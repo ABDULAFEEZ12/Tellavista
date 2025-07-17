@@ -328,6 +328,40 @@ def talk_to_tellavista():
             ]
         })
 
+@app.route('/about')
+def about():
+    return render_template('about.html')
+
+from flask import request, redirect, url_for, flash, session
+from werkzeug.security import generate_password_hash
+
+@app.route('/settings', methods=['GET', 'POST'])
+def settings():
+    if 'user_id' not in session:
+        flash("Please log in to access settings.")
+        return redirect(url_for('login'))
+
+    user_id = session['user_id']
+    user = User.query.get(user_id)  # Assuming you have a User model
+
+    if request.method == 'POST':
+        user.username = request.form['username']
+        user.email = request.form['email']
+        user.preferred_language = request.form['preferred_language']
+
+        new_password = request.form.get('password')
+        if new_password and new_password.strip() != "":
+            user.password = generate_password_hash(new_password)
+
+        db.session.commit()
+        flash("Settings updated successfully.")
+        return redirect(url_for('settings'))
+
+    return render_template('settings.html',
+                           username=user.username,
+                           email=user.email,
+                           preferred_language=user.preferred_language)
+
 
 # ------------------ MATERIALS PAGE ------------------
 @app.route('/materials')
