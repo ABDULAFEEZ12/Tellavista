@@ -3,22 +3,19 @@ from flask import (
     redirect, url_for, session, flash,
     send_file, send_from_directory
 )
-from flask_sqlalchemy import SQLAlchemy
-from flask_migrate import Migrate
-from werkzeug.security import generate_password_hash, check_password_hash
-
-from sqlalchemy import func
-from datetime import datetime
-from functools import wraps
-from dotenv import load_dotenv
-from hashlib import sha256
-from bs4 import BeautifulSoup
-
 import os
 import json
+from dotenv import load_dotenv
+from hashlib import sha256
 import redis
-import requests
+from functools import wraps
+from sqlalchemy import func
+from datetime import datetime
+from werkzeug.security import generate_password_hash, check_password_hash
 import random
+import requests
+from functools import wraps
+from flask import redirect, url_for, session
 
 def login_required(f):
     @wraps(f)
@@ -199,7 +196,13 @@ def load_json_data(file_name, data_variable_name):
     except Exception as e:
         print(f"❌ Unexpected error loading {file_name}: {e}")
     return data
-    
+
+hadith_data = load_json_data('sahih_bukhari_coded.json', 'Hadith')
+basic_knowledge_data = load_json_data('basic_islamic_knowledge.json', 'Basic Islamic Knowledge')
+friendly_responses_data = load_json_data('friendly_responses.json', 'Friendly Responses')
+daily_duas = load_json_data('daily_duas.json', 'Daily Duas')
+islamic_motivation = load_json_data('islamic_motivation.json', 'Islamic Motivation')
+
 # --- OpenRouter API key ---
 OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
 if not OPENROUTER_API_KEY:
@@ -302,7 +305,7 @@ def profile():
 @app.route('/talk-to-tellavista', methods=['GET', 'POST'])
 def talk_to_tellavista():
     if request.method == 'GET':
-        return render_template('talk-to-tellavista.html')  # For browser visits
+        return render_template('talk_to_tellavista.html')  # For browser visits
 
     # POST logic for AJAX or frontend
     try:
@@ -329,40 +332,28 @@ def talk_to_tellavista():
 def about():
     return render_template('about.html')
 
-from flask import request, redirect, url_for, flash, session, render_template
-from werkzeug.security import generate_password_hash
-
-@app.route('/settings', methods=['GET', 'POST'])
+@app.route('/settings')
 def settings():
-    if 'user_id' not in session:
-        flash("Please log in to access your settings.")
-        return redirect(url_for('login'))  # This redirect is still correct
+    memory = {
+        "traits": session.get('traits', []),
+        "more_info": session.get('more_info', ''),
+        "enable_memory": session.get('enable_memory', False)
+    }
+    return render_template('settings.html', memory=memory, theme=session.get('theme'), language=session.get('language'))
 
-    user_id = session['user_id']
-    user = User.query.get(user_id)
+@app.route('/memory', methods=['POST'])
+def save_memory():
+    session['theme'] = request.form.get('theme')
+    session['language'] = request.form.get('language')
+    session['notifications'] = 'notifications' in request.form
+    return redirect('/settings')
 
-    if not user:
-        flash("User not found.")
-        return redirect(url_for('login'))
+@app.route('/telavista/memory', methods=['POST'])
+def telavista_save_memory():
+    # Later use a real DB/session
+    print("Saving Telavista memory!")
+    return redirect('/settings')
 
-    if request.method == 'POST':
-        user.username = request.form.get('username', user.username)
-        user.email = request.form.get('email', user.email)
-        user.preferred_language = request.form.get('preferred_language', user.preferred_language)
-
-        new_password = request.form.get('password')
-        if new_password and new_password.strip() != "":
-            user.password_hash = generate_password_hash(new_password)
-
-        db.session.commit()
-        flash("✅ Settings updated successfully.")
-        return redirect(url_for('settings'))
-
-    return render_template('settings.html',
-                           username=user.username,
-                           email=user.email,
-                           preferred_language=user.preferred_language)
-    
 # ------------------ MATERIALS PAGE ------------------
 @app.route('/materials')
 @login_required
@@ -1182,6 +1173,7 @@ def ask():
     except Exception as e:
         print(f"Error in /ask: {e}")
         return jsonify({'error': 'AI service error'}), 500
+
 
 # Additional routes, static pages, etc. follow the same pattern...
 
