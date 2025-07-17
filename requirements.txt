@@ -11,3 +11,4 @@ huggingface_hub
 redis
 Flask-SQLAlchemy
 psycopg2
+flask_migrate
