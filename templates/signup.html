@@ -2,15 +2,15 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8" />
-    <title>Sign Up - Tawfiq AI</title>
+    <title>Sign Up - Tellavista</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <style>
         body {
             margin: 0;
             padding: 0;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #1f4037, #99f2c8);
-            color: white;
+            background-color: #ffffff; /* White background */
+            color: #000000; /* Black text */
             display: flex;
             justify-content: center;
             align-items: center;
@@ -18,15 +18,14 @@
         }
 
         .signup-container {
-            background-color: rgba(255, 255, 255, 0.07);
+            background-color: #f5f5f5; /* light gray for card */
             padding: 2rem;
             border-radius: 15px;
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.25);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
             width: 100%;
             max-width: 400px;
         }
 
-        /* Style for flashed messages */
         .flashes {
             list-style: none;
             padding: 0;
@@ -40,6 +39,7 @@
             border-radius: 8px;
             font-weight: bold;
             text-align: center;
+            color: white;
         }
 
         .signup-container h1 {
@@ -63,16 +63,18 @@
         input[type="password"] {
             width: 100%;
             padding: 0.7rem;
-            border: none;
+            border: 1px solid #ccc;
             border-radius: 8px;
             outline: none;
             font-size: 1rem;
+            background-color: #ffffff;
+            color: #000000;
         }
 
         button {
             width: 100%;
             padding: 0.75rem;
-            background-color: #00b894;
+            background-color: #000000;
             color: white;
             border: none;
             border-radius: 8px;
@@ -82,17 +84,19 @@
         }
 
         button:hover {
-            background-color: #019875;
+            background-color: #333333;
         }
 
         p {
             text-align: center;
             margin-top: 1rem;
             font-size: 0.95rem;
+            color: #000000;
         }
 
         a {
-            color: #00ffd0;
+            color: #000000;
+            font-weight: bold;
             text-decoration: none;
         }
 
@@ -103,7 +107,6 @@
 </head>
 <body>
     <div class="signup-container">
-        <!-- Flashed messages block -->
         {% with messages = get_flashed_messages() %}
           {% if messages %}
             <ul class="flashes">
@@ -113,7 +116,7 @@
             </ul>
           {% endif %}
         {% endwith %}
-        <h1>Create Your Account</h1>
+        <h1>Create Your Tellavista Account</h1>
         <form method="POST" action="/signup">
             <div>
                 <label for="username">Username:</label>
@@ -126,7 +129,6 @@
             <div>
                 <label for="password">Password:</label>
                 <input type="password" id="password" name="password" required />
-                <!-- Password requirements message added here -->
                 <p style="font-size: 0.9rem; margin-top: 0.5rem;">Password must be at least 8 characters long and include uppercase, lowercase, digits, and symbols.</p>
             </div>
             <button type="submit">Sign Up</button>
