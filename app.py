@@ -12,6 +12,7 @@ from functools import wraps
 from sqlalchemy import func
 from datetime import datetime
 from werkzeug.security import generate_password_hash, check_password_hash
+from bs4 import BeautifulSoup
 import requests
 
 # Load environment variables from .env file
@@ -21,6 +22,10 @@ print("✅ API KEY:", os.getenv("GOOGLE_NEWS_API_KEY"))
 print("✅ CX:", os.getenv("GOOGLE_CX"))
 
 app = Flask(__name__)
+
+OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
+if not OPENROUTER_API_KEY:
+    raise RuntimeError("Set OPENROUTER_API_KEY in environment variables.")
 
 # Configurations
 app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
