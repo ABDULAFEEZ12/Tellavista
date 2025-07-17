@@ -331,8 +331,6 @@ def about():
 
 from flask import request, redirect, url_for, flash, session, render_template
 from werkzeug.security import generate_password_hash
-from your_app.models import User  # Make sure to import User model
-from your_app import db           # Import your db instance
 
 @app.route('/settings', methods=['GET', 'POST'])
 def settings():
