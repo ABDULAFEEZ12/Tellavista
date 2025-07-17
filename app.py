@@ -12,20 +12,26 @@ from functools import wraps
 from sqlalchemy import func
 from datetime import datetime
 from werkzeug.security import generate_password_hash, check_password_hash
-from bs4 import BeautifulSoup
+import random
 import requests
+from functools import wraps
+from flask import redirect, url_for, session
 
-# Load environment variables from .env file
+def login_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if 'user' not in session:
+            return redirect(url_for('login', next=request.url))
+        return f(*args, **kwargs)
+    return decorated_function
+
+# Load environment variables
 load_dotenv()
 
 print("✅ API KEY:", os.getenv("GOOGLE_NEWS_API_KEY"))
 print("✅ CX:", os.getenv("GOOGLE_CX"))
 
 app = Flask(__name__)
-
-OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
-if not OPENROUTER_API_KEY:
-    raise RuntimeError("Set OPENROUTER_API_KEY in environment variables.")
 
 # Configurations
 app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
@@ -76,23 +82,25 @@ class UserQuestions(db.Model):
 with app.app_context():
     db.create_all()
 
-
-# Helper function to make authorized requests to OpenRouter
-def openrouter_request(payload):
-    api_key = os.getenv("OPENROUTER_API_KEY")
-    if not api_key:
-        raise ValueError("Missing OPENROUTER_API_KEY environment variable")
-    headers = {
-        "Authorization": f"Bearer {api_key}",
-        "Content-Type": "application/json"
-    }
-    response = requests.post(
-        "https://openrouter.ai/api/v1/chat/completions",
-        headers=headers,
-        json=payload
-    )
-    return response
-
+# --- Fetch questions for user ---
+def get_questions_for_user(username):
+    try:
+        with app.app_context():
+            questions = UserQuestions.query \
+                .filter(func.lower(UserQuestions.username) == username.lower()) \
+                .order_by(UserQuestions.timestamp.desc()) \
+                .all()
+            return [
+                {
+                    "question": q.question,
+                    "answer": q.answer,
+                    "timestamp": q.timestamp.strftime("%Y-%m-%d %H:%M:%S")
+                }
+                for q in questions
+            ]
+    except Exception as e:
+        print(f"❌ Error fetching questions: {e}")
+        return []
 
 # --- Save question/answer ---
 def save_question_and_answer(username, question, answer):
