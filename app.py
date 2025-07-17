@@ -329,37 +329,42 @@ def talk_to_tellavista():
 def about():
     return render_template('about.html')
 
-from flask import request, redirect, url_for, flash, session
+from flask import request, redirect, url_for, flash, session, render_template
 from werkzeug.security import generate_password_hash
+from your_app.models import User  # Make sure to import User model
+from your_app import db           # Import your db instance
 
 @app.route('/settings', methods=['GET', 'POST'])
 def settings():
     if 'user_id' not in session:
-        flash("Please log in to access settings.")
-        return redirect(url_for('login'))
+        flash("Please log in to access your settings.")
+        return redirect(url_for('login'))  # This redirect is still correct
 
     user_id = session['user_id']
-    user = User.query.get(user_id)  # Assuming you have a User model
+    user = User.query.get(user_id)
+
+    if not user:
+        flash("User not found.")
+        return redirect(url_for('login'))
 
     if request.method == 'POST':
-        user.username = request.form['username']
-        user.email = request.form['email']
-        user.preferred_language = request.form['preferred_language']
+        user.username = request.form.get('username', user.username)
+        user.email = request.form.get('email', user.email)
+        user.preferred_language = request.form.get('preferred_language', user.preferred_language)
 
         new_password = request.form.get('password')
         if new_password and new_password.strip() != "":
-            user.password = generate_password_hash(new_password)
+            user.password_hash = generate_password_hash(new_password)
 
         db.session.commit()
-        flash("Settings updated successfully.")
+        flash("✅ Settings updated successfully.")
         return redirect(url_for('settings'))
 
     return render_template('settings.html',
                            username=user.username,
                            email=user.email,
                            preferred_language=user.preferred_language)
-
-
+    
 # ------------------ MATERIALS PAGE ------------------
 @app.route('/materials')
 @login_required
