@@ -1,64 +1,155 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tawfiq AI - Your Smart Islamic Companion</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <meta charset="UTF-8" />
+  <title>Tellavista Chat - Learn with AI</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: #ffffff;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      color: #000000;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+    .chat-container {
+      width: 100%;
+      max-width: 600px;
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+      overflow: hidden;
+      background-color: #f7f7f7;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .chat-header {
+      background-color: #000000;
+      color: #ffffff;
+      padding: 1rem;
+      text-align: center;
+      font-size: 1.2rem;
+      font-weight: bold;
+    }
+
+    .chat-box {
+      flex: 1;
+      padding: 1rem;
+      height: 400px;
+      overflow-y: auto;
+      background-color: #ffffff;
+      border-top: 1px solid #ddd;
+      border-bottom: 1px solid #ddd;
+    }
+
+    .message {
+      margin-bottom: 1rem;
+      padding: 0.75rem 1rem;
+      border-radius: 8px;
+      max-width: 80%;
+      word-wrap: break-word;
+      font-size: 1rem;
+    }
+
+    .message.ai {
+      background-color: #eeeeee;
+      align-self: flex-start;
+    }
+
+    .message.user {
+      background-color: #000000;
+      color: #ffffff;
+      align-self: flex-end;
+      margin-left: auto;
+    }
+
+    .chat-input {
+      display: flex;
+      padding: 1rem;
+      background-color: #f7f7f7;
+    }
+
+    .chat-input input[type="text"] {
+      flex: 1;
+      padding: 0.75rem;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      font-size: 1rem;
+      outline: none;
+    }
+
+    .chat-input button {
+      padding: 0.75rem 1.2rem;
+      margin-left: 0.5rem;
+      background-color: #000000;
+      color: #ffffff;
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    .chat-input button:hover {
+      background-color: #333333;
+    }
+  </style>
 </head>
 <body>
-    <div class="chat-container">
-        <div class="chat-header">
-            🌙 Tawfiq AI - Your Smart Islamic Companion 🌙
-        </div>
-
-        <div class="chat-box" id="chat-box">
-            <div class="message ai">
-                ✨ Assalamu Alaikum! How can I assist you today? ✨
-            </div>
-        </div>
-
-        <div class="chat-input">
-            <input type="text" id="user_input" placeholder="Type your question here...">
-            <button onclick="askQuestion()">Ask</button>
-        </div>
+  <div class="chat-container">
+    <div class="chat-header">
+      🎓 Tellavista AI - Learn Smarter, Dream Bigger
     </div>
 
-    <script>
-        function askQuestion() {
-            var user_input = document.getElementById("user_input").value;
-            if (user_input.trim() === "") return;
+    <div class="chat-box" id="chat-box">
+      <div class="message ai">
+        👋 Hello! I'm your learning companion from Tellavista. Ask me anything about coding, AI, or success.
+      </div>
+    </div>
 
-            // Show user message
-            var userMessage = `<div class="message user">${user_input}</div>`;
-            document.getElementById("chat-box").innerHTML += userMessage;
+    <div class="chat-input">
+      <input type="text" id="user_input" placeholder="Type your question here..." />
+      <button onclick="askQuestion()">Ask</button>
+    </div>
+  </div>
 
-            // Scroll to bottom
-            document.getElementById("chat-box").scrollTop = document.getElementById("chat-box").scrollHeight;
+  <script>
+    function askQuestion() {
+      const user_input = document.getElementById("user_input").value;
+      if (user_input.trim() === "") return;
 
-            // Send to Flask
-            fetch("/ask", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/x-www-form-urlencoded",
-                },
-                body: "user_input=" + encodeURIComponent(user_input)
-            })
-            .then(response => response.json())
-            .then(data => {
-                var aiMessage = `<div class="message ai">${data.response}</div>`;
-                document.getElementById("chat-box").innerHTML += aiMessage;
-                document.getElementById("chat-box").scrollTop = document.getElementById("chat-box").scrollHeight;
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                var errorMessage = `<div class="message ai">Sorry, something went wrong! 😔</div>`;
-                document.getElementById("chat-box").innerHTML += errorMessage;
-            });
+      // Show user message
+      const userMessage = `<div class="message user">${user_input}</div>`;
+      document.getElementById("chat-box").innerHTML += userMessage;
+      document.getElementById("chat-box").scrollTop = document.getElementById("chat-box").scrollHeight;
 
-            // Clear input box
-            document.getElementById("user_input").value = "";
-        }
-    </script>
+      // Send to Flask
+      fetch("/ask", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+        body: "user_input=" + encodeURIComponent(user_input)
+      })
+      .then(response => response.json())
+      .then(data => {
+        const aiMessage = `<div class="message ai">${data.response}</div>`;
+        document.getElementById("chat-box").innerHTML += aiMessage;
+        document.getElementById("chat-box").scrollTop = document.getElementById("chat-box").scrollHeight;
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        const errorMessage = `<div class="message ai">Sorry, something went wrong! 😔</div>`;
+        document.getElementById("chat-box").innerHTML += errorMessage;
+      });
+
+      document.getElementById("user_input").value = "";
+    }
+  </script>
 </body>
 </html>
