@@ -3,19 +3,22 @@ from flask import (
     redirect, url_for, session, flash,
     send_file, send_from_directory
 )
-import os
-import json
-from dotenv import load_dotenv
-from hashlib import sha256
-import redis
-from functools import wraps
+from flask_sqlalchemy import SQLAlchemy
+from flask_migrate import Migrate
+from werkzeug.security import generate_password_hash, check_password_hash
+
 from sqlalchemy import func
 from datetime import datetime
-from werkzeug.security import generate_password_hash, check_password_hash
-import random
-import requests
 from functools import wraps
-from flask import redirect, url_for, session
+from dotenv import load_dotenv
+from hashlib import sha256
+from bs4 import BeautifulSoup
+
+import os
+import json
+import redis
+import requests
+import random
 
 def login_required(f):
     @wraps(f)
