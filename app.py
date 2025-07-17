@@ -196,13 +196,7 @@ def load_json_data(file_name, data_variable_name):
     except Exception as e:
         print(f"❌ Unexpected error loading {file_name}: {e}")
     return data
-
-hadith_data = load_json_data('sahih_bukhari_coded.json', 'Hadith')
-basic_knowledge_data = load_json_data('basic_islamic_knowledge.json', 'Basic Islamic Knowledge')
-friendly_responses_data = load_json_data('friendly_responses.json', 'Friendly Responses')
-daily_duas = load_json_data('daily_duas.json', 'Daily Duas')
-islamic_motivation = load_json_data('islamic_motivation.json', 'Islamic Motivation')
-
+    
 # --- OpenRouter API key ---
 OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
 if not OPENROUTER_API_KEY:
