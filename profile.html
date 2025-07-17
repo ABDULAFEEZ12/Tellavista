@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{{ username }}'s Profile | Tawfiq AI</title>
+  <style>
+    :root {
+      --primary-color: #1abc9c;
+      --primary-hover: #16a085;
+      --secondary-color: #4caf50;
+      --text-dark: #2c3e50;
+      --text-medium: #555;
+      --bg-color: #f9f9f9;
+      --card-color: #ffffff;
+      --shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+      --radius: 14px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: var(--bg-color);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 1rem;
+      min-height: 100vh;
+      margin: 0;
+    }
+
+    .profile-container {
+      background-color: var(--card-color);
+      padding: 2rem;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      max-width: 500px;
+      width: 100%;
+      text-align: center;
+    }
+
+    h1 {
+      color: var(--text-dark);
+      font-size: 1.8rem;
+      margin-bottom: 0.4rem;
+    }
+
+    .profile-subtitle {
+      color: var(--text-medium);
+      font-size: 1rem;
+      margin-bottom: 1.8rem;
+    }
+
+    .profile-details {
+      text-align: left;
+      background-color: #f1f5f4;
+      padding: 1rem;
+      border-radius: 10px;
+      margin-bottom: 2rem;
+    }
+
+    .detail-item {
+      margin-bottom: 1rem;
+    }
+
+    .detail-label {
+      font-weight: 600;
+      color: var(--text-dark);
+      display: block;
+      margin-bottom: 0.3rem;
+    }
+
+    .btn-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.7rem;
+      justify-content: center;
+    }
+
+    .btn {
+      padding: 0.65rem 1.4rem;
+      font-size: 0.95rem;
+      border: none;
+      border-radius: 8px;
+      text-decoration: none;
+      font-weight: 600;
+      transition: 0.3s ease;
+      cursor: pointer;
+    }
+
+    .btn-primary {
+      background-color: var(--primary-color);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background-color: var(--primary-hover);
+      transform: translateY(-2px);
+    }
+
+    .btn-secondary {
+      background-color: var(--secondary-color);
+      color: white;
+    }
+
+    .btn-secondary:hover {
+      opacity: 0.9;
+      transform: translateY(-2px);
+    }
+
+    @media (max-width: 480px) {
+      .profile-container {
+        padding: 1.5rem 1.2rem;
+      }
+
+      h1 {
+        font-size: 1.5rem;
+      }
+
+      .btn-group {
+        flex-direction: column;
+      }
+
+      .btn {
+        width: 100%;
+        text-align: center;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="profile-container">
+    <h1>Welcome, 👋 {{ username }}</h1>
+    <p class="profile-subtitle">Your personal Islamic assistant profile</p>
+
+    <div class="profile-details">
+      <div class="detail-item">
+        <span class="detail-label">📧 Email:</span>
+        {{ email }}
+      </div>
+      <div class="detail-item">
+        <span class="detail-label">🗓️ Joined On:</span>
+        {{ joined_on }}
+      </div>
+      <div class="detail-item">
+        <span class="detail-label">🌐 Preferred Language:</span>
+        {{ preferred_language }}
+      </div>
+      <div class="detail-item">
+        <span class="detail-label">⏰ Last Login:</span>
+        {{ last_login }}
+      </div>
+    </div>
+
+    <div class="btn-group">
+      <a href="/edit-profile" class="btn btn-primary">Edit Profile</a>
+      <a href="/login" class="btn btn-primary">Login</a>
+      <a href="/" class="btn btn-secondary">🏠 Home</a>
+    </div>
+  </div>
+</body>
+</html>

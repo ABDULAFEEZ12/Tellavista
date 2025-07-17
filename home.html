@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tawfiq AI - Your Smart Islamic Companion</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="chat-container">
+        <div class="chat-header">
+            🌙 Tawfiq AI - Your Smart Islamic Companion 🌙
+        </div>
+
+        <div class="chat-box" id="chat-box">
+            <div class="message ai">
+                ✨ Assalamu Alaikum! How can I assist you today? ✨
+            </div>
+        </div>
+
+        <div class="chat-input">
+            <input type="text" id="user_input" placeholder="Type your question here...">
+            <button onclick="askQuestion()">Ask</button>
+        </div>
+    </div>
+
+    <script>
+        function askQuestion() {
+            var user_input = document.getElementById("user_input").value;
+            if (user_input.trim() === "") return;
+
+            // Show user message
+            var userMessage = `<div class="message user">${user_input}</div>`;
+            document.getElementById("chat-box").innerHTML += userMessage;
+
+            // Scroll to bottom
+            document.getElementById("chat-box").scrollTop = document.getElementById("chat-box").scrollHeight;
+
+            // Send to Flask
+            fetch("/ask", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/x-www-form-urlencoded",
+                },
+                body: "user_input=" + encodeURIComponent(user_input)
+            })
+            .then(response => response.json())
+            .then(data => {
+                var aiMessage = `<div class="message ai">${data.response}</div>`;
+                document.getElementById("chat-box").innerHTML += aiMessage;
+                document.getElementById("chat-box").scrollTop = document.getElementById("chat-box").scrollHeight;
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                var errorMessage = `<div class="message ai">Sorry, something went wrong! 😔</div>`;
+                document.getElementById("chat-box").innerHTML += errorMessage;
+            });
+
+            // Clear input box
+            document.getElementById("user_input").value = "";
+        }
+    </script>
+</body>
+</html>

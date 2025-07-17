@@ -1,0 +1,16 @@
+<table>
+  <tr>
+    <th>Username</th>
+    <th>Question</th>
+    <th>Answer</th>
+    <th>Timestamp</th>
+  </tr>
+  {% for q in questions %}
+  <tr>
+    <td>{{ q.username }}</td>
+    <td>{{ q.question }}</td>
+    <td>{{ q.answer }}</td>
+    <td>{{ q.timestamp }}</td>
+  </tr>
+  {% endfor %}
+</table>

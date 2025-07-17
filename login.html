@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Login - Tawfiq AI</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<style>
+    body {
+        margin: 0;
+        padding: 0;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+        color: white;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+    }
+
+    .login-container {
+        background-color: rgba(255, 255, 255, 0.05);
+        padding: 2rem;
+        border-radius: 15px;
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+        width: 100%;
+        max-width: 400px;
+    }
+
+    .login-container h1 {
+        text-align: center;
+        margin-bottom: 1.5rem;
+        font-size: 1.8rem;
+    }
+
+    form div {
+        margin-bottom: 1rem;
+    }
+
+    label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: 500;
+    }
+
+    input[type="text"],
+    input[type="password"] {
+        width: 100%;
+        padding: 0.7rem;
+        border: none;
+        border-radius: 8px;
+        outline: none;
+        font-size: 1rem;
+        background-color: #ffffff20; /* semi-transparent background for contrast */
+        color: #fff; /* ensure text is visible */
+        box-sizing: border-box; /* include padding in width calculation */
+    }
+
+    button {
+        width: 100%;
+        padding: 0.75rem;
+        background-color: #00cba9;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+    }
+
+    button:hover {
+        background-color: #00b097;
+    }
+
+    p {
+        text-align: center;
+        margin-top: 1rem;
+        font-size: 0.95rem;
+    }
+
+    a {
+        color: #00cba9;
+        text-decoration: none;
+    }
+
+    a:hover {
+        text-decoration: underline;
+    }
+
+    /* Flashed messages styling */
+    .flashes {
+        list-style: none;
+        padding: 0;
+        margin-bottom: 1rem;
+    }
+    .flashes li {
+        background-color: #ff4d4d;
+        color: white;
+        padding: 0.75rem;
+        margin-bottom: 0.5rem;
+        border-radius: 8px;
+        font-weight: bold;
+        text-align: center;
+    }
+</style>
+</head>
+<body>
+<div class="login-container">
+    <h1>Login to Tawfiq AI</h1>
+    
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        <ul class="flashes">
+          {% for message in messages %}
+            <li>{{ message }}</li>
+          {% endfor %}
+        </ul>
+      {% endif %}
+    {% endwith %}
+
+    <form method="POST" action="/login" autocomplete="off">
+        <div>
+            <label for="username">Username:</label>
+            <input type="text" id="username" name="username" required autocomplete="username" />
+        </div>
+        <div>
+            <label for="password">Password:</label>
+            <input type="password" id="password" name="password" required autocomplete="current-password" />
+        </div>
+        <button type="submit">Login</button>
+    </form>
+    <p>Don't have an account? <a href="/signup">Sign up here</a></p>
+</div>
+</body>
+</html>

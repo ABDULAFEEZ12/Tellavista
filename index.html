@@ -1,0 +1,709 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Tellavista - Your Educational AI Companion</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+<!-- Force update -->
+<meta name="version" content="1.0.1">
+
+<!-- External CSS -->
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
+<!-- Enhanced CSS for Mobile & Aesthetics, Light/Dark Mode -->
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Poppins&display=swap');
+
+body {
+  font-family: 'Poppins', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+  margin: 0;
+  padding: 0;
+  background-color: #f0f4f8;
+  color: #333;
+  line-height: 1.6;
+  scroll-behavior: smooth;
+  overflow-x: hidden;
+}
+
+/* Light Mode Styles */
+body.light-mode {
+  background-color: #f0f4f8;
+  color: #333;
+}
+body.light-mode header h1 { color: #222; }
+body.light-mode header h3 { color: #555; }
+body.light-mode .tab { background-color: #fff; color: #000; }
+body.light-mode .tab.active, body.light-mode .tab:hover { background-color: #e0e0e0; }
+body.light-mode .section { background-color: #fff; color: #000; }
+body.light-mode .messages { background-color: #fff; }
+body.light-mode .user-message { background-color: #d0e8ff; color: #000; }
+body.light-mode .ai-message { background-color: #e8e8e8; color: #000; }
+body.light-mode #menu-toggle { background: #fff; color: #000; }
+
+ /* Dark Mode Styles */
+body.dark-mode {
+  background-color: #1e1e2f;
+  color: #e0e0e0;
+}
+body.dark-mode header h1 { color: #fff; }
+body.dark-mode header h3 { color: #ccc; }
+body.dark-mode .tab {
+  background-color: #333;
+  color: #fff;
+}
+body.dark-mode .tab.active,
+body.dark-mode .tab:hover {
+  background-color: #555;
+}
+body.dark-mode .section {
+  background-color: #2c2c3a;
+  color: #e0e0e0;
+}
+body.dark-mode .messages {
+  background-color: #2c2c3a;
+}
+body.dark-mode .user-message {
+  background-color: #4a7ebB;
+  color: #fff;
+}
+body.dark-mode .ai-message {
+  background-color: #444;
+  color: #fff;
+}
+body.dark-mode #menu-toggle {
+  background: #333;
+  color: #fff;
+}
+body.dark-mode #menu-toggle:hover {
+  background: #444;
+}
+/* Chat bubbles hover effect */
+.user-message:hover, .ai-message:hover {
+  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+}
+
+/* Header styles */
+h1, h3 {
+  text-align: center;
+  margin: 20px 10px;
+  font-weight: 600;
+}
+header h1 {
+  font-size: 2em;
+}
+header h3 {
+  font-size: 1.2em;
+  color: #555;
+}
+
+/* Menu toggle button style */
+#menu-toggle {
+  font-size: 28px;
+  cursor: pointer;
+  position: fixed;
+  top: 20px;
+  left: 15px;
+  z-index: 1001;
+  background: #fff;
+  padding: 8px 12px;
+  border-radius: 10px;
+  box-shadow: 0 3px 8px rgba(0,0,0,0.2);
+  transition: transform 0.2s;
+}
+#menu-toggle:hover {
+  background: #eee;
+  transform: scale(1.05);
+}
+
+/* Theme toggle button style */
+#theme-toggle {
+  position: fixed;
+  top: 20px;
+  right: 15px;
+  z-index: 1001;
+  padding: 8px 14px;
+  border-radius: 10px;
+  border: none;
+  cursor: pointer;
+  font-size: 18px;
+  background-color: #fff;
+  color: #000;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+  transition: all 0.3s ease;
+}
+#theme-toggle:hover {
+  transform: scale(1.1);
+}
+body.dark-mode #theme-toggle {
+  background-color: #333;
+  color: #fff;
+}
+
+/* Sidebar menu styles */
+#side-menu {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 280px;
+  height: 100%;
+  background-color: #121212;
+  color: #fff;
+  padding-top: 70px;
+  transition: all 0.3s ease;
+  z-index: 1000;
+  overflow-y: auto;
+  border-top-right-radius: 12px;
+  border-bottom-right-radius: 12px;
+}
+#side-menu.hidden {
+  left: -280px;
+}
+#side-menu ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+#side-menu li {
+  padding: 16px 20px;
+  border-bottom: 1px solid #333;
+  cursor: pointer;
+  font-size: 1em;
+  transition: background 0.2s, transform 0.1s;
+}
+#side-menu li:hover {
+  background-color: #333;
+  transform: translateX(2px);
+}
+#side-menu a {
+  color: inherit;
+  text-decoration: none;
+  display: block;
+}
+
+/* Tabs styles */
+.tabs {
+  margin-top: 100px;
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.tab {
+  padding: 10px 20px;
+  border-radius: 25px;
+  background-color: #fff;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 1em;
+  transition: background 0.3s, transform 0.2s;
+}
+.tab.active, .tab:hover {
+  background-color: #ddd;
+  transform: scale(1.02);
+}
+
+/* Sections style */
+.section {
+  display: none;
+  padding: 20px;
+  max-width: 700px;
+  margin: 0 auto;
+  background-color: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  margin-top: 20px;
+  width: 100%;
+}
+.section.active {
+  display: block;
+}
+
+/* Input styles */
+input[type="text"], select {
+  width: 100%;
+  padding: 12px 15px;
+  margin-top: 10px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  font-size: 1em;
+  font-family: 'Poppins', sans-serif;
+  box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
+  transition: border-color 0.2s;
+}
+input[type="text"]:focus, select:focus {
+  border-color: #007bff;
+  outline: none;
+}
+
+/* Buttons styling */
+button {
+  margin-top: 12px;
+  padding: 12px 20px;
+  border: none;
+  border-radius: 8px;
+  background-color: #007bff;
+  color: #fff;
+  font-size: 1em;
+  cursor: pointer;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+  transition: background 0.3s, transform 0.2s;
+}
+button:hover {
+  background-color: #0056b3;
+  transform: scale(1.02);
+}
+
+/* Chat bubbles styles */
+.messages {
+  margin-top: 20px;
+  background-color: #fff;
+  padding: 15px;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  max-height: 300px;
+  overflow-y: auto;
+  font-family: inherit;
+  display: flex;
+  flex-direction: column;
+}
+
+/* User message style */
+.user-message {
+  align-self: flex-end;
+  background-color: #d0e8ff; /* calming blue */
+  color: #000;
+  padding: 10px 14px;
+  margin-bottom: 10px;
+  border-radius: 20px;
+  max-width: 80%;
+  word-wrap: break-word;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+/* AI message style */
+.ai-message {
+  align-self: flex-start;
+  background-color: #e8e8e8; /* light gray */
+  color: #000;
+  padding: 10px 14px;
+  margin-bottom: 10px;
+  border-radius: 20px;
+  max-width: 80%;
+  word-wrap: break-word;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+/* Scrollbar styling for Webkit */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-thumb {
+  background-color: rgba(0,0,0,0.2);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(0,0,0,0.4);
+}
+/* Firefox scrollbar */
+body {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0,0,0,0.2) transparent;
+}
+
+/* Responsive adjustments */
+@media(max-width: 600px) {
+  body {
+    font-size: 0.95em;
+  }
+  header h1 {
+    font-size: 1.4em;
+  }
+  header h3 {
+    font-size: 1em;
+  }
+  #menu-toggle {
+    font-size: 24px;
+    padding: 6px 10px;
+  }
+  .tab {
+    padding: 8px 16px;
+    font-size: 0.95em;
+  }
+  button {
+    padding: 10px 16px;
+    font-size: 0.95em;
+  }
+}
+
+/* Specific styles */
+#duaSection {
+  margin-top: 20px;
+  padding: 20px;
+}
+#dailyDuaSection {
+  background-color: #e0f7fa;
+  border-radius: 12px;
+  padding: 20px;
+  margin-top: 15px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  text-align: center;
+}
+#dailyDuaSection h2 {
+  margin-bottom: 15px;
+  font-size: 1.4em;
+  color: #00695c;
+}
+#dailyDuaContent {
+  font-size: 1.2em;
+  font-family: 'Poppins', sans-serif;
+  color: #004d40;
+}
+
+/* Placeholder for sections */
+#materials {
+  display: none; /* Hidden since removed */
+}
+#materials h3 {
+  text-align: center;
+  margin-top: 20px;
+}
+</style>
+</head>
+<body class="light-mode">
+
+<!-- Theme toggle button -->
+<button id="theme-toggle" onclick="toggleMode()">☀️</button>
+
+<div class="auth-status">
+  {% if user %}
+    <p>Welcome, {{ user.username }}! <a href="/logout">Logout</a></p>
+  {% else %}
+    <p><a href="/login">Login</a> | <a href="/signup">Sign Up</a></p>
+  {% endif %}
+</div>
+
+<!-- Sidebar menu toggle -->
+<div id="menu-toggle" onclick="toggleMenu()">☰</div>
+
+<!-- Sidebar menu -->
+<div id="side-menu" class="hidden">
+  <ul>
+    <li><a href="/profile">👤 Profile</a></li>
+    <li><a href="/talk_to_tellavista">🎙️ Talk to Tellavista</a></li>
+     <li><a href="/materials">📚 Materials</a></li>
+    <li><a href="/reels">🎥 Reels</a></li>
+    <li><a href="/CBT">🧠 CBT Test</a></li>
+    <li><a href="/about">ℹ️ About</a></li>
+    <li><a href="/settings">⚙️ Settings</a></li>
+  </ul>
+</div>
+  </ul>
+</div>
+
+<header>
+<h1>🌟 Tellavista - Your Educational AI Companion 🌟</h1>
+<h3>💡 Study smarter, achieve more! 💡</h3>
+</header>
+
+<!-- Tabs for different sections: AI / Quran / Past Questions etc. -->
+<div class="tabs">
+  <div class="tab active" onclick="switchTab('aiSection', event)">🤖 AI</div>
+</div>
+
+<!-- AI Chat Section -->
+<div class="section active" id="aiSection">
+  <div class="messages" id="messages"></div>
+  <input type="text" id="userInput" placeholder="Ask me about your studies, motivation, or advice..." />
+  <button id="askButton" onclick="sendQuestion()">Ask</button>
+</div>
+
+<!-- Removed Materials Section -->
+
+<!-- GPA & Strategies Section -->
+<div class="section" id="gpaSection">
+  <h3 style="text-align:center;">📈 GPA & Course Strategies</h3>
+  <p style="text-align:center;">Ask about GPA improvement strategies, course tips, or select your course:</p>
+  <select id="courseDropdown">
+    <option value="">Select Your Course</option>
+    <option value="Computer Science">Computer Science</option>
+    <option value="Mathematics">Mathematics</option>
+    <option value="Physics">Physics</option>
+    <option value="Engineering">Engineering</option>
+  </select>
+  <button onclick="askGPA()">Ask</button>
+</div>
+
+<!-- Goals & Planning Section -->
+<div class="section" id="goalsSection">
+  <h3 style="text-align:center;">📝 Goals & Productivity</h3>
+  <p style="text-align:center;">Get help with goal setting, productivity tips, and life planning.</p>
+</div>
+
+<!-- Scripts for toggles and functions -->
+<script>
+  // Theme toggle logic
+  const themeBtn = document.getElementById('theme-toggle');
+  if (localStorage.getItem('theme') === 'dark') {
+    document.body.classList.remove('light-mode');
+    document.body.classList.add('dark-mode');
+    themeBtn.innerText = '🌙';
+  } else {
+    document.body.classList.remove('dark-mode');
+    document.body.classList.add('light-mode');
+    themeBtn.innerText = '☀️';
+  }
+
+  function toggleMode() {
+    document.body.classList.toggle('light-mode');
+    document.body.classList.toggle('dark-mode');
+    if (document.body.classList.contains('dark-mode')) {
+      localStorage.setItem('theme', 'dark');
+      themeBtn.innerText = '🌙';
+    } else {
+      localStorage.setItem('theme', 'light');
+      themeBtn.innerText = '☀️';
+    }
+  }
+
+  // Sidebar menu toggle
+  function toggleMenu() {
+    document.getElementById('side-menu').classList.toggle('hidden');
+  }
+
+  // Switch tabs
+  function switchTab(sectionId, event) {
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.getElementById(sectionId).classList.add('active');
+    event.target.classList.add('active');
+  }
+
+  // Load content functions
+  function loadDailyDua() {
+    fetch('data/daily_duas.json')
+      .then(res => res.json())
+      .then(data => {
+        document.getElementById('dailyDuaContent').innerHTML = `<p>"${data.dua || 'No Dua for today.'}"</p>`;
+      })
+      .catch(() => {
+        document.getElementById('dailyDuaContent').innerHTML = '<p>Unable to load Dua for today.</p>';
+      });
+  }
+
+  // Placeholder: Load prayer times (implement your backend API)
+  function loadPrayerTimes() {
+    fetch('/get-prayer-times')
+      .then(res => res.json())
+      .then(data => {
+        const container = document.getElementById('prayerTimesContent');
+        container.innerHTML = '';
+        if (data && data.prayer_times) {
+          for (const [name, time] of Object.entries(data.prayer_times)) {
+            const p = document.createElement('p');
+            p.innerHTML = `<strong>${name}:</strong> ${time}`;
+            container.appendChild(p);
+          }
+        } else {
+          container.innerHTML = '<p>Prayer times data unavailable.</p>';
+        }
+      })
+      .catch(() => {
+        document.getElementById('prayerTimesContent').innerHTML = '<p>Error loading prayer times.</p>';
+      });
+  }
+
+  // Load surah list for Quran search
+  function loadSurahList() {
+    fetch('/get-surah-list')
+      .then(res => res.json())
+      .then(data => {
+        const select = document.getElementById('surahList');
+        select.innerHTML = '<option value="">-- Or Select Surah --</option>';
+        if (data && data.surahs) {
+          data.surahs.forEach(surah => {
+            const option = document.createElement('option');
+            option.value = surah;
+            option.textContent = surah;
+            select.appendChild(option);
+          });
+        }
+      })
+      .catch(() => {
+        // Fallback hardcoded list
+        const surahs = ["Al-Fatihah", "Al-Baqarah", "Aali Imran", "An-Nisa", "Al-Maidah"];
+        const select = document.getElementById('surahList');
+        select.innerHTML = '<option value="">-- Or Select Surah --</option>';
+        surahs.forEach(surah => {
+          const option = document.createElement('option');
+          option.value = surah;
+          option.textContent = surah;
+          select.appendChild(option);
+        });
+      });
+  }
+
+  // Send question to backend
+  const chatHistory = [];
+  function sendQuestion() {
+    const inputEl = document.getElementById('userInput');
+    const question = inputEl.value.trim();
+    if (!question) return;
+    const messagesDiv = document.getElementById('messages');
+
+    // Show user message
+    const userMsg = document.createElement('p');
+    userMsg.className = 'user-message';
+    userMsg.innerText = `You: ${question}`;
+    messagesDiv.appendChild(userMsg);
+    inputEl.value = '';
+    messagesDiv.scrollTop = messagesDiv.scrollHeight;
+
+    // Add to chat history
+    chatHistory.push({ role: 'user', content: question });
+
+    // Show loading
+    const loadingMsg = document.createElement('p');
+    loadingMsg.className = 'ai-message';
+    loadingMsg.innerText = 'Tellavista is thinking...';
+    messagesDiv.appendChild(loadingMsg);
+    messagesDiv.scrollTop = messagesDiv.scrollHeight;
+
+    fetch('/ask', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ history: chatHistory })
+    }).then(res => res.json())
+      .then(data => {
+        loadingMsg.remove();
+        const answer = data.choices?.[0]?.message?.content || "Sorry, I couldn't answer.";
+        chatHistory.push({ role: 'assistant', content: answer });
+        const aiMsg = document.createElement('p');
+        aiMsg.className = 'ai-message';
+        aiMsg.innerHTML = `<strong>Tellavista:</strong> ${answer}`;
+        messagesDiv.appendChild(aiMsg);
+        messagesDiv.scrollTop = messagesDiv.scrollHeight;
+      })
+      .catch(() => {
+        loadingMsg.remove();
+        const errorMsg = document.createElement('p');
+        errorMsg.className = 'ai-message';
+        errorMsg.innerText = 'Error reaching Tellavista. Please try again.';
+        messagesDiv.appendChild(errorMsg);
+        messagesDiv.scrollTop = messagesDiv.scrollHeight;
+      });
+  }
+
+
+  // Search Quran
+  function searchQuran() {
+    const query = document.getElementById('quranInput').value.trim() || document.getElementById('surahList').value;
+    if (!query) return;
+    const resultDiv = document.getElementById('quranResult');
+    resultDiv.innerHTML = `<div class="user-message">Searching: ${query}</div>`;
+    const loading = document.createElement('div');
+    loading.className = 'loading-indicator';
+    loading.innerText = 'Searching Quran...';
+    resultDiv.appendChild(loading);
+    fetch('/quran-search', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ query })
+    }).then(res => res.json())
+      .then(data => {
+        loading.remove();
+        if (data.surah_title && data.results && data.results.length > 0) {
+          const titleEl = document.createElement('div');
+          titleEl.innerHTML = `<strong>${data.surah_title}:</strong>`;
+          titleEl.style.fontWeight = 'bold';
+          titleEl.style.marginBottom = '10px';
+          resultDiv.appendChild(titleEl);
+          data.results.forEach(verse => {
+            const verseEl = document.createElement('div');
+            const info = document.createElement('p');
+            info.innerHTML = `<strong>${verse.surah_number}:${verse.verse_number}</strong>`;
+            verseEl.appendChild(info);
+            const trans = document.createElement('p');
+            trans.innerText = verse.translation;
+            verseEl.appendChild(trans);
+            const arabic = document.createElement('p');
+            arabic.innerText = verse.arabic_text;
+            arabic.style.textAlign = 'right';
+            arabic.style.fontWeight = 'bold';
+            arabic.style.marginTop = '5px';
+            arabic.style.direction = 'rtl';
+            verseEl.appendChild(arabic);
+            if (verse.transliteration) {
+              const transPara = document.createElement('p');
+              transPara.innerHTML = `<em>Transliteration:</em> ${verse.transliteration}`;
+              transPara.style.marginTop = '5px';
+              transPara.style.fontSize = '0.95em';
+              verseEl.appendChild(transPara);
+            }
+            resultDiv.appendChild(verseEl);
+          });
+        } else {
+          resultDiv.innerHTML += `<div>No results for "${query}".</div>`;
+        }
+      }).catch(() => {
+        loading.remove();
+        document.getElementById('quranResult').innerHTML += `<div>Error searching Quran.</div>`;
+      });
+  }
+
+  // Search Hadith
+  function searchHadith() {
+    const inputQuery = document.getElementById('hadithInput').value.trim();
+    const dropdownQuery = document.getElementById('hadithDropdown').value;
+    const query = inputQuery || dropdownQuery;
+    if (!query) return;
+    const resultDiv = document.getElementById('hadithResult');
+    resultDiv.innerHTML = `<div class="user-message">Searching: ${query}</div>`;
+    const loading = document.createElement('div');
+    loading.className = 'loading-indicator';
+    loading.innerText = 'Searching Hadith...';
+    resultDiv.appendChild(loading);
+    fetch('/hadith-search', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ query })
+    }).then(res => res.json())
+      .then(data => {
+        loading.remove();
+        if (data.results && data.results.length > 0) {
+          data.results.forEach(hadith => {
+            const hadithEl = document.createElement('div');
+            hadithEl.className = 'hadith-entry';
+            let infoText = '';
+            if (hadith.book_name && hadith.book_number && hadith.book_name !== 'Unknown Book') {
+              infoText += `<strong>Book:</strong> ${hadith.book_name} (${hadith.book_number})<br>`;
+            }
+            if (hadith.volume_number && hadith.volume_number !== 'N/A') {
+              infoText += `<strong>Volume:</strong> ${hadith.volume_number}<br>`;
+            }
+            if (hadith.hadith_info && hadith.hadith_info !== 'Volume N/A, Book N/A') {
+              infoText += `<strong>Info:</strong> ${hadith.hadith_info}<br>`;
+            }
+            if (hadith.narrator && hadith.narrator !== 'Unknown narrator') {
+              infoText += `<strong>Narrated by:</strong> ${hadith.narrator}`;
+            }
+            const infoPara = document.createElement('p');
+            infoPara.innerHTML = infoText;
+            hadithEl.appendChild(infoPara);
+            const textPara = document.createElement('p');
+            textPara.innerText = hadith.text;
+            textPara.style.marginTop='8px';
+            hadithEl.appendChild(textPara);
+            resultDiv.appendChild(hadithEl);
+          });
+        } else {
+          resultDiv.innerHTML += `<div>No results for "${query}".</div>`;
+        }
+      }).catch(() => {
+        loading.remove();
+        document.getElementById('hadithResult').innerHTML += `<div>Error searching Hadith.</div>`;
+      });
+  }
+</script>
+</body>
+</html>

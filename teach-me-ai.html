@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>🤖 Teach Me with AI</title>
+  <style>
+    body {
+      font-family: Poppins, sans-serif;
+      padding: 20px;
+      background: #eef2f3;
+    }
+    h1 {
+      text-align: center;
+      font-size: 2em;
+    }
+    .box {
+      max-width: 700px;
+      margin: 30px auto;
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    input, select, textarea, button {
+      display: block;
+      width: 100%;
+      margin: 10px 0;
+      padding: 12px;
+      font-size: 1em;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+    }
+    button {
+      background-color: #007bff;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #0056b3;
+    }
+    #response {
+      margin-top: 20px;
+      white-space: pre-wrap;
+    }
+  </style>
+</head>
+<body>
+
+<h1>🤖 Teach Me with AI</h1>
+
+<div class="box">
+  <form id="askForm">
+    <label for="course">Course</label>
+    <select id="course" required>
+      <option value="">-- Select Course --</option>
+      <option value="Accountancy">Accountancy</option>
+      <option value="Accounting">Accounting</option>
+      <option value="Agriculture">Agriculture</option>
+      <option value="Arabic Studies">Arabic Studies</option>
+      <option value="Banking and Finance">Banking and Finance</option>
+      <option value="Biochemistry">Biochemistry</option>
+      <option value="Botany">Botany</option>
+      <option value="Business Administration">Business Administration</option>
+      <option value="Chemical and Polymer Engineering">Chemical and Polymer Engineering</option>
+      <option value="Chemistry">Chemistry</option>
+      <option value="Christian Religious Studies">Christian Religious Studies</option>
+      <option value="Computer Science">Computer Science</option>
+      <option value="Dentistry and Dental Surgery">Dentistry and Dental Surgery</option>
+      <option value="Drama / Dramatic / Performing Arts">Drama / Dramatic / Performing Arts</option>
+      <option value="Early Childhood Education">Early Childhood Education</option>
+      <option value="Economics">Economics</option>
+      <option value="Education and Accounting">Education and Accounting</option>
+      <option value="Education and Biology">Education and Biology</option>
+      <option value="Education and Chemistry">Education and Chemistry</option>
+      <option value="Education and Christian Religious Studies">Education and Christian Religious Studies</option>
+      <option value="Education and Computer Science">Education and Computer Science</option>
+      <option value="Education and Economics">Education and Economics</option>
+      <option value="Education and English Language">Education and English Language</option>
+      <option value="Education and French">Education and French</option>
+      <option value="Education and Geography">Education and Geography</option>
+      <option value="Education and History">Education and History</option>
+      <option value="Education and Islamic Studies">Education and Islamic Studies</option>
+      <option value="Education and Mathematics">Education and Mathematics</option>
+      <option value="Education and Physics">Education and Physics</option>
+      <option value="Education and Political Science">Education and Political Science</option>
+      <option value="Education and Yoruba">Education and Yoruba</option>
+      <option value="Educational Management">Educational Management</option>
+      <option value="Electronics and Computer Engineering">Electronics and Computer Engineering</option>
+      <option value="English Language">English Language</option>
+      <option value="Fine and Applied Arts">Fine and Applied Arts</option>
+      <option value="Fisheries">Fisheries</option>
+      <option value="French">French</option>
+      <option value="Geography and Planning">Geography and Planning</option>
+      <option value="Guidance and Counseling">Guidance and Counseling</option>
+      <option value="Health Education">Health Education</option>
+      <option value="History and International Studies">History and International Studies</option>
+      <option value="Industrial Relations and Personnel Management">Industrial Relations and Personnel Management</option>
+      <option value="Insurance">Insurance</option>
+      <option value="Islamic Studies">Islamic Studies</option>
+      <option value="Law">Law</option>
+      <option value="Library and Information Science">Library and Information Science</option>
+      <option value="Local Government and Development Studies">Local Government and Development Studies</option>
+      <option value="Marketing">Marketing</option>
+      <option value="Mass Communication">Mass Communication</option>
+      <option value="Mathematics">Mathematics</option>
+      <option value="Mechanical Engineering">Mechanical Engineering</option>
+      <option value="Medicine and Surgery">Medicine and Surgery</option>
+      <option value="Microbiology">Microbiology</option>
+      <option value="Music">Music</option>
+      <option value="Nursing / Nursing Science">Nursing / Nursing Science</option>
+      <option value="Pharmacology">Pharmacology</option>
+      <option value="Philosophy">Philosophy</option>
+      <option value="Physical and Health Education">Physical and Health Education</option>
+      <option value="Physics">Physics</option>
+      <option value="Physiology">Physiology</option>
+      <option value="Political Science">Political Science</option>
+      <option value="Portuguese / English">Portuguese / English</option>
+      <option value="Psychology">Psychology</option>
+      <option value="Public Administration">Public Administration</option>
+      <option value="Sociology">Sociology</option>
+      <option value="Teacher Education Science">Teacher Education Science</option>
+      <option value="Technology and Vocational Education">Technology and Vocational Education</option>
+      <option value="Theatre Arts">Theatre Arts</option>
+      <option value="Transport Management Technology">Transport Management Technology</option>
+      <option value="Yoruba">Yoruba</option>
+      <option value="Zoology">Zoology</option>
+    </select>
+
+    <label for="level">Level</label>
+    <select id="level" required>
+      <option value="">-- Select Level --</option>
+      <option value="Beginner">Beginner</option>
+      <option value="100 Level">100 Level</option>
+      <option value="200 Level">200 Level</option>
+      <option value="300 Level">300 Level</option>
+      <option value="400 Level">300 Level</option>
+      <option value="Masters">Masters</option>
+    </select>
+
+    <label for="question">Your Question</label>
+    <textarea id="question" rows="4" placeholder="e.g. Explain recursion, or how to integrate x^2..."></textarea>
+
+    <button type="submit">Ask</button>
+  </form>
+
+  <div id="response"><strong>🤖 AI:</strong> <span id="aiReply">Ask me about your studies...</span></div>
+</div>
+
+<script>
+  const form = document.getElementById("askForm");
+  form.addEventListener("submit", function (e) {
+    e.preventDefault();
+    loadLesson();
+  });
+
+  function loadLesson() {
+    const course = document.getElementById('course').value;
+    const level = document.getElementById('level').value;
+    const question = document.getElementById('question').value;
+
+    const aiReply = document.getElementById("aiReply");
+
+    if (!course || !level || !question) {
+      aiReply.innerText = "❌ Please select course, level, and type your question.";
+      return;
+    }
+
+    aiReply.innerText = "Thinking... 🤖";
+
+    const payload = {
+      history: [
+        {
+          role: "user",
+          content: `I am a ${level} student studying ${course}. Teach me: ${question}`
+        }
+      ]
+    };
+
+    fetch("/ask", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    })
+    .then(res => res.json())
+    .then(data => {
+      const answer = data?.choices?.[0]?.message?.content || "❌ No answer received.";
+      aiReply.innerText = answer;
+    })
+    .catch(err => {
+      console.error("AI error:", err);
+      aiReply.innerText = "❌ Error contacting AI.";
+    });
+  }
+</script>
+
+</body>
+</html>

@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Trivia Result - Tawfiq AI</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f5f5f5;
+            text-align: center;
+            padding: 50px;
+        }
+        .result-box {
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            display: inline-block;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #2c3e50;
+        }
+        p {
+            font-size: 20px;
+            margin-bottom: 30px;
+        }
+        .level-info {
+            font-size: 18px;
+            margin-bottom: 20px;
+            color: #34495e;
+        }
+        a {
+            text-decoration: none;
+            padding: 12px 25px;
+            background-color: #27ae60;
+            color: white;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        a:hover {
+            background-color: #2ecc71;
+        }
+    </style>
+</head>
+<body>
+    <div class="result-box">
+        <h1>🎉 Game Over!</h1>
+        <div class="level-info">
+            <p>Level: {{ level }}</p>
+        </div>
+        <p>Your Score: {{ score }} / {{ total }}</p>
+
+        {% if passed %}
+            <p style="color: green;">🎊 Congratulations! You've advanced to the next level!</p>
+            <a href="{{ url_for('next_level') }}">Next Level</a>
+        {% else %}
+            <p style="color: red;">Good effort! Try again to progress to the next level.</p>
+            <a href="{{ url_for('restart') }}">Play Again</a>
+        {% endif %}
+    </div>
+</body>
+</html>

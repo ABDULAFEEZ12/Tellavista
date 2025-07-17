@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Talk to Tawfiq</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="manifest" href="/manifest.json" />
+  <meta name="theme-color" content="#009688" />
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #f0f4f8;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      min-height: 100vh;
+      align-items: center;
+    }
+
+    .container {
+      max-width: 480px;
+      width: 90%;
+      background: white;
+      padding: 20px;
+      border-radius: 1rem;
+      box-shadow: 0 0 25px rgba(0, 0, 0, 0.05);
+      text-align: center;
+    }
+
+    h2 {
+      font-size: 1.5rem;
+      color: #009688;
+      margin-bottom: 10px;
+    }
+
+    .text {
+      font-size: 1rem;
+      margin-bottom: 1rem;
+      color: #555;
+    }
+
+    input, select, button {
+      width: 100%;
+      padding: 10px;
+      margin: 8px 0;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      font-size: 1rem;
+    }
+
+    .orb-wrapper {
+      display: flex;
+      justify-content: center;
+      margin: 1.5rem 0;
+      position: relative;
+    }
+
+    .orbit-ring {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 110px;
+      height: 110px;
+      border-radius: 50%;
+      border: 2px dashed #00968880;
+      transform: translate(-50%, -50%);
+      animation: spin 6s linear infinite;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    @keyframes spin {
+      from { transform: translate(-50%, -50%) rotate(0deg); }
+      to { transform: translate(-50%, -50%) rotate(360deg); }
+    }
+
+    .orb {
+      width: 80px;
+      height: 80px;
+      background: #009688;
+      border-radius: 50%;
+      box-shadow: 0 0 20px #009688;
+      position: relative;
+      animation: pulse 2s infinite;
+      transition: box-shadow 0.3s ease;
+      z-index: 1;
+    }
+
+    .orb.listening {
+      animation: glow 1s infinite alternate;
+      background: #ff5722;
+      box-shadow: 0 0 25px #ff5722;
+    }
+
+    .orb.speaking {
+      background: #4caf50;
+      box-shadow: 0 0 25px #4caf50;
+    }
+
+    .sound-wave {
+      position: absolute;
+      bottom: -10px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 3px;
+    }
+
+    .sound-wave .bar {
+      width: 4px;
+      height: 10px;
+      background: white;
+      animation: wave 0.7s infinite ease-in-out;
+    }
+
+    .sound-wave .bar:nth-child(2) { animation-delay: 0.1s; }
+    .sound-wave .bar:nth-child(3) { animation-delay: 0.2s; }
+    .sound-wave .bar:nth-child(4) { animation-delay: 0.3s; }
+    .sound-wave .bar:nth-child(5) { animation-delay: 0.4s; }
+
+    @keyframes glow {
+      from { box-shadow: 0 0 20px #ff5722; }
+      to { box-shadow: 0 0 35px #ff5722; }
+    }
+
+    @keyframes wave {
+      0%, 100% { height: 10px; }
+      50% { height: 20px; }
+    }
+
+    @keyframes pulse {
+      0% { box-shadow: 0 0 10px #009688; }
+      50% { box-shadow: 0 0 20px #009688; }
+      100% { box-shadow: 0 0 10px #009688; }
+    }
+
+    .log {
+      background: #f9f9f9;
+      border: 1px solid #ddd;
+      border-radius: 10px;
+      padding: 10px;
+      font-size: 0.95rem;
+      white-space: pre-line;
+      margin-bottom: 1rem;
+    }
+
+    .info {
+      font-size: 0.85rem;
+      color: #666;
+      margin-top: 1rem;
+    }
+
+    .info button {
+      background: #009688;
+      color: white;
+      border: none;
+      margin-top: 0.5rem;
+      padding: 10px;
+      border-radius: 8px;
+      font-size: 0.9rem;
+    }
+
+    @media (max-width: 480px) {
+      h2 { font-size: 1.3rem; }
+      .orb { width: 70px; height: 70px; }
+      .orbit-ring { width: 90px; height: 90px; }
+      input, select { font-size: 0.95rem; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>🎙️ Talk to Tawfiq</h2>
+    <div class="text">Enter your name, pick a voice, then click the glowing orb to speak or type below</div>
+
+    <input type="text" id="username" placeholder="Enter your name (optional)">
+    <select id="voiceSelect" aria-label="Voice Selection"><option>Loading voices...</option></select>
+
+    <div class="orb-wrapper" id="mic">
+      <div class="orbit-ring"></div>
+      <div class="orb" id="orb">
+        <div class="sound-wave" id="wave" style="display:none;">
+          <div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div>
+        </div>
+      </div>
+    </div>
+
+    <input type="text" id="typedQuestion" placeholder="Type your question here..." />
+    <button onclick="handleTypedInput()">Ask Tawfiq</button>
+
+    <div class="log" id="log">No conversation yet.</div>
+
+    <div class="info">
+      🌍 <strong>Multilingual Support:</strong> Arabic, French, Hausa, Yoruba and more (Coming Soon, in shaa Allah)<br>
+      🔊 <strong>Real Scholar Voices:</strong> Authentic recitations (Coming Soon, in shaa Allah)<br>
+      📱 <strong>Install App:</strong> Use browser menu to "Add to Home Screen"<br>
+      📥 <button onclick="downloadChat()">Download Full Chat</button>
+    </div>
+  </div>
+
+  <script>
+    const micBtn = document.getElementById('mic');
+    const orb = document.getElementById('orb');
+    const logDiv = document.getElementById('log');
+    const wave = document.getElementById('wave');
+    const voiceSelect = document.getElementById('voiceSelect');
+    const usernameInput = document.getElementById('username');
+    const typedInput = document.getElementById('typedQuestion');
+
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    let conversationHistory = JSON.parse(localStorage.getItem('tawfiqHistory')) || [];
+    let voices = [], bestVoice = null;
+
+    function populateVoiceOptions() {
+      voices = window.speechSynthesis.getVoices();
+      if (!voices.length) return;
+      voiceSelect.innerHTML = voices.map(v => `<option value="${v.name}">${v.name} (${v.lang})</option>`).join('');
+      bestVoice = voices.find(v => v.name.includes('Google US English') || v.lang === 'en-US') || voices[0];
+      voiceSelect.value = bestVoice?.name || voices[0].name;
+    }
+
+    voiceSelect.onchange = () => {
+      bestVoice = voices.find(v => v.name === voiceSelect.value);
+    };
+
+    if ('speechSynthesis' in window) {
+      window.speechSynthesis.onvoiceschanged = populateVoiceOptions;
+      populateVoiceOptions();
+    }
+
+    function saveHistory() {
+      localStorage.setItem('tawfiqHistory', JSON.stringify(conversationHistory));
+    }
+
+    function downloadChat() {
+      const chatText = conversationHistory.map(entry => {
+        const time = new Date().toLocaleTimeString();
+        const who = entry.role === 'user' ? "🧑 You" : "🧠 Tawfiq";
+        return `[${time}] ${who}: ${entry.content}`;
+      }).join('\n\n');
+
+      const blob = new Blob([chatText], { type: 'text/plain' });
+      const link = document.createElement('a');
+      link.download = 'tawfiq_chat.txt';
+      link.href = URL.createObjectURL(blob);
+      link.click();
+    }
+
+    async function sendToTawfiq(userText) {
+      const username = usernameInput.value.trim() || "Guest";
+      conversationHistory.push({ role: 'user', content: userText });
+      saveHistory();
+      logDiv.innerHTML = `<strong>You:</strong> ${userText}\n<em>Tawfiq is thinking...</em>`;
+      orb.className = 'orb speaking';
+
+      try {
+        const res = await fetch('/ask', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ history: conversationHistory, username })
+        });
+
+        if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+        const data = await res.json();
+        let answer = data.choices?.[0]?.message?.content || "Sorry, I don't have an answer right now.";
+        answer = answer.replace(/^#+\s*/gm, '').trim();
+
+        conversationHistory.push({ role: 'assistant', content: answer });
+        saveHistory();
+
+        logDiv.innerHTML = `<strong>You:</strong> ${userText}\n<strong>Tawfiq:</strong> ${answer}`;
+        speakOut(answer);
+      } catch (err) {
+        orb.className = 'orb';
+        wave.style.display = "none";
+        logDiv.innerHTML = "❌ Error getting answer. Try again.";
+        console.error(err);
+      }
+    }
+
+    function speakOut(text) {
+      const cleanedText = text.replace(/\p{Emoji_Presentation}/gu, match => match);
+      const utterance = new SpeechSynthesisUtterance(cleanedText);
+      utterance.voice = bestVoice;
+      utterance.lang = bestVoice?.lang || 'en-US';
+      utterance.pitch = 1.15;
+      utterance.rate = 0.94;
+      utterance.onend = () => {
+        orb.className = 'orb';
+        wave.style.display = "none";
+      };
+      window.speechSynthesis.speak(utterance);
+    }
+
+    function handleTypedInput() {
+      const typedText = typedInput.value.trim();
+      if (typedText) {
+        sendToTawfiq(typedText);
+        typedInput.value = "";
+      }
+    }
+
+    if (!SpeechRecognition) {
+      logDiv.innerHTML = "❌ Your browser does not support Speech Recognition.";
+      micBtn.style.display = "none";
+    } else {
+      const recognition = new SpeechRecognition();
+      recognition.lang = 'en-US';
+      recognition.interimResults = false;
+      recognition.maxAlternatives = 1;
+
+      micBtn.onclick = () => {
+        logDiv.innerHTML = "🎤 Listening...";
+        orb.className = 'orb listening';
+        wave.style.display = "flex";
+        recognition.start();
+      };
+
+      recognition.onresult = (event) => {
+        const spokenText = event.results[0][0].transcript.trim();
+        sendToTawfiq(spokenText);
+      };
+
+      recognition.onerror = (event) => {
+        orb.className = 'orb';
+        wave.style.display = "none";
+        logDiv.innerHTML = `❌ Speech recognition error: ${event.error}`;
+      };
+
+      recognition.onspeechend = () => recognition.stop();
+    }
+  </script>
+</body>
+</html>

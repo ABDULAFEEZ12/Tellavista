@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>📚 Study Materials</title>
+  <style>
+    body {
+      font-family: Poppins, sans-serif;
+      padding: 20px;
+      background: #f4f4f4;
+      color: #222;
+    }
+    h1, h2 {
+      text-align: center;
+    }
+    .material {
+      background: white;
+      padding: 15px;
+      margin: 10px auto;
+      border-radius: 8px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      max-width: 700px;
+    }
+    .material a {
+      text-decoration: none;
+      color: blue;
+    }
+    select, input, button {
+      margin: 10px auto;
+      display: block;
+      padding: 10px;
+      font-size: 1em;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      width: 90%;
+      max-width: 600px;
+    }
+    button {
+      background-color: #007BFF;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+    button:disabled {
+      background-color: #6c757d;
+      cursor: not-allowed;
+    }
+    button:hover:enabled {
+      background-color: #0056b3;
+    }
+    .ai-tab {
+      text-align: center;
+      margin-top: 30px;
+    }
+    .ai-tab a {
+      padding: 10px 20px;
+      background-color: #28a745;
+      color: white;
+      border-radius: 6px;
+      text-decoration: none;
+      font-weight: bold;
+    }
+    .ai-tab a:hover {
+      background-color: #1e7e34;
+    }
+  </style>
+</head>
+<body>
+
+<h1>📚 Study Materials</h1>
+<h1>Select Course and Level</h1>
+
+<!-- Course Dropdown -->
+<select id="course">
+  <option value="">-- Select Course --</option>
+  <!-- Your existing options -->
+  <option value="Accountancy">Accountancy</option>
+  <option value="Accounting">Accounting</option>
+  <option value="Agriculture">Agriculture</option>
+  <option value="Arabic Studies">Arabic Studies</option>
+  <option value="Banking and Finance">Banking and Finance</option>
+  <option value="Biochemistry">Biochemistry</option>
+  <option value="Botany">Botany</option>
+  <option value="Business Administration">Business Administration</option>
+  <option value="Chemical and Polymer Engineering">Chemical and Polymer Engineering</option>
+  <option value="Chemistry">Chemistry</option>
+  <option value="Christian Religious Studies">Christian Religious Studies</option>
+  <option value="Computer Science">Computer Science</option>
+  <option value="Dentistry and Dental Surgery">Dentistry and Dental Surgery</option>
+  <option value="Drama / Dramatic / Performing Arts">Drama / Dramatic / Performing Arts</option>
+  <option value="Early Childhood Education">Early Childhood Education</option>
+  <option value="Economics">Economics</option>
+  <option value="Education and Accounting">Education and Accounting</option>
+  <option value="Education and Biology">Education and Biology</option>
+  <option value="Education and Chemistry">Education and Chemistry</option>
+  <option value="Education and Christian Religious Studies">Education and Christian Religious Studies</option>
+  <option value="Education and Computer Science">Education and Computer Science</option>
+  <option value="Education and Economics">Education and Economics</option>
+  <option value="Education and English Language">Education and English Language</option>
+  <option value="Education and French">Education and French</option>
+  <option value="Education and Geography">Education and Geography</option>
+  <option value="Education and History">Education and History</option>
+  <option value="Education and Islamic Studies">Education and Islamic Studies</option>
+  <option value="Education and Mathematics">Education and Mathematics</option>
+  <option value="Education and Physics">Education and Physics</option>
+  <option value="Education and Political Science">Education and Political Science</option>
+  <option value="Education and Yoruba">Education and Yoruba</option>
+  <option value="Educational Management">Educational Management</option>
+  <option value="Electronics and Computer Engineering">Electronics and Computer Engineering</option>
+  <option value="English Language">English Language</option>
+  <option value="Fine and Applied Arts">Fine and Applied Arts</option>
+  <option value="Fisheries">Fisheries</option>
+  <option value="French">French</option>
+  <option value="Geography and Planning">Geography and Planning</option>
+  <option value="Guidance and Counseling">Guidance and Counseling</option>
+  <option value="Health Education">Health Education</option>
+  <option value="History and International Studies">History and International Studies</option>
+  <option value="Industrial Relations and Personnel Management">Industrial Relations and Personnel Management</option>
+  <option value="Insurance">Insurance</option>
+  <option value="Islamic Studies">Islamic Studies</option>
+  <option value="Law">Law</option>
+  <option value="Library and Information Science">Library and Information Science</option>
+  <option value="Local Government and Development Studies">Local Government and Development Studies</option>
+  <option value="Marketing">Marketing</option>
+  <option value="Mass Communication">Mass Communication</option>
+  <option value="Mathematics">Mathematics</option>
+  <option value="Mechanical Engineering">Mechanical Engineering</option>
+  <option value="Medicine and Surgery">Medicine and Surgery</option>
+  <option value="Microbiology">Microbiology</option>
+  <option value="Music">Music</option>
+  <option value="Nursing / Nursing Science">Nursing / Nursing Science</option>
+  <option value="Pharmacology">Pharmacology</option>
+  <option value="Philosophy">Philosophy</option>
+  <option value="Physical and Health Education">Physical and Health Education</option>
+  <option value="Physics">Physics</option>
+  <option value="Physiology">Physiology</option>
+  <option value="Political Science">Political Science</option>
+  <option value="Portuguese / English">Portuguese / English</option>
+  <option value="Psychology">Psychology</option>
+  <option value="Public Administration">Public Administration</option>
+  <option value="Sociology">Sociology</option>
+  <option value="Teacher Education Science">Teacher Education Science</option>
+  <option value="Technology and Vocational Education">Technology and Vocational Education</option>
+  <option value="Theatre Arts">Theatre Arts</option>
+  <option value="Transport Management Technology">Transport Management Technology</option>
+  <option value="Yoruba">Yoruba</option>
+  <option value="Zoology">Zoology</option>
+</select>
+
+<!-- Level Dropdown -->
+<select id="level">
+  <option value="">-- Select Level --</option>
+  <option value="100">100 Level</option>
+  <option value="200">200 Level</option>
+  <option value="300">300 Level</option>
+  <option value="400">400 Level</option>
+</select>
+
+<!-- Input for Topic -->
+<input type="text" id="topic" placeholder="Enter topic" />
+
+<!-- Search Button -->
+<button id="searchBtn">🔍 Search Materials</button>
+
+<!-- Results Section -->
+<div id="results"></div>
+
+<!-- AI Tab Link -->
+<div class="ai-tab">
+  <a href="/teach-me-ai">🤖 Teach Me with AI</a>
+</div>
+
+<script>
+  const btn = document.getElementById('searchBtn');
+
+  btn.addEventListener('click', () => {
+    const course = document.getElementById('course').value;
+    const level = document.getElementById('level').value;
+    const topic = document.getElementById('topic').value.trim();
+
+    if (!course || !topic || !level) {
+      alert("Please select course, level, and enter topic.");
+      return;
+    }
+
+    // Show "Searching..."
+    btn.textContent = "🔍 Searching...";
+    btn.disabled = true;
+
+    const url = `/ai/materials?topic=${encodeURIComponent(topic)}&level=${encodeURIComponent(level)}&department=${encodeURIComponent(course)}`;
+
+    fetch(url)
+      .then(res => res.json())
+      .then(data => {
+        // Reset button text
+        btn.textContent = "🔍 Search Materials";
+        btn.disabled = false;
+
+        const container = document.getElementById('results');
+        container.innerHTML = '';
+
+        // Display books
+        if (data.books && data.books.length > 0) {
+          container.innerHTML += `<h2>📖 Books</h2>`;
+          data.books.forEach(book => {
+            container.innerHTML += `
+              <div class="material">
+                <strong>${book.title}</strong><br/>
+                <em>${book.author}</em><br/>
+                <a href="${book.link}" target="_blank">Read</a>
+              </div>
+            `;
+          });
+        }
+
+        // Remove PDFs section entirely
+        // if you previously had code for PDFs, just delete it or comment it out
+
+        // Display videos
+        if (data.videos && data.videos.length > 0) {
+          container.innerHTML += `<h2>🎥 Videos</h2>`;
+          data.videos.forEach(video => {
+            container.innerHTML += `
+              <div class="material">
+                <strong>${video.title}</strong><br/>
+                <a href="${video.link}" target="_blank">Watch</a>
+              </div>
+            `;
+          });
+        }
+
+        // Show message if no materials found
+        if (
+          (!data.books || data.books.length === 0) &&
+          (!data.videos || data.videos.length === 0)
+        ) {
+          container.innerHTML = "<p>No materials found for this course.</p>";
+        }
+      })
+      .catch(err => {
+        document.getElementById('results').innerHTML = "❌ Error loading materials.";
+        console.error(err);
+        btn.textContent = "🔍 Search Materials";
+        btn.disabled = false;
+      });
+  });
+</script>
+
+</body>
+</html>
