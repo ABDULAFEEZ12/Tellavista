@@ -302,7 +302,7 @@ def profile():
 @app.route('/talk-to-tellavista', methods=['GET', 'POST'])
 def talk_to_tellavista():
     if request.method == 'GET':
-        return render_template('talk_to_tellavista.html')  # For browser visits
+        return render_template('talk-to-tellavista.html')  # For browser visits
 
     # POST logic for AJAX or frontend
     try:
