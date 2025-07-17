@@ -1,13 +1,120 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>About</title>
+  <meta charset="UTF-8" />
+  <title>About - Tellavista</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #ffffff;
+      color: #000000;
+      line-height: 1.6;
+    }
+
+    header {
+      background-color: #000000;
+      color: #ffffff;
+      padding: 1.5rem;
+      text-align: center;
+    }
+
+    main {
+      padding: 2rem 1.5rem;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    h1 {
+      font-size: 2rem;
+      margin-bottom: 1rem;
+      text-align: center;
+    }
+
+    h2 {
+      margin-top: 2rem;
+      font-size: 1.4rem;
+    }
+
+    p {
+      font-size: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    ul {
+      margin: 1rem 0;
+      padding-left: 1.2rem;
+    }
+
+    li {
+      margin-bottom: 0.5rem;
+    }
+
+    footer {
+      background-color: #000000;
+      color: #ffffff;
+      text-align: center;
+      padding: 1rem;
+      position: relative;
+      bottom: 0;
+      width: 100%;
+      margin-top: 2rem;
+    }
+
+    .btn-back {
+      display: inline-block;
+      margin-top: 2rem;
+      padding: 0.7rem 1.4rem;
+      background-color: #000000;
+      color: #ffffff;
+      text-decoration: none;
+      border-radius: 8px;
+      transition: background-color 0.3s ease;
+    }
+
+    .btn-back:hover {
+      background-color: #333333;
+    }
+  </style>
 </head>
 <body>
-    <h1>About This Application</h1>
-    <p>This is an application for Islamic Knowledge...</p>
-    <a href="{{ url_for('home') }}">Back to Home</a>
+
+  <header>
+    <h1>About Tellavista</h1>
+  </header>
+
+  <main>
+    <p><strong>Tellavista</strong> is an innovative education platform that combines the power of AI, animation, and motivation to help people around the world learn faster, grow smarter, and build meaningful lives.</p>
+
+    <h2>Our Mission</h2>
+    <p>We aim to empower learners with tools that make education enjoyable and effective — whether it's coding, artificial intelligence, or life skills. We believe that learning should be engaging, personalized, and inspiring.</p>
+
+    <h2>What We Offer</h2>
+    <ul>
+      <li>🎓 <strong>Education AI Assistant</strong> — Ask, learn, grow instantly.</li>
+      <li>🎬 <strong>AI Video Maker</strong> — Turn knowledge into animated content.</li>
+      <li>🗺️ <strong>Success Road Map</strong> — Your path from beginner to expert.</li>
+      <li>🔍 <strong>Searchable Knowledge</strong> — Explore books, videos, quizzes & more.</li>
+    </ul>
+
+    <h2>Our Vision</h2>
+    <p>By 2035, Tellavista will become a global force in digital learning — merging African creativity, Islamic ethics, and cutting-edge AI to shape the minds and values of the next generation.</p>
+
+    <h2>Created By</h2>
+    <p><strong>Abdul Afeez Adewale Tella</strong><br>
+    Nigerian Muslim • Mathematician • Animator • AI Visionary</p>
+    <p>
+      Afeez founded Tellavista to empower the world through a blend of modern technology and timeless wisdom. His vision? A world where education, spirituality, and artificial intelligence walk hand in hand — building not just smart humans, but great ones.
+    </p>
+
+    <a class="btn-back" href="/">← Back to Home</a>
+  </main>
+
+  <footer>
+    &copy; 2025 Tellavista. All rights reserved.
+  </footer>
+
 </body>
 </html>
