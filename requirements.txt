@@ -12,3 +12,4 @@ redis
 Flask-SQLAlchemy
 psycopg2
 flask_migrate
+beautifulsoup4
