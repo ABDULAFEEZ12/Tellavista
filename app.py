@@ -1084,63 +1084,71 @@ def ai_teach():
     except Exception as e:
         return jsonify({"error": str(e)})
 
+def get_pdfs(query):
+    pdfs = []
+    try:
+        html = requests.get(
+            f"https://www.pdfdrive.com/search?q={query}",
+            headers={"User-Agent": "Mozilla/5.0"}
+        ).text
+        soup = BeautifulSoup(html, 'html.parser')
+        for book in soup.select('.file-left')[:3]:
+            title = book.select_one('img')['alt']
+            link = "https://www.pdfdrive.com" + book.parent['href']
+            pdfs.append({'title': title, 'link': link})
+    except Exception as e:
+        print(f"[PDF ERROR] {e}")
+    return pdfs
+
+def get_books(query):
+    books = []
+    try:
+        res = requests.get(f"https://openlibrary.org/search.json?q={query}").json()
+        for doc in res.get("docs", [])[:2]:
+            books.append({
+                "title": doc.get("title"),
+                "author": ', '.join(doc.get("author_name", [])) if doc.get("author_name") else "Unknown",
+                "link": f"https://openlibrary.org{doc.get('key')}"
+            })
+    except Exception as e:
+        print(f"[BOOK ERROR] {e}")
+    return books
+
+
 @app.route('/ask', methods=['POST'])
+@login_required
 def ask():
     data = request.get_json()
     username = session.get('user', {}).get('username')
     history = data.get('history')
-    if not username:
-        return jsonify({'error': 'Login required'}), 401
+
     if not history:
         return jsonify({'error': 'Chat history required'}), 400
 
-    # Extract user's last question
     user_question = next((m['content'] for m in reversed(history) if m['role'] == 'user'), '')
     if not user_question:
         return jsonify({'error': 'No user question found'}), 400
 
-    # --- Fetch Materials ---
-    def get_pdfs(query):
-        pdfs = []
-        try:
-            html = requests.get(f"https://www.pdfdrive.com/search?q={query}", headers={"User-Agent": "Mozilla/5.0"}).text
-            soup = BeautifulSoup(html, 'html.parser')
-            for book in soup.select('.file-left')[:3]:
-                title = book.select_one('img')['alt']
-                link = "https://www.pdfdrive.com" + book.parent['href']
-                pdfs.append({'title': title, 'link': link})
-        except:
-            pass
-        return pdfs
-
-    def get_books(query):
-        books = []
-        try:
-            res = requests.get(f"https://openlibrary.org/search.json?q={query}").json()
-            for doc in res.get("docs", [])[:2]:
-                books.append({
-                    "title": doc.get("title"),
-                    "author": ', '.join(doc.get("author_name", [])) if doc.get("author_name") else "Unknown",
-                    "link": f"https://openlibrary.org{doc.get('key')}"
-                })
-        except:
-            pass
-        return books
-
+    # --- Fetch materials ---
     pdfs = get_pdfs(user_question)
     books = get_books(user_question)
 
-    # Format links into a prompt
-    materials_text = "📚 Study Materials:\n"
+    materials = []
     for pdf in pdfs:
-        materials_text += f"- {pdf['title']} ({pdf['link']})\n"
+        materials.append(f"- {pdf['title']} ({pdf['link']})")
     for book in books:
-        materials_text += f"- {book['title']} by {book['author']} ({book['link']})\n"
+        materials.append(f"- {book['title']} by {book['author']} ({book['link']})")
 
-    # Compose prompt
+    materials_text = "📚 Study Materials:\n" + "\n".join(materials)
+
+    # --- System prompt ---
     system_prompt = {
         "role": "system",
-        "content": f"You are Tellavista — a wise, kind, and helpful AI tutor. Use these study materials to guide your response:\n\n{materials_text}\n\nAnswer in a clear, educational way as if you're teaching a student from scratch."
+        "content": (
+            f"You are Tellavista — a wise, kind, and helpful AI tutor. "
+            f"Use these study materials to guide your response:\n\n{materials_text}\n\n"
+            f"Answer in a clear, educational way as if you're teaching a student from scratch."
+        )
     }
 
     messages = [system_prompt] + history
@@ -1149,7 +1157,7 @@ def ask():
     if cache_key in question_cache:
         answer = question_cache[cache_key]
         save_question_and_answer(username, user_question, answer)
-        return jsonify({'choices':[{'message':{'role':'assistant','content':answer}}]})
+        return jsonify({'choices': [{'message': {'role': 'assistant', 'content': answer}}]})
 
     headers = {
         "Authorization": f"Bearer {OPENROUTER_API_KEY}",
@@ -1157,7 +1165,7 @@ def ask():
     }
 
     payload = {
-        "model": "openai/gpt-4-turbo",
+        "model": "openrouter/openai/gpt-4-turbo",  # Confirmed correct OpenRouter format
         "messages": messages,
         "stream": False
     }
@@ -1172,11 +1180,11 @@ def ask():
         save_cache()
         save_question_and_answer(username, user_question, answer)
 
-        return jsonify({'choices':[{'message':{'role':'assistant','content':answer}}]})
-    except Exception as e:
-        print(f"Error in /ask: {e}")
-        return jsonify({'error': 'AI service error'}), 500
+        return jsonify({'choices': [{'message': {'role': 'assistant', 'content': answer}}]})
 
+    except Exception as e:
+        print(f"❌ Error in /ask: {e}")
+        return jsonify({'error': 'AI service error'}), 500
 
 # Additional routes, static pages, etc. follow the same pattern...
 
