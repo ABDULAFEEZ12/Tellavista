@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Settings - Tellavista</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: #ffffff;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      color: #000000;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      min-height: 100vh;
+      padding-top: 3rem;
+    }
+
+    .settings-container {
+      background-color: #f7f7f7;
+      padding: 2rem;
+      border-radius: 14px;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+      width: 100%;
+      max-width: 500px;
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 1.5rem;
+      font-size: 1.8rem;
+    }
+
+    form div {
+      margin-bottom: 1.2rem;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 0.4rem;
+      font-weight: 600;
+    }
+
+    input,
+    select {
+      width: 100%;
+      padding: 0.75rem;
+      font-size: 1rem;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      background-color: #ffffff;
+      color: #000000;
+      outline: none;
+    }
+
+    button {
+      width: 100%;
+      padding: 0.75rem;
+      background-color: #000000;
+      color: #ffffff;
+      font-size: 1rem;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+      margin-top: 1rem;
+    }
+
+    button:hover {
+      background-color: #333333;
+    }
+
+    .back-link {
+      display: block;
+      text-align: center;
+      margin-top: 1.5rem;
+      color: #000000;
+      text-decoration: none;
+      font-weight: bold;
+    }
+
+    .back-link:hover {
+      text-decoration: underline;
+    }
+
+    .flashes {
+      list-style: none;
+      padding: 0;
+      margin-bottom: 1rem;
+    }
+
+    .flashes li {
+      background-color: #ff4d4d;
+      color: white;
+      padding: 0.75rem;
+      margin-bottom: 0.5rem;
+      border-radius: 8px;
+      text-align: center;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <div class="settings-container">
+    <h1>Account Settings</h1>
+
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        <ul class="flashes">
+          {% for message in messages %}
+            <li>{{ message }}</li>
+          {% endfor %}
+        </ul>
+      {% endif %}
+    {% endwith %}
+
+    <form method="POST" action="/settings">
+      <div>
+        <label for="username">Username:</label>
+        <input type="text" id="username" name="username" value="{{ username }}" required />
+      </div>
+      <div>
+        <label for="email">Email:</label>
+        <input type="email" id="email" name="email" value="{{ email }}" required />
+      </div>
+      <div>
+        <label for="language">Preferred Language:</label>
+        <select id="language" name="preferred_language" required>
+          <option value="English" {% if preferred_language == 'English' %}selected{% endif %}>English</option>
+          <option value="Yoruba" {% if preferred_language == 'Yoruba' %}selected{% endif %}>Yoruba</option>
+          <option value="Hausa" {% if preferred_language == 'Hausa' %}selected{% endif %}>Hausa</option>
+          <option value="French" {% if preferred_language == 'French' %}selected{% endif %}>French</option>
+          <option value="Arabic" {% if preferred_language == 'Arabic' %}selected{% endif %}>Arabic</option>
+        </select>
+      </div>
+      <div>
+        <label for="password">New Password:</label>
+        <input type="password" id="password" name="password" placeholder="Leave blank to keep current password" />
+      </div>
+      <button type="submit">Save Changes</button>
+    </form>
+
+    <a href="/profile" class="back-link">← Back to Profile</a>
+  </div>
+</body>
+</html>
