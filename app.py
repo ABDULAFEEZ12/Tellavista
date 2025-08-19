@@ -5,18 +5,82 @@ from flask import (
 )
 import os
 import json
+from bs4 import BeautifulSoup
+import openai
+import requests
 from dotenv import load_dotenv
 from hashlib import sha256
 import redis
 from functools import wraps
-from sqlalchemy import func
 from datetime import datetime
 from werkzeug.security import generate_password_hash, check_password_hash
-import random
-import requests
-from functools import wraps
-from flask import redirect, url_for, session
 
+# Load environment variables
+load_dotenv()
+
+# Debug prints to confirm environment variables are loaded
+print("✅ GOOGLE_NEWS_API_KEY:", os.getenv("GOOGLE_NEWS_API_KEY"))
+print("✅ GOOGLE_CX:", os.getenv("GOOGLE_CX"))
+
+# Load OpenRouter API key safely
+# Load OpenRouter API key safely
+OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
+if not OPENROUTER_API_KEY:
+    raise ValueError("❌ OPENROUTER_API_KEY is not set in .env file")
+
+# Add OpenAI API key loading right here
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+if OPENAI_API_KEY:
+    openai.api_key = OPENAI_API_KEY
+else:
+    print("⚠️ OPENAI_API_KEY not set - AI features will not work")
+
+print("✅ OPENROUTER_API_KEY loaded successfully!")
+
+app = Flask(__name__)
+app.secret_key = os.getenv('SECRET_KEY', 'your-secret-key-for-dev')
+
+# --- In-memory users store ---
+users = {}
+
+# --- Helper functions ---
+def get_questions_for_user(username):
+    # Replace with your actual data retrieval logic
+    return [
+        {
+            "question": "Sample question?",
+            "answer": "Sample answer.",
+            "timestamp": "2024-01-01 12:00:00"
+        }
+    ]
+
+# --- Helper functions ---
+def get_questions_for_user(username):
+    # Replace with your actual data retrieval logic
+    return [
+        {
+            "question": "Sample question?",
+            "answer": "Sample answer.",
+            "timestamp": "2024-01-01 12:00:00"
+        }
+    ]
+
+# Add this right here - after get_questions_for_user but before login_required decorator
+def save_question_and_answer(username, question, answer):
+    # Implement your database saving logic here
+    print(f"Saving Q&A for {username}: Q: {question}, A: {answer}")
+    # For now, just print to console
+
+# Placeholder for UserQuestions model
+class UserQuestions:
+    @staticmethod
+    def filter_by(username=None):
+        return UserQuestions()
+    
+    def order_by(self, timestamp=None):
+        return []
+        
+# --- Login required decorator ---
 def login_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
@@ -25,235 +89,45 @@ def login_required(f):
         return f(*args, **kwargs)
     return decorated_function
 
-# Load environment variables
-load_dotenv()
-
-print("✅ API KEY:", os.getenv("GOOGLE_NEWS_API_KEY"))
-print("✅ CX:", os.getenv("GOOGLE_CX"))
-
-app = Flask(__name__)
-
-# Configurations
-app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
-app.config['SESSION_COOKIE_SECURE'] = False
-app.config['SECRET_KEY'] = os.getenv('MY_SECRET', 'fallback_secret_for_dev')
-app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL')
-
-from flask_sqlalchemy import SQLAlchemy
-db = SQLAlchemy()
-db.init_app(app)
-
-# For database migrations
-from flask_migrate import Migrate
-migrate = Migrate(app, db)
-
-# --- Models ---
-class User(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(150), unique=True, nullable=False)
-    email = db.Column(db.String(150), unique=True, nullable=False)
-    password_hash = db.Column(db.String(200), nullable=False)
-    level = db.Column(db.Integer, default=1)
-    joined_on = db.Column(db.DateTime, default=datetime.utcnow)
-    last_login = db.Column(db.DateTime)
-
-    # Additional personality fields if needed
-    tone = db.Column(db.String(50), default='neutral')
-    slang = db.Column(db.Boolean, default=False)
-    style = db.Column(db.String(100), default='default')
-    beliefs = db.Column(db.Text)
-    interests = db.Column(db.Text)
-    prefers_savage_mode = db.Column(db.Boolean, default=False)
-    favorite_scholars = db.Column(db.Text)
-
-    def set_password(self, password):
-        self.password_hash = generate_password_hash(password)
-
-    def check_password(self, password):
-        return check_password_hash(self.password_hash, password)
-
-class UserQuestions(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(150), nullable=False)
-    question = db.Column(db.Text, nullable=False)
-    answer = db.Column(db.Text, nullable=False)
-    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
-
-with app.app_context():
-    db.create_all()
-
-# --- Fetch questions for user ---
-def get_questions_for_user(username):
-    try:
-        with app.app_context():
-            questions = UserQuestions.query \
-                .filter(func.lower(UserQuestions.username) == username.lower()) \
-                .order_by(UserQuestions.timestamp.desc()) \
-                .all()
-            return [
-                {
-                    "question": q.question,
-                    "answer": q.answer,
-                    "timestamp": q.timestamp.strftime("%Y-%m-%d %H:%M:%S")
-                }
-                for q in questions
-            ]
-    except Exception as e:
-        print(f"❌ Error fetching questions: {e}")
-        return []
-
-# --- Save question/answer ---
-def save_question_and_answer(username, question, answer):
-    with app.app_context():
-        try:
-            existing = UserQuestions.query.filter_by(username=username, question=question).first()
-            if existing:
-                existing.answer = answer
-                existing.timestamp = datetime.utcnow()
-                print(f"🔁 Updated Q&A for {username}")
-            else:
-                new_q = UserQuestions(
-                    username=username,
-                    question=question,
-                    answer=answer,
-                    timestamp=datetime.utcnow()
-                )
-                db.session.add(new_q)
-                print(f"✅ Saved new Q&A for {username}")
-            db.session.commit()
-        except Exception as e:
-            print(f"❌ Error saving Q&A: {e}")
-            db.session.rollback()
-
-# --- Get PDFs from PDFDrive ---
-def get_pdfs(query):
-    pdfs = []
-    try:
-        html = requests.get(
-            f"https://www.pdfdrive.com/search?q={query}",
-            headers={"User-Agent": "Mozilla/5.0"}
-        ).text
-        soup = BeautifulSoup(html, 'html.parser')
-        for book in soup.select('.file-left')[:5]:
-            title = book.select_one('img')['alt']
-            link = "https://www.pdfdrive.com" + book.parent['href']
-            pdfs.append({'title': title, 'link': link})
-    except Exception as e:
-        print(f"[PDF ERROR] {e}")
-    return pdfs
-
-# --- Get Books from Open Library ---
-def get_books(query):
-    books = []
-    try:
-        res = requests.get(f"https://openlibrary.org/search.json?q={query}").json()
-        for doc in res.get("docs", [])[:5]:
-            books.append({
-                "title": doc.get("title"),
-                "author": ', '.join(doc.get("author_name", [])) if doc.get("author_name") else "Unknown",
-                "link": f"https://openlibrary.org{doc.get('key')}"
-            })
-    except Exception as e:
-        print(f"[BOOK ERROR] {e}")
-    return books
-
-# --- Redis Cache ---
-redis_host = os.getenv("REDIS_HOST", "localhost")
-redis_port = int(os.getenv("REDIS_PORT", 6379))
-redis_db = int(os.getenv("REDIS_DB", 0))
-redis_password = os.getenv("REDIS_PASSWORD")
-r = redis.Redis(host=redis_host, port=redis_port, db=redis_db, password=redis_password, decode_responses=True)
-
-
-# --- File cache ---
-CACHE_FILE = "tellavista_cache.json"
-if os.path.exists(CACHE_FILE):
-    try:
-        with open(CACHE_FILE, "r", encoding="utf-8") as f:
-            question_cache = json.load(f)
-    except json.JSONDecodeError:
-        question_cache = {}
-else:
-    question_cache = {}
-
-def save_cache():
-    with open(CACHE_FILE, "w", encoding="utf-8") as f:
-        json.dump(question_cache, f, indent=2, ensure_ascii=False)
-
-# --- Load datasets ---
-def load_json_data(file_name, data_variable_name):
-    data = {}
-    path = os.path.join(os.path.dirname(__file__), 'DATA', file_name)
-    print(f"Loading {data_variable_name} from {path}")
-    try:
-        with open(path, 'r', encoding='utf-8') as f:
-            data = json.load(f)
-        print(f"✅ Loaded {data_variable_name}")
-    except FileNotFoundError:
-        print(f"❌ {data_variable_name} file not found at {path}")
-    except json.JSONDecodeError as e:
-        print(f"❌ JSON decode error in {path}: {e}")
-    except Exception as e:
-        print(f"❌ Unexpected error loading {file_name}: {e}")
-    return data
-
-# --- OpenRouter API key ---
-OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
-if not OPENROUTER_API_KEY:
-    raise RuntimeError("Set OPENROUTER_API_KEY in environment variables.")
-
 # --- Routes ---
 
 @app.route('/signup', methods=['GET', 'POST'])
 def signup():
     if request.method == 'POST':
-        username = request.form.get('username').strip()
-        email = request.form.get('email').strip()
-        password = request.form.get('password').strip()
+        username = request.form.get('username', '').strip()
+        email = request.form.get('email', '').strip()
+        password = request.form.get('password', '').strip()
 
         if not username or not email or not password:
-            flash('Fill all fields.')
+            flash('Please fill out all fields.')
             return redirect(url_for('signup'))
 
-        if User.query.filter_by(username=username).first():
-            flash('Username exists.')
+        if username in users:
+            flash('Username already exists.')
             return redirect(url_for('signup'))
 
-        if User.query.filter_by(email=email).first():
-            flash('Email registered.')
-            return redirect(url_for('signup'))
-
-        user = User(username=username, email=email)
-        user.set_password(password)
-        db.session.add(user)
-        db.session.commit()
-
-        session['user'] = {
+        users[username] = {
             'username': username,
             'email': email,
-            'joined_on': user.joined_on.strftime('%Y-%m-%d'),
-            'last_login': datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')
+            'password': generate_password_hash(password)
         }
-        flash('Signed up! Please login.')
-        return redirect(url_for('index'))
-    return render_template('signup.html', user=session.get('user'))
+        flash('Signup successful! Please login.')
+        return redirect(url_for('login'))
+    return render_template('signup.html')
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
+    from werkzeug.security import check_password_hash
     if request.method == 'POST':
         data = request.get_json() if request.is_json else None
         username = data.get('username') if data else request.form.get('username', '').strip()
         password = data.get('password') if data else request.form.get('password', '').strip()
 
-        user = User.query.filter_by(username=username).first()
-        if user and user.check_password(password):
-            user.last_login = datetime.utcnow()
-            db.session.commit()
+        user = users.get(username)
+        if user and check_password_hash(user['password'], password):
             session['user'] = {
-                'username': user.username,
-                'email': user.email,
-                'joined_on': user.joined_on.strftime('%Y-%m-%d'),
-                'last_login': user.last_login.strftime('%Y-%m-%d %H:%M:%S')
+                'username': username,
+                'email': user['email']
             }
             if request.is_json:
                 return jsonify({'success': True, 'user': session['user']})
@@ -280,7 +154,6 @@ def index():
         return redirect(url_for('login'))
     questions = get_questions_for_user(user['username'])
     return render_template('index.html', user=user, questions=questions)
-
 
 @app.route('/my-questions')
 @login_required
@@ -325,15 +198,6 @@ def talk_to_tellavista():
 @app.route('/about')
 def about():
     return render_template('about.html')
-
-@app.route('/settings')
-def settings():
-    memory = {
-        "traits": session.get('traits', []),
-        "more_info": session.get('more_info', ''),
-        "enable_memory": session.get('enable_memory', False)
-    }
-    return render_template('settings.html', memory=memory, theme=session.get('theme'), language=session.get('language'))
 
 @app.route('/memory', methods=['POST'])
 def save_memory():
@@ -1075,17 +939,32 @@ def ai_teach():
     except Exception as e:
         return jsonify({"error": str(e)})
 
+CACHE_FILE = "tellavista_cache.json"
+if os.path.exists(CACHE_FILE):
+    try:
+        with open(CACHE_FILE, "r", encoding="utf-8") as f:
+            question_cache = json.load(f)
+    except json.JSONDecodeError:
+        question_cache = {}
+else:
+    question_cache = {}
+
+def save_cache():
+    with open(CACHE_FILE, "w", encoding="utf-8") as f:
+        json.dump(question_cache, f, indent=2, ensure_ascii=False)
+
 @app.route('/ask', methods=['POST'])
 def ask():
     data = request.get_json()
     username = session.get('user', {}).get('username')
     history = data.get('history')
+
     if not username:
         return jsonify({'error': 'Login required'}), 401
     if not history:
         return jsonify({'error': 'Chat history required'}), 400
 
-    # Extract user's last question
+    # Extract last user question
     user_question = next((m['content'] for m in reversed(history) if m['role'] == 'user'), '')
     if not user_question:
         return jsonify({'error': 'No user question found'}), 400
@@ -1094,14 +973,17 @@ def ask():
     def get_pdfs(query):
         pdfs = []
         try:
-            html = requests.get(f"https://www.pdfdrive.com/search?q={query}", headers={"User-Agent": "Mozilla/5.0"}).text
+            html = requests.get(
+                f"https://www.pdfdrive.com/search?q={query}",
+                headers={"User-Agent": "Mozilla/5.0"}
+            ).text
             soup = BeautifulSoup(html, 'html.parser')
             for book in soup.select('.file-left')[:3]:
                 title = book.select_one('img')['alt']
                 link = "https://www.pdfdrive.com" + book.parent['href']
                 pdfs.append({'title': title, 'link': link})
-        except:
-            pass
+        except Exception as e:
+            print("PDF fetch error:", e)
         return pdfs
 
     def get_books(query):
@@ -1114,21 +996,21 @@ def ask():
                     "author": ', '.join(doc.get("author_name", [])) if doc.get("author_name") else "Unknown",
                     "link": f"https://openlibrary.org{doc.get('key')}"
                 })
-        except:
-            pass
+        except Exception as e:
+            print("Book fetch error:", e)
         return books
 
     pdfs = get_pdfs(user_question)
     books = get_books(user_question)
 
-    # Format links into a prompt
+    # Build study materials text
     materials_text = "📚 Study Materials:\n"
     for pdf in pdfs:
         materials_text += f"- {pdf['title']} ({pdf['link']})\n"
     for book in books:
         materials_text += f"- {book['title']} by {book['author']} ({book['link']})\n"
 
-    # Compose prompt
+    # System role
     system_prompt = {
         "role": "system",
         "content": f"You are Tellavista — a wise, kind, and helpful AI tutor. Use these study materials to guide your response:\n\n{materials_text}\n\nAnswer in a clear, educational way as if you're teaching a student from scratch."
@@ -1137,16 +1019,17 @@ def ask():
     messages = [system_prompt] + history
     cache_key = sha256(json.dumps(messages, sort_keys=True).encode()).hexdigest()
 
+    # Cache hit
     if cache_key in question_cache:
         answer = question_cache[cache_key]
         save_question_and_answer(username, user_question, answer)
         return jsonify({'choices':[{'message':{'role':'assistant','content':answer}}]})
 
+    # Call OpenRouter API
     headers = {
         "Authorization": f"Bearer {OPENROUTER_API_KEY}",
         "Content-Type": "application/json"
     }
-
     payload = {
         "model": "openai/gpt-4-turbo",
         "messages": messages,
@@ -1168,10 +1051,15 @@ def ask():
         print(f"Error in /ask: {e}")
         return jsonify({'error': 'AI service error'}), 500
 
-
-# Additional routes, static pages, etc. follow the same pattern...
+@app.route('/settings')
+def settings():
+    memory = {
+        "traits": session.get('traits', []),
+        "more_info": session.get('more_info', ''),
+        "enable_memory": session.get('enable_memory', False)
+    }
+    return render_template('settings.html', memory=memory, theme=session.get('theme'), language=session.get('language'))
 
 if __name__ == '__main__':
     with app.app_context():
-        db.create_all()
-    app.run(debug=True)
+        app.run(debug=True)
