@@ -1,96 +1,98 @@
 from flask import (
     Flask, request, jsonify, render_template,
-    redirect, url_for, session, flash,
-    send_file, send_from_directory
+    redirect, url_for, session, flash
 )
 import os
-import json
-from bs4 import BeautifulSoup
-import openai
-import requests
-from dotenv import load_dotenv
-from hashlib import sha256
-import redis
-from functools import wraps
-from datetime import datetime
 from werkzeug.security import generate_password_hash, check_password_hash
+from functools import wraps
+from flask_sqlalchemy import SQLAlchemy
+from dotenv import load_dotenv
+import json
+import requests
+from bs4 import BeautifulSoup
+from hashlib import sha256
+import openai
 
 # Load environment variables
 load_dotenv()
 
-# Debug prints to confirm environment variables are loaded
-print("✅ GOOGLE_NEWS_API_KEY:", os.getenv("GOOGLE_NEWS_API_KEY"))
-print("✅ GOOGLE_CX:", os.getenv("GOOGLE_CX"))
+# ----------------------
+# Flask + DB Setup
+# ----------------------
+app = Flask(__name__)
+app.secret_key = os.getenv('SECRET_KEY', 'dev-secret-key')
+app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL')
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+db = SQLAlchemy(app)
 
-# Load OpenRouter API key safely
-# Load OpenRouter API key safely
-OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
-if not OPENROUTER_API_KEY:
-    raise ValueError("❌ OPENROUTER_API_KEY is not set in .env file")
-
-# Add OpenAI API key loading right here
+# ----------------------
+# OpenAI / OpenRouter API
+# ----------------------
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 if OPENAI_API_KEY:
     openai.api_key = OPENAI_API_KEY
-else:
-    print("⚠️ OPENAI_API_KEY not set - AI features will not work")
 
-print("✅ OPENROUTER_API_KEY loaded successfully!")
+OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
+if not OPENROUTER_API_KEY:
+    raise ValueError("OPENROUTER_API_KEY not set!")
 
-app = Flask(__name__)
-app.secret_key = os.getenv('SECRET_KEY', 'your-secret-key-for-dev')
+# ----------------------
+# Models
+# ----------------------
+class User(db.Model):
+    __tablename__ = 'users'
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(100), unique=True, nullable=False)
+    email = db.Column(db.String(150), unique=True, nullable=False)
+    password_hash = db.Column(db.Text, nullable=False)
+    created_at = db.Column(db.DateTime, server_default=db.func.now())
 
-# --- In-memory users store ---
-users = {}
+class UserQuestions(db.Model):
+    __tablename__ = 'user_questions'
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(100), nullable=False)
+    question = db.Column(db.Text, nullable=False)
+    answer = db.Column(db.Text, nullable=False)
+    timestamp = db.Column(db.DateTime, server_default=db.func.now())
 
-# --- Helper functions ---
-def get_questions_for_user(username):
-    # Replace with your actual data retrieval logic
-    return [
-        {
-            "question": "Sample question?",
-            "answer": "Sample answer.",
-            "timestamp": "2024-01-01 12:00:00"
-        }
-    ]
-
-# --- Helper functions ---
-def get_questions_for_user(username):
-    # Replace with your actual data retrieval logic
-    return [
-        {
-            "question": "Sample question?",
-            "answer": "Sample answer.",
-            "timestamp": "2024-01-01 12:00:00"
-        }
-    ]
-
-# Add this right here - after get_questions_for_user but before login_required decorator
-def save_question_and_answer(username, question, answer):
-    # Implement your database saving logic here
-    print(f"Saving Q&A for {username}: Q: {question}, A: {answer}")
-    # For now, just print to console
-
-# Placeholder for UserQuestions model
-class UserQuestions:
-    @staticmethod
-    def filter_by(username=None):
-        return UserQuestions()
-    
-    def order_by(self, timestamp=None):
-        return []
-        
-# --- Login required decorator ---
+# ----------------------
+# Helpers
+# ----------------------
 def login_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
-        if 'user' not in session:
+        if 'user_id' not in session:
             return redirect(url_for('login', next=request.url))
         return f(*args, **kwargs)
     return decorated_function
 
-# --- Routes ---
+def save_question_and_answer(username, question, answer):
+    entry = UserQuestions(username=username, question=question, answer=answer)
+    db.session.add(entry)
+    db.session.commit()
 
+CACHE_FILE = "tellavista_cache.json"
+if os.path.exists(CACHE_FILE):
+    try:
+        with open(CACHE_FILE, "r", encoding="utf-8") as f:
+            question_cache = json.load(f)
+    except json.JSONDecodeError:
+        question_cache = {}
+else:
+    question_cache = {}
+
+def save_cache():
+    with open(CACHE_FILE, "w", encoding="utf-8") as f:
+        json.dump(question_cache, f, indent=2, ensure_ascii=False)
+
+# ----------------------
+# Routes
+# ----------------------
+@app.route('/')
+def index():
+    return render_template('index.html')
+
+# -------- SIGNUP --------
 @app.route('/signup', methods=['GET', 'POST'])
 def signup():
     if request.method == 'POST':
@@ -102,59 +104,53 @@ def signup():
             flash('Please fill out all fields.')
             return redirect(url_for('signup'))
 
-        if username in users:
-            flash('Username already exists.')
+        if User.query.filter((User.username == username) | (User.email == email)).first():
+            flash('Username or email already exists.')
             return redirect(url_for('signup'))
 
-        users[username] = {
-            'username': username,
-            'email': email,
-            'password': generate_password_hash(password)
-        }
+        new_user = User(
+            username=username,
+            email=email,
+            password_hash=generate_password_hash(password)
+        )
+        db.session.add(new_user)
+        db.session.commit()
+
         flash('Signup successful! Please login.')
         return redirect(url_for('login'))
+
     return render_template('signup.html')
 
+# -------- LOGIN --------
 @app.route('/login', methods=['GET', 'POST'])
 def login():
-    from werkzeug.security import check_password_hash
     if request.method == 'POST':
-        data = request.get_json() if request.is_json else None
-        username = data.get('username') if data else request.form.get('username', '').strip()
-        password = data.get('password') if data else request.form.get('password', '').strip()
+        username_or_email = request.form.get('username_or_email', '').strip()
+        password = request.form.get('password', '').strip()
 
-        user = users.get(username)
-        if user and check_password_hash(user['password'], password):
-            session['user'] = {
-                'username': username,
-                'email': user['email']
-            }
-            if request.is_json:
-                return jsonify({'success': True, 'user': session['user']})
-            else:
-                flash('Logged in!')
-                return redirect(url_for('index'))
+        user = User.query.filter(
+            (db.func.lower(User.username) == username_or_email.lower()) |
+            (db.func.lower(User.email) == username_or_email.lower())
+        ).first()
+
+        if user and check_password_hash(user.password_hash, password):
+            session['user_id'] = user.id
+            session['user'] = {'username': user.username, 'email': user.email}
+            flash('Logged in successfully!')
+            return redirect(url_for('index'))
         else:
-            if request.is_json:
-                return jsonify({'error': 'Invalid credentials'}), 401
-            else:
-                flash('Invalid username or password.')
-                return redirect(url_for('login'))
+            flash('Invalid username or password.')
+            return redirect(url_for('login'))
+
     return render_template('login.html')
 
+# -------- LOGOUT --------
 @app.route('/logout')
 def logout():
     session.clear()
     return redirect(url_for('login'))
 
-@app.route('/')
-def index():
-    user = session.get('user')
-    if not user:
-        return redirect(url_for('login'))
-    questions = get_questions_for_user(user['username'])
-    return render_template('index.html', user=user, questions=questions)
-
+# -------- MY QUESTIONS --------
 @app.route('/my-questions')
 @login_required
 def my_questions():
@@ -162,7 +158,7 @@ def my_questions():
     questions = UserQuestions.query.filter_by(username=username).order_by(UserQuestions.timestamp.desc()).all()
     return render_template('my_questions.html', questions=questions)
 
-
+# -------- PROFILE --------
 @app.route('/profile')
 @login_required
 def profile():
@@ -1063,3 +1059,4 @@ def settings():
 if __name__ == '__main__':
     with app.app_context():
         app.run(debug=True)
+
