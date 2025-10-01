@@ -9,8 +9,8 @@
         margin: 0;
         padding: 0;
         font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        background-color: #ffffff; /* White background */
-        color: #000000; /* Black text */
+        background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+        color: white;
         display: flex;
         justify-content: center;
         align-items: center;
@@ -18,10 +18,10 @@
     }
 
     .login-container {
-        background-color: #f5f5f5; /* Light gray container */
+        background-color: rgba(255, 255, 255, 0.05);
         padding: 2rem;
         border-radius: 15px;
-        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
         width: 100%;
         max-width: 400px;
     }
@@ -46,19 +46,19 @@
     input[type="password"] {
         width: 100%;
         padding: 0.7rem;
-        border: 1px solid #ccc;
+        border: none;
         border-radius: 8px;
         outline: none;
         font-size: 1rem;
-        background-color: #ffffff;
-        color: #000000;
+        background-color: #ffffff20;
+        color: #fff;
         box-sizing: border-box;
     }
 
     button {
         width: 100%;
         padding: 0.75rem;
-        background-color: #000000;
+        background-color: #00cba9;
         color: white;
         border: none;
         border-radius: 8px;
@@ -68,19 +68,17 @@
     }
 
     button:hover {
-        background-color: #333333;
+        background-color: #00b097;
     }
 
     p {
         text-align: center;
         margin-top: 1rem;
         font-size: 0.95rem;
-        color: #000000;
     }
 
     a {
-        color: #000000;
-        font-weight: bold;
+        color: #00cba9;
         text-decoration: none;
     }
 
@@ -94,7 +92,6 @@
         padding: 0;
         margin-bottom: 1rem;
     }
-
     .flashes li {
         background-color: #ff4d4d;
         color: white;
@@ -109,7 +106,7 @@
 <body>
 <div class="login-container">
     <h1>Login to Tellavista</h1>
-
+    
     {% with messages = get_flashed_messages() %}
       {% if messages %}
         <ul class="flashes">
@@ -122,8 +119,8 @@
 
     <form method="POST" action="/login" autocomplete="off">
         <div>
-            <label for="username">Username:</label>
-            <input type="text" id="username" name="username" required autocomplete="username" />
+            <label for="username_or_email">Username or Email:</label>
+            <input type="text" id="username_or_email" name="username_or_email" required autocomplete="username" />
         </div>
         <div>
             <label for="password">Password:</label>
