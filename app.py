@@ -154,6 +154,47 @@ def create_default_user():
         except Exception as e:
             print(f"❌ Error creating default user: {e}")
 
+def is_academic_book(title, topic, department):
+    if not title:
+        return False
+    title_lower = title.lower()
+    topic_lower = topic.lower()
+    department_lower = department.lower()
+
+    academic_keywords = [
+        "principles", "fundamentals", "introduction", "basics", "theory",
+        "textbook", "manual", "engineering", "mathematics", "analysis",
+        "guide", "mechanics", "accounting", "algebra", "economics", "physics",
+        "statistics", topic_lower, department_lower
+    ]
+
+    fiction_keywords = [
+        "novel", "jedi", "star wars", "story", "episode", "adventure", "magic",
+        "wizard", "putting", "love", "mystery", "thriller", "detective",
+        "vampire", "romance", "oz", "dragon", "ghost", "horror"
+    ]
+
+    if any(bad in title_lower for bad in fiction_keywords):
+        return False
+    if any(good in title_lower for good in academic_keywords):
+        return True
+    return False
+
+# --- Cache Setup ---
+CACHE_FILE = "tellavista_cache.json"
+if os.path.exists(CACHE_FILE):
+    try:
+        with open(CACHE_FILE, "r", encoding="utf-8") as f:
+            question_cache = json.load(f)
+    except json.JSONDecodeError:
+        question_cache = {}
+else:
+    question_cache = {}
+
+def save_cache():
+    with open(CACHE_FILE, "w", encoding="utf-8") as f:
+        json.dump(question_cache, f, indent=2, ensure_ascii=False)
+
 # --- Initialize database ---
 print("🚀 Initializing database...")
 if init_database():
@@ -326,14 +367,83 @@ def ask():
 
         print(f"🤖 Processing question from {username}: {user_question}")
 
-        # Simple response for now
-        answer = f"Hello {username}! I'm Tellavista, your AI tutor. You asked: '{user_question}'. I'm here to help you learn!"
+        # --- Detect Chatty vs Solution Mode ---
+        chatty_keywords = ["hi", "hello", "hey", "how are you", "good morning", "good evening"]
+        solution_triggers = ["?", "solve", "calculate", "explain", "why", "how", "find", "prove"]
 
-        # Save Q&A to database
+        # Default mode = Chatty
+        if any(word in user_question.lower() for word in chatty_keywords) and not any(
+            kw in user_question.lower() for kw in solution_triggers
+        ):
+            mode = "chatty"
+        else:
+            mode = "solution"
+
+        # --- System prompt changes depending on mode ---
+        if mode == "chatty":
+            system_prompt = (
+                "You are Tellavista, a friendly and motivational AI tutor. "
+                "For casual chats:\n"
+                "- Reply in clean HTML using <p> only.\n"
+                "- Be warm, short, and natural like a human friend.\n"
+                "- Use emojis for friendliness.\n"
+                "- DO NOT structure into steps or Final Answer.\n"
+                "- Example: <p>👋 Hey! Great to see you. What's on your mind today?</p>"
+            )
+        else:
+            system_prompt = (
+                "You are Tellavista, a motivational AI tutor. "
+                "Always respond in clean HTML for problem-solving. "
+                "Format answers like this:\n\n"
+                "<p><strong>Intro:</strong> Short motivational opener.</p>\n"
+                "<h3>🔹 Step 1:</h3>\n"
+                "<p>Explain clearly with short sentences or bullets.</p>\n"
+                "<h3>🔹 Step 2:</h3>\n"
+                "<p>Keep guiding step by step like a tutor.</p>\n"
+                "<hr>\n"
+                "<h2>✅ Final Answer</h2>\n"
+                "<pre><strong>🎯 Show the final solution here, copyable</strong></pre>\n\n"
+                "⚡ Rules:\n"
+                "- Do NOT start with 'Tellavista Solution'.\n"
+                "- Use <h2>, <h3>, <p>, <ul>, <li> for clarity.\n"
+                "- Final Answer must be inside <pre> so it's easy to copy.\n"
+                "- Use emojis for friendliness."
+            )
+
+        # --- Call OpenRouter API ---
+        OPENROUTER_API_KEY = os.getenv('OPENROUTER_API_KEY')
+        if not OPENROUTER_API_KEY:
+            return jsonify({'error': 'OpenRouter API key not configured'}), 500
+
+        headers = {
+            "Authorization": f"Bearer {OPENROUTER_API_KEY}",
+            "Content-Type": "application/json"
+        }
+
+        payload = {
+            "model": "openai/gpt-4o-mini",
+            "messages": [
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": user_question}
+            ]
+        }
+
+        response = requests.post("https://openrouter.ai/api/v1/chat/completions",
+                                 headers=headers, data=json.dumps(payload))
+
+        if response.status_code != 200:
+            print(f"❌ OpenRouter API error: {response.text}")
+            return jsonify({'error': 'AI service failed. Try again later.'}), 500
+
+        api_result = response.json()
+        answer = api_result["choices"][0]["message"]["content"]
+
+        # Save Q&A to database (solution mode only)
         try:
-            new_q = UserQuestions(username=username, question=user_question, answer=answer)
-            db.session.add(new_q)
-            db.session.commit()
+            if mode == "solution":
+                new_q = UserQuestions(username=username, question=user_question, answer=answer)
+                db.session.add(new_q)
+                db.session.commit()
         except Exception as e:
             print(f"❌ Error saving question to database: {e}")
             db.session.rollback()
@@ -410,6 +520,210 @@ def materials():
         selected_course=selected_course,
         materials=materials
     )
+
+@app.route('/api/materials')
+def get_study_materials():
+    query = request.args.get("q", "python")
+
+    pdfs = []
+    try:
+        pdf_html = requests.get(
+            f"https://www.pdfdrive.com/search?q={query}", 
+            headers={"User-Agent": "Mozilla/5.0"},
+            timeout=10
+        ).text
+        soup = BeautifulSoup(pdf_html, 'html.parser')
+        for book in soup.select('.file-left')[:5]:
+            title = book.select_one('img')['alt']
+            link = "https://www.pdfdrive.com" + book.parent['href']
+            pdfs.append({'title': title, 'link': link})
+    except Exception as e:
+        pdfs = [{"error": str(e)}]
+
+    books = []
+    try:
+        ol_data = requests.get(
+            f"https://openlibrary.org/search.json?q={query}",
+            timeout=10
+        ).json()
+        for doc in ol_data.get("docs", [])[:5]:
+            books.append({
+                "title": doc.get("title"),
+                "author": ', '.join(doc.get("author_name", [])) if doc.get("author_name") else "Unknown",
+                "link": f"https://openlibrary.org{doc.get('key')}"
+            })
+    except Exception as e:
+        books = [{"error": str(e)}]
+
+    return jsonify({
+        "query": query,
+        "pdfs": pdfs,
+        "books": books
+    })
+
+@app.route('/ai/materials')
+def ai_materials():
+    topic = request.args.get("topic")
+    level = request.args.get("level")
+    department = request.args.get("department")
+    goal = request.args.get("goal", "general")
+    
+    if not topic or not level or not department:
+        return jsonify({"error": "Missing one or more parameters: topic, level, department"}), 400
+
+    # AI Explanation
+    prompt = f"""
+    You're an educational AI helping a {level} student in the {department} department.
+    They want to learn: '{goal}' in the topic of {topic}.
+    Provide a short and clear explanation to help them get started.
+    End with: '📚 Here are materials to study further:'
+    """
+
+    explanation = ""
+    try:
+        if os.getenv('OPENAI_API_KEY'):
+            response = openai.ChatCompletion.create(
+                model="gpt-3.5-turbo",
+                messages=[
+                    {"role": "system", "content": "You're a helpful and knowledgeable tutor."},
+                    {"role": "user", "content": prompt}
+                ]
+            )
+            explanation = response.choices[0].message.content
+        else:
+            explanation = f"As an AI tutor, I'd recommend starting with the basics of {topic}. Focus on understanding the fundamental concepts first, then gradually move to more advanced topics. 📚 Here are materials to study further:"
+    except Exception as e:
+        explanation = f"Let me help you learn {topic}. Start with the basic concepts and build from there. 📚 Here are materials to study further:"
+
+    # Search PDFDrive
+    pdfs = []
+    try:
+        pdf_html = requests.get(
+            f"https://www.pdfdrive.com/search?q={topic}", 
+            headers={"User-Agent": "Mozilla/5.0"},
+            timeout=10
+        ).text
+        soup = BeautifulSoup(pdf_html, 'html.parser')
+        for book in soup.select('.file-left')[:10]:
+            title = book.select_one('img')['alt']
+            if is_academic_book(title, topic, department):
+                link = "https://www.pdfdrive.com" + book.parent['href']
+                pdfs.append({'title': title, 'link': link})
+    except Exception as e:
+        pdfs = [{"error": str(e)}]
+
+    # Search OpenLibrary
+    books = []
+    try:
+        ol_data = requests.get(
+            f"https://openlibrary.org/search.json?q={topic}",
+            timeout=10
+        ).json()
+        for doc in ol_data.get("docs", [])[:10]:
+            title = doc.get("title", "")
+            if is_academic_book(title, topic, department):
+                books.append({
+                    "title": doc.get("title"),
+                    "author": ', '.join(doc.get("author_name", [])) if doc.get("author_name") else "Unknown",
+                    "link": f"https://openlibrary.org{doc.get('key')}"
+                })
+    except Exception as e:
+        books = [{"error": str(e)}]
+
+    if not pdfs and not books:
+        return jsonify({
+            "query": topic,
+            "ai_explanation": explanation,
+            "pdfs": [],
+            "books": [],
+            "message": "❌ No academic study materials found for this topic."
+        })
+
+    return jsonify({
+        "query": topic,
+        "ai_explanation": explanation,
+        "pdfs": pdfs,
+        "books": books
+    })
+
+@app.route('/reels', methods=['GET'])
+@login_required
+def reels():
+    categories = ["Tech", "Motivation", "Islamic", "AI"]
+    selected_category = request.args.get("category")
+    videos = []
+
+    if selected_category:
+        videos = [
+            {"title": f"{selected_category} Reel 1", "video_id": "abc123"},
+            {"title": f"{selected_category} Reel 2", "video_id": "def456"}
+        ]
+
+    return render_template("reels.html",
+                           user=session.get("user"),
+                           categories=categories,
+                           selected_category=selected_category,
+                           videos=videos)
+
+@app.route("/api/reels")
+def get_reels():
+    course = request.args.get("course")
+
+    all_reels = [
+        {"course": "Accountancy", "caption": "Introduction to Accounting", "video_url": "https://youtu.be/Gua2Bo_G-J0?si=FNnNZBbmBh0yqvrk"},
+        {"course": "Zoology", "caption": "Animal Classification", "video_url": "https://example.com/videos/zoology1.mp4"},
+    ]
+
+    matching = [r for r in all_reels if r["course"] == course] if course else all_reels
+    return jsonify({"reels": matching})
+
+@app.route('/CBT', methods=['GET'])
+@login_required
+def CBT():
+    topics = ["Python", "Hadith", "AI", "Math"]
+    selected_topic = request.args.get("topic")
+    questions = []
+
+    if selected_topic:
+        questions = [
+            {"question": f"What is {selected_topic}?", "options": ["Option A", "Option B", "Option C"], "answer": "Option A"},
+            {"question": f"Why is {selected_topic} important?", "options": ["Reason 1", "Reason 2", "Reason 3"], "answer": "Reason 2"}
+        ]
+    return render_template("CBT.html", 
+                         user=session.get("user"), 
+                         topics=topics, 
+                         selected_topic=selected_topic, 
+                         questions=questions)
+
+@app.route('/teach-me-ai')
+@login_required
+def teach_me_ai():
+    return render_template('teach-me-ai.html')
+
+@app.route('/api/ai-teach')
+def ai_teach():
+    course = request.args.get("course")
+    level = request.args.get("level")
+
+    if not course or not level:
+        return jsonify({"error": "Missing course or level"}), 400
+
+    prompt = f"You're a tutor. Teach a {level} student the basics of {course} in a friendly and easy-to-understand way."
+
+    try:
+        if os.getenv('OPENAI_API_KEY'):
+            response = openai.ChatCompletion.create(
+                model="gpt-3.5-turbo",
+                messages=[
+                    {"role": "system", "content": "You are an educational AI assistant."},
+                    {"role": "user", "content": prompt}
+                ]
+            )
+            return jsonify({"summary": response.choices[0].message.content})
+        else:
+            return jsonify({"summary": f"Let me teach you the basics of {course}. We'll start with fundamental concepts and build up from there. This is perfect for {level} students!"})
+    except Exception as e:
+        return jsonify({"error": str(e)})
 
 # Create default user after initialization
 create_default_user()
