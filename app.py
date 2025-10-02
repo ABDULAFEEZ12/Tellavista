@@ -340,7 +340,7 @@ def profile():
 
 @app.route('/talk-to-tellavista')
 @login_required
-def talk-to-tellavista():
+def talk_to_tellavista():
     return render_template('talk-to-tellavista.html')
 
 @app.route('/ask', methods=['POST'])
@@ -1202,6 +1202,7 @@ if __name__ == '__main__':
     print("🔑 Default user: test / test123")
     print("🌐 Server running on http://localhost:5000")
     app.run(debug=True, port=5000)
+
 
 
 
