@@ -11,6 +11,8 @@ import requests
 from bs4 import BeautifulSoup
 import openai
 from functools import wraps
+import psycopg2
+from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
 
 # Load environment variables
 load_dotenv()
@@ -21,10 +23,17 @@ app = Flask(__name__)
 app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
 app.config['SESSION_COOKIE_SECURE'] = False
 app.config['SECRET_KEY'] = os.getenv('MY_SECRET', 'fallback_secret_for_dev')
-app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL', 'sqlite:///tellavista.db')
+
+# Database configuration
+DATABASE_URL = os.getenv('DATABASE_URL')
+app.config['SQLALCHEMY_DATABASE_URI'] = DATABASE_URL or 'sqlite:///tellavista.db'
 app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
     'pool_recycle': 300,
-    'pool_pre_ping': True
+    'pool_pre_ping': True,
+    'connect_args': {
+        'connect_timeout': 10,
+        'application_name': 'tellavista_app'
+    }
 }
 
 from flask_sqlalchemy import SQLAlchemy
@@ -53,17 +62,6 @@ class UserQuestions(db.Model):
     answer = db.Column(db.Text, nullable=False)
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
 
-# Create tables and verify connection
-with app.app_context():
-    try:
-        db.create_all()
-        print("✅ Database tables created/verified")
-        # Test the connection
-        db.session.execute('SELECT 1')
-        print("✅ Database connection successful")
-    except Exception as e:
-        print(f"❌ Database error: {e}")
-
 # --- Helper Functions ---
 def login_required(f):
     @wraps(f)
@@ -73,49 +71,75 @@ def login_required(f):
         return f(*args, **kwargs)
     return decorated_function
 
-def is_academic_book(title, topic, department):
-    if not title:
-        return False
-    title_lower = title.lower()
-    topic_lower = topic.lower()
-    department_lower = department.lower()
-
-    academic_keywords = [
-        "principles", "fundamentals", "introduction", "basics", "theory",
-        "textbook", "manual", "engineering", "mathematics", "analysis",
-        "guide", "mechanics", "accounting", "algebra", "economics", "physics",
-        "statistics", topic_lower, department_lower
-    ]
-
-    fiction_keywords = [
-        "novel", "jedi", "star wars", "story", "episode", "adventure", "magic",
-        "wizard", "putting", "love", "mystery", "thriller", "detective",
-        "vampire", "romance", "oz", "dragon", "ghost", "horror"
-    ]
-
-    if any(bad in title_lower for bad in fiction_keywords):
-        return False
-    if any(good in title_lower for good in academic_keywords):
-        return True
-    return False
-
-# --- Cache Setup ---
-CACHE_FILE = "tellavista_cache.json"
-if os.path.exists(CACHE_FILE):
+def create_database_if_not_exists():
+    """Create database if it doesn't exist"""
     try:
-        with open(CACHE_FILE, "r", encoding="utf-8") as f:
-            question_cache = json.load(f)
-    except json.JSONDecodeError:
-        question_cache = {}
-else:
-    question_cache = {}
+        # Parse the DATABASE_URL to get connection details without database name
+        db_url = os.getenv('DATABASE_URL')
+        if not db_url:
+            print("ℹ️  No DATABASE_URL, using SQLite")
+            return True
+            
+        # Extract parts from the connection string
+        if 'postgresql://' in db_url:
+            # Remove the database name from the URL to connect to default database
+            parts = db_url.split('/')
+            base_url = '/'.join(parts[:-1])  # Everything before the last /
+            db_name = parts[-1]  # The database name
+            
+            # Connect to default postgres database to create our database
+            conn = psycopg2.connect(base_url + '/postgres')
+            conn.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
+            cursor = conn.cursor()
+            
+            # Check if database exists
+            cursor.execute("SELECT 1 FROM pg_catalog.pg_database WHERE datname = %s", (db_name,))
+            exists = cursor.fetchone()
+            
+            if not exists:
+                print(f"🔄 Creating database: {db_name}")
+                cursor.execute(f'CREATE DATABASE "{db_name}"')
+                print(f"✅ Database {db_name} created")
+            else:
+                print(f"✅ Database {db_name} already exists")
+                
+            cursor.close()
+            conn.close()
+            return True
+            
+    except Exception as e:
+        print(f"⚠️  Could not create database (might already exist): {e}")
+        return False
 
-def save_cache():
-    with open(CACHE_FILE, "w", encoding="utf-8") as f:
-        json.dump(question_cache, f, indent=2, ensure_ascii=False)
+def init_database():
+    """Initialize database with error handling"""
+    try:
+        # Try to create database first
+        create_database_if_not_exists()
+        
+        with app.app_context():
+            db.create_all()
+            print("✅ Database tables created/verified")
+            # Test the connection
+            db.session.execute('SELECT 1')
+            print("✅ Database connection successful")
+            return True
+    except Exception as e:
+        print(f"❌ Database initialization failed: {e}")
+        print("🚨 Falling back to SQLite database")
+        # Fallback to SQLite
+        app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///tellavista.db'
+        try:
+            with app.app_context():
+                db.create_all()
+                print("✅ SQLite database created as fallback")
+                return True
+        except Exception as e2:
+            print(f"❌ SQLite fallback also failed: {e2}")
+            return False
 
-# --- Create default user ---
 def create_default_user():
+    """Create default user with error handling"""
     with app.app_context():
         try:
             user = User.query.filter_by(username='test').first()
@@ -129,6 +153,13 @@ def create_default_user():
                 print("✅ Default user already exists: test / test123")
         except Exception as e:
             print(f"❌ Error creating default user: {e}")
+
+# --- Initialize database ---
+print("🚀 Initializing database...")
+if init_database():
+    print("✅ Database initialized successfully")
+else:
+    print("❌ Database initialization failed, but continuing...")
 
 # --- Routes ---
 @app.route('/')
@@ -239,8 +270,11 @@ def login():
             else:
                 print(f"❌ User not found: {login_input}")
                 # Debug: Show all users in database
-                all_users = User.query.all()
-                print(f"📊 All users in database: {[u.username for u in all_users]}")
+                try:
+                    all_users = User.query.all()
+                    print(f"📊 All users in database: {[u.username for u in all_users]}")
+                except Exception as e:
+                    print(f"📊 Could not fetch users: {e}")
                 flash('User not found.')
                 
         except Exception as e:
@@ -266,7 +300,7 @@ def profile():
 @app.route('/talk-to-tellavista')
 @login_required
 def talk_to_tellavista():
-    return render_template('talk-to-tellavista.html')
+    return render_template('talk_to_tellavista.html')
 
 @app.route('/ask', methods=['POST'])
 @login_required
@@ -292,83 +326,14 @@ def ask():
 
         print(f"🤖 Processing question from {username}: {user_question}")
 
-        # --- Detect Chatty vs Solution Mode ---
-        chatty_keywords = ["hi", "hello", "hey", "how are you", "good morning", "good evening"]
-        solution_triggers = ["?", "solve", "calculate", "explain", "why", "how", "find", "prove"]
+        # Simple response for now
+        answer = f"Hello {username}! I'm Tellavista, your AI tutor. You asked: '{user_question}'. I'm here to help you learn!"
 
-        # Default mode = Chatty
-        if any(word in user_question.lower() for word in chatty_keywords) and not any(
-            kw in user_question.lower() for kw in solution_triggers
-        ):
-            mode = "chatty"
-        else:
-            mode = "solution"
-
-        # --- System prompt changes depending on mode ---
-        if mode == "chatty":
-            system_prompt = (
-                "You are Tellavista, a friendly and motivational AI tutor. "
-                "For casual chats:\n"
-                "- Reply in clean HTML using <p> only.\n"
-                "- Be warm, short, and natural like a human friend.\n"
-                "- Use emojis for friendliness.\n"
-                "- DO NOT structure into steps or Final Answer.\n"
-                "- Example: <p>👋 Hey! Great to see you. What's on your mind today?</p>"
-            )
-        else:
-            system_prompt = (
-                "You are Tellavista, a motivational AI tutor. "
-                "Always respond in clean HTML for problem-solving. "
-                "Format answers like this:\n\n"
-                "<p><strong>Intro:</strong> Short motivational opener.</p>\n"
-                "<h3>🔹 Step 1:</h3>\n"
-                "<p>Explain clearly with short sentences or bullets.</p>\n"
-                "<h3>🔹 Step 2:</h3>\n"
-                "<p>Keep guiding step by step like a tutor.</p>\n"
-                "<hr>\n"
-                "<h2>✅ Final Answer</h2>\n"
-                "<pre><strong>🎯 Show the final solution here, copyable</strong></pre>\n\n"
-                "⚡ Rules:\n"
-                "- Do NOT start with 'Tellavista Solution'.\n"
-                "- Use <h2>, <h3>, <p>, <ul>, <li> for clarity.\n"
-                "- Final Answer must be inside <pre> so it's easy to copy.\n"
-                "- Use emojis for friendliness."
-            )
-
-        # --- Call OpenRouter API ---
-        OPENROUTER_API_KEY = os.getenv('OPENROUTER_API_KEY')
-        if not OPENROUTER_API_KEY:
-            return jsonify({'error': 'OpenRouter API key not configured'}), 500
-
-        headers = {
-            "Authorization": f"Bearer {OPENROUTER_API_KEY}",
-            "Content-Type": "application/json"
-        }
-
-        payload = {
-            "model": "openai/gpt-4o-mini",
-            "messages": [
-                {"role": "system", "content": system_prompt},
-                {"role": "user", "content": user_question}
-            ]
-        }
-
-        response = requests.post("https://openrouter.ai/api/v1/chat/completions",
-                                 headers=headers, data=json.dumps(payload))
-
-        if response.status_code != 200:
-            print(f"❌ OpenRouter API error: {response.text}")
-            return jsonify({'error': 'AI service failed. Try again later.'}), 500
-
-        api_result = response.json()
-        answer = api_result["choices"][0]["message"]["content"]
-
-        # Save Q&A to database (solution mode only)
+        # Save Q&A to database
         try:
-            if mode == "solution":
-                new_q = UserQuestions(username=username, question=user_question, answer=answer)
-                db.session.add(new_q)
-                db.session.commit()
+            new_q = UserQuestions(username=username, question=user_question, answer=answer)
+            db.session.add(new_q)
+            db.session.commit()
         except Exception as e:
             print(f"❌ Error saving question to database: {e}")
             db.session.rollback()
@@ -446,216 +411,12 @@ def materials():
         materials=materials
     )
 
-@app.route('/api/materials')
-def get_study_materials():
-    query = request.args.get("q", "python")
-
-    pdfs = []
-    try:
-        pdf_html = requests.get(
-            f"https://www.pdfdrive.com/search?q={query}", 
-            headers={"User-Agent": "Mozilla/5.0"},
-            timeout=10
-        ).text
-        soup = BeautifulSoup(pdf_html, 'html.parser')
-        for book in soup.select('.file-left')[:5]:
-            title = book.select_one('img')['alt']
-            link = "https://www.pdfdrive.com" + book.parent['href']
-            pdfs.append({'title': title, 'link': link})
-    except Exception as e:
-        pdfs = [{"error": str(e)}]
-
-    books = []
-    try:
-        ol_data = requests.get(
-            f"https://openlibrary.org/search.json?q={query}",
-            timeout=10
-        ).json()
-        for doc in ol_data.get("docs", [])[:5]:
-            books.append({
-                "title": doc.get("title"),
-                "author": ', '.join(doc.get("author_name", [])) if doc.get("author_name") else "Unknown",
-                "link": f"https://openlibrary.org{doc.get('key')}"
-            })
-    except Exception as e:
-        books = [{"error": str(e)}]
-
-    return jsonify({
-        "query": query,
-        "pdfs": pdfs,
-        "books": books
-    })
-
-@app.route('/ai/materials')
-def ai_materials():
-    topic = request.args.get("topic")
-    level = request.args.get("level")
-    department = request.args.get("department")
-    goal = request.args.get("goal", "general")
-    
-    if not topic or not level or not department:
-        return jsonify({"error": "Missing one or more parameters: topic, level, department"}), 400
-
-    # AI Explanation
-    prompt = f"""
-    You're an educational AI helping a {level} student in the {department} department.
-    They want to learn: '{goal}' in the topic of {topic}.
-    Provide a short and clear explanation to help them get started.
-    End with: '📚 Here are materials to study further:'
-    """
-
-    explanation = ""
-    try:
-        if os.getenv('OPENAI_API_KEY'):
-            response = openai.ChatCompletion.create(
-                model="gpt-3.5-turbo",
-                messages=[
-                    {"role": "system", "content": "You're a helpful and knowledgeable tutor."},
-                    {"role": "user", "content": prompt}
-                ]
-            )
-            explanation = response.choices[0].message.content
-        else:
-            explanation = f"As an AI tutor, I'd recommend starting with the basics of {topic}. Focus on understanding the fundamental concepts first, then gradually move to more advanced topics. 📚 Here are materials to study further:"
-    except Exception as e:
-        explanation = f"Let me help you learn {topic}. Start with the basic concepts and build from there. 📚 Here are materials to study further:"
-
-    # Search PDFDrive
-    pdfs = []
-    try:
-        pdf_html = requests.get(
-            f"https://www.pdfdrive.com/search?q={topic}", 
-            headers={"User-Agent": "Mozilla/5.0"},
-            timeout=10
-        ).text
-        soup = BeautifulSoup(pdf_html, 'html.parser')
-        for book in soup.select('.file-left')[:10]:
-            title = book.select_one('img')['alt']
-            if is_academic_book(title, topic, department):
-                link = "https://www.pdfdrive.com" + book.parent['href']
-                pdfs.append({'title': title, 'link': link})
-    except Exception as e:
-        pdfs = [{"error": str(e)}]
-
-    # Search OpenLibrary
-    books = []
-    try:
-        ol_data = requests.get(
-            f"https://openlibrary.org/search.json?q={topic}",
-            timeout=10
-        ).json()
-        for doc in ol_data.get("docs", [])[:10]:
-            title = doc.get("title", "")
-            if is_academic_book(title, topic, department):
-                books.append({
-                    "title": doc.get("title"),
-                    "author": ', '.join(doc.get("author_name", [])) if doc.get("author_name") else "Unknown",
-                    "link": f"https://openlibrary.org{doc.get('key')}"
-                })
-    except Exception as e:
-        books = [{"error": str(e)}]
-
-    if not pdfs and not books:
-        return jsonify({
-            "query": topic,
-            "ai_explanation": explanation,
-            "pdfs": [],
-            "books": [],
-            "message": "❌ No academic study materials found for this topic."
-        })
-
-    return jsonify({
-        "query": topic,
-        "ai_explanation": explanation,
-        "pdfs": pdfs,
-        "books": books
-    })
-
-@app.route('/reels', methods=['GET'])
-@login_required
-def reels():
-    categories = ["Tech", "Motivation", "Islamic", "AI"]
-    selected_category = request.args.get("category")
-    videos = []
-
-    if selected_category:
-        videos = [
-            {"title": f"{selected_category} Reel 1", "video_id": "abc123"},
-            {"title": f"{selected_category} Reel 2", "video_id": "def456"}
-        ]
-
-    return render_template("reels.html",
-                           user=session.get("user"),
-                           categories=categories,
-                           selected_category=selected_category,
-                           videos=videos)
-
-@app.route("/api/reels")
-def get_reels():
-    course = request.args.get("course")
-
-    all_reels = [
-        {"course": "Accountancy", "caption": "Introduction to Accounting", "video_url": "https://youtu.be/Gua2Bo_G-J0?si=FNnNZBbmBh0yqvrk"},
-        {"course": "Zoology", "caption": "Animal Classification", "video_url": "https://example.com/videos/zoology1.mp4"},
-    ]
-
-    matching = [r for r in all_reels if r["course"] == course] if course else all_reels
-    return jsonify({"reels": matching})
-
-@app.route('/CBT', methods=['GET'])
-@login_required
-def CBT():
-    topics = ["Python", "Hadith", "AI", "Math"]
-    selected_topic = request.args.get("topic")
-    questions = []
-
-    if selected_topic:
-        questions = [
-            {"question": f"What is {selected_topic}?", "options": ["Option A", "Option B", "Option C"], "answer": "Option A"},
-            {"question": f"Why is {selected_topic} important?", "options": ["Reason 1", "Reason 2", "Reason 3"], "answer": "Reason 2"}
-        ]
-    return render_template("CBT.html", 
-                         user=session.get("user"), 
-                         topics=topics, 
-                         selected_topic=selected_topic, 
-                         questions=questions)
-
-@app.route('/teach-me-ai')
-@login_required
-def teach_me_ai():
-    return render_template('teach-me-ai.html')
-
-@app.route('/api/ai-teach')
-def ai_teach():
-    course = request.args.get("course")
-    level = request.args.get("level")
-
-    if not course or not level:
-        return jsonify({"error": "Missing course or level"}), 400
-
-    prompt = f"You're a tutor. Teach a {level} student the basics of {course} in a friendly and easy-to-understand way."
-
-    try:
-        if os.getenv('OPENAI_API_KEY'):
-            response = openai.ChatCompletion.create(
-                model="gpt-3.5-turbo",
-                messages=[
-                    {"role": "system", "content": "You are an educational AI assistant."},
-                    {"role": "user", "content": prompt}
-                ]
-            )
-            return jsonify({"summary": response.choices[0].message.content})
-        else:
-            return jsonify({"summary": f"Let me teach you the basics of {course}. We'll start with fundamental concepts and build up from there. This is perfect for {level} students!"})
-    except Exception as e:
-        return jsonify({"error": str(e)})
-
-# Create default user
+# Create default user after initialization
 create_default_user()
 
 if __name__ == '__main__':
     print("🚀 Tellavista starting...")
-    print(f"📊 Database: {app.config['SQLALCHEMY_DATABASE_URI']}")
+    print(f"📊 Database URL: {app.config['SQLALCHEMY_DATABASE_URI']}")
     print("🔑 Default user: test / test123")
     print("🌐 Server running on http://localhost:5000")
     app.run(debug=True, port=5000)
