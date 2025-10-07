@@ -24,12 +24,13 @@ header h1 {
   margin: 0;
   font-size: 28px;
   letter-spacing: 1px;
+  color: #FF6F61;
 }
 header h3 {
   margin: 5px 0 0;
   font-weight: normal;
   font-size: 16px;
-  opacity: 0.7;
+  opacity: 0.8;
 }
 
 /* Tabs */
@@ -38,7 +39,7 @@ header h3 {
   justify-content: center;
   margin: 20px 0;
   width: 100%;
-  background: #e0e0e0;
+  background: rgba(255, 239, 228, 0.8);
   border-radius: 30px;
   overflow: hidden;
   max-width: 600px;
@@ -50,13 +51,12 @@ header h3 {
   cursor: pointer;
   transition: background 0.3s, color 0.3s;
   font-size: 16px;
-  color: #000;
 }
 .tab:hover {
-  background: #d0d0d0;
+  background: rgba(0, 0, 0, 0.05);
 }
 .tab.active {
-  background: #000;
+  background: #FF6F61;
   font-weight: bold;
   color: #fff;
 }
@@ -69,7 +69,7 @@ header h3 {
   width: 100%;
   max-width: 700px;
   padding: 20px;
-  background: #f9f9f9;
+  background: rgba(255, 255, 255, 0.95);
   border-radius: 15px;
   box-shadow: 0 0 20px rgba(0,0,0,0.1);
   overflow-y: auto;
@@ -80,8 +80,11 @@ header h3 {
 .section.active {
   display: flex;
 }
+.section h2, .section h3 {
+  color: #4B0082;
+}
 
-/* Inputs & Buttons */
+/* Inputs */
 input[type="text"], select {
   width: 80%;
   padding: 12px;
@@ -89,14 +92,17 @@ input[type="text"], select {
   border: 1px solid #ccc;
   border-radius: 8px;
   font-size: 16px;
+  outline: none;
+  box-sizing: border-box;
   background-color: inherit;
   color: inherit;
-  outline: none;
 }
+
+/* Buttons */
 button {
   padding: 12px 25px;
   border: none;
-  background: #000;
+  background: #32CD32;
   color: #fff;
   border-radius: 8px;
   cursor: pointer;
@@ -105,14 +111,14 @@ button {
   transition: background 0.3s;
 }
 button:hover {
-  background: #333;
+  background: #28a428;
 }
 button:disabled {
   background: #ccc;
   cursor: not-allowed;
 }
 
-/* Messages & Results */
+/* Messages and Results */
 .messages, .results {
   margin-top: 20px;
   width: 100%;
@@ -120,28 +126,56 @@ button:disabled {
   overflow-y: auto;
   text-align: left;
 }
-.messages p, .results div {
-  background: #eee;
+.messages p,
+.results div {
+  background: rgba(0, 0, 0, 0.05);
   padding: 12px;
   border-radius: 8px;
   margin: 10px 0;
+  word-wrap: break-word;
+  font-size: 1em;
 }
 .user-message {
-  background: #ddd;
+  background: rgba(255, 111, 97, 0.2);
 }
 
-/* Quran & Hadith Blocks */
-.quran-verse, .hadith-entry {
-  border: 1px solid #ccc;
+/* Quran Styling */
+.quran-verse {
+  border: 1px solid #eee;
   padding: 15px;
   margin-bottom: 15px;
   border-radius: 10px;
-  background: #f0f0f0;
+  background: rgba(255, 111, 97, 0.05);
 }
-.quran-verse p:first-child,
-.hadith-entry p:first-child {
+.quran-verse p {
+  margin: 5px 0;
+  padding: 0;
+  background: none;
+}
+.quran-verse p:first-child {
   font-weight: bold;
-  color: #000;
+  color: #FF6F61;
+}
+.quran-verse p:nth-child(3) {
+  font-size: 1.2em;
+  direction: rtl;
+  text-align: right;
+}
+
+/* Hadith Styling */
+.hadith-entry {
+  border: 1px solid #eee;
+  padding: 15px;
+  margin-bottom: 15px;
+  border-radius: 10px;
+  background: rgba(75, 0, 130, 0.05);
+}
+.hadith-entry p {
+  margin: 5px 0;
+}
+.hadith-entry p:first-child {
+  font-size: 0.9em;
+  color: #4B0082;
 }
 
 /* Toggle Button */
@@ -154,16 +188,16 @@ button:disabled {
   cursor: pointer;
   border: none;
   border-radius: 5px;
-  background-color: #000;
+  background-color: #32CD32;
   color: white;
   transition: background-color 0.3s;
   z-index: 10;
 }
 .toggle-btn:hover {
-  background-color: #333;
+  background-color: #28a428;
 }
 
-/* Animation */
+/* Animations */
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(20px); }
   to { opacity: 1; transform: translateY(0); }
@@ -171,53 +205,54 @@ button:disabled {
 
 /* Light Mode */
 body.light-mode {
-  background: #fff;
-  color: #000;
+  background: linear-gradient(135deg, #FAF3E0, #FFECD1, #FFF5E1);
+  color: #2B2B2B;
+}
+body.light-mode .tabs {
+  background: rgba(255, 239, 228, 0.8);
 }
 body.light-mode .section {
-  background: #f9f9f9;
+  background: rgba(255, 255, 255, 0.95);
 }
 body.light-mode .messages p,
-body.light-mode .results div,
-body.light-mode .quran-verse,
-body.light-mode .hadith-entry {
-  background: #eee;
-}
-body.light-mode input[type="text"], body.light-mode select {
-  border-color: #ccc;
+body.light-mode .results div {
+  background: rgba(0, 0, 0, 0.05);
 }
 
 /* Dark Mode */
 body.dark-mode {
-  background: #000;
-  color: #fff;
+  background: linear-gradient(135deg, #2B2B2B, #1A1A1A, #0D0D0D);
+  color: #FAF3E0;
 }
 body.dark-mode .tabs {
-  background: #111;
+  background: rgba(255, 255, 255, 0.1);
 }
-body.dark-mode .tab {
+body.dark-mode .tab.active {
+  background: #FF6F61;
   color: #fff;
 }
 body.dark-mode .section {
-  background: #111;
+  background: rgba(255, 255, 255, 0.05);
 }
 body.dark-mode .messages p,
-body.dark-mode .results div,
-body.dark-mode .quran-verse,
-body.dark-mode .hadith-entry {
-  background: #222;
+body.dark-mode .results div {
+  background: rgba(255, 255, 255, 0.08);
 }
 body.dark-mode input[type="text"], body.dark-mode select {
-  background-color: #111;
-  border-color: #444;
+  border-color: #555;
+  background-color: rgba(255,255,255,0.05);
   color: #fff;
 }
-body.dark-mode select option {
-  background: #000;
-  color: #fff;
+body.dark-mode .quran-verse {
+  background: rgba(255, 111, 97, 0.15);
+  border-color: #333;
+}
+body.dark-mode .hadith-entry {
+  background: rgba(75, 0, 130, 0.1);
+  border-color: #333;
 }
 
-/* Responsive Design */
+/* Responsive */
 @media (max-width: 600px) {
   header {
     padding: 15px 10px;
