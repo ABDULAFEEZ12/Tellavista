@@ -1,52 +1,124 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>CBT Platform</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tellavista CBT Quiz</title>
+
   <style>
+    /* ==== RESET ==== */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
     body {
-      font-family: Arial, sans-serif;
-      background: #f3f4f6;
-      padding: 20px;
+      font-family: "Poppins", sans-serif;
+      background: #f8f9fa;
+      color: #222;
+      padding: 15px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
     }
-    #selection-section, #quiz-section, #result-section {
-      max-width: 700px;
-      margin: auto;
-      background: #fff;
-      padding: 20px;
-      border-radius: 10px;
-      box-shadow: 0 5px 10px rgba(0,0,0,0.1);
-    }
-    select, button {
-      padding: 10px;
-      font-size: 16px;
-      margin-top: 10px;
-    }
-    .question-block {
-      margin-top: 20px;
-    }
-    .question-text {
-      font-weight: bold;
-    }
-    .option-btn {
-      display: block;
+
+    .container {
+      background: white;
       width: 100%;
-      padding: 8px;
-      margin: 5px 0;
-      background-color: #e2e8f0;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-      text-align: left;
+      max-width: 500px;
+      padding: 20px;
+      border-radius: 15px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
     }
-    .option-btn.selected {
-      background-color: #bae6fd;
+
+    h2, h3 {
+      text-align: center;
+      margin-bottom: 15px;
+    }
+
+    select, button {
+      width: 100%;
+      padding: 12px;
+      font-size: 16px;
+      margin-bottom: 15px;
+      border: 1px solid #ccc;
+      border-radius: 10px;
+      outline: none;
+    }
+
+    select:focus, button:focus {
+      border-color: #4caf50;
+    }
+
+    button {
+      background: #4caf50;
+      color: white;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+
+    button:hover {
+      background: #3e8e41;
+    }
+
+    .question-block {
+      background: #f1f1f1;
+      padding: 15px;
+      border-radius: 10px;
+      margin-bottom: 15px;
+    }
+
+    .question-text {
+      font-weight: 600;
+      margin-bottom: 10px;
+    }
+
+    label {
+      display: block;
+      font-size: 15px;
+      padding: 5px 0;
+      cursor: pointer;
+    }
+
+    input[type="radio"] {
+      margin-right: 8px;
+      accent-color: #4caf50;
+    }
+
+    .result {
+      text-align: center;
+      font-size: 18px;
+      font-weight: bold;
+      margin: 20px 0;
+    }
+
+    @media (max-width: 480px) {
+      body {
+        padding: 10px;
+      }
+
+      .container {
+        padding: 15px;
+        border-radius: 10px;
+      }
+
+      select, button {
+        font-size: 15px;
+      }
+
+      .question-text {
+        font-size: 15px;
+      }
+
+      label {
+        font-size: 14px;
+      }
     }
   </style>
 </head>
 <body>
-
 <div id="selection-section">
   <h2>Select Course & Level</h2>
   <label for="course">Course:</label>
@@ -6458,3 +6530,4 @@
 
 </body>
 </html>
+
