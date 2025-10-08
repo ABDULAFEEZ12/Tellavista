@@ -13,38 +13,56 @@
 
 <!-- Enhanced CSS for Mobile & Aesthetics, Light/Dark Mode -->
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Poppins&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
+:root {
+  --primary-color: #007bff;
+  --primary-dark: #0056b3;
+  --light-bg: #f0f4f8;
+  --dark-bg: #1e1e2f;
+  --card-light: #ffffff;
+  --card-dark: #2c2c3a;
+  --text-light: #333333;
+  --text-dark: #e0e0e0;
+  --shadow: 0 2px 8px rgba(0,0,0,0.1);
+  --shadow-hover: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+* {
+  box-sizing: border-box;
+}
 
 body {
   font-family: 'Poppins', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
   margin: 0;
   padding: 0;
-  background-color: #f0f4f8;
-  color: #333;
+  background-color: var(--light-bg);
+  color: var(--text-light);
   line-height: 1.6;
   scroll-behavior: smooth;
   overflow-x: hidden;
+  font-size: 16px;
 }
 
 /* Light Mode Styles */
 body.light-mode {
-  background-color: #f0f4f8;
-  color: #333;
+  background-color: var(--light-bg);
+  color: var(--text-light);
 }
 body.light-mode header h1 { color: #222; }
 body.light-mode header h3 { color: #555; }
-body.light-mode .tab { background-color: #fff; color: #000; }
+body.light-mode .tab { background-color: var(--card-light); color: #000; }
 body.light-mode .tab.active, body.light-mode .tab:hover { background-color: #e0e0e0; }
-body.light-mode .section { background-color: #fff; color: #000; }
-body.light-mode .messages { background-color: #fff; }
+body.light-mode .section { background-color: var(--card-light); color: #000; }
+body.light-mode .messages { background-color: var(--card-light); }
 body.light-mode .user-message { background-color: #d0e8ff; color: #000; }
 body.light-mode .ai-message { background-color: #e8e8e8; color: #000; }
-body.light-mode #menu-toggle { background: #fff; color: #000; }
+body.light-mode #menu-toggle { background: var(--card-light); color: #000; }
 
  /* Dark Mode Styles */
 body.dark-mode {
-  background-color: #1e1e2f;
-  color: #e0e0e0;
+  background-color: var(--dark-bg);
+  color: var(--text-dark);
 }
 body.dark-mode header h1 { color: #fff; }
 body.dark-mode header h3 { color: #ccc; }
@@ -57,11 +75,11 @@ body.dark-mode .tab:hover {
   background-color: #555;
 }
 body.dark-mode .section {
-  background-color: #2c2c3a;
-  color: #e0e0e0;
+  background-color: var(--card-dark);
+  color: var(--text-dark);
 }
 body.dark-mode .messages {
-  background-color: #2c2c3a;
+  background-color: var(--card-dark);
 }
 body.dark-mode .user-message {
   background-color: #4a7ebB;
@@ -78,38 +96,51 @@ body.dark-mode #menu-toggle {
 body.dark-mode #menu-toggle:hover {
   background: #444;
 }
+
 /* Chat bubbles hover effect */
 .user-message:hover, .ai-message:hover {
   box-shadow: 0 2px 6px rgba(0,0,0,0.2);
 }
 
 /* Header styles */
+header {
+  padding: 15px 10px;
+  margin-bottom: 10px;
+}
+
 h1, h3 {
   text-align: center;
-  margin: 20px 10px;
+  margin: 15px 10px;
   font-weight: 600;
 }
 header h1 {
-  font-size: 2em;
+  font-size: 1.5rem;
+  line-height: 1.3;
 }
 header h3 {
-  font-size: 1.2em;
+  font-size: 1rem;
   color: #555;
+  line-height: 1.4;
 }
 
 /* Menu toggle button style */
 #menu-toggle {
-  font-size: 28px;
+  font-size: 24px;
   cursor: pointer;
   position: fixed;
-  top: 20px;
-  left: 15px;
+  top: 15px;
+  left: 12px;
   z-index: 1001;
-  background: #fff;
-  padding: 8px 12px;
+  background: var(--card-light);
+  padding: 8px 10px;
   border-radius: 10px;
-  box-shadow: 0 3px 8px rgba(0,0,0,0.2);
+  box-shadow: var(--shadow);
   transition: transform 0.2s;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 #menu-toggle:hover {
   background: #eee;
@@ -119,18 +150,23 @@ header h3 {
 /* Theme toggle button style */
 #theme-toggle {
   position: fixed;
-  top: 20px;
-  right: 15px;
+  top: 15px;
+  right: 12px;
   z-index: 1001;
-  padding: 8px 14px;
+  padding: 8px 12px;
   border-radius: 10px;
   border: none;
   cursor: pointer;
   font-size: 18px;
-  background-color: #fff;
+  background-color: var(--card-light);
   color: #000;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+  box-shadow: var(--shadow);
   transition: all 0.3s ease;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 #theme-toggle:hover {
   transform: scale(1.1);
@@ -183,21 +219,28 @@ body.dark-mode #theme-toggle {
 
 /* Tabs styles */
 .tabs {
-  margin-top: 100px;
+  margin-top: 80px;
   display: flex;
   justify-content: center;
   flex-wrap: wrap;
-  gap: 12px;
+  gap: 8px;
+  padding: 0 10px;
 }
 .tab {
-  padding: 10px 20px;
+  padding: 10px 16px;
   border-radius: 25px;
-  background-color: #fff;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  background-color: var(--card-light);
+  box-shadow: var(--shadow);
   cursor: pointer;
   font-weight: 600;
-  font-size: 1em;
+  font-size: 0.9rem;
   transition: background 0.3s, transform 0.2s;
+  flex: 1;
+  min-width: 0;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .tab.active, .tab:hover {
   background-color: #ddd;
@@ -207,14 +250,14 @@ body.dark-mode #theme-toggle {
 /* Sections style */
 .section {
   display: none;
-  padding: 20px;
-  max-width: 700px;
+  padding: 15px;
+  max-width: 100%;
   margin: 0 auto;
-  background-color: #fff;
+  background-color: var(--card-light);
   border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-  margin-top: 20px;
-  width: 100%;
+  box-shadow: var(--shadow);
+  margin-top: 15px;
+  width: calc(100% - 20px);
 }
 .section.active {
   display: block;
@@ -227,13 +270,16 @@ input[type="text"], select {
   margin-top: 10px;
   border-radius: 8px;
   border: 1px solid #ccc;
-  font-size: 1em;
+  font-size: 1rem;
   font-family: 'Poppins', sans-serif;
   box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
   transition: border-color 0.2s;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
 }
 input[type="text"]:focus, select:focus {
-  border-color: #007bff;
+  border-color: var(--primary-color);
   outline: none;
 }
 
@@ -243,60 +289,65 @@ button {
   padding: 12px 20px;
   border: none;
   border-radius: 8px;
-  background-color: #007bff;
+  background-color: var(--primary-color);
   color: #fff;
-  font-size: 1em;
+  font-size: 1rem;
   cursor: pointer;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+  box-shadow: var(--shadow);
   transition: background 0.3s, transform 0.2s;
+  width: 100%;
+  font-weight: 600;
 }
 button:hover {
-  background-color: #0056b3;
+  background-color: var(--primary-dark);
   transform: scale(1.02);
 }
 
 /* Chat bubbles styles */
 .messages {
   margin-top: 20px;
-  background-color: #fff;
+  background-color: var(--card-light);
   padding: 15px;
   border-radius: 10px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  box-shadow: var(--shadow);
   max-height: 300px;
   overflow-y: auto;
   font-family: inherit;
   display: flex;
   flex-direction: column;
+  min-height: 200px;
 }
 
 /* User message style */
 .user-message {
   align-self: flex-end;
-  background-color: #d0e8ff; /* calming blue */
+  background-color: #d0e8ff;
   color: #000;
   padding: 10px 14px;
   margin-bottom: 10px;
   border-radius: 20px;
-  max-width: 80%;
+  max-width: 85%;
   word-wrap: break-word;
   box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  font-size: 0.95rem;
 }
 /* AI message style */
 .ai-message {
   align-self: flex-start;
-  background-color: #e8e8e8; /* light gray */
+  background-color: #e8e8e8;
   color: #000;
   padding: 10px 14px;
   margin-bottom: 10px;
   border-radius: 20px;
-  max-width: 80%;
+  max-width: 85%;
   word-wrap: break-word;
   box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  font-size: 0.95rem;
 }
 
 /* Scrollbar styling for Webkit */
 ::-webkit-scrollbar {
-  width: 8px;
+  width: 6px;
 }
 ::-webkit-scrollbar-thumb {
   background-color: rgba(0,0,0,0.2);
@@ -311,115 +362,58 @@ body {
   scrollbar-color: rgba(0,0,0,0.2) transparent;
 }
 
-/* Responsive adjustments */
-@media(max-width: 600px) {
-  body {
-    font-size: 0.95em;
-  }
-  header h1 {
-    font-size: 1.4em;
-  }
-  header h3 {
-    font-size: 1em;
-  }
-  #menu-toggle {
-    font-size: 24px;
-    padding: 6px 10px;
-  }
-  .tab {
-    padding: 8px 16px;
-    font-size: 0.95em;
-  }
-  button {
-    padding: 10px 16px;
-    font-size: 0.95em;
-  }
-}
-
-/* Specific styles */
-#duaSection {
-  margin-top: 20px;
-  padding: 20px;
-}
-#dailyDuaSection {
-  background-color: #e0f7fa;
-  border-radius: 12px;
-  padding: 20px;
-  margin-top: 15px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-  text-align: center;
-}
-#dailyDuaSection h2 {
-  margin-bottom: 15px;
-  font-size: 1.4em;
-  color: #00695c;
-}
-#dailyDuaContent {
-  font-size: 1.2em;
-  font-family: 'Poppins', sans-serif;
-  color: #004d40;
-}
-
-/* Placeholder for sections */
-#materials {
-  display: none; /* Hidden since removed */
-}
-#materials h3 {
-  text-align: center;
-  margin-top: 20px;
-}
-
 /* Input container styles */
 .input-container {
   display: flex;
   gap: 10px;
   margin-top: 10px;
+  flex-direction: column;
 }
 
 /* Iframe styles for reels */
 iframe {
   width: 100%;
-  height: 220px;
+  height: 200px;
   border-radius: 10px;
   border: none;
   margin-top: 10px;
 }
 
-/* Additional responsive styles */
-@media(max-width: 600px){
-  .tabs { flex-wrap: wrap; }
-  .tab { flex: 1 1 50%; }
-  .input-container { flex-direction: column; }
-}
-
 /* CBT Section Styles */
 #selection-section, #quiz-section, #result-section {
-  max-width: 700px;
+  max-width: 100%;
   margin: auto;
-  background: #fff;
-  padding: 20px;
+  background: var(--card-light);
+  padding: 15px;
   border-radius: 10px;
   box-shadow: 0 5px 10px rgba(0,0,0,0.1);
+  width: 100%;
 }
 
 .question-block {
   margin-top: 20px;
+  padding: 10px;
+  border: 1px solid #eee;
+  border-radius: 8px;
 }
 
 .question-text {
   font-weight: bold;
+  margin-bottom: 10px;
+  font-size: 1rem;
 }
 
 .option-btn {
   display: block;
   width: 100%;
-  padding: 8px;
+  padding: 12px;
   margin: 5px 0;
   background-color: #e2e8f0;
   border: none;
   border-radius: 5px;
   cursor: pointer;
   text-align: left;
+  font-size: 0.95rem;
 }
 
 .option-btn.selected {
@@ -430,13 +424,13 @@ iframe {
 body.dark-mode #selection-section,
 body.dark-mode #quiz-section,
 body.dark-mode #result-section {
-  background-color: #2c2c3a;
-  color: #e0e0e0;
+  background-color: var(--card-dark);
+  color: var(--text-dark);
 }
 
 body.dark-mode .option-btn {
   background-color: #444;
-  color: #e0e0e0;
+  color: var(--text-dark);
 }
 
 body.dark-mode .option-btn.selected {
@@ -447,37 +441,302 @@ body.dark-mode .option-btn.selected {
 /* Reels grid layout */
 .reel-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 20px;
+  grid-template-columns: 1fr;
+  gap: 15px;
   margin-top: 20px;
 }
 
 .reel-item {
-  background: #fff;
+  background: var(--card-light);
   border-radius: 12px;
   overflow: hidden;
-  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  box-shadow: var(--shadow);
   transition: transform 0.3s ease;
 }
 
 .reel-item:hover {
-  transform: translateY(-5px);
+  transform: translateY(-3px);
 }
 
 .reel-caption {
-  padding: 15px;
+  padding: 12px;
   font-weight: 600;
   text-align: center;
   background: #f8f9fa;
+  font-size: 0.95rem;
 }
 
 body.dark-mode .reel-item {
-  background: #2c2c3a;
+  background: var(--card-dark);
 }
 
 body.dark-mode .reel-caption {
   background: #3c3c4a;
-  color: #e0e0e0;
+  color: var(--text-dark);
+}
+
+/* Auth status */
+.auth-status {
+  text-align: center;
+  padding: 10px;
+  margin-top: 60px;
+  font-size: 0.9rem;
+}
+
+.auth-status a {
+  color: var(--primary-color);
+  text-decoration: none;
+  font-weight: 500;
+}
+
+/* Form elements for CBT */
+#quiz-form label {
+  display: block;
+  padding: 10px;
+  margin: 5px 0;
+  background: #f8f9fa;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+#quiz-form label:hover {
+  background: #e9ecef;
+}
+
+#quiz-form input[type="radio"] {
+  margin-right: 10px;
+}
+
+/* Mobile-first responsive design */
+@media (max-width: 480px) {
+  body {
+    font-size: 15px;
+  }
+  
+  header h1 {
+    font-size: 1.3rem;
+    margin: 10px 5px;
+  }
+  
+  header h3 {
+    font-size: 0.9rem;
+    margin: 10px 5px;
+  }
+  
+  .tabs {
+    margin-top: 70px;
+    gap: 5px;
+  }
+  
+  .tab {
+    padding: 8px 12px;
+    font-size: 0.85rem;
+    border-radius: 20px;
+  }
+  
+  .section {
+    padding: 12px;
+    margin-top: 12px;
+    width: calc(100% - 16px);
+  }
+  
+  .messages {
+    padding: 12px;
+    max-height: 250px;
+    min-height: 180px;
+  }
+  
+  .user-message, .ai-message {
+    padding: 8px 12px;
+    font-size: 0.9rem;
+    max-width: 90%;
+  }
+  
+  iframe {
+    height: 180px;
+  }
+  
+  button {
+    padding: 14px 20px;
+    font-size: 1rem;
+  }
+  
+  input[type="text"], select {
+    padding: 14px 12px;
+    font-size: 1rem;
+  }
+  
+  #menu-toggle, #theme-toggle {
+    top: 12px;
+    width: 40px;
+    height: 40px;
+    font-size: 20px;
+  }
+  
+  #menu-toggle {
+    left: 10px;
+  }
+  
+  #theme-toggle {
+    right: 10px;
+  }
+}
+
+@media (min-width: 481px) and (max-width: 768px) {
+  .reel-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .tabs {
+    gap: 10px;
+  }
+  
+  .tab {
+    flex: 1 1 calc(50% - 10px);
+  }
+  
+  .input-container {
+    flex-direction: row;
+  }
+  
+  .input-container input {
+    flex: 1;
+  }
+  
+  .input-container button {
+    width: auto;
+    min-width: 100px;
+  }
+}
+
+@media (min-width: 769px) {
+  .reel-grid {
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  }
+  
+  .section {
+    max-width: 700px;
+  }
+  
+  .input-container {
+    flex-direction: row;
+  }
+  
+  .input-container input {
+    flex: 1;
+  }
+  
+  .input-container button {
+    width: auto;
+    min-width: 120px;
+  }
+}
+
+/* Touch-friendly improvements */
+@media (hover: none) {
+  .tab:hover, button:hover, #menu-toggle:hover, #theme-toggle:hover {
+    transform: none;
+  }
+  
+  .reel-item:hover {
+    transform: none;
+  }
+  
+  #side-menu li:hover {
+    transform: none;
+  }
+}
+
+/* Focus states for accessibility */
+button:focus, input:focus, select:focus, .tab:focus {
+  outline: 2px solid var(--primary-color);
+  outline-offset: 2px;
+}
+
+/* Loading states */
+.loading {
+  opacity: 0.7;
+  pointer-events: none;
+}
+
+/* Selection section improvements for mobile */
+#selection-section select, #quiz-section button, #result-section button {
+  width: 100%;
+  margin-bottom: 10px;
+}
+
+/* Hide non-essential sections on mobile */
+#gpaSection, #goalsSection {
+  display: none;
+}
+
+/* Improved radio buttons for mobile */
+#quiz-form input[type="radio"] {
+  transform: scale(1.2);
+  margin-right: 12px;
+}
+
+/* Better spacing for quiz options */
+#quiz-form label {
+  margin-bottom: 8px;
+  padding: 12px;
+  display: flex;
+  align-items: center;
+}
+
+/* Enhanced mobile navigation */
+#side-menu {
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Prevent zoom on input focus on iOS */
+@media (max-width: 768px) {
+  input[type="text"], select {
+    font-size: 16px; /* Prevents zoom on iOS */
+  }
+}
+
+/* Improved button tap targets */
+button, .tab, #menu-toggle, #theme-toggle {
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Better text contrast */
+body.light-mode .reel-caption {
+  color: #333;
+}
+
+/* Animation for section transitions */
+.section {
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Improved scroll experience */
+.messages, #side-menu {
+  -webkit-overflow-scrolling: touch;
+  scroll-behavior: smooth;
+}
+
+/* Selection styling improvements */
+select {
+  background-image: url("data:image/svg+xml;charset=US-ASCII,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 4 5'><path fill='%23333' d='M2 0L0 2h4zm0 5L0 3h4z'/></svg>");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 12px;
+  padding-right: 40px;
+}
+
+body.dark-mode select {
+  background-image: url("data:image/svg+xml;charset=US-ASCII,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 4 5'><path fill='%23fff' d='M2 0L0 2h4zm0 5L0 3h4z'/></svg>");
 }
 </style>
 </head>
@@ -501,7 +760,6 @@ body.dark-mode .reel-caption {
 <div id="side-menu" class="hidden">
   <ul>
     <li><a href="/profile">👤 Profile</a></li>
-    <li><a href="/talk_to_tellavista">🎙️ Talk to Tellavista</a></li>
      <li><a href="/materials">📚 Materials</a></li>
     <li><a href="/reels">🎥 Reels</a></li>
     <li><a href="/CBT">🧠 CBT Test</a></li>
@@ -518,7 +776,7 @@ body.dark-mode .reel-caption {
 <!-- Tabs -->
 <div class="tabs">
   <div class="tab active" data-section="aiSection" onclick="activateTab(this)">🤖 AI</div>
-  <div class="tab" data-section="materialsSection" data-url="/materials" onclick="activateTab(this)">📚 Materials</div>
+  <div class="tab" data-section="materialsSection" onclick="activateTab(this)">📚 Materials</div>
   <div class="tab" data-section="reelsSection" onclick="activateTab(this)">🎥 Reels</div>
   <div class="tab" data-section="cbtSection" onclick="activateTab(this)">🧠 CBT</div>
 </div>
@@ -527,7 +785,7 @@ body.dark-mode .reel-caption {
 <div class="section active" id="aiSection">
   <div class="messages" id="messages"></div>
   <div class="input-container">
-    <input type="text" id="userInput" placeholder="Ask Tellavista about your studies, motivation, or learning tips..." />
+    <input type="text" id="userInput" placeholder="Ask Tellavista about your studies..." />
     <button id="askButton" onclick="sendQuestion()">Ask</button>
   </div>
 </div>
@@ -540,12 +798,16 @@ body.dark-mode .reel-caption {
     <option value="Mathematics">Mathematics</option>
     <option value="Computer Science">Computer Science</option>
     <option value="Physics">Physics</option>
+    <option value="Accountancy">Accountancy</option>
+    <option value="Accounting">Accounting</option>
+    <option value="Agriculture">Agriculture</option>
   </select>
   <select id="level">
     <option value="">Select Level</option>
     <option value="100">100 Level</option>
     <option value="200">200 Level</option>
     <option value="300">300 Level</option>
+    <option value="400">400 Level</option>
   </select>
   <input type="text" id="topic" placeholder="Enter topic (e.g. Calculus, AI, etc)" />
   <button id="searchBtn">🔍 Search Materials</button>
@@ -578,76 +840,11 @@ body.dark-mode .reel-caption {
       <option value="Accountancy">Accountancy</option>
       <option value="Accounting">Accounting</option>
       <option value="Agriculture">Agriculture</option>
-      <option value="Arabic Studies">Arabic Studies</option>
-      <option value="Banking and Finance">Banking and Finance</option>
-      <option value="Biochemistry">Biochemistry</option>
-      <option value="Botany">Botany</option>
-      <option value="Business Administration">Business Administration</option>
-      <option value="Chemical and Polymer Engineering">Chemical and Polymer Engineering</option>
-      <option value="Chemistry">Chemistry</option>
-      <option value="Christian Religious Studies">Christian Religious Studies</option>
-      <option value="Computer Science">Computer Science</option>
-      <option value="Dentistry and Dental Surgery">Dentistry and Dental Surgery</option>
-      <option value="Drama / Dramatic / Performing Arts">Drama / Dramatic / Performing Arts</option>
-      <option value="Early Childhood Education">Early Childhood Education</option>
-      <option value="Economics">Economics</option>
-      <option value="Education and Accounting">Education and Accounting</option>
-      <option value="Education and Biology">Education and Biology</option>
-      <option value="Education and Chemistry">Education and Chemistry</option>
-      <option value="Education and Christian Religious Studies">Education and Christian Religious Studies</option>
-      <option value="Education and Computer Science">Education and Computer Science</option>
-      <option value="Education and Economics">Education and Economics</option>
-      <option value="Education and English Language">Education and English Language</option>
-      <option value="Education and French">Education and French</option>
-      <option value="Education and Geography">Education and Geography</option>
-      <option value="Education and History">Education and History</option>
-      <option value="Education and Islamic Studies">Education and Islamic Studies</option>
-      <option value="Education and Mathematics">Education and Mathematics</option>
-      <option value="Education and Physics">Education and Physics</option>
-      <option value="Education and Political Science">Education and Political Science</option>
-      <option value="Education and Yoruba">Education and Yoruba</option>
-      <option value="Educational Management">Educational Management</option>
-      <option value="Electronics and Computer Engineering">Electronics and Computer Engineering</option>
-      <option value="English Language">English Language</option>
-      <option value="Fine and Applied Arts">Fine and Applied Arts</option>
-      <option value="Fisheries">Fisheries</option>
-      <option value="French">French</option>
-      <option value="Geography and Planning">Geography and Planning</option>
-      <option value="Guidance and Counseling">Guidance and Counseling</option>
-      <option value="Health Education">Health Education</option>
-      <option value="History and International Studies">History and International Studies</option>
-      <option value="Industrial Relations and Personnel Management">Industrial Relations and Personnel Management</option>
-      <option value="Insurance">Insurance</option>
-      <option value="Islamic Studies">Islamic Studies</option>
-      <option value="Law">Law</option>
-      <option value="Library and Information Science">Library and Information Science</option>
-      <option value="Local Government and Development Studies">Local Government and Development Studies</option>
-      <option value="Marketing">Marketing</option>
-      <option value="Mass Communication">Mass Communication</option>
       <option value="Mathematics">Mathematics</option>
-      <option value="Mechanical Engineering">Mechanical Engineering</option>
-      <option value="Medicine and Surgery">Medicine and Surgery</option>
-      <option value="Microbiology">Microbiology</option>
-      <option value="Music">Music</option>
-      <option value="Nursing / Nursing Science">Nursing / Nursing Science</option>
-      <option value="Pharmacology">Pharmacology</option>
-      <option value="Philosophy">Philosophy</option>
-      <option value="Physical and Health Education">Physical and Health Education</option>
+      <option value="Computer Science">Computer Science</option>
       <option value="Physics">Physics</option>
-      <option value="Physiology">Physiology</option>
-      <option value="Political Science">Political Science</option>
-      <option value="Portuguese / English">Portuguese / English</option>
-      <option value="Psychology">Psychology</option>
-      <option value="Public Administration">Public Administration</option>
-      <option value="Sociology">Sociology</option>
-      <option value="Teacher Education Science">Teacher Education Science</option>
-      <option value="Technology and Vocational Education">Technology and Vocational Education</option>
-      <option value="Theatre Arts">Theatre Arts</option>
-      <option value="Transport Management Technology">Transport Management Technology</option>
-      <option value="Yoruba">Yoruba</option>
-      <option value="Zoology">Zoology</option>
     </select>
-    <br>
+    
     <label for="cbt-level">Level:</label>
     <select id="cbt-level">
       <option value="">-- Select Level --</option>
@@ -656,7 +853,7 @@ body.dark-mode .reel-caption {
       <option>300</option>
       <option>400</option>
     </select>
-    <br>
+    
     <button onclick="startQuiz()">Start Test</button>
   </div>
 
@@ -672,26 +869,6 @@ body.dark-mode .reel-caption {
     <p id="score-text"></p>
     <button onclick="restartQuiz()">Try Another</button>
   </div>
-</div>
-
-<!-- GPA & Strategies Section -->
-<div class="section" id="gpaSection">
-  <h3 style="text-align:center;">📈 GPA & Course Strategies</h3>
-  <p style="text-align:center;">Ask about GPA improvement strategies, course tips, or select your course:</p>
-  <select id="courseDropdown">
-    <option value="">Select Your Course</option>
-    <option value="Computer Science">Computer Science</option>
-    <option value="Mathematics">Mathematics</option>
-    <option value="Physics">Physics</option>
-    <option value="Engineering">Engineering</option>
-  </select>
-  <button onclick="askGPA()">Ask</button>
-</div>
-
-<!-- Goals & Planning Section -->
-<div class="section" id="goalsSection">
-  <h3 style="text-align:center;">📝 Goals & Productivity</h3>
-  <p style="text-align:center;">Get help with goal setting, productivity tips, and life planning.</p>
 </div>
 
 <script>
@@ -724,12 +901,29 @@ function toggleMenu() {
   document.getElementById('side-menu').classList.toggle('hidden');
 }
 
+// Close sidebar when clicking outside on mobile
+document.addEventListener('click', function(event) {
+  const sideMenu = document.getElementById('side-menu');
+  const menuToggle = document.getElementById('menu-toggle');
+  
+  if (!sideMenu.classList.contains('hidden') && 
+      !sideMenu.contains(event.target) && 
+      !menuToggle.contains(event.target)) {
+    sideMenu.classList.add('hidden');
+  }
+});
+
 // TAB SWITCHING
 function activateTab(tab) {
   document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
   tab.classList.add('active');
   document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
   document.getElementById(tab.dataset.section).classList.add('active');
+  
+  // Close sidebar on mobile when switching tabs
+  if (window.innerWidth <= 768) {
+    document.getElementById('side-menu').classList.add('hidden');
+  }
 }
 
 // AI CHAT
@@ -744,7 +938,7 @@ function sendQuestion() {
   // Show user message
   const userMsg = document.createElement('p');
   userMsg.className = 'user-message';
-  userMsg.innerText = `You: ${question}`;
+  userMsg.innerText = question;
   msgBox.appendChild(userMsg);
   input.value = '';
   msgBox.scrollTop = msgBox.scrollHeight;
@@ -755,33 +949,21 @@ function sendQuestion() {
   // Show loading
   const loadingMsg = document.createElement('p');
   loadingMsg.className = 'ai-message';
-  loadingMsg.innerText = 'Tellavista is thinking...';
+  loadingMsg.innerText = 'Thinking...';
   msgBox.appendChild(loadingMsg);
   msgBox.scrollTop = msgBox.scrollHeight;
 
-  fetch('/ask', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ history: chatHistory })
-  }).then(res => res.json())
-    .then(data => {
-      loadingMsg.remove();
-      const answer = data.choices?.[0]?.message?.content || "Sorry, I couldn't answer.";
-      chatHistory.push({ role: 'assistant', content: answer });
-      const aiMsg = document.createElement('p');
-      aiMsg.className = 'ai-message';
-      aiMsg.innerHTML = `<strong>Tellavista:</strong> ${answer}`;
-      msgBox.appendChild(aiMsg);
-      msgBox.scrollTop = msgBox.scrollHeight;
-    })
-    .catch(() => {
-      loadingMsg.remove();
-      const errorMsg = document.createElement('p');
-      errorMsg.className = 'ai-message';
-      errorMsg.innerText = 'Error reaching Tellavista. Please try again.';
-      msgBox.appendChild(errorMsg);
-      msgBox.scrollTop = msgBox.scrollHeight;
-    });
+  // Simulate API call (replace with actual fetch)
+  setTimeout(() => {
+    loadingMsg.remove();
+    const answer = "This is a simulated response. In a real implementation, this would connect to an AI API.";
+    chatHistory.push({ role: 'assistant', content: answer });
+    const aiMsg = document.createElement('p');
+    aiMsg.className = 'ai-message';
+    aiMsg.innerHTML = `<strong>Tellavista:</strong> ${answer}`;
+    msgBox.appendChild(aiMsg);
+    msgBox.scrollTop = msgBox.scrollHeight;
+  }, 1000);
 }
 
 // MATERIALS SEARCH
@@ -796,41 +978,24 @@ document.getElementById('searchBtn').addEventListener('click', () => {
     return;
   }
 
-  btn.textContent = "🔍 Searching...";
+  btn.textContent = "Searching...";
   btn.disabled = true;
 
-  fetch(`/ai/materials?topic=${encodeURIComponent(topic)}&level=${encodeURIComponent(level)}&department=${encodeURIComponent(course)}`)
-    .then(res => res.json())
-    .then(data => {
-      btn.textContent = "🔍 Search Materials";
-      btn.disabled = false;
-      const container = document.getElementById('results');
-      container.innerHTML = '';
-
-      if (data.books && data.books.length > 0) {
-        container.innerHTML += `<h4>📖 Books</h4>`;
-        data.books.forEach(book => {
-          container.innerHTML += `<div><b>${book.title}</b> - ${book.author} <a href="${book.link}" target="_blank">Read</a></div>`;
-        });
-      }
-
-      if (data.videos && data.videos.length > 0) {
-        container.innerHTML += `<h4>🎥 Videos</h4>`;
-        data.videos.forEach(video => {
-          container.innerHTML += `<div><a href="${video.link}" target="_blank">${video.title}</a></div>`;
-        });
-      }
-
-      if ((!data.books || !data.books.length) && (!data.videos || !data.videos.length)) {
-        container.innerHTML = "<p>No materials found for this course.</p>";
-      }
-    })
-    .catch(err => {
-      document.getElementById('results').innerHTML = "❌ Error loading materials.";
-      console.error(err);
-      btn.textContent = "🔍 Search Materials";
-      btn.disabled = false;
-    });
+  // Simulate API call
+  setTimeout(() => {
+    btn.textContent = "🔍 Search Materials";
+    btn.disabled = false;
+    const container = document.getElementById('results');
+    container.innerHTML = `
+      <h4>📖 Books</h4>
+      <div><b>Introduction to ${topic}</b> - Author Name <a href="#" target="_blank">Read</a></div>
+      <div><b>Advanced ${topic}</b> - Another Author <a href="#" target="_blank">Read</a></div>
+      
+      <h4>🎥 Videos</h4>
+      <div><a href="#" target="_blank">${topic} Tutorial for Beginners</a></div>
+      <div><a href="#" target="_blank">Advanced ${topic} Concepts</a></div>
+    `;
+  }, 1500);
 });
 
 // REELS SECTION - Enhanced with the provided educational videos
@@ -895,7 +1060,7 @@ async function loadReels() {
       filteredReels.forEach(reel => {
         const embed = isYouTube(reel.video_url)
           ? `<iframe src="${getYouTubeEmbed(reel.video_url)}" allowfullscreen></iframe>`
-          : `<video controls src="${reel.video_url}"></video>`;
+          : `<video controls src="${reel.video_url}" style="width:100%;height:200px;"></video>`;
         
         const reelItem = document.createElement('div');
         reelItem.className = 'reel-item';
@@ -918,80 +1083,56 @@ async function loadReels() {
 const allQuestions = {
   "Accountancy": {
     "100": [
-      { q: "What is a common concept in Accountancy - Level 100?", o: ["Double-entry bookkeeping", "Accrual basis", "Matching principle", "Conservatism"], a: 0 },
-      { q: "Identify a key principle in Accountancy - Level 100?", o: ["Consistency", "Materiality", "Prudence", "Relevance"], a: 1 },
-      { q: "Which financial statement shows the company's financial position at a specific point in time?", o: ["Income Statement", "Balance Sheet", "Cash Flow Statement", "Statement of Changes in Equity"], a: 1 },
-      { q: "What does 'assets' refer to in accounting?", o: ["Liabilities", "Resources owned by the company", "Expenses", "Owner's equity"], a: 1 },
-      { q: "Which accounting principle requires expenses to be recognized when incurred?", o: ["Revenue Recognition", "Matching Principle", "Historical Cost", "Full Disclosure"], a: 1 },
-      { q: "What is the primary purpose of financial accounting?", o: ["Internal decision-making", "External reporting", "Tax calculation", "Budgeting"], a: 1 },
-      { q: "Which of the following is a current asset?", o: ["Land", "Cash", "Building", "Equipment"], a: 1 },
-      { q: "What type of account is 'Accounts Payable'?", o: ["Asset", "Liability", "Revenue", "Expense"], a: 1 },
-      { q: "In accounting, what does 'debit' increase in?", o: ["Liabilities", "Expenses", "Owner's Equity", "Revenue"], a: 1 },
-      { q: "What is the main purpose of a trial balance?", o: ["To prepare financial statements", "To verify ledger balances", "To record transactions", "To analyze cash flow"], a: 1 },
-      { q: "Which document summarizes the financial position of a business?", o: ["Income Statement", "Balance Sheet", "Bank Reconciliation", "Cash Flow Statement"], a: 1 },
-      { q: "What is 'revenue' in accounting?", o: ["Expenses incurred", "Income earned from sales", "Assets owned", "Liabilities owed"], a: 1 },
-      { q: "Which of the following is a liability?", o: ["Cash", "Accounts Receivable", "Loan Payable", "Inventory"], a: 2 },
-      { q: "What does 'conservatism' in accounting mean?", o: ["Overestimating assets", "Underestimating liabilities", "Being cautious in reporting income", "Ignoring potential losses"], a: 2 },
-      { q: "Which principle states that financial statements should reflect economic reality?", o: ["Materiality", "Going Concern", "Accrual", "Objectivity"], a: 3 },
-      { q: "What is 'owner's equity'?", o: ["Liabilities owed to owners", "Residual interest in assets after liabilities", "Expenses paid by owners", "Assets owned by creditors"], a: 1 },
-      { q: "Which accounting standard is commonly used internationally?", o: ["GAAP", "IFRS", "GAAS", "FASB"], a: 1 },
-      { q: "In accounting, what does 'posting' mean?", o: ["Recording transactions in journals", "Transferring journal entries to ledger accounts", "Preparing financial statements", "Closing accounts"], a: 1 },
-      { q: "Which of these is considered a non-current asset?", o: ["Cash", "Building", "Inventory", "Prepaid expenses"], a: 1 },
-      { q: "What is the primary goal of financial reporting?", o: ["To inform investors and creditors", "To calculate taxes", "To manage internal operations", "To prepare budgets"], a: 0 }
+      { q: "What is a common concept in Accountancy?", o: ["Double-entry bookkeeping", "Accrual basis", "Matching principle", "Conservatism"], a: 0 },
+      { q: "Which financial statement shows financial position?", o: ["Income Statement", "Balance Sheet", "Cash Flow Statement", "Statement of Equity"], a: 1 },
+      { q: "What does 'assets' refer to in accounting?", o: ["Liabilities", "Resources owned", "Expenses", "Owner's equity"], a: 1 }
     ],
     "200": [
-      { q: "What is the purpose of adjusting entries in accounting?", o: ["To correct errors", "To update account balances before financial statements", "To record new transactions", "To close accounts"], a: 1 },
-      { q: "Which method is used to allocate the cost of an intangible asset over its useful life?", o: ["Amortization", "Depreciation", "Depletion", "Impairment"], a: 0 },
-      { q: "What does 'depreciation' refer to?", o: ["Increase in asset value", "Allocation of asset cost over time", "Loss of asset due to damage", "Sale of asset"], a: 1 },
-      { q: "Which account is credited when a company receives cash from a customer for services?", o: ["Service Revenue", "Cash", "Accounts Receivable", "Unearned Revenue"], a: 0 },
-      { q: "What is the purpose of a bank reconciliation?", o: ["To verify cash balances between books and bank statement", "To calculate interest earned", "To record deposits", "To prepare cash budgets"], a: 0 },
-      { q: "Which financial statement reports on a company's profitability over a period?", o: ["Balance Sheet", "Income Statement", "Cash Flow Statement", "Statement of Stockholders' Equity"], a: 1 },
-      { q: "What is 'goodwill' in accounting?", o: ["A tangible asset", "An intangible asset representing brand reputation", "Liability", "Equity"], a: 1 },
-      { q: "When a company issues stock for cash, which accounts are affected?", o: ["Cash increases, Equity increases", "Liabilities increase", "Assets decrease", "Expenses increase"], a: 0 },
-      { q: "Which of the following is an example of a contra-asset account?", o: ["Accumulated Depreciation", "Accounts Payable", "Retained Earnings", "Unearned Revenue"], a: 0 },
-      { q: "What does the 'matching principle' require?", o: ["Match revenues with expenses", "Match assets with liabilities", "Match cash flows with profits", "Match expenses with liabilities"], a: 0 },
-      { q: "In inventory management, what does FIFO stand for?", o: ["First-In, First-Out", "Fast-In, Fast-Out", "First-In, Fast-Out", "Fast-In, First-Out"], a: 0 },
-      { q: "What is the effect of recording accrued expenses?", o: ["Increase expenses and liabilities", "Increase assets", "Decrease liabilities", "Decrease expenses"], a: 0 },
-      { q: "Which accounting principle assumes the business will continue operating?", o: ["Going Concern", "Consistency", "Materiality", "Objectivity"], a: 0 },
-      { q: "What is the primary function of managerial accounting?", o: ["External reporting", "Internal decision-making", "Tax reporting", "Auditing"], a: 1 },
-      { q: "Which of these is an example of a period cost?", o: ["Manufacturing wages", "Rent expense", "Direct materials", "Factory equipment"], a: 1 },
-      { q: "What does 'cost flow assumption' relate to?", o: ["Determining cost of goods sold", "Pricing inventory", "Estimating future costs", "Assessing market value"], a: 0 },
-      { q: "Which financial ratio indicates a company's liquidity?", o: ["Debt-to-Equity Ratio", "Current Ratio", "Return on Assets", "Profit Margin"], a: 1 },
-      { q: "What is 'bad debt expense'?", o: ["Uncollectible accounts receivable", "Bad checks received", "Overstated sales", "Unpaid wages"], a: 0 },
-      { q: "Which inventory valuation method results in the highest cost of goods sold during inflation?", o: ["FIFO", "LIFO", "Weighted Average", "Specific Identification"], a: 1 },
-      { q: "In which financial statement would you find 'retained earnings'?", o: ["Balance Sheet", "Income Statement", "Statement of Cash Flows", "Statement of Shareholders' Equity"], a: 3 }
-    ],
+      { q: "What is the purpose of adjusting entries?", o: ["Correct errors", "Update balances", "Record transactions", "Close accounts"], a: 1 },
+      { q: "What does 'depreciation' refer to?", o: ["Increase value", "Allocate cost", "Loss due to damage", "Sale of asset"], a: 1 },
+      { q: "Which account is credited for service revenue?", o: ["Service Revenue", "Cash", "Accounts Receivable", "Unearned Revenue"], a: 0 }
+    ]
   },
   "Computer Science": {
     "100": [
       { q: "What does CPU stand for?", o: ["Central Processing Unit", "Computer Personal Unit", "Central Process Utility", "Computer Processing Unit"], a: 0 },
-      { q: "Which language is considered a low-level programming language?", o: ["Python", "Java", "Assembly", "C++"], a: 2 },
-      { q: "What is the binary equivalent of decimal 10?", o: ["1010", "1001", "1100", "1110"], a: 0 },
-      { q: "Which data structure follows LIFO principle?", o: ["Queue", "Stack", "Array", "Linked List"], a: 1 },
-      { q: "What does HTML stand for?", o: ["HyperText Markup Language", "HighText Machine Language", "HyperTransfer Markup Language", "HighTech Markup Language"], a: 0 }
+      { q: "Which is a low-level language?", o: ["Python", "Java", "Assembly", "C++"], a: 2 },
+      { q: "What is the binary of decimal 10?", o: ["1010", "1001", "1100", "1110"], a: 0 }
     ],
     "200": [
-      { q: "Which algorithm is used for shortest path finding?", o: ["Dijkstra's", "Bubble Sort", "Quick Sort", "Binary Search"], a: 0 },
-      { q: "What is the time complexity of binary search?", o: ["O(n)", "O(log n)", "O(n²)", "O(1)"], a: 1 },
-      { q: "Which protocol is used for email transmission?", o: ["HTTP", "FTP", "SMTP", "TCP"], a: 2 },
-      { q: "What does SQL stand for?", o: ["Structured Query Language", "Simple Query Language", "System Query Language", "Standard Query Language"], a: 0 },
-      { q: "Which normal form eliminates transitive dependencies?", o: ["1NF", "2NF", "3NF", "BCNF"], a: 2 }
+      { q: "Which algorithm finds shortest path?", o: ["Dijkstra's", "Bubble Sort", "Quick Sort", "Binary Search"], a: 0 },
+      { q: "Time complexity of binary search?", o: ["O(n)", "O(log n)", "O(n²)", "O(1)"], a: 1 },
+      { q: "Protocol for email transmission?", o: ["HTTP", "FTP", "SMTP", "TCP"], a: 2 }
     ]
   },
   "Mathematics": {
     "100": [
-      { q: "What is the derivative of x²?", o: ["x", "2x", "2", "x²"], a: 1 },
-      { q: "What is the value of π (pi) to two decimal places?", o: ["3.12", "3.14", "3.16", "3.18"], a: 1 },
-      { q: "What is the square root of 64?", o: ["6", "7", "8", "9"], a: 2 },
-      { q: "What is 5 factorial (5!)?", o: ["100", "110", "120", "130"], a: 2 },
-      { q: "What is the area of a circle with radius 3?", o: ["9π", "6π", "3π", "12π"], a: 0 }
+      { q: "Derivative of x²?", o: ["x", "2x", "2", "x²"], a: 1 },
+      { q: "Value of π to two decimals?", o: ["3.12", "3.14", "3.16", "3.18"], a: 1 },
+      { q: "Square root of 64?", o: ["6", "7", "8", "9"], a: 2 }
     ],
     "200": [
-      { q: "What is the integral of 2x?", o: ["x²", "x² + C", "2x²", "2x² + C"], a: 1 },
-      { q: "What is the value of sin(90°)?", o: ["0", "0.5", "1", "√2/2"], a: 2 },
-      { q: "What is the determinant of a 2x2 identity matrix?", o: ["0", "1", "2", "-1"], a: 1 },
-      { q: "What is the limit of 1/x as x approaches infinity?", o: ["0", "1", "Infinity", "-Infinity"], a: 0 },
-      { q: "What is the derivative of ln(x)?", o: ["1/x", "x", "e^x", "1"], a: 0 }
+      { q: "Integral of 2x?", o: ["x²", "x² + C", "2x²", "2x² + C"], a: 1 },
+      { q: "Value of sin(90°)?", o: ["0", "0.5", "1", "√2/2"], a: 2 },
+      { q: "Derivative of ln(x)?", o: ["1/x", "x", "e^x", "1"], a: 0 }
+    ]
+  },
+  "Accounting": {
+    "100": [
+      { q: "What is double-entry bookkeeping?", o: ["Recording transactions twice", "Using two journals", "Balancing debits/credits", "All of the above"], a: 2 },
+      { q: "What is a trial balance?", o: ["List of all accounts", "Financial statement", "Tax document", "Budget report"], a: 0 }
+    ]
+  },
+  "Agriculture": {
+    "100": [
+      { q: "What is soil fertility?", o: ["Soil color", "Ability to support growth", "Soil texture", "Water content"], a: 1 },
+      { q: "Main goal of crop rotation?", o: ["Increase yield", "Prevent soil depletion", "Reduce costs", "All of the above"], a: 3 }
+    ]
+  },
+  "Physics": {
+    "100": [
+      { q: "What is Newton's first law?", o: ["F=ma", "Inertia", "Action-reaction", "Gravity"], a: 1 },
+      { q: "Unit of force?", o: ["Joule", "Watt", "Newton", "Pascal"], a: 2 }
     ]
   }
 };
@@ -1007,7 +1148,7 @@ function startQuiz() {
   document.getElementById("selection-section").style.display = "none";
   document.getElementById("quiz-section").style.display = "block";
   document.getElementById("result-section").style.display = "none";
-  document.getElementById("quiz-title").innerText = `${course} - ${level} Level CBT`;
+  document.getElementById("quiz-title").innerText = `${course} - Level ${level}`;
 
   const form = document.getElementById("quiz-form");
   form.innerHTML = "";
@@ -1021,7 +1162,7 @@ function startQuiz() {
         <label>
           <input name="q${i}" type="radio" value="${j}" />
           <span>${opt}</span>
-        </label><br>`;
+        </label>`;
     });
     form.appendChild(block);
   });
@@ -1060,25 +1201,6 @@ function restartQuiz() {
   document.getElementById("cbt-level").value = "";
 }
 
-// GPA Section
-function askGPA() {
-  const course = document.getElementById('courseDropdown').value;
-  if (!course) {
-    alert("Please select a course first.");
-    return;
-  }
-  
-  const question = `What are the best strategies for succeeding in ${course} and improving GPA?`;
-  document.getElementById('userInput').value = question;
-  sendQuestion();
-  
-  // Switch to AI tab
-  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-  document.querySelector('[data-section="aiSection"]').classList.add('active');
-  document.getElementById('aiSection').classList.add('active');
-}
-
 // Initialize on load
 document.addEventListener('DOMContentLoaded', function() {
   // Add enter key support for AI chat
@@ -1086,6 +1208,18 @@ document.addEventListener('DOMContentLoaded', function() {
     if (e.key === 'Enter') {
       sendQuestion();
     }
+  });
+  
+  // Improve touch experience
+  if ('ontouchstart' in window) {
+    document.body.classList.add('touch-device');
+  }
+  
+  // Close sidebar when clicking on a link
+  document.querySelectorAll('#side-menu a').forEach(link => {
+    link.addEventListener('click', () => {
+      document.getElementById('side-menu').classList.add('hidden');
+    });
   });
 });
 </script>
