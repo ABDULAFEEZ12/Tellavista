@@ -795,6 +795,7 @@ body.dark-mode select {
 <div class="section" id="materialsSection">
   <h3>📚 Search Course Materials</h3>
   <select id="course">
+    <option value="">Select Course</option>
     <option value="Accountancy">Accountancy</option>
       <option value="Accounting">Accounting</option>
       <option value="Agriculture">Agriculture</option>
@@ -869,9 +870,10 @@ body.dark-mode select {
   </select>
   <select id="level">
     <option value="">Select Level</option>
-    <option value="100">100 Level</option>
-    <option value="200">200 Level</option>
-    <option value="300">300 Level</option>
+    <option>100</option>
+      <option>200</option>
+      <option>300</option>
+      <option>400</option>
   </select>
   <input type="text" id="topic" placeholder="Enter topic (e.g. Calculus, AI, etc)" />
   <button id="searchBtn">🔍 Search Materials</button>
@@ -8341,3 +8343,4 @@ document.addEventListener('DOMContentLoaded', function() {
 </script>
 </body>
 </html>
+
