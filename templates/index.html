@@ -1148,7 +1148,7 @@ function sendQuestion() {
   // Show loading
   const loadingMsg = document.createElement('p');
   loadingMsg.className = 'ai-message';
-  loadingMsg.innerText = 'Tellavista is thinking...';
+  loadingMsg.innerText = 'Nelavista is thinking...';
   msgBox.appendChild(loadingMsg);
   msgBox.scrollTop = msgBox.scrollHeight;
 
@@ -1163,7 +1163,7 @@ function sendQuestion() {
       chatHistory.push({ role: 'assistant', content: answer });
       const aiMsg = document.createElement('p');
       aiMsg.className = 'ai-message';
-      aiMsg.innerHTML = `<strong>Tellavista:</strong> ${answer}`;
+      aiMsg.innerHTML = `<strong>Nelavista:</strong> ${answer}`;
       msgBox.appendChild(aiMsg);
       msgBox.scrollTop = msgBox.scrollHeight;
     })
@@ -1171,7 +1171,7 @@ function sendQuestion() {
       loadingMsg.remove();
       const errorMsg = document.createElement('p');
       errorMsg.className = 'ai-message';
-      errorMsg.innerText = 'Error reaching Tellavista. Please try again.';
+      errorMsg.innerText = 'Error reaching Nellavista. Please try again.';
       msgBox.appendChild(errorMsg);
       msgBox.scrollTop = msgBox.scrollHeight;
     });
@@ -8343,5 +8343,6 @@ document.addEventListener('DOMContentLoaded', function() {
 </script>
 </body>
 </html>
+
 
 
