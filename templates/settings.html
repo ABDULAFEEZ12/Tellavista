@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Tellavista Settings</title>
+  <title>Telavista Settings</title>
   <style id="theme-style">
     body {
       font-family: 'Arial', sans-serif;
@@ -96,7 +96,7 @@
     </div>
 
     <hr>
-    <h2 id="ai-pref-title">📚 Telavista AI Preferences</h2>
+    <h2 id="ai-pref-title">📚 Nelavista AI Preferences</h2>
     <div class="setting">
       <label for="memoryToggle">Enable Learning Memory</label>
       <input type="checkbox" id="memoryToggle" />
@@ -122,7 +122,7 @@
       </div>
 
       <div class="setting">
-        <label><strong>Anything else Telavista should know about you?</strong></label>
+        <label><strong>Anything else Nelavista should know about you?</strong></label>
       </div>
       <div class="setting">
         <textarea name="more_info" id="moreInfo" rows="3"></textarea>
@@ -157,7 +157,7 @@
 
   <script>
     document.addEventListener('DOMContentLoaded', () => {
-      const settings = JSON.parse(localStorage.getItem('telavistaSettings') || '{}');
+      const settings = JSON.parse(localStorage.getItem('NelavistaSettings') || '{}');
       document.getElementById('theme').value = settings.theme || 'light';
       document.getElementById('notifications').checked = settings.notifications || false;
       document.getElementById('language').value = settings.language || 'en';
@@ -192,12 +192,12 @@
 
     function applyLanguage(lang) {
       if (lang === 'yo') {
-        document.getElementById('settings-title').textContent = '⚙️ Eto Telavista';
-        document.getElementById('ai-pref-title').textContent = '📚 Awon Ayanfẹ AI Telavista';
+        document.getElementById('settings-title').textContent = '⚙️ Eto Nelavista';
+        document.getElementById('ai-pref-title').textContent = '📚 Awon Ayanfẹ AI Nelavista';
         document.getElementById('assistant-type-title').textContent = '🧠 Iru Iranlọwọ to fe';
       } else {
-        document.getElementById('settings-title').textContent = '⚙️ Telavista Settings';
-        document.getElementById('ai-pref-title').textContent = '📚 Telavista AI Preferences';
+        document.getElementById('settings-title').textContent = '⚙️ Nelavista Settings';
+        document.getElementById('ai-pref-title').textContent = '📚 Nelavista AI Preferences';
         document.getElementById('assistant-type-title').textContent = '🧠 What type of assistant do you want?';
       }
     }
@@ -215,7 +215,7 @@
         moreInfo: document.getElementById('moreInfo').value,
         traits
       };
-      localStorage.setItem('telavistaSettings', JSON.stringify(data));
+      localStorage.setItem('NelavistaSettings', JSON.stringify(data));
       applyTheme(data.theme);
       applyLanguage(data.language);
       alert('Preferences saved!');
@@ -225,7 +225,7 @@
       const field = document.getElementById('fieldToDelete').value;
       const settings = JSON.parse(localStorage.getItem('telavistaSettings') || '{}');
       delete settings[field];
-      localStorage.setItem('telavistaSettings', JSON.stringify(settings));
+      localStorage.setItem('NelavistaSettings', JSON.stringify(settings));
       location.reload();
     }
 
