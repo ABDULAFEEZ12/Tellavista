@@ -338,10 +338,10 @@ def profile():
     user = session.get('user', {})
     return render_template('profile.html', user=user)
 
-@app.route('/talk-to-tellavista')
+@app.route('/talk-to-nelavista')
 @login_required
-def talk_to_tellavista():
-    return render_template('talk-to-tellavista.html')
+def talk_to_nelavista():
+    return render_template('talk-to-nelavista.html')
 
 @app.route('/ask', methods=['POST'])
 @login_required
@@ -382,7 +382,7 @@ def ask():
         # --- System prompt changes depending on mode ---
         if mode == "chatty":
             system_prompt = (
-                "You are Tellavista, a friendly and motivational AI tutor. "
+                "You are Nelavista, a friendly and motivational AI tutor. "
                 "For casual chats:\n"
                 "- Reply in clean HTML using <p> only.\n"
                 "- Be warm, short, and natural like a human friend.\n"
@@ -392,7 +392,7 @@ def ask():
             )
         else:
             system_prompt = (
-                "You are Tellavista, a motivational AI tutor. "
+                "You are Nelavista, a motivational AI tutor. "
                 "Always respond in clean HTML for problem-solving. "
                 "Format answers like this:\n\n"
                 "<p><strong>Intro:</strong> Short motivational opener.</p>\n"
@@ -404,7 +404,7 @@ def ask():
                 "<h2>✅ Final Answer</h2>\n"
                 "<pre><strong>🎯 Show the final solution here, copyable</strong></pre>\n\n"
                 "⚡ Rules:\n"
-                "- Do NOT start with 'Tellavista Solution'.\n"
+                "- Do NOT start with 'Nelavista Solution'.\n"
                 "- Use <h2>, <h3>, <p>, <ul>, <li> for clarity.\n"
                 "- Final Answer must be inside <pre> so it's easy to copy.\n"
                 "- Use emojis for friendliness."
@@ -1202,6 +1202,7 @@ if __name__ == '__main__':
     print("🔑 Default user: test / test123")
     print("🌐 Server running on http://localhost:5000")
     app.run(debug=True, port=5000)
+
 
 
 
