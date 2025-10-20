@@ -3,7 +3,9 @@
 <head>
 <meta charset="UTF-8" />
 <title>Nelavista - Your Educational AI Companion</title>
-<meta name="viewport" content="width=device-width, initial-scale=8.0" />
+
+<!-- Viewport (mobile-first) -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
 <!-- Force update -->
 <meta name="version" content="1.0.1">
@@ -509,77 +511,34 @@ body.dark-mode .reel-caption {
 }
 
 /* Mobile-first responsive design */
-@media (max-width: 480px) {
+@media(max-width: 600px) {
   body {
-    font-size: 15px;
+    font-size: 0.95em;
   }
-  
   header h1 {
-    font-size: 1.3rem;
-    margin: 10px 5px;
+    font-size: 1.4em;
   }
-  
   header h3 {
-    font-size: 0.9rem;
-    margin: 10px 5px;
+    font-size: 1em;
   }
-  
-  .tabs {
-    margin-top: 70px;
-    gap: 5px;
-  }
-  
-  .tab {
-    padding: 8px 12px;
-    font-size: 0.85rem;
-    border-radius: 20px;
-  }
-  
-  .section {
-    padding: 12px;
-    margin-top: 12px;
-    width: calc(100% - 16px);
-  }
-  
-  .messages {
-    padding: 12px;
-    max-height: 250px;
-    min-height: 180px;
-  }
-  
-  .user-message, .ai-message {
-    padding: 8px 12px;
-    font-size: 0.9rem;
-    max-width: 90%;
-  }
-  
-  iframe {
-    height: 180px;
-  }
-  
-  button {
-    padding: 14px 20px;
-    font-size: 1rem;
-  }
-  
-  input[type="text"], select {
-    padding: 14px 12px;
-    font-size: 1rem;
-  }
-  
-  #menu-toggle, #theme-toggle {
-    top: 12px;
-    width: 40px;
-    height: 40px;
-    font-size: 20px;
-  }
-  
   #menu-toggle {
-    left: 10px;
+    font-size: 24px;
+    padding: 6px 10px;
   }
-  
-  #theme-toggle {
-    right: 10px;
+  .tab {
+    padding: 8px 16px;
+    font-size: 0.95em;
+  }
+  button {
+    padding: 10px 16px;
+    font-size: 0.95em;
+  }
+  .audio-controls {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .audio-time {
+    text-align: center;
   }
 }
 
@@ -774,6 +733,7 @@ body.dark-mode select {
 <p style="font-size: 16px; color: #555; font-weight: 500; margin-top: -4px;">(formerly Tellavista)</p>
 <h3>💡 Study smarter, achieve more! 💡</h3>
 </header>
+
 <!-- Tabs -->
 <div class="tabs">
   <div class="tab active" data-section="aiSection" onclick="activateTab(this)">🤖 AI</div>
@@ -786,7 +746,7 @@ body.dark-mode select {
 <div class="section active" id="aiSection">
   <div class="messages" id="messages"></div>
   <div class="input-container">
-    <input type="text" id="userInput" placeholder="Ask Tellavista about your studies, motivation, or learning tips..." />
+    <input type="text" id="userInput" placeholder="Ask Nelavista about your studies, motivation, or learning tips..." />
     <button id="askButton" onclick="sendQuestion()">Ask</button>
   </div>
 </div>
@@ -795,7 +755,6 @@ body.dark-mode select {
 <div class="section" id="materialsSection">
   <h3>📚 Search Course Materials</h3>
   <select id="course">
-    <option value="">Select Course</option>
     <option value="Accountancy">Accountancy</option>
       <option value="Accounting">Accounting</option>
       <option value="Agriculture">Agriculture</option>
@@ -870,10 +829,9 @@ body.dark-mode select {
   </select>
   <select id="level">
     <option value="">Select Level</option>
-    <option>100</option>
-      <option>200</option>
-      <option>300</option>
-      <option>400</option>
+    <option value="100">100 Level</option>
+    <option value="200">200 Level</option>
+    <option value="300">300 Level</option>
   </select>
   <input type="text" id="topic" placeholder="Enter topic (e.g. Calculus, AI, etc)" />
   <button id="searchBtn">🔍 Search Materials</button>
@@ -1148,7 +1106,7 @@ function sendQuestion() {
   // Show loading
   const loadingMsg = document.createElement('p');
   loadingMsg.className = 'ai-message';
-  loadingMsg.innerText = 'Nelavista is thinking...';
+  loadingMsg.innerText = 'Tellavista is thinking...';
   msgBox.appendChild(loadingMsg);
   msgBox.scrollTop = msgBox.scrollHeight;
 
@@ -1171,7 +1129,7 @@ function sendQuestion() {
       loadingMsg.remove();
       const errorMsg = document.createElement('p');
       errorMsg.className = 'ai-message';
-      errorMsg.innerText = 'Error reaching Nellavista. Please try again.';
+      errorMsg.innerText = 'Error reaching Nelavista. Please try again.';
       msgBox.appendChild(errorMsg);
       msgBox.scrollTop = msgBox.scrollHeight;
     });
@@ -8343,8 +8301,3 @@ document.addEventListener('DOMContentLoaded', function() {
 </script>
 </body>
 </html>
-
-
-
-
-
