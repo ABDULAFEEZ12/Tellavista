@@ -468,7 +468,7 @@ def about():
     return render_template('about.html')
 
 @app.route('/privacy-policy')
-def about():
+def privacy_policy():
     return render_template('privacy-policy.html')
 
 @app.route('/settings')
@@ -1206,6 +1206,7 @@ if __name__ == '__main__':
     print("🔑 Default user: test / test123")
     print("🌐 Server running on http://localhost:5000")
     app.run(debug=True, port=5000)
+
 
 
 
