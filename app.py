@@ -467,6 +467,10 @@ def ask():
 def about():
     return render_template('about.html')
 
+@app.route('/privacy-policy')
+def about():
+    return render_template('privacy-policy.html')
+
 @app.route('/settings')
 @login_required
 def settings():
@@ -1202,6 +1206,7 @@ if __name__ == '__main__':
     print("🔑 Default user: test / test123")
     print("🌐 Server running on http://localhost:5000")
     app.run(debug=True, port=5000)
+
 
 
 
