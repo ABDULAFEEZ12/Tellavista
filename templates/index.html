@@ -1,35 +1,44 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<title>Nelavista - Your Educational AI Companion</title>
+  <meta charset="UTF-8" />
+  <title>Nelavista - Your Educational AI Companion</title>
 
-<!-- Viewport (mobile-first) -->
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <!-- Viewport for mobile and scaling -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
 
-<!-- Force update -->
-<meta name="version" content="1.0.1">
+  <!-- Version tracking -->
+  <meta name="version" content="1.0.2">
 
-<!-- External CSS -->
-<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <!-- Prevent cache (force reload in WebView) -->
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
 
-<!-- Enhanced CSS for Mobile & Aesthetics, Light/Dark Mode -->
-<style>
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+  <!-- Security & Compatibility -->
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="referrer" content="no-referrer" />
+  <meta http-equiv="Content-Security-Policy" content="default-src * 'unsafe-inline' 'unsafe-eval' data: blob:;" />
 
-:root {
-  --primary-color: #007bff;
-  --primary-dark: #0056b3;
-  --light-bg: #f0f4f8;
-  --dark-bg: #1e1e2f;
-  --card-light: #ffffff;
-  --card-dark: #2c2c3a;
-  --text-light: #333333;
-  --text-dark: #e0e0e0;
-  --shadow: 0 2px 8px rgba(0,0,0,0.1);
-  --shadow-hover: 0 4px 12px rgba(0,0,0,0.15);
-}
+  <!-- External CSS -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 
+  <!-- Mobile-Optimized Font & Color Scheme -->
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
+    :root {
+      --primary-color: #007bff;
+      --primary-dark: #0056b3;
+      --light-bg: #f0f4f8;
+      --dark-bg: #1e1e2f;
+      --card-light: #ffffff;
+      --card-dark: #2c2c3a;
+      --text-light: #333333;
+      --text-dark: #e0e0e0;
+      --shadow: 0 2px 8px rgba(0,0,0,0.1);
+      --shadow-hover: 0 4px 12px rgba(0,0,0,0.15);
+    }
 * {
   box-sizing: border-box;
 }
@@ -8307,4 +8316,5 @@ document.addEventListener('DOMContentLoaded', function() {
 </script>
 </body>
 </html>
+
 
