@@ -3,111 +3,170 @@
 <head>
 <meta charset="UTF-8" />
 <title>Login - Nelavista</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+<!-- Viewport for proper scaling in WebView -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+
+<!-- Prevent caching for live updates -->
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+<meta http-equiv="Pragma" content="no-cache" />
+<meta http-equiv="Expires" content="0" />
+
+<!-- Style Section -->
 <style>
+  * {
+    box-sizing: border-box;
+  }
+
+  body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+    color: white;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
+  }
+
+  .login-container {
+    background-color: rgba(255, 255, 255, 0.08);
+    padding: 2rem 1.5rem;
+    border-radius: 15px;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.35);
+    width: 90%;
+    max-width: 400px;
+    animation: fadeIn 0.4s ease-in-out;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .login-container h1 {
+    text-align: center;
+    margin-bottom: 0.5rem;
+    font-size: 1.8rem;
+    color: #fff;
+  }
+
+  .login-container p.subtitle {
+    text-align: center;
+    font-size: 0.95rem;
+    color: #ccc;
+    margin-top: -2px;
+    margin-bottom: 1.5rem;
+  }
+
+  form div {
+    margin-bottom: 1.2rem;
+  }
+
+  label {
+    display: block;
+    margin-bottom: 0.4rem;
+    font-weight: 500;
+    font-size: 0.95rem;
+  }
+
+  input[type="text"],
+  input[type="password"] {
+    width: 100%;
+    padding: 0.75rem 0.9rem;
+    border: none;
+    border-radius: 8px;
+    outline: none;
+    font-size: 1rem;
+    background-color: rgba(255, 255, 255, 0.15);
+    color: #fff;
+    transition: background-color 0.3s ease, box-shadow 0.3s ease;
+  }
+
+  input[type="text"]:focus,
+  input[type="password"]:focus {
+    background-color: rgba(255, 255, 255, 0.25);
+    box-shadow: 0 0 0 2px #00cba9;
+  }
+
+  button {
+    width: 100%;
+    padding: 0.8rem;
+    background-color: #00cba9;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-weight: 600;
+  }
+
+  button:hover {
+    background-color: #00b097;
+    transform: translateY(-1px);
+  }
+
+  p {
+    text-align: center;
+    margin-top: 1.2rem;
+    font-size: 0.95rem;
+    color: #eee;
+  }
+
+  a {
+    color: #00cba9;
+    text-decoration: none;
+    font-weight: 500;
+  }
+
+  a:hover {
+    text-decoration: underline;
+  }
+
+  /* Flash messages */
+  .flashes {
+    list-style: none;
+    padding: 0;
+    margin-bottom: 1rem;
+  }
+
+  .flashes li {
+    background-color: #ff4d4d;
+    color: white;
+    padding: 0.75rem;
+    margin-bottom: 0.5rem;
+    border-radius: 8px;
+    font-weight: bold;
+    text-align: center;
+  }
+
+  /* Responsive adjustments */
+  @media (max-width: 600px) {
     body {
-        margin: 0;
-        padding: 0;
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
-        color: white;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        height: 100vh;
+      padding: 1rem;
+      font-size: 0.95em;
     }
-
     .login-container {
-        background-color: rgba(255, 255, 255, 0.05);
-        padding: 2rem;
-        border-radius: 15px;
-        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
-        width: 100%;
-        max-width: 400px;
+      padding: 1.5rem 1rem;
     }
+    input, button {
+      font-size: 1rem;
+    }
+  }
 
-    .login-container h1 {
-        text-align: center;
-        margin-bottom: 1.5rem;
-        font-size: 1.8rem;
-    }
-
-    form div {
-        margin-bottom: 1rem;
-    }
-
-    label {
-        display: block;
-        margin-bottom: 0.5rem;
-        font-weight: 500;
-    }
-
-    input[type="text"],
-    input[type="password"] {
-        width: 100%;
-        padding: 0.7rem;
-        border: none;
-        border-radius: 8px;
-        outline: none;
-        font-size: 1rem;
-        background-color: #ffffff20;
-        color: #fff;
-        box-sizing: border-box;
-    }
-
-    button {
-        width: 100%;
-        padding: 0.75rem;
-        background-color: #00cba9;
-        color: white;
-        border: none;
-        border-radius: 8px;
-        font-size: 1rem;
-        cursor: pointer;
-        transition: background-color 0.3s ease;
-    }
-
-    button:hover {
-        background-color: #00b097;
-    }
-
-    p {
-        text-align: center;
-        margin-top: 1rem;
-        font-size: 0.95rem;
-    }
-
-    a {
-        color: #00cba9;
-        text-decoration: none;
-    }
-
-    a:hover {
-        text-decoration: underline;
-    }
-
-    /* Flashed messages styling */
-    .flashes {
-        list-style: none;
-        padding: 0;
-        margin-bottom: 1rem;
-    }
-    .flashes li {
-        background-color: #ff4d4d;
-        color: white;
-        padding: 0.75rem;
-        margin-bottom: 0.5rem;
-        border-radius: 8px;
-        font-weight: bold;
-        text-align: center;
-    }
 </style>
 </head>
 <body>
-<div class="login-container">
+  <div class="login-container">
     <h1>Login to Nelavista</h1>
-<p style="font-size: 16px; color: #555; font-weight: 500; margin-top: -4px;">(formerly Tellavista)</p>
-    
+    <p class="subtitle">(formerly Tellavista)</p>
+
     {% with messages = get_flashed_messages() %}
       {% if messages %}
         <ul class="flashes">
@@ -119,19 +178,20 @@
     {% endwith %}
 
     <form method="POST" action="/login" autocomplete="off">
-        <div>
-            <label for="username_or_email">Username or Email:</label>
-            <input type="text" id="username_or_email" name="username_or_email" required autocomplete="username" />
-        </div>
-        <div>
-            <label for="password">Password:</label>
-            <input type="password" id="password" name="password" required autocomplete="current-password" />
-        </div>
-        <button type="submit">Login</button>
+      <div>
+        <label for="username_or_email">Username or Email:</label>
+        <input type="text" id="username_or_email" name="username_or_email" required autocomplete="username" />
+      </div>
+
+      <div>
+        <label for="password">Password:</label>
+        <input type="password" id="password" name="password" required autocomplete="current-password" />
+      </div>
+
+      <button type="submit">Login</button>
     </form>
+
     <p>Don't have an account? <a href="/signup">Sign up here</a></p>
-</div>
+  </div>
 </body>
 </html>
-
-
