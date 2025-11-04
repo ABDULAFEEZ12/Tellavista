@@ -3,17 +3,17 @@
 <head>
   <meta charset="UTF-8" />
   <title>Login - Nelavista</title>
-  <!-- Viewport for proper scaling in WebView -->
+  <!-- Android WebView specific meta tags -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <!-- Prevent caching for live updates -->
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
   <meta http-equiv="Pragma" content="no-cache" />
   <meta http-equiv="Expires" content="0" />
   
-  <!-- Style Section -->
+  <!-- Style Section - Android WebView Optimized -->
   <style>
     * {
       box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
     }
     
     body {
@@ -29,38 +29,16 @@
       align-items: center;
       overflow-y: auto;
       -webkit-overflow-scrolling: touch;
-      scroll-behavior: smooth;
-      /* Hardware acceleration for gradients */
-      transform: translateZ(0);
-      -webkit-transform: translateZ(0);
-      -webkit-backface-visibility: hidden;
-      -webkit-perspective: 1000;
     }
     
     .login-container {
-      background-color: rgba(255, 255, 255, 0.08);
+      background-color: rgba(255, 255, 255, 0.15); /* Increased opacity for better visibility */
       padding: 2rem 1.5rem;
       border-radius: 15px;
-      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.35);
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5); /* Darker shadow for contrast */
       width: 90%;
       max-width: 400px;
-      animation: fadeIn 0.4s ease-in-out;
-      /* Hardware acceleration for container */
-      transform: translateZ(0);
-      -webkit-transform: translateZ(0);
-      -webkit-backface-visibility: hidden;
-      -webkit-perspective: 1000;
-    }
-    
-    @keyframes fadeIn {
-      from { 
-        opacity: 0; 
-        transform: translateY(20px); 
-      }
-      to { 
-        opacity: 1; 
-        transform: translateY(0); 
-      }
+      border: 1px solid rgba(255, 255, 255, 0.1); /* Added border for definition */
     }
     
     .login-container h1 {
@@ -68,115 +46,122 @@
       margin-bottom: 0.5rem;
       font-size: 1.8rem;
       color: #fff;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3); /* Added text shadow */
     }
     
     .login-container p.subtitle {
       text-align: center;
       font-size: 0.95rem;
-      color: #ccc;
+      color: #e0e0e0; /* Brighter color */
       margin-top: -2px;
       margin-bottom: 1.5rem;
+      font-weight: 500;
     }
     
     form div {
-      margin-bottom: 1.2rem;
+      margin-bottom: 1.5rem; /* Increased spacing */
     }
     
     label {
       display: block;
-      margin-bottom: 0.4rem;
-      font-weight: 500;
-      font-size: 0.95rem;
+      margin-bottom: 0.6rem; /* Increased spacing */
+      font-weight: 600; /* Bolder labels */
+      font-size: 1rem;
+      color: #f0f0f0; /* Brighter label color */
     }
     
     input[type="text"], input[type="password"] {
       width: 100%;
-      padding: 0.75rem 0.9rem;
-      border: none;
-      border-radius: 8px;
+      padding: 0.9rem 1rem; /* Increased padding */
+      border: 2px solid rgba(255, 255, 255, 0.2); /* Added border */
+      border-radius: 10px; /* Slightly larger radius */
       outline: none;
-      font-size: 1rem;
-      background-color: rgba(255, 255, 255, 0.15);
+      font-size: 1.05rem; /* Slightly larger font */
+      background-color: rgba(255, 255, 255, 0.2); /* More opaque background */
       color: #fff;
-      transition: background-color 0.3s ease, box-shadow 0.3s ease;
-      /* Hardware acceleration for inputs */
-      transform: translateZ(0);
-      -webkit-transform: translateZ(0);
+      transition: all 0.3s ease;
+      -webkit-appearance: none; /* Remove default styling on iOS/Android */
     }
     
     input[type="text"]:focus, input[type="password"]:focus {
-      background-color: rgba(255, 255, 255, 0.25);
-      box-shadow: 0 0 0 2px #00cba9;
+      background-color: rgba(255, 255, 255, 0.3);
+      border-color: #00cba9;
+      box-shadow: 0 0 0 3px rgba(0, 203, 169, 0.3);
+    }
+    
+    input[type="text"]::placeholder, input[type="password"]::placeholder {
+      color: rgba(255, 255, 255, 0.7); /* Visible placeholder */
     }
     
     button {
       width: 100%;
-      padding: 0.8rem;
-      background-color: #00cba9;
+      padding: 1rem; /* Increased padding */
+      background: linear-gradient(135deg, #00cba9, #00b897); /* Gradient button */
       color: white;
       border: none;
-      border-radius: 8px;
-      font-size: 1rem;
+      border-radius: 10px;
+      font-size: 1.1rem; /* Larger font */
       cursor: pointer;
       transition: all 0.3s ease;
-      font-weight: 600;
-      /* Hardware acceleration for button */
-      transform: translateZ(0);
-      -webkit-transform: translateZ(0);
+      font-weight: 700; /* Bolder text */
+      box-shadow: 0 4px 15px rgba(0, 203, 169, 0.3);
     }
     
-    button:hover {
-      background-color: #00b097;
-      transform: translateY(-1px);
+    button:active {
+      transform: translateY(1px); /* Press effect */
+      box-shadow: 0 2px 8px rgba(0, 203, 169, 0.3);
     }
     
     p {
       text-align: center;
-      margin-top: 1.2rem;
-      font-size: 0.95rem;
-      color: #eee;
+      margin-top: 1.5rem;
+      font-size: 1rem;
+      color: #f0f0f0; /* Brighter text */
     }
     
     a {
-      color: #00cba9;
+      color: #00ffd5; /* Brighter link color */
       text-decoration: none;
-      font-weight: 500;
+      font-weight: 600;
     }
     
     a:hover {
       text-decoration: underline;
     }
     
-    /* Flash messages */
+    /* Flash messages - More visible */
     .flashes {
       list-style: none;
       padding: 0;
-      margin-bottom: 1rem;
+      margin-bottom: 1.5rem;
     }
     
     .flashes li {
-      background-color: #ff4d4d;
+      background: linear-gradient(135deg, #ff6b6b, #ff5252);
       color: white;
-      padding: 0.75rem;
-      margin-bottom: 0.5rem;
-      border-radius: 8px;
+      padding: 1rem;
+      margin-bottom: 0.8rem;
+      border-radius: 10px;
       font-weight: bold;
       text-align: center;
+      box-shadow: 0 4px 15px rgba(255, 107, 107, 0.3);
     }
     
-    /* Responsive adjustments */
-    @media (max-width: 600px) {
+    /* Android WebView specific fixes */
+    @media screen and (max-width: 768px) {
       body {
         padding: 1rem;
-        font-size: 0.95em;
+        background-attachment: fixed; /* Fix gradient on scroll */
       }
       
       .login-container {
-        padding: 1.5rem 1rem;
+        padding: 1.8rem 1.2rem;
+        margin: 1rem 0;
       }
       
       input, button {
-        font-size: 1rem;
+        font-size: 16px; /* Prevent zoom on focus in iOS */
+        min-height: 44px; /* Better touch targets */
       }
     }
   </style>
@@ -199,16 +184,56 @@
     <form method="POST" action="/login" autocomplete="off">
       <div>
         <label for="username_or_email">Username or Email:</label>
-        <input type="text" id="username_or_email" name="username_or_email" required autocomplete="username" />
+        <input 
+          type="text" 
+          id="username_or_email" 
+          name="username_or_email" 
+          required 
+          autocomplete="username"
+          placeholder="Enter your username or email"
+        />
       </div>
       <div>
         <label for="password">Password:</label>
-        <input type="password" id="password" name="password" required autocomplete="current-password" />
+        <input 
+          type="password" 
+          id="password" 
+          name="password" 
+          required 
+          autocomplete="current-password"
+          placeholder="Enter your password"
+        />
       </div>
       <button type="submit">Login</button>
     </form>
     
     <p>Don't have an account? <a href="/signup">Sign up here</a></p>
   </div>
+
+  <!-- Simple JavaScript for better Android compatibility -->
+  <script>
+    // Prevent default behaviors that might cause issues
+    document.addEventListener('DOMContentLoaded', function() {
+      // Fix for Android WebView input focus issues
+      const inputs = document.querySelectorAll('input');
+      inputs.forEach(input => {
+        input.addEventListener('focus', function() {
+          this.style.backgroundColor = 'rgba(255, 255, 255, 0.3)';
+        });
+        input.addEventListener('blur', function() {
+          this.style.backgroundColor = 'rgba(255, 255, 255, 0.2)';
+        });
+      });
+      
+      // Add loading state to button
+      const form = document.querySelector('form');
+      const button = document.querySelector('button');
+      
+      form.addEventListener('submit', function() {
+        button.innerHTML = 'Logging in...';
+        button.disabled = true;
+      });
+    });
+  </script>
 </body>
 </html>
