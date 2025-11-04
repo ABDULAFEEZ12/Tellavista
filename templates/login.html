@@ -4,44 +4,52 @@
 <meta charset="UTF-8" />
 <title>Login - Nelavista</title>
 
-<!-- Viewport for proper scaling in WebView -->
+<!-- Viewport for mobile scaling -->
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
 
-<!-- Prevent caching for live updates -->
+<!-- Prevent caching -->
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
 <meta http-equiv="Pragma" content="no-cache" />
 <meta http-equiv="Expires" content="0" />
 
-<!-- Style Section -->
 <style>
   * {
     box-sizing: border-box;
   }
 
-  body {
+  html, body {
     margin: 0;
     padding: 0;
+    height: 100%;
+    width: 100%;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: #ffffff;
+    background: #203a43; /* Fallback solid color */
     background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
-    color: white;
-    min-height: 100vh;
+    background-attachment: fixed;
+    background-size: cover;
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  body {
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    overflow-y: auto;
-    -webkit-overflow-scrolling: touch;
-    scroll-behavior: smooth;
+    min-height: 100vh;
   }
 
   .login-container {
-    background-color: rgba(255, 255, 255, 0.08);
-    padding: 2rem 1.5rem;
-    border-radius: 15px;
-    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.35);
     width: 90%;
     max-width: 400px;
+    padding: 2rem 1.5rem;
+    border-radius: 15px;
+    background: rgba(255, 255, 255, 0.1);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.35);
     animation: fadeIn 0.4s ease-in-out;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
   }
 
   @keyframes fadeIn {
@@ -53,70 +61,66 @@
     text-align: center;
     margin-bottom: 0.5rem;
     font-size: 1.8rem;
-    color: #fff;
+    color: #ffffff;
   }
 
-  .login-container p.subtitle {
+  .subtitle {
     text-align: center;
     font-size: 0.95rem;
-    color: #ccc;
+    color: #b5c9cf;
     margin-top: -2px;
     margin-bottom: 1.5rem;
   }
 
-  form div {
-    margin-bottom: 1.2rem;
-  }
-
   label {
     display: block;
-    margin-bottom: 0.4rem;
+    margin-bottom: 0.5rem;
     font-weight: 500;
-    font-size: 0.95rem;
+    color: #e3e3e3;
   }
 
   input[type="text"],
   input[type="password"] {
     width: 100%;
-    padding: 0.75rem 0.9rem;
+    padding: 0.8rem;
     border: none;
     border-radius: 8px;
-    outline: none;
-    font-size: 1rem;
-    background-color: rgba(255, 255, 255, 0.15);
+    background-color: rgba(255, 255, 255, 0.18);
     color: #fff;
-    transition: background-color 0.3s ease, box-shadow 0.3s ease;
+    font-size: 1rem;
+    outline: none;
+    transition: 0.3s ease;
   }
 
   input[type="text"]:focus,
   input[type="password"]:focus {
-    background-color: rgba(255, 255, 255, 0.25);
+    background-color: rgba(255, 255, 255, 0.28);
     box-shadow: 0 0 0 2px #00cba9;
   }
 
   button {
     width: 100%;
-    padding: 0.8rem;
-    background-color: #00cba9;
-    color: white;
+    margin-top: 0.5rem;
+    padding: 0.85rem;
     border: none;
     border-radius: 8px;
+    background-color: #00cba9;
+    color: white;
     font-size: 1rem;
-    cursor: pointer;
-    transition: all 0.3s ease;
     font-weight: 600;
+    cursor: pointer;
+    transition: 0.3s ease;
   }
 
   button:hover {
     background-color: #00b097;
-    transform: translateY(-1px);
   }
 
   p {
     text-align: center;
     margin-top: 1.2rem;
     font-size: 0.95rem;
-    color: #eee;
+    color: #e0e0e0;
   }
 
   a {
@@ -129,7 +133,6 @@
     text-decoration: underline;
   }
 
-  /* Flash messages */
   .flashes {
     list-style: none;
     padding: 0;
@@ -146,20 +149,11 @@
     text-align: center;
   }
 
-  /* Responsive adjustments */
   @media (max-width: 600px) {
-    body {
-      padding: 1rem;
-      font-size: 0.95em;
-    }
     .login-container {
       padding: 1.5rem 1rem;
     }
-    input, button {
-      font-size: 1rem;
-    }
   }
-
 </style>
 </head>
 <body>
@@ -180,12 +174,12 @@
     <form method="POST" action="/login" autocomplete="off">
       <div>
         <label for="username_or_email">Username or Email:</label>
-        <input type="text" id="username_or_email" name="username_or_email" required autocomplete="username" />
+        <input type="text" id="username_or_email" name="username_or_email" required />
       </div>
 
       <div>
         <label for="password">Password:</label>
-        <input type="password" id="password" name="password" required autocomplete="current-password" />
+        <input type="password" id="password" name="password" required />
       </div>
 
       <button type="submit">Login</button>
