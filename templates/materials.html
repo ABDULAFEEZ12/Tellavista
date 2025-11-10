@@ -2,237 +2,734 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" /> <!-- crucial for mobile scaling -->
   <title>📚 Study Materials</title>
   <style>
     body {
-      font-family: 'Poppins', sans-serif;
+      font-family: Poppins, sans-serif;
+      padding: 20px;
       background: #f4f4f4;
       color: #222;
-      margin: 0;
-      padding: 16px;
-      box-sizing: border-box;
     }
-
     h1, h2 {
       text-align: center;
-      margin: 10px 0;
-      line-height: 1.4;
     }
-
-    select, input, button {
-      display: block;
-      width: 100%;
-      max-width: 500px;
+    .material {
+      background: white;
+      padding: 15px;
       margin: 10px auto;
-      padding: 14px;
-      font-size: 1rem;
-      border-radius: 10px;
+      border-radius: 8px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      max-width: 700px;
+    }
+    .material a {
+      text-decoration: none;
+      color: blue;
+    }
+    select, input, button {
+      margin: 10px auto;
+      display: block;
+      padding: 10px;
+      font-size: 1em;
+      border-radius: 6px;
       border: 1px solid #ccc;
-      background-color: #fff;
-      box-sizing: border-box;
-      transition: all 0.3s ease;
+      width: 90%;
+      max-width: 600px;
     }
-
-    select:focus, input:focus {
-      border-color: #007BFF;
-      outline: none;
-      box-shadow: 0 0 6px rgba(0,123,255,0.3);
-    }
-
     button {
       background-color: #007BFF;
       color: white;
       border: none;
-      font-weight: 600;
       cursor: pointer;
     }
-
     button:disabled {
       background-color: #6c757d;
       cursor: not-allowed;
     }
-
     button:hover:enabled {
       background-color: #0056b3;
-      transform: scale(1.02);
     }
-
-    .material {
-      background: white;
-      padding: 15px;
-      margin: 12px auto;
-      border-radius: 10px;
-      box-shadow: 0 3px 10px rgba(0,0,0,0.08);
-      max-width: 600px;
-      word-wrap: break-word;
-    }
-
-    .material a {
-      text-decoration: none;
-      color: #007BFF;
-      font-weight: 600;
-    }
-
-    .material a:hover {
-      text-decoration: underline;
-    }
-
-    #results h2 {
-      margin-top: 25px;
-      font-size: 1.2rem;
-    }
-
     .ai-tab {
       text-align: center;
-      margin: 30px 0 15px 0;
+      margin-top: 30px;
     }
-
     .ai-tab a {
-      padding: 12px 24px;
+      padding: 10px 20px;
       background-color: #28a745;
       color: white;
-      border-radius: 8px;
+      border-radius: 6px;
       text-decoration: none;
-      font-weight: 600;
-      display: inline-block;
-      transition: all 0.3s ease;
+      font-weight: bold;
     }
-
     .ai-tab a:hover {
       background-color: #1e7e34;
-      transform: scale(1.05);
-    }
-
-    /* make results readable and smooth on small screens */
-    #results {
-      padding-bottom: 40px;
-    }
-
-    /* mobile spacing */
-    @media (max-width: 480px) {
-      body {
-        padding: 12px;
-      }
-      select, input, button {
-        font-size: 0.95rem;
-        padding: 12px;
-      }
-      h1 {
-        font-size: 1.3rem;
-      }
-      .ai-tab a {
-        width: 90%;
-      }
     }
   </style>
 </head>
 <body>
 
-  <h1>📚 Study Materials</h1>
-  <h2>Select Course and Level</h2>
+<h1>📚 Study Materials</h1>
+<h1>Select Course and Level</h1>
 
-  <select id="course">
-    <option value="">-- Select Course --</option>
-    <!-- your options here -->
-    <option value="Accountancy">Accountancy</option>
-    <option value="Accounting">Accounting</option>
-    <option value="Agriculture">Agriculture</option>
-    <option value="Arabic Studies">Arabic Studies</option>
-    <option value="Banking and Finance">Banking and Finance</option>
-    <option value="Biochemistry">Biochemistry</option>
-    <option value="Botany">Botany</option>
-    <option value="Business Administration">Business Administration</option>
-    <option value="Computer Science">Computer Science</option>
-    <option value="Economics">Economics</option>
-    <option value="Mathematics">Mathematics</option>
-    <option value="Political Science">Political Science</option>
-    <option value="Sociology">Sociology</option>
-    <!-- ...continue as needed -->
-  </select>
+<!-- Course Dropdown -->
+<select id="course">
+  <option value="">-- Select Course --</option>
+  <option value="Accountancy">Accountancy</option>
+  <option value="Accounting">Accounting</option>
+  <option value="Agriculture">Agriculture</option>
+  <option value="Arabic Studies">Arabic Studies</option>
+      <option value="Banking and Finance">Banking and Finance</option>
+      <option value="Biochemistry">Biochemistry</option>
+      <option value="Botany">Botany</option>
+      <option value="Business Administration">Business Administration</option>
+      <option value="Chemical and Polymer Engineering">Chemical and Polymer Engineering</option>
+      <option value="Chemistry">Chemistry</option>
+      <option value="Christian Religious Studies">Christian Religious Studies</option>
+      <option value="Computer Science">Computer Science</option>
+      <option value="Dentistry and Dental Surgery">Dentistry and Dental Surgery</option>
+      <option value="Drama / Dramatic / Performing Arts">Drama / Dramatic / Performing Arts</option>
+      <option value="Early Childhood Education">Early Childhood Education</option>
+      <option value="Economics">Economics</option>
+      <option value="Education and Accounting">Education and Accounting</option>
+      <option value="Education and Biology">Education and Biology</option>
+      <option value="Education and Chemistry">Education and Chemistry</option>
+      <option value="Education and Christian Religious Studies">Education and Christian Religious Studies</option>
+      <option value="Education and Computer Science">Education and Computer Science</option>
+      <option value="Education and Economics">Education and Economics</option>
+      <option value="Education and English Language">Education and English Language</option>
+      <option value="Education and French">Education and French</option>
+      <option value="Education and Geography">Education and Geography</option>
+      <option value="Education and History">Education and History</option>
+      <option value="Education and Islamic Studies">Education and Islamic Studies</option>
+      <option value="Education and Mathematics">Education and Mathematics</option>
+      <option value="Education and Physics">Education and Physics</option>
+      <option value="Education and Political Science">Education and Political Science</option>
+      <option value="Education and Yoruba">Education and Yoruba</option>
+      <option value="Educational Management">Educational Management</option>
+      <option value="Electronics and Computer Engineering">Electronics and Computer Engineering</option>
+      <option value="English Language">English Language</option>
+      <option value="Fine and Applied Arts">Fine and Applied Arts</option>
+      <option value="Fisheries">Fisheries</option>
+      <option value="French">French</option>
+      <option value="Geography and Planning">Geography and Planning</option>
+      <option value="Guidance and Counseling">Guidance and Counseling</option>
+      <option value="Health Education">Health Education</option>
+      <option value="History and International Studies">History and International Studies</option>
+      <option value="Industrial Relations and Personnel Management">Industrial Relations and Personnel Management</option>
+      <option value="Insurance">Insurance</option>
+      <option value="Islamic Studies">Islamic Studies</option>
+      <option value="Law">Law</option>
+      <option value="Library and Information Science">Library and Information Science</option>
+      <option value="Local Government and Development Studies">Local Government and Development Studies</option>
+      <option value="Marketing">Marketing</option>
+      <option value="Mass Communication">Mass Communication</option>
+      <option value="Mathematics">Mathematics</option>
+      <option value="Mechanical Engineering">Mechanical Engineering</option>
+      <option value="Medicine and Surgery">Medicine and Surgery</option>
+      <option value="Microbiology">Microbiology</option>
+      <option value="Music">Music</option>
+      <option value="Nursing / Nursing Science">Nursing / Nursing Science</option>
+      <option value="Pharmacology">Pharmacology</option>
+      <option value="Philosophy">Philosophy</option>
+      <option value="Physical and Health Education">Physical and Health Education</option>
+      <option value="Physics">Physics</option>
+      <option value="Physiology">Physiology</option>
+      <option value="Political Science">Political Science</option>
+      <option value="Portuguese / English">Portuguese / English</option>
+      <option value="Psychology">Psychology</option>
+      <option value="Public Administration">Public Administration</option>
+      <option value="Sociology">Sociology</option>
+      <option value="Teacher Education Science">Teacher Education Science</option>
+      <option value="Technology and Vocational Education">Technology and Vocational Education</option>
+      <option value="Theatre Arts">Theatre Arts</option>
+      <option value="Transport Management Technology">Transport Management Technology</option>
+      <option value="Yoruba">Yoruba</option>
+      <option value="Zoology">Zoology</option>
+</select>
 
-  <select id="level">
-    <option value="">-- Select Level --</option>
-    <option value="100">100 Level</option>
-    <option value="200">200 Level</option>
-    <option value="300">300 Level</option>
-    <option value="400">400 Level</option>
-  </select>
+<!-- Level Dropdown -->
+<select id="level">
+  <option value="">-- Select Level --</option>
+  <option value="100">100 Level</option>
+  <option value="200">200 Level</option>
+  <option value="300">300 Level</option>
+  <option value="400">400 Level</option>
+</select>
 
-  <input type="text" id="topic" placeholder="Enter topic" />
-  <button id="searchBtn">🔍 Search Materials</button>
+<!-- Input for Topic -->
+<input type="text" id="topic" placeholder="Enter topic" />
 
-  <div id="results"></div>
+<!-- Search Button -->
+<button id="searchBtn">🔍 Search Materials</button>
 
-  <div class="ai-tab">
-    <a href="/teach-me-ai">🤖 Teach Me with AI</a>
-  </div>
+<!-- Results Section -->
+<div id="results"></div>
 
-  <script>
-    const btn = document.getElementById('searchBtn');
+<!-- AI Tab Link -->
+<div class="ai-tab">
+  <a href="/teach-me-ai">🤖 Teach Me with AI</a>
+</div>
 
-    btn.addEventListener('click', () => {
-      const course = document.getElementById('course').value;
-      const level = document.getElementById('level').value;
-      const topic = document.getElementById('topic').value.trim();
+<script>
+const uploadedMaterials = [
+  {
+    title: "Financial Accounting (OpenStax)",
+    author: "OpenStax",
+    license: "CC BY 4.0",
+    link: "static/materials/accounting/Financial-Accounting.pdf"
+  },
+  {
+    title: "Principles of Accounting",
+    author: "Open Educational Resource",
+    license: "CC BY 4.0",
+    link: "static/materials/accounting/Principles-of-Financial-Accounting.pdf"
+  },
+  {
+    title: "A Business Perspective (Managerial Accounting)",
+    author: "Open Educational Resource",
+    license: "CC BY 4.0",
+    link: "static/materials/account/A-Business-Perspective-(Managerial-Accounting).pdf"
+  },
+  {
+    title: "Principles Of Accounting Vol 1",
+    author: "Open Educational Resource",
+    license: "CC BY 4.0",
+    link: "static/materials/account/Principles-Of-Accounting-Vol-1.pdf"
+  },
+  {
+    title: "Principles of Accounting Vol 2",
+    author: "Open Educational Resource",
+    license: "CC BY 4.0",
+    link: "static/materials/account/Principles-Of-Accounting-Vol-2.pdf"
+  },
+  {
+    title: "Principles of Financial Accounting",
+    author: "Open Educational Resource",
+    license: "CC BY 4.0",
+    link: "static/materials/account/Principles-of-Financial-Accounting.pdf"
+  },
+  {
+    title: "Training Manual for ORGANIC AGRICULTURE",
+    author: "FAO",
+    license: "FAO PDF for small‑holder farmers",
+    link: "static/materials/agriculture/Compilation_techniques_organic_agriculture_rev.pdf"
+  },
+  {
+    title: "Introduction to Soil Science",
+    author: "Amber Anderson",
+    license: "CC BY 4.0",
+    link: "static/materials/agriculture/Introduction-to-Soil-Science-1722446382.pdf"
+  },
+  {
+    title: "Genetics, Agriculture, and Biotechnology",
+    author: "Walter Suza and Donald Lee",
+    license: "CC BY-NC-SA 4.0",
+    link: "static/materials/agriculture/Genetics-Agriculture-and-Biotechnology-1646343300.pdf"
+  },
+  {
+    title: "Plant Breeding Methods",
+    author: "Walter R. Fehr and Walter P. Suza",
+    license: "CC BY-NC 4.0",
+    link: "static/materials/agriculture/Plant-Breeding-Methods-1724939423.pdf"
+  },
+  {
+    title: "Crop Genetics",
+    author: "William Beavis, Arden Campbell, Jode Edwards, Shui-Zhang Fei, Thomas Lübberstedt, Laura Merrick, Deborah Muenchrath, Walter Suza; Edited by Walter Suza and Kendall Lamkey",
+    license: "CC BY-NC-SA 4.0",
+    link: "static/materials/agriculture/Crop-Genetics-1696858550 (1).pdf"
+  },
+  {
+    title: "Quantitative Methods for Plant Breeding",
+    author: "Ken Moore, M. L. Harbur, Ron Mowers, Laura Merrick, Dennis Todey, Kendra Meade, William Beavis, Reka Howard, Ursula Frei, Anthony Assibi Mahama, Walter Suza; Edited by Walter Suza and Kendall Lamkey",
+    license: "CC BY-NC-SA 4.0",
+    link: "static/materials/agriculture/Quantitative-Methods-for-Plant-Breeding-1696860463.pdf"
+},
+{
+    title: "Molecular Plant Breeding",
+    author: "Walter Suza (Editor), Kendall Lamkey (Editor), Thomas Lübberstedt, William Beavis, Madan Bhattacharyya, Laura Merrick, Ursula Frei",
+    license: "CC BY-NC-SA 4.0",
+    link: "static/materials/agriculture/Molecular-Plant-Breeding-1696858563.pdf"
+},
+{
+    title: "Quantitative Genetics for Plant Breeding",
+    author: "William Beavis, Katherine Espinosa, Mark Newell, Anthony Assibi Mahama, Walter Suza; Edited by Walter Suza and Kendall Lamkey",
+    license: "CC BY-NC-SA 4.0",
+    link: "static/materials/agriculture/Quantitative-Genetics-for-Plant-Breeding-1697468159.pdf"
+},
+{
+    title: "Crop Improvement",
+    author: "Asheesh Singh, Teshale Mamo, Arti Singh, Jessica Barb, Shui-Zhang Fei, Anthony A. Mahama, Walter Suza; Edited by Walter Suza and Kendall Lamkey",
+    license: "CC BY-NC-SA 4.0",
+    link: "static/materials/agriculture/Crop-Improvement-1696858561.pdf"
+},
+{
+    title: "Cultivar Development",
+    author: "Walter Suza (Editor), Kendall Lamkey (Editor), Rita H. Mumm",
+    license: "CC BY-NC-SA 4.0",
+    link: "static/materials/agriculture/Cultivar-Development-1696858608.pdf"
+},
+{
+    title: "Botany (Ha, Morrow, and Algiers)",
+    author: "Melissa Ha, Maria Morrow, Kammy Algiers",
+    license: "CC BY-NC 4.0 / CC BY-SA 4.0 / CC BY-NC-SA 4.0 / CC BY 4.0 (Mixed, see source)",
+    link: "static/materials/biology/Botany-LibreCommons.pdf"
+},
+{
+    title: "Botany Lab Manual (Morrow)",
+    author: "Maria Morrow",
+    license: "CC BY-NC 4.0",
+    link: "static/materials/biology/Botany-Lab-Manual-Morrow.pdf"
+},
+{
+    title: "A Photographic Atlas for Botany (Morrow)",
+    author: "Maria Morrow",
+    license: "CC BY-NC 4.0",
+    link: "static/materials/biology/A-Photographic-Atlas-for-Botany-Morrow.pdf"
+},
+{
+    title: "History and Science of Cultivated Plants (Naithani)",
+    author: "Sushma Naithani",
+    license: "CC BY-NC 4.0",
+    link: "static/materials/botany/History-and-Science-of-Cultivated-Plants-Naithani.pdf"
+},
+{
+    title: "Inanimate Life (Briggs)",
+    author: "George M. Briggs",
+    license: "CC BY-SA 4.0",
+    link: "static/materials/botany/Inanimate-Life-1669056520.pdf"
+},
+{
+    title: "Introduction to Botany (Shipunov)",
+    author: "Alexey Shipunov",
+    license: "Public Domain",
+    link: "static/materials/botany/Full (3).pdf"
+},
+{
+    title: "Plant Anatomy and Physiology (Bellairs)",
+    author: "Sean Bellairs",
+    license: "Creative Commons Attribution-ShareAlike 4.0",
+    link: "static/materials/botany/Plant-Anatomy-Images-and-diagrams-to-explain-concepts-1535068587.pdf"
+},
+{
+    title: "Red Seal Landscape Horticulturist Identify Plants and Plant Requirements (Nakano)",
+    author: "Michelle Nakano",
+    license: "Creative Commons Attribution 4.0",
+    link: "static/materials/botany/Red-Seal-Landscape-Horticulturist-Identify-Plants-and-Plant-Requirements-1660159016.pdf"
+},
+{
+    title: "Soil and Water Conservation Laboratory Manual (Moorberg)",
+    author: "Colby J. Moorberg",
+    license: "Creative Commons Attribution-NonCommercial-ShareAlike 4.0",
+    link: "static/materials/botany/Soil-and-Water-Conservation-Laboratory-Manual-1707258673.pdf"
+},
+{
+    title: "Properties and Behavior of Soil – Online Lab Manual (Hossain et al.)",
+    author: "MD Sahadat Hossain, Ph.D., P.E.; Md Azijul Islam; Faria Fahim Badhon; Tanvir Imtiaz",
+    license: "Creative Commons Attribution-NonCommercial 4.0",
+    link: "static/materials/botany/Properties-and-Behavior-of-Soil-Online-Lab-Manual-1730155959.pdf"
+},
+{
+    title: "Soils Laboratory Manual: K-State Edition, Version 2.0",
+    author: "Colby J. Moorberg and David A. Crouse",
+    license: "Creative Commons Attribution 4.0",
+    link: "static/materials/botany/Soils-Laboratory-Manual-1724790515.pdf"
+},
+{
+    title: "First-Year Arabic",
+    author: "Ragy Mikhaeel",
+    license: "Creative Commons Attribution-NonCommercial ShareAlike 4.0",
+    link: "static/materials/arabic/First-Year-Arabic-1753121858.pdf"
+},
+{
+    title: "Elementary Arabic I",
+    author: "Sadam Issa and Ayman Mohamed",
+    license: "Creative Commons Attribution-NonCommercial 4.0",
+    link: "static/materials/arabic/Elementary-Arabic-I-Sadam-Issa-Ayman-Mohamed.pdf"
+},
+  {
+    title: "Kitāb al-mawāʻiẓ wa-al-iʻtibār 4",
+    author: "Maqrīzī, Aḥmad ibn ʻAlī, 1364-1442",
+    license: "Public Domain",
+    link: "static/materials/arabic/uaena_aco000071_lo.pdf"
+  },
+  {
+    title: "Kitāb al-tawfīqāt al-ilhāmīyah fī muqāranat al-tawārīkh al-Hijrīyah bi-al-sinīn al-Ifrankīyah wa-al-Qibṭīyah",
+    author: "Mukhtār, Muḥammad, 1835-1897",
+    license: "Public Domain",
+    link: "static/materials/arabic/uaena_aco000009_lo.pdf"
+  },
+  {
+    title: "Kitāb Muḥīṭ al-muḥīṭ 2",
+    author: "Bustānī, Buṭrus ibn Būlus, 1818-1883",
+    license: "Public Domain",
+    link: "static/materials/arabic/uaena_aco000002_lo.pdf"
+  },
+  {
+    title: "al-Muzhir fī ʻulūm al-lughah wa-anwāʻihā 1",
+    author: "Suyūṭī, 1445-1505",
+    license: "Public Domain",
+    link: "static/materials/arabic/uaena_aco000106_lo"
+  },
+  {
+    title: "Jāmiʻ al-Zaytūnah 1",
+    author: "n.a.",
+    license: "Public Domain",
+    link: "static/materials/arabic/uaena_aco000111_hi.pdf"
+  },
+  {
+    title: "Riḥlāt 1",
+    author: "ʻAzzām, ʻAbd al-Wahhāb, 1894-1959",
+    license: "Public Domain",
+    link: "static/materials/arabic/uaena_aco000110_lo.pdf"
+  },
+  {
+    title: "Kitāb al-Iqd al-farīd 5",
+    author: "Ibn ʻAbd Rabbih, Aḥmad ibn Muḥammad, 860-940",
+    license: "Public Domain",
+    link: "static/materials/arabic/uaena_aco000020_lo.pdf"
+  },
+  {
+    title: "Money and Banking",
+    author: "Robert E. Wright",
+    license: "Creative Commons Attribution-NonCommercial-ShareAlike (CC BY-NC-SA)",
+    link: "static/materials/bankingandfinance/Money and Banking.pdf"  
+  },
+  {
+    title: "Finance, Banking, and Money",
+    author: "LibreTexts – business/finance authors", 
+    license: "Creative Commons Attribution (CC BY)",
+    link: "static/materials/bankingandfinance/Full (4).pdf"
+  },
+  {
+    title: "Principles of Finance",
+    author: "OpenStax",
+    license: "CC BY 4.0",
+    link: "static/materials/bankingandfinance/PrinciplesofFinance-WEB.pdf"
+  },
+  {
+    title: "Financial Management for Small Businesses: Financial Statements & Present Value Models",
+    author: "Robinson, Hanson, Black",
+    license: "CC BY",
+    link: "static/materials/bankingandfinance/Full (4).pdf"
+  },
+  {
+    title: "Fundamentals of Finance",
+    author: "Annette Nguyen",
+    license: "Creative Commons Attribution-NonCommercial 4.0",
+    link: "static/materials/bankingandfinance/Financial-Management-for-Small-Businesses-2nd-OER-Edition-1627674276.pdf"
+  },
+  {
+    title: "Personal Finance",
+    author: "Rachel Siegel & Carol Yacht",
+    license: "CC BY-NC-SA",
+    link: "static/materials/bankingandfinance/Personal Finance.pdf"
+  },
+  {
+    title: "Introduction to Business Administration",
+    author: "Amit Shah; Bethann Talsma; Carl McDaniel; Lawrence J. Gitman; Linda Koffel; Monique Reece",
+    license: "CC BY 4.0",
+    link: "static/materials/businessadministation/Introduction-to-Business-Administration-1735836334.pdf"  // includes PDF. :contentReference[oaicite:1]{index=1}
+  },
+  {
+    title: "Business Fundamentals – 1st Edition",
+    author: "Kerri Shields",
+    license: "CC BY-NC-SA 4.0",
+    link: "static/materials/businessadministation/Business-Fundamentals-1st-Edition-1760797243.pdf"  // recent OER. :contentReference[oaicite:3]{index=3}
+  },
+  {
+    title: "Introduction to Business",
+    author: "Lawrence J. Gitman; Carl McDaniel; Amit Shah; Monique Reece; Linda Koffel; Bethann Talsma; James C. Hyatt",
+    license: "CC BY 4.0",
+    link: "static/materials/businessadministation/IntroductionToBusiness-OP_8D04gAa.pdf"
+  },
+  {
+    title: "Introduction to Business Administration",
+    author: "Amit Shah; Bethann Talsma; Carl McDaniel; Lawrence J. Gitman; Linda Koffel; Monique Reece",
+    license: "CC BY 4.0",
+    link: "static/materials/businessadministation/Introduction-to-Business-Administration-1735836334 (1).pdf"
+  },
+  {
+    title: "Principles of Management",
+    author: "OpenStax Contributors",
+    license: "CC BY 4.0",
+    link: "static/materials/businessadministation/PrinciplesofManagement-OP.pdf"
+  },
+  {
+    title: "Introduction to Business & Administrative Studies",
+    author: "Angela Flanagan",
+    license: "CC BY-NC-SA 4.0",
+    link: "static/materials/businessadministration/Introduction-to-Business-amp-Administrative-Studies-1726502695.pdf"
+  },
+  {
+    title: "Chemistry 2e",
+    author: "OpenStax",
+    license: "CC BY 4.0",  
+    link: "static/materials/chemicalpolynomerengineer/Chemistry-LR.pdf"
+  },
+  {
+    title: "Introduction to Polymer Science and Technology",
+    author: "Mustafa Akay",
+    license: "© 2012 Ernst & Young LLP (but free download – check license)",  
+    link: "static/materials/Introduction to Polymer Science and Technology.pdf"
+  },
+  {
+    title: "Chemical Process Dynamics and Controls – Book I",
+    author: "University of Michigan student/contributor team",
+    license: "Creative Commons Attribution 3.0 Unported (CC BY 3.0)",
+    link: "static/materials/chemicalpolynomerengineer/chemical_process_dynamics_and_controls-book_1.pdf"
+  },
+  {
+    title: "Mechanics of Biomaterials",
+    author: "Amir A. Zadpoor (ed.)",
+    license: "CC BY‑NC‑ND",
+    link: "static/materials/chemicalpolynomerengineer/Mechanics_of_Biomaterials"
+  },
+  {
+  title: "Solutions Manual for Thermodynamics and Chemistry (2nd Edition)",
+  author: "Howard DeVoe",
+  license: "Creative Commons Attribution 4.0 International (CC BY 4.0)",
+  link: "static/materials/chemicalpolynomerengineer/SolnsMan.pdf"
+  },
+  {
+  title: "Bio‑Inspired Sensory Systems",
+  author: "Geoffrey Brooks",
+  license: "Creative Commons Attribution‑NonCommercial‑ShareAlike 4.0 (CC BY‑NC‑SA 4.0)",
+  link: "static/materials/chemicalpolynomerengineer/original-ab435618883852d4b0d28e64c4c5e7b4.pdf"
+  },
+  {
+  title: "Chemistry 2e",
+  author: "Paul Flowers; Klaus Theopold; Richard Langley; William R. Robinson",
+  license: "Creative Commons Attribution 4.0 (CC BY 4.0)",
+  link: "static/materials/chemistry/chemistry-2e.pdf"
+},
+{
+    title: "Chemistry: Atoms First 2e",
+    author: "OpenStax & University of Connecticut",
+    license: "CC BY 4.0",
+    link: "static/materials/chemistry/ChemistryAtomsFirst2e-WEB.pdf"  // alternate approach. :contentReference[oaicite:1]{index=1}
+  },
+  {
+    title: "Introductory Chemistry",
+    author: "David W. Ball",
+    license: "CC BY‑NC‑SA (Attribution‑NonCommercial‑ShareAlike) 4.0",
+    link: "static/materials/chemistry/Introductory Chemistry.pdf"  // suitable for prep course. :contentReference[oaicite:2]{index=2}
+  },
+  {
+    title: "Introductory Chemistry Online!",
+    author: "Young et al.",
+    license: "Check‑license (open‑source) – likely CC BY or CC BY‑NC‑SA",
+    link: "static/materials/chemistry/Full (5).pdf"
+  },
+  {
+    title: "Organic Chemistry: A Tenth Edition",
+    author: "John McMurry",
+    license: "CC BY‑NC‑SA 4.0",
+    link: "static/materials/chemistry/OrganicChemistry-SAMPLE_9ADraVJ.pdf"  // OpenStax sample. :contentReference[oaicite:5]{index=5}
+  },
+  {
+  title: "World Religions: The Spirit Searching",
+  author: "Jody Ondich",
+  license: "CC BY‑NC‑SA 4.0",
+  link: "static/materials/christianreligiousstudy/World-Religions-the-Spirit-Searching-1681823908.pdf"
+},
+{
+    title: "Workplace Software and Skills",
+    author: "Tammie Bolling; Angela Mitchell; Tanya Scott; Nyrobi Wheeler",
+    license: "Creative Commons Attribution 4.0 (CC BY)",
+    link: "static/materials/computerscience/Workplace_Software_and_Skills_-_WEB_IlfJtcP.pdf"
+},
+{
+  title: "Introduction to Computer Science",
+  author: "Dr. Jean‑Claude Franchitti",
+  license: "Creative Commons Attribution 4.0 (CC BY 4.0)",
+  link: "static/materials/computerscience/Introduction_To_Computer_Science_-_WEB.pdf"
+},
+{
+  title: "Foundations of Information Systems",
+  author: "Dr. Mahesh S. Raisinghani",
+  license: "Creative Commons Attribution‑NonCommercial‑ShareAlike 4.0 (CC BY‑NC‑SA 4.0)",
+  link: "static/materials/computerscience/Foundations_of_Information_Systems_-_WEB_oNlbGYl.pdf"
+},
+{
+  title: "Principles of Data Science",
+  author: "Dr. Shaun V. Ault; Dr. Soohyun Nam Liao; Larry Musolino",
+  license: "Creative Commons Attribution‑NonCommercial‑ShareAlike 4.0 (CC BY‑NC‑SA 4.0)",
+  link: "static/materials/computerscience/Principles-of-Data-Science-WEB.pdf"
+},
+{
+  title: "Introduction to Python Programming",
+  author: "Udayan Das; Aubrey Lawson; Chris Mayfield; Narges Norouzi",
+  license: "Creative Commons Attribution 4.0 (CC BY 4.0)",
+  link: "static/materials/computerscience/Introduction_to_Python_Programming_-_WEB.pdf"
+},
+{
+  title: "Oral and Maxillofacial Surgery for the Clinician",
+  author: "Krishnamurthy Bonanthaya; Elavenil Panneerselvam; Suvy Manuel; Vinay V. Kumar; Anshul Rai",
+  license: "CC BY 4.0",
+  link: "static/materials/dentistryanddentalsurgery/978-981-15-1346-6.pdf"
+},
+{
+  title: "Exploring the Arts: A Brief Introduction to Art, Theatre, Music, and Dance",
+  author: "Doris Hall; Kimberly Berkeley; Nubia Nurain Khan",
+  license: "CC BY 4.0",
+  link: "static/materials/dramaperformingarts/Exploring-the-Arts-1735836622.pdf"
+},
+{
+  title: "Storytelling on Screen: An Online Playback Theatre Archive and Guidebook",
+  author: "Jordan Rosin; Heidi Winters Vogel; Sammy Lebron",
+  license: "Creative Commons Attribution-NonCommercial-ShareAlike 4.0 (CC BY-NC-SA 4.0)",
+  link: "static/materials/dramaperformingarts/Storytelling_on_Screen_An_Online_Playback_Theatre_Archive_and_Guidebook.pdf"
+},
+{
+    title: "Theatrical Worlds",
+    author: "Open Textbook Library Contributors",
+    license: "CC BY-NC-ND 4.0",
+    link: "static/materials/dramaperformingarts/Theatrical_Worlds.pdf"
+  },
+  {
+  title: "Safety, Health, and Nutrition in Early Childhood Education",
+  author: "Jennifer Paris",
+  license: "CC BY 4.0",
+  link: "static/materials/earlychildhoodeducation/Health, Safety, and Nutrition OER Textbook.pdf"  // full textbook page. :contentReference[oaicite:0]{index=0}
+},
+{
+  title: "Algebra and Trigonometry 2e",
+  author: "Jay Abramson (et al.)",
+  license: "Creative Commons Attribution 4.0 (CC BY 4.0)",
+  link: "static/materials/math/Algebra-and-Trigonometry-2e-WEB.pdf"
+},
+{
+  title: "Calculus Volume 1",
+  author: "Gilbert Strang; Edwin “Jed” Herman",
+  license: "Creative Commons Attribution-NonCommercial-ShareAlike 4.0 (CC BY-NC-SA 4.0)",
+  link: "static/materials/math/Calculus_Volume_1_-_WEB_68M1Z5W.pdf"
+},
+{
+title: "Calculus Volume 2",
+author: "Gilbert Strang; Edwin 'Jed' Herman",
+license: "Creative Commons Attribution-NonCommercial-ShareAlike 4.0 (CC BY-NC-SA 4.0)",
+link: "static/materials/math/Calculus_Volume_2_-_WEB.pdf"
+},
+{
+title: "Calculus Volume 3",
+author: "Gilbert Strang; Edwin 'Jed' Herman",
+license: "Creative Commons Attribution-NonCommercial-ShareAlike 4.0 (CC BY-NC-SA 4.0)",
+link: "static/materials/math/Calculus_Volume_3_-_WEB.pdf"
+},
+{
+title: "College Algebra 2e",
+author: "Jay Abramson; Valeree Falduto; Rachael Gross; David Lippman; Melonie Rasmussen; Rick Norwood; Nicholas Belloit; Jean-Marie Magnier; Harold Whipple",
+license: "Creative Commons Attribution 4.0 (CC BY 4.0)",
+link: "static/materials/math/College-Algebra-2e-WEB.pdf"
+},
+{
+title: "College Algebra Corequisite Support 2e",
+author: "Jay Abramson; Valeree Falduto; Rachael Gross; David Lippman; Rick Norwood; Melonie Rasmussen; Jean-Marie Magnier; Harold Whipple; Christina Fernandez",
+license: "Creative Commons Attribution 4.0 (CC BY 4.0)",
+link: "static/materials/math/College-Algebra-Corequisite-Support-2e-WEB.pdf"
+},
+{
+title: "Contemporary Mathematics",
+author: "Donna Kirk",
+license: "Creative Commons Attribution 4.0 (CC BY 4.0)",
+link: "static/materials/math/ContemporaryMathematics-WEB.pdf"
+},
+{
+title: "Precalculus 2e",
+author: "Jay Abramson",
+license: "Creative Commons Attribution 4.0 (CC BY 4.0)",
+link: "static/materials/math/Precalculus_2e-WEB.pdf"
+},
+{
+title: "Principles of Data Science",
+author: "Shaun V. Ault; Soohyun Nam Liao; Larry Musolino",
+license: "Creative Commons Attribution-NonCommercial-ShareAlike 4.0 (CC BY-NC-SA 4.0)",
+link: "static/materials/computer-science/Principles-of-Data-Science-WEB.pdf"
+},
 
-      if (!course || !topic || !level) {
-        alert("Please select course, level, and enter topic.");
-        return;
+];
+
+const btn = document.getElementById('searchBtn');
+
+btn.addEventListener('click', () => {
+  const course = document.getElementById('course').value;
+  const level = document.getElementById('level').value;
+  const topic = document.getElementById('topic').value.trim().toLowerCase();
+  const container = document.getElementById('results');
+  container.innerHTML = '';
+
+  if (!course || !topic || !level) {
+    alert("Please select course, level, and enter topic.");
+    return;
+  }
+
+  btn.textContent = "🔍 Searching...";
+  btn.disabled = true;
+
+  // Filter uploaded PDFs
+  const filteredUploads = uploadedMaterials.filter(pdf =>
+    pdf.title.toLowerCase().includes(topic)
+  );
+
+  if (filteredUploads.length > 0) {
+    container.innerHTML += `<h2>📘 Read Now</h2>`;
+    filteredUploads.forEach(pdf => {
+      container.innerHTML += `
+        <div class="material">
+          <strong>${pdf.title}</strong><br/>
+          ${pdf.author ? `<em>Author: ${pdf.author}</em><br/>` : ''}
+          <em>License: ${pdf.license}</em><br/>
+          <a href="${pdf.link}" target="_blank">Read PDF</a>
+        </div>
+      `;
+    });
+  }
+
+  // Fetch online materials
+  const url = `/ai/materials?topic=${encodeURIComponent(topic)}&level=${encodeURIComponent(level)}&department=${encodeURIComponent(course)}`;
+  fetch(url)
+    .then(res => res.json())
+    .then(data => {
+      btn.textContent = "🔍 Search Materials";
+      btn.disabled = false;
+
+      if (data.books && data.books.length > 0) {
+        container.innerHTML += `<h2>📖 Read Online</h2>`;
+        data.books.forEach(book => {
+          container.innerHTML += `
+            <div class="material">
+              <strong>${book.title}</strong><br/>
+              ${book.author ? `<em>Author: ${book.author}</em><br/>` : ''}
+              <em>License: ${book.license || 'Unknown'}</em><br/>
+              <a href="${book.link}" target="_blank">Read</a>
+            </div>
+          `;
+        });
       }
 
-      btn.textContent = "🔍 Searching...";
-      btn.disabled = true;
-
-      const url = `/ai/materials?topic=${encodeURIComponent(topic)}&level=${encodeURIComponent(level)}&department=${encodeURIComponent(course)}`;
-
-      fetch(url)
-        .then(res => res.json())
-        .then(data => {
-          btn.textContent = "🔍 Search Materials";
-          btn.disabled = false;
-
-          const container = document.getElementById('results');
-          container.innerHTML = '';
-
-          if (data.books?.length > 0) {
-            container.innerHTML += `<h2>📖 Books</h2>`;
-            data.books.forEach(book => {
-              container.innerHTML += `
-                <div class="material">
-                  <strong>${book.title}</strong><br/>
-                  <em>${book.author}</em><br/>
-                  <a href="${book.link}" target="_blank">Read</a>
-                </div>
-              `;
-            });
-          }
-
-          if (data.videos?.length > 0) {
-            container.innerHTML += `<h2>🎥 Videos</h2>`;
-            data.videos.forEach(video => {
-              container.innerHTML += `
-                <div class="material">
-                  <strong>${video.title}</strong><br/>
-                  <a href="${video.link}" target="_blank">Watch</a>
-                </div>
-              `;
-            });
-          }
-
-          if ((!data.books || data.books.length === 0) &&
-              (!data.videos || data.videos.length === 0)) {
-            container.innerHTML = "<p>No materials found for this course.</p>";
-          }
-        })
-        .catch(err => {
-          document.getElementById('results').innerHTML = "❌ Error loading materials.";
-          console.error(err);
-          btn.textContent = "🔍 Search Materials";
-          btn.disabled = false;
+      if (data.videos && data.videos.length > 0) {
+        container.innerHTML += `<h2>🎥 Videos</h2>`;
+        data.videos.forEach(video => {
+          container.innerHTML += `
+            <div class="material">
+              <strong>${video.title}</strong><br/>
+              <a href="${video.link}" target="_blank">Watch</a>
+            </div>
+          `;
         });
+      }
+
+      if (filteredUploads.length === 0 && (!data.books || data.books.length === 0) && (!data.videos || data.videos.length === 0)) {
+        container.innerHTML = "<p>No materials found for this topic.</p>";
+      }
+    })
+    .catch(err => {
+      container.innerHTML = "❌ Error loading materials.";
+      console.error(err);
+      btn.textContent = "🔍 Search Materials";
+      btn.disabled = false;
     });
-  </script>
+});
+</script>
 
 </body>
 </html>
