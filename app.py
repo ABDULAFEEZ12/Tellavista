@@ -1,4 +1,4 @@
-ADD import eventlet
+import eventlet
 eventlet.monkey_patch()
 print("✅ Eventlet monkey patch applied")
 
@@ -1210,10 +1210,10 @@ def reels():
 def get_reels():
     course = request.args.get("course")
 
-all_reels = [
-    {"course": "Accountancy", "caption": "Introduction to Accounting", "video_url": "https://youtu.be/Gua2Bo_G-J0?si=FNnNZBbmBh0yqvrk"},
-    {"course": "Zoology", "caption": "Animal Classification", "video_url": "https://example.com/videos/zoology1.mp4"},
-    {"course": "Accountancy", "caption": "Financial Statements Basics", "video_url": "https://youtu.be/fb7YCVR5fIU?si=XWozkxGoBV2HP2HW"},
+    all_reels = [
+        {"course": "Accountancy", "caption": "Introduction to Accounting", "video_url": "https://youtu.be/Gua2Bo_G-J0?si=FNnNZBbmBh0yqvrk"},
+        {"course": "Zoology", "caption": "Animal Classification", "video_url": "https://example.com/videos/zoology1.mp4"},
+        {"course": "Accountancy", "caption": "Financial Statements Basics", "video_url": "https://youtu.be/fb7YCVR5fIU?si=XWozkxGoBV2HP2HW"},
     {"course": "Accountancy", "caption": "Management Accounting Overview", "video_url": "https://youtu.be/qISkyoiGHcI?si=BKRnkFfl-fqKXgLG"},
     {"course": "Accountancy", "caption": "Auditing Principles", "video_url": "https://youtu.be/27gabbJQZqc?si=rsOLmkD2QXOoxSoi"},
     {"course": "Accountancy", "caption": "Taxation Fundamentals", "video_url": "https://youtu.be/Cox8rLXYAGQ?si=CvKUaPuPJOxPb6cr"},
@@ -1481,7 +1481,7 @@ all_reels = [
     # Health Education
     {"course": "Health Education", "caption": "Health Promotion Strategies", "video_url": "https://example.com/videos/health1.mp4"},
     {"course": "Health Education", "caption": "Disease Prevention", "video_url": "https://example.com/videos/health2.mp4"},
-    {"course": "Health Education", caption": "Nutrition Education", "video_url": "https://example.com/videos/health3.mp4"},
+    {"course": "Health Education", "caption": "Nutrition Education", "video_url": "https://example.com/videos/health3.mp4"},  # FIXED: Added quotes to "caption"
     {"course": "Health Education", "caption": "Mental Health Awareness", "video_url": "https://example.com/videos/health4.mp4"},
     {"course": "Health Education", "caption": "First Aid Training", "video_url": "https://example.com/videos/health5.mp4"},
 
