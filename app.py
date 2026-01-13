@@ -1,4 +1,4 @@
-ADD import eventlet
+import eventlet
 eventlet.monkey_patch()
 print("✅ Eventlet monkey patch applied")
 
@@ -8,21 +8,18 @@ print("✅ Eventlet monkey patch applied")
 import os
 import json
 from datetime import datetime
-from flask import (
-    Flask, render_template, session, redirect, url_for, 
-    request, flash, jsonify
-)
+from flask import Flask, render_template, session, redirect, url_for, request, flash, jsonify, send_file, send_from_directory
 from flask_socketio import SocketIO, join_room, emit, leave_room
 from flask_sqlalchemy import SQLAlchemy
-import uuid
-from dotenv import load_dotenv
 from werkzeug.security import generate_password_hash, check_password_hash
-import requests
-from bs4 import BeautifulSoup
-import openai
+from sqlalchemy import inspect, text  # ADDED: inspect for checking table structure
+from hashlib import sha256
 from functools import wraps
-import psycopg2
-from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
+import uuid
+import requests
+from dotenv import load_dotenv
+import random
+from difflib import get_close_matches
 
 # Load environment variables
 load_dotenv()
@@ -1893,3 +1890,4 @@ if __name__ == '__main__':
     
     port = int(os.environ.get('PORT', 5000))
     socketio.run(app, host='0.0.0.0', port=port, debug=DEBUG_MODE)
+
