@@ -1,0 +1,2470 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Live - Room {{ room_id }}</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
+    <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 20px 30px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        .room-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .room-icon {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 22px;
+        }
+
+        .room-details h1 {
+            font-size: 24px;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .room-details .room-id {
+            background: #f0f4ff;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-family: monospace;
+            font-size: 18px;
+            color: #667eea;
+            font-weight: 600;
+        }
+
+        .student-info {
+            text-align: right;
+        }
+
+        .student-name {
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .student-role {
+            background: #e0f7fa;
+            color: #00796b;
+            padding: 3px 10px;
+            border-radius: 10px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 350px;
+            gap: 20px;
+        }
+
+        .video-section {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        /* Teacher video container - TOP */
+        .teacher-video-container {
+            background: #000;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 10px;
+            position: relative;
+            aspect-ratio: 16/9;
+        }
+
+        #teacherVideo {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            background: #000;
+        }
+
+        /* Students video grid */
+        .students-video-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            min-height: 200px;
+        }
+
+        .student-video-item {
+            position: relative;
+            background: #000;
+            border-radius: 10px;
+            overflow: hidden;
+            aspect-ratio: 16/9;
+            border: 2px solid #667eea;
+            transition: all 0.3s ease;
+        }
+
+        .student-video-item.pinned {
+            border-color: #ff4757;
+            border-width: 3px;
+            order: -1;
+        }
+
+        .student-video-item.active-speaker {
+            border-color: #ffa502;
+            box-shadow: 0 0 20px rgba(255, 165, 2, 0.5);
+            animation: pulse 2s infinite;
+        }
+
+        .student-video-item.self-view {
+            border-color: #2ed573;
+        }
+
+        .student-video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+            transform: scaleX(-1); /* Mirror effect for self-view */
+        }
+
+        .student-video-label {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 8px 12px;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .student-video-controls {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            display: flex;
+            gap: 5px;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .student-video-item:hover .student-video-controls {
+            opacity: 1;
+        }
+
+        .video-overlay {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            right: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .video-label {
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .video-controls {
+            display: flex;
+            gap: 10px;
+        }
+
+        .control-btn {
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .control-btn:hover {
+            background: rgba(0, 0, 0, 0.9);
+            transform: scale(1.1);
+        }
+
+        .control-btn.active {
+            background: #ff4757;
+        }
+
+        .control-btn.small {
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            border: none;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .control-btn.small:hover {
+            background: rgba(0, 0, 0, 0.9);
+        }
+
+        .control-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .control-btn:disabled:hover {
+            transform: none;
+            background: rgba(0, 0, 0, 0.7);
+        }
+
+        .connection-status {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 20px 0;
+            padding: 15px;
+            background: #f8f9ff;
+            border-radius: 10px;
+            font-size: 14px;
+        }
+
+        .connection-status.connecting {
+            background: #fff3e0;
+            color: #f57c00;
+        }
+
+        .connection-status.connected {
+            background: #e8f5e9;
+            color: #388e3c;
+        }
+
+        .connection-status.error {
+            background: #ffebee;
+            color: #d32f2f;
+        }
+
+        .connection-status i {
+            font-size: 18px;
+        }
+
+        .status-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 8px;
+        }
+
+        .status-indicator.connecting {
+            background: #ffa502;
+            animation: pulse 1.5s infinite;
+        }
+
+        .status-indicator.connected {
+            background: #2ed573;
+        }
+
+        .status-indicator.error {
+            background: #ff4757;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .sidebar {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+            height: fit-content;
+        }
+
+        .section-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 20px;
+            color: #667eea;
+            font-size: 18px;
+        }
+
+        .section-title i {
+            font-size: 20px;
+        }
+
+        .class-info {
+            margin-bottom: 25px;
+        }
+
+        .info-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 15px;
+            padding: 12px;
+            background: #f8f9ff;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .info-item:hover {
+            background: #edf2ff;
+            transform: translateX(5px);
+        }
+
+        .info-item i {
+            color: #667eea;
+            font-size: 18px;
+            width: 24px;
+        }
+
+        .info-item .label {
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 3px;
+        }
+
+        .info-item .value {
+            font-size: 14px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .controls {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-top: 20px;
+        }
+
+        .action-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .action-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 7px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .action-btn.secondary {
+            background: #6c757d;
+        }
+
+        .action-btn.danger {
+            background: #ff4757;
+        }
+
+        .action-btn.success {
+            background: #2ed573;
+        }
+
+        .action-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none !important;
+            box-shadow: none !important;
+        }
+
+        .notification {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: white;
+            padding: 15px 25px;
+            border-radius: 10px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            z-index: 1000;
+            transform: translateX(120%);
+            transition: transform 0.3s ease;
+            max-width: 400px;
+        }
+
+        .notification.show {
+            transform: translateX(0);
+        }
+
+        .notification.success {
+            border-left: 4px solid #2ed573;
+        }
+
+        .notification.error {
+            border-left: 4px solid #ff4757;
+        }
+
+        .notification.info {
+            border-left: 4px solid #667eea;
+        }
+
+        .notification i {
+            font-size: 24px;
+        }
+
+        .notification.success i {
+            color: #2ed573;
+        }
+
+        .notification.error i {
+            color: #ff4757;
+        }
+
+        .notification.info i {
+            color: #667eea;
+        }
+
+        .empty-video {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            color: white;
+            text-align: center;
+            padding: 40px;
+        }
+
+        .empty-video i {
+            font-size: 64px;
+            margin-bottom: 20px;
+            opacity: 0.7;
+        }
+
+        .empty-video h3 {
+            font-size: 24px;
+            margin-bottom: 10px;
+            color: white;
+        }
+
+        .empty-video p {
+            font-size: 16px;
+            opacity: 0.8;
+            color: white;
+        }
+
+        /* Debug Panel Styles */
+        .debug-panel {
+            background: #1a1a1a;
+            color: #00ff00;
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 20px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .debug-panel h4 {
+            color: #00ff00;
+            margin-bottom: 10px;
+            border-bottom: 1px solid #333;
+            padding-bottom: 5px;
+        }
+
+        .debug-log {
+            max-height: 150px;
+            overflow-y: auto;
+        }
+
+        .debug-entry {
+            padding: 3px 0;
+            border-bottom: 1px dashed #333;
+        }
+
+        .debug-timestamp {
+            color: #888;
+            font-size: 10px;
+            margin-right: 10px;
+        }
+
+        .debug-message {
+            color: #00ff00;
+        }
+
+        /* NELAVISTA Student Controls */
+        .student-controls-panel {
+            background: #f8f9ff;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 20px 0;
+            border: 2px solid #667eea;
+        }
+
+        .control-row {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+
+        .struggle-signals {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            margin-top: 15px;
+        }
+
+        .struggle-btn {
+            padding: 10px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+            transition: all 0.3s ease;
+        }
+
+        .struggle-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .struggle-btn.confused {
+            background: #ffebee;
+            color: #d32f2f;
+            border: 1px solid #ffcdd2;
+        }
+
+        .struggle-btn.too-fast {
+            background: #fff3e0;
+            color: #f57c00;
+            border: 1px solid #ffe0b2;
+        }
+
+        .struggle-btn.got-it {
+            background: #e8f5e9;
+            color: #388e3c;
+            border: 1px solid #c8e6c9;
+        }
+
+        .mic-status {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            padding: 10px;
+            background: #f0f4ff;
+            border-radius: 8px;
+            margin-top: 10px;
+        }
+
+        .mic-status.pending {
+            background: #fff3e0;
+            color: #f57c00;
+        }
+
+        .mic-status.approved {
+            background: #e8f5e9;
+            color: #388e3c;
+        }
+
+        .teacher-restriction {
+            background: #ffebee;
+            border-left: 4px solid #ff4757;
+            padding: 10px;
+            border-radius: 6px;
+            margin: 10px 0;
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* Active speaker notification */
+        @keyframes pulse {
+            0%, 100% { box-shadow: 0 0 20px rgba(255, 165, 2, 0.5); }
+            50% { box-shadow: 0 0 30px rgba(255, 165, 2, 0.8); }
+        }
+        
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        
+        @keyframes slideOut {
+            from {
+                transform: translateX(0);
+                opacity: 1;
+            }
+            to {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+        }
+
+        @media (max-width: 1024px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+            
+            .students-video-grid {
+                grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            }
+        }
+
+        @media (max-width: 768px) {
+            .header {
+                flex-direction: column;
+                gap: 15px;
+                text-align: center;
+            }
+            
+            .room-info {
+                justify-content: center;
+            }
+            
+            .student-info {
+                text-align: center;
+            }
+            
+            .video-overlay {
+                flex-direction: column;
+                gap: 10px;
+                align-items: flex-start;
+            }
+            
+            .video-controls {
+                align-self: flex-end;
+            }
+            
+            .students-video-grid {
+                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+                gap: 10px;
+                padding: 10px;
+            }
+            
+            .student-video-item {
+                aspect-ratio: 4/3;
+            }
+
+            .struggle-signals {
+                grid-template-columns: 1fr;
+            }
+            
+            .control-row {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="room-info">
+                <div class="room-icon">
+                    <i class="fas fa-user-graduate"></i>
+                </div>
+                <div class="room-details">
+                    <h1>Live Classroom</h1>
+                    <div class="room-id">Room: {{ room_id }}</div>
+                </div>
+            </div>
+            <div class="student-info">
+                <div class="student-name" id="studentName">Student</div>
+                <div class="student-role">Student</div>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <div class="video-section">
+                <!-- Teacher video on TOP -->
+                <div class="teacher-video-container">
+                    <video id="teacherVideo" autoplay playsinline></video>
+                    
+                    <div class="empty-video" id="emptyVideo">
+                        <i class="fas fa-chalkboard-teacher"></i>
+                        <h3>Waiting for teacher</h3>
+                        <p>The teacher will start the broadcast soon...</p>
+                    </div>
+                    <div class="video-overlay">
+                        <div class="video-label" id="videoLabel">
+                            <i class="fas fa-chalkboard-teacher"></i>
+                            <span>Teacher's Broadcast</span>
+                        </div>
+                        <div class="video-controls">
+                            <button class="control-btn" id="toggleFullscreen" title="Fullscreen">
+                                <i class="fas fa-expand"></i>
+                            </button>
+                            <button class="control-btn" id="toggleMute" title="Toggle Mute">
+                                <i class="fas fa-volume-up"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Students video grid -->
+                <div class="students-video-grid" id="studentsVideoGrid">
+                    <!-- Student videos will be added here dynamically -->
+                    <div class="empty-state" style="grid-column: 1 / -1; text-align: center; padding: 40px 20px; color: #666;">
+                        <i class="fas fa-user-friends"></i>
+                        <p>Other students will appear here</p>
+                    </div>
+                </div>
+
+                <!-- NELAVISTA Student Controls -->
+                <div class="student-controls-panel">
+                    <h3 style="color: #667eea; margin-bottom: 15px; font-size: 18px;">
+                        <i class="fas fa-user-cog"></i> Your Controls
+                    </h3>
+                    
+                    <div class="control-row">
+                        <button class="action-btn success" id="requestMicBtn">
+                            <i class="fas fa-microphone"></i> Request to Speak
+                        </button>
+                        <button class="action-btn secondary" id="toggleMyAudio">
+                            <i class="fas fa-microphone"></i> My Mic: ON
+                        </button>
+                        <button class="action-btn secondary" id="toggleMyVideo">
+                            <i class="fas fa-video"></i> My Camera: ON
+                        </button>
+                    </div>
+
+                    <div class="mic-status" id="micStatus" style="display: none;">
+                        <i class="fas fa-clock"></i>
+                        <span>Mic request pending...</span>
+                    </div>
+
+                    <div id="teacherRestrictions" style="display: none;">
+                        <!-- Will show teacher restrictions -->
+                    </div>
+
+                    <h4 style="margin-top: 20px; margin-bottom: 10px; color: #666;">
+                        <i class="fas fa-comment-medical"></i> Quick Feedback
+                    </h4>
+                    <div class="struggle-signals">
+                        <button class="struggle-btn confused" onclick="sendStruggleSignal('confused')">
+                            <i class="fas fa-question-circle"></i>
+                            <span>I'm confused</span>
+                        </button>
+                        <button class="struggle-btn too-fast" onclick="sendStruggleSignal('too_fast')">
+                            <i class="fas fa-tachometer-alt"></i>
+                            <span>Too fast</span>
+                        </button>
+                        <button class="struggle-btn got-it" onclick="sendStruggleSignal('got_it')">
+                            <i class="fas fa-check-circle"></i>
+                            <span>I get it</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="connection-status" id="connectionStatus">
+                    <i class="fas fa-sync-alt fa-spin"></i>
+                    <span>Connecting to classroom...</span>
+                </div>
+
+                <!-- Debug Panel -->
+                <div class="debug-panel">
+                    <h4><i class="fas fa-bug"></i> Debug Log</h4>
+                    <div class="debug-log" id="debugLog"></div>
+                </div>
+
+                <div class="controls">
+                    <button class="action-btn" id="raiseHand" disabled>
+                        <i class="fas fa-hand-paper"></i> Raise Hand
+                    </button>
+                    <button class="action-btn danger" id="leaveClass">
+                        <i class="fas fa-sign-out-alt"></i> Leave Class
+                    </button>
+                </div>
+            </div>
+
+            <div class="sidebar">
+                <div class="section-title">
+                    <i class="fas fa-info-circle"></i>
+                    <h2>Class Information</h2>
+                </div>
+
+                <div class="class-info">
+                    <div class="info-item">
+                        <i class="fas fa-clock"></i>
+                        <div>
+                            <div class="label">Session Time</div>
+                            <div class="value" id="sessionTime">00:00</div>
+                        </div>
+                    </div>
+                    <div class="info-item">
+                        <i class="fas fa-network-wired"></i>
+                        <div>
+                            <div class="label">Connection</div>
+                            <div class="value" id="connectionType">WebRTC Mesh</div>
+                        </div>
+                    </div>
+                    <div class="info-item">
+                        <i class="fas fa-video"></i>
+                        <div>
+                            <div class="label">Stream Quality</div>
+                            <div class="value" id="streamQuality">Auto</div>
+                        </div>
+                    </div>
+                    <div class="info-item">
+                        <i class="fas fa-user-tie"></i>
+                        <div>
+                            <div class="label">Teacher</div>
+                            <div class="value" id="teacherName">Waiting...</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section-title">
+                    <i class="fas fa-user-shield"></i>
+                    <h2>Classroom Status</h2>
+                </div>
+
+                <div class="class-info">
+                    <div class="info-item">
+                        <i class="fas fa-microphone"></i>
+                        <div>
+                            <div class="label">Audio Permission</div>
+                            <div class="value" id="audioPermission">Allowed</div>
+                        </div>
+                    </div>
+                    <div class="info-item">
+                        <i class="fas fa-video"></i>
+                        <div>
+                            <div class="label">Camera Permission</div>
+                            <div class="value" id="cameraPermission">Allowed</div>
+                        </div>
+                    </div>
+                    <div class="info-item">
+                        <i class="fas fa-bullhorn"></i>
+                        <div>
+                            <div class="label">Questions</div>
+                            <div class="value" id="questionsStatus">Enabled</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="section-title">
+                    <i class="fas fa-users"></i>
+                    <h2>Participants (<span id="participantCount">0</span>)</h2>
+                </div>
+                
+                <div class="class-info">
+                    <div class="info-item">
+                        <i class="fas fa-chalkboard-teacher"></i>
+                        <div>
+                            <div class="label">Teacher Status</div>
+                            <div class="value" id="teacherStatus">Connecting...</div>
+                        </div>
+                    </div>
+                    <div class="info-item">
+                        <i class="fas fa-user-graduate"></i>
+                        <div>
+                            <div class="label">Students Online</div>
+                            <div class="value" id="studentsOnline">0</div>
+                        </div>
+                    </div>
+                    <div class="info-item">
+                        <i class="fas fa-signal"></i>
+                        <div>
+                            <div class="label">Your Connections</div>
+                            <div class="value" id="activeConnections">0</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="notification" id="notification">
+        <i class="fas fa-check-circle"></i>
+        <div class="notification-content">
+            <div class="notification-title">Notification</div>
+            <div class="notification-message">This is a notification message</div>
+        </div>
+    </div>
+
+    <script>
+        // ============================================
+        // Student WebRTC Mesh - Full Implementation
+        // ============================================
+
+        const roomId = "{{ room_id }}";
+        const socket = io();
+        let localStream = null;
+        let sessionStartTime = null;
+        let sessionTimer = null;
+        let mySid = null;
+        let studentName = localStorage.getItem('studentName') || `Student_${Math.floor(Math.random() * 1000)}`;
+
+        // ============================================
+        // Core WebRTC Data Structures
+        // ============================================
+        const peerConnections = {};      // socket_id -> RTCPeerConnection
+        const remoteStreams = {};        // socket_id -> MediaStream
+        const participants = {};         // socket_id -> {username, role}
+        const audioAnalysers = {};       // socket_id -> {analyser, dataArray} for speaker detection
+
+        // ============================================
+        // NELAVISTA State
+        // ============================================
+        let roomState = {
+            muted_all: false,
+            cameras_disabled: false,
+            questions_enabled: true,
+            question_visibility: 'public',
+            mic_approved: false,
+            teacher_sid: null
+        };
+
+        // ============================================
+        // DOM Elements
+        // ============================================
+        const teacherVideo = document.getElementById('teacherVideo');
+        const studentsVideoGrid = document.getElementById('studentsVideoGrid');
+        const emptyVideo = document.getElementById('emptyVideo');
+        const videoLabel = document.getElementById('videoLabel');
+        const toggleFullscreen = document.getElementById('toggleFullscreen');
+        const toggleMute = document.getElementById('toggleMute');
+        const raiseHand = document.getElementById('raiseHand');
+        const toggleMyAudio = document.getElementById('toggleMyAudio');
+        const toggleMyVideo = document.getElementById('toggleMyVideo');
+        const requestMicBtn = document.getElementById('requestMicBtn');
+        const micStatus = document.getElementById('micStatus');
+        const teacherRestrictions = document.getElementById('teacherRestrictions');
+        const leaveClass = document.getElementById('leaveClass');
+        const connectionStatus = document.getElementById('connectionStatus');
+        const studentNameElement = document.getElementById('studentName');
+        const sessionTimeElement = document.getElementById('sessionTime');
+        const teacherNameElement = document.getElementById('teacherName');
+        const notification = document.getElementById('notification');
+        const debugLog = document.getElementById('debugLog');
+        const streamQualityElement = document.getElementById('streamQuality');
+        const connectionTypeElement = document.getElementById('connectionType');
+        const audioPermissionElement = document.getElementById('audioPermission');
+        const cameraPermissionElement = document.getElementById('cameraPermission');
+        const questionsStatusElement = document.getElementById('questionsStatus');
+        const participantCountElement = document.getElementById('participantCount');
+        const teacherStatusElement = document.getElementById('teacherStatus');
+        const studentsOnlineElement = document.getElementById('studentsOnline');
+        const activeConnectionsElement = document.getElementById('activeConnections');
+
+        // ============================================
+        // WebRTC Configuration
+        // ============================================
+        const WEBRTC_CONFIG = {
+            iceServers: [
+                {
+                    urls: "stun:stun.l.google.com:19302"
+                },
+                {
+                    urls: "stun:global.stun.twilio.com:3478"
+                },
+                {
+                    urls: "turn:global.relay.metered.ca:80",
+                    username: "459b679e028c3f37200569ec",
+                    credential: "7Y4blbcvHOg1Uhwm"
+                },
+                {
+                    urls: "turns:global.relay.metered.ca:443?transport=tcp",
+                    username: "459b679e028c3f37200569ec",
+                    credential: "7Y4blbcvHOg1Uhwm"
+                }
+            ],
+            bundlePolicy: 'max-bundle',
+            rtcpMuxPolicy: 'require'
+        };
+
+        // ============================================
+        // Speaker Detection Variables
+        // ============================================
+        let sharedAudioContext = null;
+        let speakerDetectionInterval = null;
+        let activeSpeaker = null;
+
+        // ============================================
+        // Initialize Student
+        // ============================================
+        document.addEventListener('DOMContentLoaded', async function() {
+            studentNameElement.textContent = studentName;
+            logDebug('Student page loaded. Room: ' + roomId);
+            
+            try {
+                // Get student's local media
+                await initializeLocalMedia();
+                
+                // Connect to room
+                connectToRoom();
+                setupEventListeners();
+                startSessionTimer();
+                
+                logDebug('Student initialized successfully');
+            } catch (error) {
+                console.error('Error initializing student:', error);
+                showNotification('error', 'Initialization Error', error.message);
+            }
+        });
+
+        // ============================================
+        // Media Initialization
+        // ============================================
+        async function initializeLocalMedia() {
+            try {
+                localStream = await navigator.mediaDevices.getUserMedia({
+                    video: {
+                        width: { ideal: 640 },
+                        height: { ideal: 480 },
+                        frameRate: { ideal: 30 }
+                    },
+                    audio: {
+                        echoCancellation: true,
+                        noiseSuppression: true,
+                        autoGainControl: true
+                    }
+                });
+                
+                // Create self-view video element
+                createSelfViewVideo();
+                
+                logDebug('Student local media obtained:', {
+                    video: localStream.getVideoTracks().length,
+                    audio: localStream.getAudioTracks().length
+                });
+                
+                showNotification('success', 'Media Ready', 'Camera and microphone are ready');
+                
+            } catch (error) {
+                console.error('Error getting local media:', error);
+                showNotification('error', 'Media Error', 'Could not access camera/microphone. Please check permissions.');
+                throw error;
+            }
+        }
+
+        function createSelfViewVideo() {
+            const videoContainer = document.createElement('div');
+            videoContainer.id = 'video-self';
+            videoContainer.className = 'student-video-item self-view';
+            videoContainer.dataset.sid = 'self';
+            
+            const video = document.createElement('video');
+            video.id = 'remote-video-self';
+            video.autoplay = true;
+            video.playsInline = true;
+            video.className = 'student-video';
+            video.muted = true;
+            
+            const label = document.createElement('div');
+            label.className = 'student-video-label';
+            label.innerHTML = `
+                <i class="fas fa-user"></i>
+                <span>You (${studentName})</span>
+            `;
+            
+            videoContainer.appendChild(video);
+            videoContainer.appendChild(label);
+            
+            // Add to students video grid
+            const emptyState = studentsVideoGrid.querySelector('.empty-state');
+            if (emptyState) {
+                emptyState.remove();
+            }
+            studentsVideoGrid.appendChild(videoContainer);
+            
+            // Set the stream
+            video.srcObject = localStream;
+            video.play().catch(e => console.log('Self-view video play error:', e));
+        }
+
+        // ============================================
+        // Socket.IO Event Listeners
+        // ============================================
+        function setupEventListeners() {
+            // Connection events
+            socket.on('connect', () => {
+                logDebug('✅ Connected to server');
+                updateConnectionStatus('connected');
+            });
+            
+            socket.on('disconnect', () => {
+                logDebug('❌ Disconnected from server');
+                updateConnectionStatus('disconnected');
+            });
+            
+            // Room events
+            socket.on('room-joined', handleRoomJoined);
+            socket.on('new-participant', handleNewParticipant);
+            socket.on('participant-left', handleParticipantLeft);
+            
+            // WebRTC signaling events (using webrtc-* for full mesh)
+            socket.on('webrtc-offer', handleWebRTCOffer);
+            socket.on('webrtc-answer', handleWebRTCAnswer);
+            socket.on('webrtc-ice-candidate', handleWebRTCIceCandidate);
+            
+            // Teacher authority events
+            socket.on('room-state', handleRoomState);
+            socket.on('room-muted', handleRoomMuted);
+            socket.on('cameras-disabled', handleCamerasDisabled);
+            socket.on('mic-approved', handleMicApproved);
+            socket.on('questions-toggled', handleQuestionsToggled);
+            socket.on('teacher-disconnected', handleTeacherDisconnected);
+            
+            // Button events
+            toggleFullscreen?.addEventListener('click', toggleFullscreenMode);
+            toggleMute?.addEventListener('click', toggleVideoMute);
+            raiseHand?.addEventListener('click', raiseHandAction);
+            toggleMyAudio?.addEventListener('click', toggleStudentAudio);
+            toggleMyVideo?.addEventListener('click', toggleStudentVideo);
+            requestMicBtn?.addEventListener('click', requestMicrophone);
+            leaveClass?.addEventListener('click', leaveClassroom);
+            
+            // Document events
+            document.addEventListener('fullscreenchange', handleFullscreenChange);
+        }
+
+        // ============================================
+        // Room Management
+        // ============================================
+        function connectToRoom() {
+            socket.emit('join-room', {
+                room: roomId,
+                role: 'student',
+                username: studentName
+            });
+            logDebug('Connecting to room: ' + roomId);
+        }
+
+        function handleRoomJoined(data) {
+            const { sid, username, role, existing_participants, teacher_sid } = data;
+            
+            mySid = sid;
+            roomState.teacher_sid = teacher_sid;
+            
+            logDebug(`✅ Room joined. My SID: ${mySid}, Role: ${role}, Teacher SID: ${teacher_sid}, Existing participants: ${existing_participants.length}`);
+            
+            // Store participants
+            existing_participants.forEach(participant => {
+                participants[participant.sid] = participant;
+                
+                // Create connection to each existing participant (except self)
+                if (participant.sid !== mySid) {
+                    createPeerConnection(participant.sid, participant.username, participant.role);
+                }
+            });
+            
+            updateParticipantCount();
+            updateConnectionStatus('connected', 'Connected to classroom');
+            showNotification('success', 'Connected', 'Successfully joined the classroom.');
+            
+            // Find teacher name
+            const teacher = existing_participants.find(p => p.role === 'teacher');
+            if (teacher) {
+                teacherNameElement.textContent = teacher.username;
+                teacherStatusElement.textContent = 'Online';
+                teacherStatusElement.style.color = '#2ed573';
+            }
+        }
+
+        function handleNewParticipant(data) {
+            const { sid, username, role } = data;
+            
+            logDebug(`👋 New participant: ${username} (${sid})`);
+            
+            // Store participant info
+            participants[sid] = { username, role };
+            
+            // Create connection to new participant (except self)
+            if (sid !== mySid) {
+                createPeerConnection(sid, username, role);
+            }
+            
+            // Update UI
+            updateParticipantCount();
+            showNotification('info', 'Participant Joined', `${username} has joined the classroom.`);
+            
+            if (role === 'teacher') {
+                teacherNameElement.textContent = username;
+                teacherStatusElement.textContent = 'Online';
+                teacherStatusElement.style.color = '#2ed573';
+                roomState.teacher_sid = sid;
+            }
+        }
+
+        function handleParticipantLeft(data) {
+            const { sid, username, role } = data;
+            
+            logDebug(`👋 Participant left: ${username} (${sid})`);
+            
+            // Cleanup connection
+            cleanupConnection(sid);
+            
+            // Remove from participants
+            delete participants[sid];
+            
+            // Update UI
+            updateParticipantCount();
+            
+            if (role === 'teacher') {
+                showNotification('info', 'Teacher Left', `${username} has left the classroom.`);
+                teacherStatusElement.textContent = 'Offline';
+                teacherStatusElement.style.color = '#ff4757';
+                roomState.teacher_sid = null;
+            } else {
+                showNotification('info', 'Student Left', `${username} has left the classroom.`);
+            }
+        }
+
+        function handleTeacherDisconnected() {
+            logDebug('Teacher disconnected');
+            showNotification('error', 'Teacher Disconnected', 'The teacher has left the classroom.');
+            
+            // Cleanup teacher connection
+            if (roomState.teacher_sid) {
+                cleanupConnection(roomState.teacher_sid);
+            }
+            
+            // Remove teacher video
+            const teacherVideoElement = document.getElementById('video-teacher');
+            if (teacherVideoElement) {
+                teacherVideoElement.remove();
+            }
+            
+            // Show empty state for teacher video
+            emptyVideo.style.display = 'flex';
+            teacherVideo.style.display = 'none';
+            
+            teacherStatusElement.textContent = 'Offline';
+            teacherStatusElement.style.color = '#ff4757';
+            roomState.teacher_sid = null;
+        }
+
+        // ============================================
+        // WebRTC Peer Connection Management
+        // ============================================
+        function createPeerConnection(targetSid, targetUsername, targetRole) {
+            logDebug(`🔗 Creating connection to ${targetUsername} (${targetSid})`);
+            
+            // Don't connect to self or existing connection
+            if (targetSid === mySid || peerConnections[targetSid]) {
+                return;
+            }
+            
+            try {
+                // Create RTCPeerConnection
+                const peerConnection = new RTCPeerConnection(WEBRTC_CONFIG);
+                peerConnections[targetSid] = peerConnection;
+                
+                // Add local tracks
+                if (localStream) {
+                    localStream.getTracks().forEach(track => {
+                        // Apply teacher restrictions
+                        if (track.kind === 'audio' && roomState.muted_all) {
+                            track.enabled = false;
+                        }
+                        if (track.kind === 'video' && roomState.cameras_disabled) {
+                            track.enabled = false;
+                        }
+                        peerConnection.addTrack(track, localStream);
+                    });
+                }
+                
+                // Handle incoming stream
+                peerConnection.ontrack = (event) => {
+                    logDebug(`📥 Received stream from ${targetUsername}`);
+                    
+                    if (event.streams && event.streams[0]) {
+                        remoteStreams[targetSid] = event.streams[0];
+                        
+                        // Display the stream
+                        if (targetRole === 'teacher') {
+                            displayTeacherVideo(event.streams[0]);
+                        } else {
+                            displayRemoteVideo(targetSid, targetUsername, targetRole, event.streams[0]);
+                        }
+                        
+                        // Setup audio analysis for speaker detection
+                        setupAudioAnalysis(targetSid, event.streams[0]);
+                    }
+                };
+                
+                // Handle ICE candidates
+                peerConnection.onicecandidate = (event) => {
+                    if (event.candidate) {
+                        socket.emit('webrtc-ice-candidate', {
+                            room: roomId,
+                            target_sid: targetSid,
+                            candidate: event.candidate
+                        });
+                    }
+                };
+                
+                // Handle connection state
+                peerConnection.onconnectionstatechange = () => {
+                    logDebug(`🔌 ${targetUsername} connection: ${peerConnection.connectionState}`);
+                    
+                    if (peerConnection.connectionState === 'connected') {
+                        logDebug(`✅ Connected to ${targetUsername}`);
+                        updateConnectionStatus('connected');
+                        updateActiveConnections();
+                    } else if (peerConnection.connectionState === 'failed' || 
+                              peerConnection.connectionState === 'disconnected') {
+                        logDebug(`❌ Connection to ${targetUsername} failed`);
+                        cleanupConnection(targetSid);
+                    }
+                };
+                
+                // Handle ICE connection state
+                peerConnection.oniceconnectionstatechange = () => {
+                    logDebug(`🧊 ICE connection to ${targetUsername}: ${peerConnection.iceConnectionState}`);
+                };
+                
+                // Create and send offer if we're the initiator
+                // Rule: if our socket ID < their socket ID, we initiate
+                if (mySid && mySid < targetSid) {
+                    createAndSendOffer(peerConnection, targetSid);
+                }
+                
+                logDebug(`✅ Peer connection created for ${targetUsername}`);
+                
+            } catch (error) {
+                console.error(`❌ Error creating connection to ${targetSid}:`, error);
+                logDebug(`Error: ${error.message}`);
+            }
+        }
+
+        async function createAndSendOffer(peerConnection, targetSid) {
+            try {
+                const offer = await peerConnection.createOffer({
+                    offerToReceiveAudio: true,
+                    offerToReceiveVideo: true
+                });
+                
+                await peerConnection.setLocalDescription(offer);
+                
+                socket.emit('webrtc-offer', {
+                    room: roomId,
+                    target_sid: targetSid,
+                    offer: peerConnection.localDescription
+                });
+                
+                logDebug(`📤 Offer sent to ${targetSid}`);
+                
+            } catch (error) {
+                console.error(`❌ Error creating offer:`, error);
+                logDebug(`Error: ${error.message}`);
+            }
+        }
+
+        async function handleWebRTCOffer(data) {
+            const { from_sid, offer } = data;
+            const participant = participants[from_sid];
+            
+            if (!participant) {
+                logDebug(`❌ Unknown participant: ${from_sid}`);
+                return;
+            }
+            
+            logDebug(`📥 Received offer from ${participant.username}`);
+            
+            // Create connection if it doesn't exist
+            if (!peerConnections[from_sid]) {
+                createPeerConnection(from_sid, participant.username, participant.role);
+            }
+            
+            const peerConnection = peerConnections[from_sid];
+            if (!peerConnection) return;
+            
+            try {
+                await peerConnection.setRemoteDescription(new RTCSessionDescription(offer));
+                
+                // Add local tracks if not already added
+                if (localStream && peerConnection.getSenders().length === 0) {
+                    localStream.getTracks().forEach(track => {
+                        // Apply teacher restrictions
+                        if (track.kind === 'audio' && roomState.muted_all) {
+                            track.enabled = false;
+                        }
+                        if (track.kind === 'video' && roomState.cameras_disabled) {
+                            track.enabled = false;
+                        }
+                        peerConnection.addTrack(track, localStream);
+                    });
+                }
+                
+                const answer = await peerConnection.createAnswer();
+                await peerConnection.setLocalDescription(answer);
+                
+                socket.emit('webrtc-answer', {
+                    room: roomId,
+                    target_sid: from_sid,
+                    answer: peerConnection.localDescription
+                });
+                
+                logDebug(`📤 Answer sent to ${participant.username}`);
+                
+            } catch (error) {
+                console.error(`❌ Error handling offer:`, error);
+                logDebug(`Error: ${error.message}`);
+            }
+        }
+
+        async function handleWebRTCAnswer(data) {
+            const { from_sid, answer } = data;
+            const participant = participants[from_sid];
+            
+            logDebug(`📥 Received answer from ${participant?.username || from_sid}`);
+            
+            const peerConnection = peerConnections[from_sid];
+            if (peerConnection) {
+                try {
+                    await peerConnection.setRemoteDescription(new RTCSessionDescription(answer));
+                    logDebug(`✅ Remote description set for ${from_sid}`);
+                    updateActiveConnections();
+                } catch (error) {
+                    console.error(`❌ Error setting remote description:`, error);
+                    logDebug(`Error: ${error.message}`);
+                }
+            }
+        }
+
+        function handleWebRTCIceCandidate(data) {
+            const { from_sid, candidate } = data;
+            
+            const peerConnection = peerConnections[from_sid];
+            if (peerConnection) {
+                peerConnection.addIceCandidate(new RTCIceCandidate(candidate))
+                    .then(() => {
+                        logDebug(`✅ ICE candidate added from ${from_sid}`);
+                    })
+                    .catch(error => {
+                        console.error(`❌ Error adding ICE candidate:`, error);
+                        logDebug(`Error: ${error.message}`);
+                    });
+            }
+        }
+
+        // ============================================
+        // Video Display Management
+        // ============================================
+        function displayTeacherVideo(stream) {
+            emptyVideo.style.display = 'none';
+            teacherVideo.style.display = 'block';
+            teacherVideo.srcObject = stream;
+            
+            teacherVideo.play().catch(e => {
+                console.log('Teacher video play error:', e);
+                logDebug(`Teacher video play error: ${e.message}`);
+            });
+            
+            // Monitor stream quality
+            monitorStreamQuality(stream);
+            
+            logDebug('Displaying teacher video');
+            
+            // Also create a video item in the grid for teacher
+            const teacherSid = roomState.teacher_sid;
+            if (teacherSid && !document.getElementById(`video-${teacherSid}`)) {
+                displayRemoteVideo(teacherSid, 'Teacher', 'teacher', stream);
+            }
+        }
+
+        function displayRemoteVideo(sid, username, role, stream) {
+            // Check if video element already exists
+            let videoContainer = document.getElementById(`video-${sid}`);
+            
+            if (!videoContainer) {
+                // Create video container
+                videoContainer = document.createElement('div');
+                videoContainer.id = `video-${sid}`;
+                videoContainer.className = 'student-video-item';
+                videoContainer.dataset.sid = sid;
+                
+                // Create video element
+                const video = document.createElement('video');
+                video.id = `remote-video-${sid}`;
+                video.autoplay = true;
+                video.playsInline = true;
+                video.className = 'student-video';
+                
+                // Create video label
+                const label = document.createElement('div');
+                label.className = 'student-video-label';
+                label.innerHTML = `
+                    <i class="fas fa-${role === 'teacher' ? 'chalkboard-teacher' : 'user'}"></i>
+                    <span>${username}</span>
+                `;
+                
+                // Create controls
+                const controls = document.createElement('div');
+                controls.className = 'student-video-controls';
+                controls.innerHTML = `
+                    <button class="control-btn small" onclick="toggleRemoteMute('${sid}')" title="Mute/Unmute">
+                        <i class="fas fa-volume-up"></i>
+                    </button>
+                    <button class="control-btn small" onclick="pinStudentVideo('${sid}')" title="Pin Video">
+                        <i class="fas fa-thumbtack"></i>
+                    </button>
+                `;
+                
+                videoContainer.appendChild(video);
+                videoContainer.appendChild(label);
+                videoContainer.appendChild(controls);
+                
+                // Add to students video grid
+                const emptyState = studentsVideoGrid.querySelector('.empty-state');
+                if (emptyState) {
+                    emptyState.remove();
+                }
+                studentsVideoGrid.appendChild(videoContainer);
+            }
+            
+            // Set the stream
+            const video = document.getElementById(`remote-video-${sid}`);
+            if (video) {
+                video.srcObject = stream;
+                video.play().catch(e => console.log('Video play error:', e));
+                
+                // Update connection status
+                updateActiveConnections();
+            }
+        }
+
+        function removeVideoElement(sid) {
+            const videoElement = document.getElementById(`video-${sid}`);
+            if (videoElement) {
+                videoElement.remove();
+            }
+            
+            // Show empty state if no videos (except self)
+            const videoItems = studentsVideoGrid.querySelectorAll('.student-video-item');
+            if (videoItems.length === 1 && videoItems[0].id === 'video-self') {
+                const emptyState = document.createElement('div');
+                emptyState.className = 'empty-state';
+                emptyState.style.cssText = 'grid-column: 1 / -1; text-align: center; padding: 40px 20px; color: #666;';
+                emptyState.innerHTML = `
+                    <i class="fas fa-user-friends"></i>
+                    <p>Other students will appear here</p>
+                `;
+                studentsVideoGrid.appendChild(emptyState);
+            }
+        }
+
+        // ============================================
+        // Audio Analysis for Speaker Detection
+        // ============================================
+        function setupAudioAnalysis(sid, stream) {
+            if (audioAnalysers[sid]) return;
+            
+            const audioTrack = stream.getAudioTracks()[0];
+            if (!audioTrack) return;
+            
+            try {
+                // Create shared audio context if not exists
+                if (!sharedAudioContext) {
+                    sharedAudioContext = new (window.AudioContext || window.webkitAudioContext)();
+                }
+                
+                const analyser = sharedAudioContext.createAnalyser();
+                analyser.fftSize = 256;
+                
+                const source = sharedAudioContext.createMediaStreamSource(stream);
+                source.connect(analyser);
+                
+                const bufferLength = analyser.frequencyBinCount;
+                const dataArray = new Uint8Array(bufferLength);
+                
+                audioAnalysers[sid] = { analyser, dataArray };
+                
+                // Start speaker detection if not already running
+                if (!speakerDetectionInterval) {
+                    startSpeakerDetection();
+                }
+                
+            } catch (error) {
+                console.error(`Error setting up audio analysis for ${sid}:`, error);
+            }
+        }
+
+        function startSpeakerDetection() {
+            if (speakerDetectionInterval) return;
+            
+            speakerDetectionInterval = setInterval(() => {
+                detectActiveSpeaker();
+            }, 500); // Check every 500ms
+        }
+
+        function detectActiveSpeaker() {
+            let maxLevel = 0;
+            let newActiveSpeaker = null;
+            
+            // Check all remote streams
+            Object.entries(audioAnalysers).forEach(([sid, obj]) => {
+                const { analyser, dataArray } = obj;
+                analyser.getByteFrequencyData(dataArray);
+                
+                let sum = 0;
+                for (let i = 0; i < dataArray.length; i++) sum += dataArray[i];
+                
+                const avg = sum / dataArray.length;
+                const level = avg / 255;
+                
+                // If level > threshold and higher than current max
+                if (level > 0.1 && level > maxLevel) {
+                    maxLevel = level;
+                    newActiveSpeaker = sid;
+                }
+            });
+            
+            // Update active speaker highlighting
+            if (newActiveSpeaker !== activeSpeaker) {
+                // Remove highlight from old speaker
+                if (activeSpeaker) {
+                    const oldVideo = document.getElementById(`video-${activeSpeaker}`);
+                    if (oldVideo) {
+                        oldVideo.classList.remove('active-speaker');
+                    }
+                }
+                
+                // Add highlight to new speaker
+                if (newActiveSpeaker) {
+                    const newVideo = document.getElementById(`video-${newActiveSpeaker}`);
+                    if (newVideo) {
+                        newVideo.classList.add('active-speaker');
+                        
+                        // Show notification for active speaker
+                        const participant = participants[newActiveSpeaker];
+                        if (participant && participant.role === 'student') {
+                            showSpeakerNotification(participant.username);
+                        }
+                    }
+                }
+                
+                activeSpeaker = newActiveSpeaker;
+            }
+        }
+
+        function showSpeakerNotification(username) {
+            // Check if notification already exists
+            if (document.querySelector('.speaker-notification')) return;
+            
+            const notification = document.createElement('div');
+            notification.className = 'speaker-notification';
+            notification.innerHTML = `
+                <i class="fas fa-microphone-alt"></i>
+                <span>${username} is speaking</span>
+            `;
+            notification.style.cssText = `
+                position: fixed;
+                bottom: 80px;
+                right: 20px;
+                background: rgba(255, 165, 2, 0.9);
+                color: white;
+                padding: 10px 15px;
+                border-radius: 8px;
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                z-index: 9999;
+                animation: slideIn 0.3s ease;
+            `;
+            
+            document.body.appendChild(notification);
+            
+            // Auto-remove after 3 seconds
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.style.animation = 'slideOut 0.3s ease';
+                    setTimeout(() => notification.remove(), 300);
+                }
+            }, 3000);
+        }
+
+        // ============================================
+        // NELAVISTA Student Compliance Functions
+        // ============================================
+        function handleRoomState(data) {
+            logDebug('Received room state from server');
+            roomState = { ...roomState, ...data };
+            applyRoomState();
+        }
+
+        function handleRoomMuted(data) {
+            const { muted } = data;
+            roomState.muted_all = muted;
+            
+            if (muted) {
+                disableStudentMicrophone();
+                showNotification('info', 'Class Muted', 'Teacher has muted all students');
+                audioPermissionElement.textContent = 'Disabled by Teacher';
+                audioPermissionElement.style.color = '#ff4757';
+            } else {
+                // Mic still needs approval for speaking
+                audioPermissionElement.textContent = roomState.mic_approved ? 'Approved' : 'Request Required';
+                audioPermissionElement.style.color = roomState.mic_approved ? '#2ed573' : '#ffa502';
+            }
+            
+            updateControlButtons();
+            updateTeacherRestrictionsUI();
+        }
+
+        function handleCamerasDisabled(data) {
+            const { disabled } = data;
+            roomState.cameras_disabled = disabled;
+            
+            if (disabled) {
+                disableStudentCamera();
+                showNotification('info', 'Cameras Disabled', 'Teacher has disabled all student cameras');
+                cameraPermissionElement.textContent = 'Disabled by Teacher';
+                cameraPermissionElement.style.color = '#ff4757';
+            } else {
+                cameraPermissionElement.textContent = 'Allowed';
+                cameraPermissionElement.style.color = '#2ed573';
+            }
+            
+            updateControlButtons();
+            updateTeacherRestrictionsUI();
+        }
+
+        function handleMicApproved(data) {
+            if (data.approved) {
+                roomState.mic_approved = true;
+                showNotification('success', 'Microphone Approved', 'Teacher has approved your microphone request');
+                micStatus.className = 'mic-status approved';
+                micStatus.innerHTML = '<i class="fas fa-check-circle"></i><span>Mic approved! You can speak.</span>';
+                audioPermissionElement.textContent = 'Approved';
+                audioPermissionElement.style.color = '#2ed573';
+                
+                // Enable microphone if it was disabled
+                if (localStream) {
+                    localStream.getAudioTracks().forEach(track => {
+                        track.enabled = true;
+                    });
+                }
+                
+                // Update all peer connections
+                Object.values(peerConnections).forEach(pc => {
+                    const senders = pc.getSenders();
+                    const audioSender = senders.find(s => s.track?.kind === 'audio');
+                    if (audioSender && localStream) {
+                        const audioTrack = localStream.getAudioTracks()[0];
+                        if (audioTrack) {
+                            audioSender.replaceTrack(audioTrack);
+                        }
+                    }
+                });
+            }
+        }
+
+        function handleQuestionsToggled(data) {
+            const { enabled } = data;
+            roomState.questions_enabled = enabled;
+            questionsStatusElement.textContent = enabled ? 'Enabled' : 'Disabled';
+            questionsStatusElement.style.color = enabled ? '#2ed573' : '#ff4757';
+            
+            if (!enabled) {
+                showNotification('info', 'Questions Disabled', 'Teacher has disabled questions');
+            }
+            
+            updateTeacherRestrictionsUI();
+        }
+
+        function applyRoomState() {
+            logDebug('Applying room state restrictions');
+            
+            if (roomState.muted_all) {
+                disableStudentMicrophone();
+            }
+            
+            if (roomState.cameras_disabled) {
+                disableStudentCamera();
+            }
+            
+            updateControlButtons();
+            updateTeacherRestrictionsUI();
+        }
+
+        function disableStudentMicrophone() {
+            if (localStream) {
+                localStream.getAudioTracks().forEach(track => {
+                    track.enabled = false;
+                });
+                
+                // Update all peer connections
+                Object.values(peerConnections).forEach(pc => {
+                    const senders = pc.getSenders();
+                    const audioSender = senders.find(s => s.track?.kind === 'audio');
+                    if (audioSender && localStream) {
+                        const audioTrack = localStream.getAudioTracks()[0];
+                        if (audioTrack) {
+                            audioSender.replaceTrack(audioTrack);
+                        }
+                    }
+                });
+                
+                updateControlButtons();
+            }
+        }
+
+        function disableStudentCamera() {
+            if (localStream) {
+                localStream.getVideoTracks().forEach(track => {
+                    track.enabled = false;
+                });
+                
+                // Update all peer connections
+                Object.values(peerConnections).forEach(pc => {
+                    const senders = pc.getSenders();
+                    const videoSender = senders.find(s => s.track?.kind === 'video');
+                    if (videoSender && localStream) {
+                        const videoTrack = localStream.getVideoTracks()[0];
+                        if (videoTrack) {
+                            videoSender.replaceTrack(videoTrack);
+                        }
+                    }
+                });
+                
+                updateControlButtons();
+            }
+        }
+
+        // ============================================
+        // Utility Functions
+        // ============================================
+        function cleanupConnection(sid) {
+            logDebug(`🧹 Cleaning up connection to ${sid}`);
+            
+            // Close peer connection
+            if (peerConnections[sid]) {
+                peerConnections[sid].close();
+                delete peerConnections[sid];
+            }
+            
+            // Remove audio analyser
+            if (audioAnalysers[sid]) {
+                delete audioAnalysers[sid];
+            }
+            
+            // Remove stream
+            delete remoteStreams[sid];
+            
+            // Remove video display
+            removeVideoElement(sid);
+            
+            // Update active speaker if this was the active speaker
+            if (activeSpeaker === sid) {
+                activeSpeaker = null;
+            }
+            
+            // Update connection counts
+            updateActiveConnections();
+        }
+
+        function updateParticipantCount() {
+            const studentParticipants = Object.values(participants).filter(p => p.role === 'student');
+            const teacherParticipants = Object.values(participants).filter(p => p.role === 'teacher');
+            const totalParticipants = studentParticipants.length + teacherParticipants.length;
+            
+            participantCountElement.textContent = totalParticipants;
+            studentsOnlineElement.textContent = studentParticipants.length;
+        }
+
+        function updateActiveConnections() {
+            const connectedCount = Object.values(peerConnections).filter(
+                pc => pc.connectionState === 'connected'
+            ).length;
+            
+            activeConnectionsElement.textContent = connectedCount;
+            activeConnectionsElement.style.color = connectedCount > 0 ? '#2ed573' : '#ff4757';
+        }
+
+        function updateControlButtons() {
+            // Update microphone button
+            if (roomState.muted_all) {
+                toggleMyAudio.innerHTML = '<i class="fas fa-microphone-slash"></i> My Mic: OFF (Teacher)';
+                toggleMyAudio.classList.add('disabled');
+                toggleMyAudio.disabled = true;
+            } else {
+                const audioEnabled = localStream && localStream.getAudioTracks()[0]?.enabled;
+                toggleMyAudio.innerHTML = audioEnabled ? 
+                    '<i class="fas fa-microphone"></i> My Mic: ON' : 
+                    '<i class="fas fa-microphone-slash"></i> My Mic: OFF';
+                toggleMyAudio.disabled = false;
+                toggleMyAudio.classList.remove('disabled');
+            }
+
+            // Update camera button
+            if (roomState.cameras_disabled) {
+                toggleMyVideo.innerHTML = '<i class="fas fa-video-slash"></i> My Camera: OFF (Teacher)';
+                toggleMyVideo.classList.add('disabled');
+                toggleMyVideo.disabled = true;
+            } else {
+                const videoEnabled = localStream && localStream.getVideoTracks()[0]?.enabled;
+                toggleMyVideo.innerHTML = videoEnabled ? 
+                    '<i class="fas fa-video"></i> My Camera: ON' : 
+                    '<i class="fas fa-video-slash"></i> My Camera: OFF';
+                toggleMyVideo.disabled = false;
+                toggleMyVideo.classList.remove('disabled');
+            }
+
+            // Update request mic button
+            requestMicBtn.disabled = roomState.muted_all || roomState.mic_approved;
+            if (roomState.muted_all) {
+                requestMicBtn.title = 'Class is muted by teacher';
+            } else if (roomState.mic_approved) {
+                requestMicBtn.title = 'Mic already approved';
+                requestMicBtn.innerHTML = '<i class="fas fa-check"></i> Mic Approved';
+            } else {
+                requestMicBtn.title = 'Request microphone permission';
+                requestMicBtn.innerHTML = '<i class="fas fa-microphone"></i> Request to Speak';
+            }
+        }
+
+        function updateTeacherRestrictionsUI() {
+            const restrictions = [];
+            
+            if (roomState.muted_all) {
+                restrictions.push('<i class="fas fa-volume-mute"></i> Class audio muted by teacher');
+            }
+            
+            if (roomState.cameras_disabled) {
+                restrictions.push('<i class="fas fa-video-slash"></i> Cameras disabled by teacher');
+            }
+            
+            if (!roomState.questions_enabled) {
+                restrictions.push('<i class="fas fa-comment-slash"></i> Questions disabled by teacher');
+            }
+            
+            if (restrictions.length > 0) {
+                teacherRestrictions.innerHTML = restrictions.map(r => 
+                    `<div class="teacher-restriction">${r}</div>`
+                ).join('');
+                teacherRestrictions.style.display = 'block';
+            } else {
+                teacherRestrictions.style.display = 'none';
+            }
+        }
+
+        function updateConnectionStatus(status, message) {
+            if (!connectionStatus) return;
+            
+            let icon, color, statusClass;
+            
+            switch(status) {
+                case 'connected':
+                    icon = 'fa-check-circle';
+                    color = '#388e3c';
+                    statusClass = 'connected';
+                    break;
+                case 'connecting':
+                    icon = 'fa-sync-alt fa-spin';
+                    color = '#f57c00';
+                    statusClass = 'connecting';
+                    break;
+                case 'disconnected':
+                    icon = 'fa-exclamation-circle';
+                    color = '#d32f2f';
+                    statusClass = 'error';
+                    break;
+                default:
+                    icon = 'fa-sync-alt fa-spin';
+                    color = '#f57c00';
+                    statusClass = 'connecting';
+            }
+            
+            connectionStatus.innerHTML = `
+                <i class="fas ${icon}" style="color:${color}"></i>
+                <span>${message || 'Connected to classroom'}</span>
+            `;
+            connectionStatus.className = `connection-status ${statusClass}`;
+            
+            logDebug(`Connection status: ${status} - ${message}`);
+        }
+
+        function startSessionTimer() {
+            sessionStartTime = new Date();
+            if (sessionTimer) clearInterval(sessionTimer);
+            
+            sessionTimer = setInterval(() => {
+                const now = new Date();
+                const diff = Math.floor((now - sessionStartTime) / 1000);
+                const minutes = Math.floor(diff / 60).toString().padStart(2, '0');
+                const seconds = (diff % 60).toString().padStart(2, '0');
+                
+                if (sessionTimeElement) {
+                    sessionTimeElement.textContent = `${minutes}:${seconds}`;
+                }
+            }, 1000);
+        }
+
+        function monitorStreamQuality(stream) {
+            if (stream.getVideoTracks().length > 0) {
+                const videoTrack = stream.getVideoTracks()[0];
+                const settings = videoTrack.getSettings();
+                
+                logDebug(`Stream settings: ${settings.width}x${settings.height} @ ${settings.frameRate}fps`);
+                
+                if (settings.width >= 1920) {
+                    streamQualityElement.textContent = '1080p HD';
+                } else if (settings.width >= 1280) {
+                    streamQualityElement.textContent = '720p HD';
+                } else if (settings.width >= 640) {
+                    streamQualityElement.textContent = '480p SD';
+                } else {
+                    streamQualityElement.textContent = 'Low';
+                }
+            }
+        }
+
+        // ============================================
+        // Control Functions
+        // ============================================
+        function requestMicrophone() {
+            if (roomState.muted_all) {
+                showNotification('error', 'Class Muted', 'Teacher has muted the entire class');
+                return;
+            }
+            
+            if (roomState.mic_approved) {
+                showNotification('info', 'Already Approved', 'Your microphone is already approved');
+                return;
+            }
+            
+            socket.emit('student-request-mic', { room: roomId });
+            showNotification('info', 'Request Sent', 'Waiting for teacher approval');
+            
+            micStatus.className = 'mic-status pending';
+            micStatus.innerHTML = '<i class="fas fa-clock"></i><span>Mic request pending...</span>';
+            micStatus.style.display = 'flex';
+            
+            requestMicBtn.disabled = true;
+            requestMicBtn.innerHTML = '<i class="fas fa-clock"></i> Request Sent';
+            
+            logDebug('Requested microphone permission');
+        }
+
+        function sendStruggleSignal(signal) {
+            if (!roomState.teacher_sid) {
+                showNotification('error', 'No Teacher', 'Teacher is not in the classroom');
+                return;
+            }
+            
+            socket.emit('student-struggle-signal', {
+                room: roomId,
+                signal: signal
+            });
+            
+            const signalMessages = {
+                'confused': 'I\'m confused',
+                'too_fast': 'Too fast',
+                'got_it': 'I get it'
+            };
+            
+            showNotification('info', 'Feedback Sent', `Teacher notified: ${signalMessages[signal]}`);
+            logDebug(`Sent struggle signal: ${signal}`);
+        }
+
+        async function toggleStudentAudio() {
+            if (roomState.muted_all) {
+                showNotification('error', 'Cannot Unmute', 'Teacher has muted the entire class');
+                return;
+            }
+            
+            if (!roomState.mic_approved) {
+                showNotification('info', 'Approval Needed', 'Please request microphone permission from teacher first');
+                return;
+            }
+            
+            try {
+                if (!localStream) {
+                    localStream = await navigator.mediaDevices.getUserMedia({ 
+                        audio: {
+                            echoCancellation: true,
+                            noiseSuppression: true,
+                            autoGainControl: true
+                        }
+                    });
+                    
+                    // Update self-view video
+                    const selfVideo = document.getElementById('remote-video-self');
+                    if (selfVideo) {
+                        selfVideo.srcObject = localStream;
+                    }
+                }
+                
+                const audioTrack = localStream.getAudioTracks()[0];
+                
+                if (audioTrack) {
+                    if (audioTrack.enabled) {
+                        audioTrack.enabled = false;
+                        toggleMyAudio.innerHTML = '<i class="fas fa-microphone-slash"></i> My Mic: OFF';
+                        showNotification('info', 'Microphone off', 'Your microphone is now disabled.');
+                        logDebug('Microphone disabled by student');
+                    } else {
+                        audioTrack.enabled = true;
+                        toggleMyAudio.innerHTML = '<i class="fas fa-microphone"></i> My Mic: ON';
+                        showNotification('info', 'Microphone on', 'Your microphone is now enabled.');
+                        logDebug('Microphone enabled by student');
+                    }
+                    
+                    // Update all peer connections
+                    Object.values(peerConnections).forEach(pc => {
+                        const senders = pc.getSenders();
+                        const audioSender = senders.find(s => s.track?.kind === 'audio');
+                        if (audioSender && audioTrack) {
+                            audioSender.replaceTrack(audioTrack);
+                            logDebug('Replaced audio track in peer connection');
+                        }
+                    });
+                }
+            } catch (error) {
+                console.error('Error accessing microphone:', error);
+                showNotification('error', 'Microphone Error', 'Could not access microphone. Please check permissions.');
+                logDebug(`Microphone error: ${error.message}`);
+            }
+        }
+
+        async function toggleStudentVideo() {
+            if (roomState.cameras_disabled) {
+                showNotification('error', 'Cannot Enable Camera', 'Teacher has disabled all student cameras');
+                return;
+            }
+            
+            try {
+                if (!localStream) {
+                    localStream = await navigator.mediaDevices.getUserMedia({ 
+                        video: {
+                            width: { ideal: 640 },
+                            height: { ideal: 480 }
+                        }
+                    });
+                    
+                    // Update self-view video
+                    const selfVideo = document.getElementById('remote-video-self');
+                    if (selfVideo) {
+                        selfVideo.srcObject = localStream;
+                    }
+                }
+                
+                const videoTrack = localStream.getVideoTracks()[0];
+                
+                if (videoTrack) {
+                    if (videoTrack.enabled) {
+                        videoTrack.enabled = false;
+                        toggleMyVideo.innerHTML = '<i class="fas fa-video-slash"></i> My Camera: OFF';
+                        showNotification('info', 'Camera off', 'Your camera is now disabled.');
+                        logDebug('Camera disabled by student');
+                    } else {
+                        videoTrack.enabled = true;
+                        toggleMyVideo.innerHTML = '<i class="fas fa-video"></i> My Camera: ON';
+                        showNotification('info', 'Camera on', 'Your camera is now enabled.');
+                        logDebug('Camera enabled by student');
+                    }
+                    
+                    // Update all peer connections
+                    Object.values(peerConnections).forEach(pc => {
+                        const senders = pc.getSenders();
+                        const videoSender = senders.find(s => s.track?.kind === 'video');
+                        if (videoSender && videoTrack) {
+                            videoSender.replaceTrack(videoTrack);
+                            logDebug('Replaced video track in peer connection');
+                        }
+                    });
+                }
+            } catch (error) {
+                console.error('Error accessing camera:', error);
+                showNotification('error', 'Camera Error', 'Could not access camera. Please check permissions.');
+                logDebug(`Camera error: ${error.message}`);
+            }
+        }
+
+        function toggleFullscreenMode() {
+            const videoContainer = teacherVideo.parentElement;
+            
+            if (!document.fullscreenElement) {
+                if (videoContainer.requestFullscreen) {
+                    videoContainer.requestFullscreen();
+                } else if (videoContainer.webkitRequestFullscreen) {
+                    videoContainer.webkitRequestFullscreen();
+                } else if (videoContainer.msRequestFullscreen) {
+                    videoContainer.msRequestFullscreen();
+                }
+                toggleFullscreen.innerHTML = '<i class="fas fa-compress"></i>';
+                logDebug('Entered fullscreen mode');
+            } else {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                } else if (document.webkitExitFullscreen) {
+                    document.webkitExitFullscreen();
+                } else if (document.msExitFullscreen) {
+                    document.msExitFullscreen();
+                }
+                toggleFullscreen.innerHTML = '<i class="fas fa-expand"></i>';
+                logDebug('Exited fullscreen mode');
+            }
+        }
+
+        function handleFullscreenChange() {
+            if (!document.fullscreenElement) {
+                toggleFullscreen.innerHTML = '<i class="fas fa-expand"></i>';
+            }
+        }
+
+        function toggleVideoMute() {
+            const isMuted = teacherVideo.muted;
+            teacherVideo.muted = !isMuted;
+            toggleMute.innerHTML = isMuted ? 
+                '<i class="fas fa-volume-up"></i>' : 
+                '<i class="fas fa-volume-mute"></i>';
+            toggleMute.classList.toggle('active', !isMuted);
+            showNotification('info', isMuted ? 'Unmuted' : 'Muted', 
+                `Teacher's stream ${isMuted ? 'unmuted' : 'muted'}`);
+            logDebug(`Teacher's stream ${isMuted ? 'unmuted' : 'muted'}`);
+        }
+
+        function toggleRemoteMute(sid) {
+            const video = document.getElementById(`remote-video-${sid}`);
+            if (video) {
+                video.muted = !video.muted;
+                const btn = document.querySelector(`#video-${sid} .control-btn.small`);
+                if (btn) {
+                    btn.innerHTML = video.muted ? 
+                        '<i class="fas fa-volume-mute"></i>' : 
+                        '<i class="fas fa-volume-up"></i>';
+                }
+            }
+        }
+
+        function pinStudentVideo(sid) {
+            const videoContainer = document.getElementById(`video-${sid}`);
+            if (videoContainer) {
+                // Remove pin from all
+                document.querySelectorAll('.pinned').forEach(el => {
+                    el.classList.remove('pinned');
+                });
+                
+                // Add pin to selected
+                videoContainer.classList.add('pinned');
+                
+                // Move to top
+                studentsVideoGrid.insertBefore(videoContainer, studentsVideoGrid.firstChild);
+            }
+        }
+
+        function raiseHandAction() {
+            if (!roomState.questions_enabled) {
+                showNotification('error', 'Questions Disabled', 'Teacher has disabled questions');
+                return;
+            }
+            
+            showNotification('info', 'Hand Raised', 'Teacher has been notified that you have a question.');
+            logDebug('Raised hand');
+            
+            raiseHand.innerHTML = '<i class="fas fa-hand-paper fa-bounce"></i> Hand Raised';
+            raiseHand.disabled = true;
+            
+            setTimeout(() => {
+                raiseHand.innerHTML = '<i class="fas fa-hand-paper"></i> Raise Hand';
+                raiseHand.disabled = false;
+            }, 5000);
+        }
+
+        function leaveClassroom() {
+            if (confirm('Are you sure you want to leave the classroom?')) {
+                logDebug('Leaving classroom');
+                
+                // Cleanup all connections
+                Object.keys(peerConnections).forEach(sid => {
+                    cleanupConnection(sid);
+                });
+                
+                // Stop all streams
+                if (localStream) {
+                    localStream.getTracks().forEach(track => track.stop());
+                }
+                
+                // Stop speaker detection
+                if (speakerDetectionInterval) {
+                    clearInterval(speakerDetectionInterval);
+                }
+                
+                // Close audio context
+                if (sharedAudioContext) {
+                    sharedAudioContext.close();
+                }
+                
+                // Stop timer
+                if (sessionTimer) {
+                    clearInterval(sessionTimer);
+                }
+                
+                // Disconnect socket
+                socket.disconnect();
+                
+                // Redirect to home
+                window.location.href = '/live_meeting';
+            }
+        }
+
+        function showNotification(type, title, message) {
+            if (!notification) return;
+            
+            const icons = {
+                success: 'fa-check-circle',
+                error: 'fa-exclamation-circle',
+                info: 'fa-info-circle'
+            };
+            
+            notification.className = `notification ${type}`;
+            notification.innerHTML = `
+                <i class="fas ${icons[type]}"></i>
+                <div class="notification-content">
+                    <div class="notification-title">${title}</div>
+                    <div class="notification-message">${message}</div>
+                </div>
+            `;
+            notification.classList.add('show');
+            
+            logDebug(`Notification: ${title} - ${message}`);
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+
+        function logDebug(message, data) {
+            if (!debugLog) return;
+            
+            const timestamp = new Date().toLocaleTimeString();
+            const logEntry = document.createElement('div');
+            logEntry.className = 'debug-entry';
+            logEntry.innerHTML = `
+                <span class="debug-timestamp">[${timestamp}]</span>
+                <span class="debug-message">${message}</span>
+            `;
+            debugLog.prepend(logEntry);
+            
+            if (data) {
+                const dataEntry = document.createElement('div');
+                dataEntry.textContent = JSON.stringify(data, null, 2);
+                dataEntry.style.fontSize = '10px';
+                dataEntry.style.color = '#666';
+                debugLog.prepend(dataEntry);
+            }
+            
+            while (debugLog.children.length > 20) {
+                debugLog.removeChild(debugLog.lastChild);
+            }
+            
+            debugLog.scrollTop = 0;
+            
+            console.debug(`[${timestamp}] ${message}`);
+        }
+
+        // ============================================
+        // Cleanup on Unload
+        // ============================================
+        window.addEventListener('beforeunload', () => {
+            // Cleanup all connections
+            Object.keys(peerConnections).forEach(sid => {
+                cleanupConnection(sid);
+            });
+            
+            // Stop all streams
+            if (localStream) {
+                localStream.getTracks().forEach(track => track.stop());
+            }
+            
+            // Stop speaker detection
+            if (speakerDetectionInterval) {
+                clearInterval(speakerDetectionInterval);
+            }
+            
+            // Close audio context
+            if (sharedAudioContext) {
+                sharedAudioContext.close();
+            }
+            
+            // Disconnect socket
+            if (socket) {
+                socket.disconnect();
+            }
+            
+            logDebug('Page unloading - cleaning up');
+        });
+    </script>
+</body>
+</html>
