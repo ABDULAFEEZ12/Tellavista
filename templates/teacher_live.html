@@ -1,0 +1,2039 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teacher Live - Room {{ room_id }}</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
+    <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #1a2980 0%, #26d0ce 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .header {
+            background: white;
+            border-radius: 15px;
+            padding: 20px 30px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+        }
+        
+        .room-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .room-icon {
+            background: linear-gradient(135deg, #1a2980 0%, #26d0ce 100%);
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 22px;
+        }
+        
+        .room-details h1 {
+            font-size: 24px;
+            color: #1a2980;
+            margin-bottom: 5px;
+        }
+        
+        .room-details .room-id {
+            background: #f0f8ff;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-family: monospace;
+            font-size: 18px;
+            color: #1a2980;
+            font-weight: 600;
+        }
+        
+        .stats {
+            display: flex;
+            gap: 25px;
+        }
+        
+        .stat-card {
+            text-align: center;
+            padding: 10px 20px;
+            background: #f8f9ff;
+            border-radius: 10px;
+            min-width: 120px;
+        }
+        
+        .stat-card i {
+            font-size: 24px;
+            color: #1a2980;
+            margin-bottom: 8px;
+        }
+        
+        .stat-card .count {
+            font-size: 28px;
+            font-weight: 700;
+            color: #1a2980;
+        }
+        
+        .stat-card .label {
+            font-size: 12px;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 400px;
+            gap: 20px;
+        }
+        
+        .video-section {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+        }
+        
+        .teacher-video-container {
+            background: #000;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 10px;
+            position: relative;
+            aspect-ratio: 16/9;
+        }
+        
+        #teacherVideo {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .students-video-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            min-height: 200px;
+        }
+        
+        .student-video-item {
+            position: relative;
+            background: #000;
+            border-radius: 10px;
+            overflow: hidden;
+            aspect-ratio: 16/9;
+            border: 2px solid #667eea;
+            transition: all 0.3s ease;
+        }
+        
+        .student-video-item.pinned {
+            border-color: #ff4757;
+            border-width: 3px;
+            order: -1;
+        }
+        
+        .student-video-item.active-speaker {
+            border-color: #ffa502;
+            box-shadow: 0 0 20px rgba(255, 165, 2, 0.5);
+            animation: pulse 2s infinite;
+        }
+        
+        .student-video-item.highlighted {
+            border-color: #2ed573;
+            box-shadow: 0 0 20px rgba(46, 213, 115, 0.5);
+        }
+        
+        .student-video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+        
+        .student-video-label {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 8px 12px;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .student-video-controls {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            display: flex;
+            gap: 5px;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        
+        .student-video-item:hover .student-video-controls {
+            opacity: 1;
+        }
+        
+        .video-overlay {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            right: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .video-controls {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .control-btn {
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            border: none;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 20px;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .control-btn:hover {
+            background: rgba(0, 0, 0, 0.9);
+            transform: scale(1.1);
+        }
+        
+        .control-btn.active {
+            background: #ff4757;
+        }
+        
+        .control-btn.screen-share.active {
+            background: #2ed573;
+        }
+        
+        .control-btn.small {
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            border: none;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .control-btn.small:hover {
+            background: rgba(0, 0, 0, 0.9);
+        }
+        
+        .video-label {
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 14px;
+        }
+        
+        .controls-section {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .action-btn {
+            background: linear-gradient(135deg, #1a2980 0%, #26d0ce 100%);
+            color: white;
+            border: none;
+            padding: 15px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        
+        .action-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 7px 20px rgba(26, 41, 128, 0.3);
+        }
+        
+        .action-btn.secondary {
+            background: #6c757d;
+        }
+        
+        .action-btn.danger {
+            background: #ff4757;
+        }
+        
+        .action-btn.success {
+            background: #2ed573;
+        }
+        
+        .action-btn.disabled {
+            background: #cccccc;
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+        
+        .action-btn.disabled:hover {
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .students-section {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+            height: fit-content;
+        }
+        
+        .section-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 20px;
+            color: #1a2980;
+            font-size: 20px;
+        }
+        
+        .section-title i {
+            font-size: 24px;
+        }
+        
+        .students-list {
+            max-height: 500px;
+            overflow-y: auto;
+        }
+        
+        .student-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 15px;
+            background: #f8f9ff;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .student-item:hover {
+            background: #edf2ff;
+            transform: translateX(5px);
+        }
+        
+        .student-avatar {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #1a2980 0%, #26d0ce 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+        }
+        
+        .student-info h4 {
+            font-size: 16px;
+            color: #333;
+            margin-bottom: 3px;
+        }
+        
+        .student-info .status {
+            font-size: 12px;
+            color: #666;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .status.connected {
+            color: #2ed573;
+        }
+        
+        .status.connecting {
+            color: #ffa502;
+        }
+        
+        .status.disconnected {
+            color: #ff4757;
+        }
+        
+        .connection-status {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 10px;
+            padding: 10px;
+            background: #e8f5e9;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+        
+        .connection-status.connecting {
+            background: #fff3e0;
+        }
+        
+        .connection-status.error {
+            background: #ffebee;
+            color: #d32f2f;
+        }
+        
+        .notification {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: white;
+            padding: 15px 25px;
+            border-radius: 10px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            z-index: 1000;
+            transform: translateX(120%);
+            transition: transform 0.3s ease;
+        }
+        
+        .notification.show {
+            transform: translateX(0);
+        }
+        
+        .notification.success {
+            border-left: 4px solid #2ed573;
+        }
+        
+        .notification.error {
+            border-left: 4px solid #ff4757;
+        }
+        
+        .notification.info {
+            border-left: 4px solid #1a2980;
+        }
+        
+        .notification i {
+            font-size: 24px;
+        }
+        
+        .notification.success i {
+            color: #2ed573;
+        }
+        
+        .notification.error i {
+            color: #ff4757;
+        }
+        
+        .notification.info i {
+            color: #1a2980;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: #666;
+        }
+        
+        .empty-state i {
+            font-size: 48px;
+            margin-bottom: 15px;
+            color: #ccc;
+        }
+        
+        .debug-info {
+            background: #f8f9ff;
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 20px;
+            font-family: monospace;
+            font-size: 12px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        
+        .debug-info h4 {
+            margin-bottom: 10px;
+            color: #1a2980;
+        }
+
+        .authority-panel {
+            margin: 25px 0;
+            padding: 20px;
+            background: #fff;
+            border-radius: 12px;
+            border: 2px solid #2ed573;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+        }
+
+        .authority-panel h3 {
+            color: #1a2980;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .control-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .control-group {
+            padding: 15px;
+            background: #f8f9ff;
+            border-radius: 8px;
+            border: 1px solid #e6e9ff;
+        }
+
+        .control-group h4 {
+            font-size: 15px;
+            color: #666;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .mic-request-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 12px;
+            background: white;
+            border-radius: 6px;
+            margin-bottom: 8px;
+            border-left: 3px solid #ffa502;
+        }
+
+        .signal-item {
+            padding: 8px 12px;
+            margin-bottom: 8px;
+            border-radius: 6px;
+            font-size: 13px;
+            border-left: 3px solid #1a2980;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .signal-item:hover {
+            transform: translateX(5px);
+        }
+
+        #aiPrompter {
+            position: fixed;
+            right: 20px;
+            top: 120px;
+            width: 300px;
+            background: white;
+            border-radius: 12px;
+            padding: 0;
+            box-shadow: 0 5px 25px rgba(0, 0, 0, 0.15);
+            z-index: 1000;
+            overflow: hidden;
+            border: 1px solid #e6e9ff;
+        }
+
+        .prompter-header {
+            background: linear-gradient(135deg, #1a2980 0%, #26d0ce 100%);
+            color: white;
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .prompter-header h4 {
+            margin: 0;
+            color: white;
+        }
+
+        #prompterContent {
+            padding: 15px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .prompter-item {
+            display: flex;
+            gap: 10px;
+            padding: 10px;
+            border-bottom: 1px solid #f0f0f0;
+            align-items: flex-start;
+        }
+
+        .prompter-item:last-child {
+            border-bottom: none;
+        }
+
+        .prompter-bullet {
+            color: #1a2980;
+            font-weight: bold;
+            min-width: 20px;
+        }
+
+        .time-alert {
+            background: #fff3e0;
+            border-left: 3px solid #ffa502;
+            margin-top: 10px;
+        }
+
+        @keyframes pulse {
+            0%, 100% { box-shadow: 0 0 20px rgba(255, 165, 2, 0.5); }
+            50% { box-shadow: 0 0 30px rgba(255, 165, 2, 0.8); }
+        }
+        
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        /* Mobile-specific styles */
+        @media (max-width: 1024px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+            
+            .stats {
+                gap: 15px;
+            }
+            
+            .stat-card {
+                min-width: 100px;
+                padding: 10px 15px;
+            }
+            
+            .students-video-grid {
+                grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            }
+            
+            #aiPrompter {
+                position: relative;
+                width: 100%;
+                top: 0;
+                right: 0;
+                margin-top: 20px;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .header {
+                flex-direction: column;
+                gap: 15px;
+                text-align: center;
+            }
+            
+            .room-info {
+                justify-content: center;
+            }
+            
+            .stats {
+                justify-content: center;
+                flex-wrap: wrap;
+            }
+            
+            .controls-section {
+                grid-template-columns: 1fr;
+            }
+            
+            .students-video-grid {
+                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+                gap: 10px;
+                padding: 10px;
+            }
+            
+            .student-video-item {
+                aspect-ratio: 4/3;
+            }
+            
+            .control-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            /* Mobile notification */
+            .notification {
+                position: fixed;
+                top: 20px;
+                right: 10px;
+                left: 10px;
+                bottom: auto;
+                max-width: 100%;
+                z-index: 10000;
+                transform: translateY(-100%);
+            }
+            
+            .notification.show {
+                transform: translateY(0);
+            }
+            
+            /* Mobile authority panel */
+            .authority-panel {
+                margin: 15px 0;
+                padding: 15px;
+            }
+            
+            /* Ensure video controls are visible on mobile */
+            .student-video-controls {
+                opacity: 1 !important;
+            }
+            
+            .control-btn {
+                width: 44px;
+                height: 44px;
+                font-size: 18px;
+            }
+            
+            .video-controls {
+                gap: 5px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 10px;
+            }
+            
+            .header {
+                padding: 15px;
+            }
+            
+            .room-details h1 {
+                font-size: 20px;
+            }
+            
+            .room-details .room-id {
+                font-size: 16px;
+                padding: 4px 12px;
+            }
+            
+            .stat-card {
+                min-width: 80px;
+                padding: 8px 12px;
+            }
+            
+            .stat-card .count {
+                font-size: 22px;
+            }
+            
+            .students-video-grid {
+                grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            }
+            
+            .action-btn {
+                padding: 12px;
+                font-size: 14px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="room-info">
+                <div class="room-icon">
+                    <i class="fas fa-chalkboard-teacher"></i>
+                </div>
+                <div class="room-details">
+                    <h1>Teaching Session</h1>
+                    <div class="room-id">Room: {{ room_id }}</div>
+                </div>
+            </div>
+            <div class="stats">
+                <div class="stat-card">
+                    <i class="fas fa-users"></i>
+                    <div class="count" id="studentCount">0</div>
+                    <div class="label">Students</div>
+                </div>
+                <div class="stat-card">
+                    <i class="fas fa-signal"></i>
+                    <div class="count" id="connectionStatus">●</div>
+                    <div class="label">Status</div>
+                </div>
+                <div class="stat-card">
+                    <i class="fas fa-clock"></i>
+                    <div class="count" id="sessionTime">00:00</div>
+                    <div class="label">Time</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="main-content">
+            <div class="video-section">
+                <!-- Teacher video -->
+                <div class="teacher-video-container">
+                    <video id="teacherVideo" autoplay playsinline muted></video>
+                    <div class="video-overlay">
+                        <div class="video-label">
+                            <i class="fas fa-user-tie"></i> You (Teacher)
+                        </div>
+                        <div class="video-controls">
+                            <button class="control-btn" id="toggleVideo" title="Toggle Video">
+                                <i class="fas fa-video"></i>
+                            </button>
+                            <button class="control-btn" id="toggleAudio" title="Toggle Audio">
+                                <i class="fas fa-microphone"></i>
+                            </button>
+                            <button class="control-btn screen-share" id="toggleScreenShare" title="Share Screen">
+                                <i class="fas fa-desktop"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Students video grid -->
+                <div class="students-video-grid" id="studentsVideoGrid">
+                    <div class="empty-state">
+                        <i class="fas fa-user-friends"></i>
+                        <p>Students will appear here when they join</p>
+                    </div>
+                </div>
+                
+                <div class="connection-status" id="connectionStatusBar">
+                    <i class="fas fa-sync-alt fa-spin"></i>
+                    <span>Connecting to classroom...</span>
+                </div>
+                
+                <!-- Controls -->
+                <div class="controls-section">
+                    <button class="action-btn success" id="startBroadcast">
+                        <i class="fas fa-play"></i> Start Broadcast
+                    </button>
+                    <button class="action-btn" id="copyRoomId">
+                        <i class="fas fa-copy"></i> Copy Room ID
+                    </button>
+                    <button class="action-btn secondary" id="togglePrompterBtn">
+                        <i class="fas fa-robot"></i> AI Prompter
+                    </button>
+                    <button class="action-btn danger" id="endSession">
+                        <i class="fas fa-power-off"></i> End Session
+                    </button>
+                </div>
+                
+                <!-- Teacher Authority Panel -->
+                <div class="authority-panel">
+                    <h3><i class="fas fa-crown"></i> Classroom Controls</h3>
+                    
+                    <div class="control-grid">
+                        <!-- Audio Controls -->
+                        <div class="control-group">
+                            <h4><i class="fas fa-volume-mute"></i> Audio</h4>
+                            <div style="display: flex; gap: 8px; margin-bottom: 15px;">
+                                <button class="action-btn danger" id="muteAllBtn" style="flex: 1;">
+                                    <i class="fas fa-volume-mute"></i> Mute All
+                                </button>
+                                <button class="action-btn success" id="unmuteAllBtn" style="flex: 1;">
+                                    <i class="fas fa-volume-up"></i> Unmute
+                                </button>
+                            </div>
+                            <div id="micRequestContainer">
+                                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+                                    <span style="font-size: 14px;">Mic Requests:</span>
+                                    <span id="micRequestBadge" style="background: #ff4757; color: white; border-radius: 10px; padding: 2px 8px; font-size: 12px;">0</span>
+                                </div>
+                                <div id="micRequestList" style="max-height: 120px; overflow-y: auto;"></div>
+                            </div>
+                        </div>
+                        
+                        <!-- Video Controls -->
+                        <div class="control-group">
+                            <h4><i class="fas fa-video"></i> Video</h4>
+                            <div style="display: flex; gap: 8px;">
+                                <button class="action-btn danger" id="disableCamsBtn" style="flex: 1;">
+                                    <i class="fas fa-video-slash"></i> Disable Cams
+                                </button>
+                                <button class="action-btn success" id="enableCamsBtn" style="flex: 1;">
+                                    <i class="fas fa-video"></i> Enable
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- Student Signals -->
+                        <div class="control-group">
+                            <h4><i class="fas fa-heartbeat"></i> Student Signals</h4>
+                            <div id="struggleSignals" style="min-height: 100px; max-height: 150px; overflow-y: auto;">
+                                <p class="empty-state" style="font-size: 13px; padding: 20px 0;">No signals yet</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Debug Information -->
+                <div class="debug-info">
+                    <h4><i class="fas fa-bug"></i> Debug Information</h4>
+                    <div id="debugLog"></div>
+                </div>
+            </div>
+            
+            <div class="students-section">
+                <div class="section-title">
+                    <i class="fas fa-user-graduate"></i>
+                    <h2>Students (<span id="liveStudentCount">0</span>)</h2>
+                </div>
+                <div class="students-list" id="studentsList">
+                    <div class="empty-state">
+                        <i class="fas fa-user-friends"></i>
+                        <p>Waiting for students to join...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- AI Prompter -->
+    <div id="aiPrompter" style="display: none;">
+        <div class="prompter-header">
+            <h4><i class="fas fa-robot"></i> AI Prompter</h4>
+            <button onclick="toggleAIPrompter()" style="background: none; border: none; color: white; cursor: pointer; font-size: 20px;">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div id="prompterContent">
+            <div class="prompter-item">
+                <span class="prompter-bullet">•</span>
+                <span>Welcome students and set agenda (2 min)</span>
+            </div>
+            <div class="prompter-item">
+                <span class="prompter-bullet">•</span>
+                <span>Review previous lesson (3 min)</span>
+            </div>
+            <div class="prompter-item">
+                <span class="prompter-bullet">•</span>
+                <span>Introduce new topic (5 min)</span>
+            </div>
+            <div class="prompter-item time-alert">
+                <span class="prompter-bullet">⏰</span>
+                <span>You planned 5 minutes for examples</span>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Notification -->
+    <div class="notification" id="notification">
+        <i class="fas fa-check-circle"></i>
+        <div class="notification-content">
+            <div class="notification-title">Notification</div>
+            <div class="notification-message">Welcome to the classroom!</div>
+        </div>
+    </div>
+
+    <script>
+        // ============================================
+        // CONFIGURATION
+        // ============================================
+        const roomId = "{{ room_id }}";
+        const socket = io({
+            reconnection: true,
+            reconnectionAttempts: 10,
+            reconnectionDelay: 1000,
+            reconnectionDelayMax: 5000,
+            timeout: 20000
+        });
+        
+        // Detect mobile device
+        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        
+        // Global variables
+        let localStream = null;
+        let screenStream = null;
+        let isBroadcasting = false;
+        let sessionStartTime = null;
+        let sessionTimer = null;
+        let mySid = null;
+        
+        // WebRTC Data Structures
+        const peerConnections = {};
+        const remoteStreams = {};
+        const participants = {};
+        
+        // WebRTC Configuration
+        const WEBRTC_CONFIG = {
+            iceServers: [
+                { urls: "stun:stun.l.google.com:19302" },
+                { urls: "stun:global.stun.twilio.com:3478" },
+                {
+                    urls: "turn:global.relay.metered.ca:80",
+                    username: "459b679e028c3f37200569ec",
+                    credential: "7Y4blbcvHOg1Uhwm"
+                },
+                {
+                    urls: "turns:global.relay.metered.ca:443?transport=tcp",
+                    username: "459b679e028c3f37200569ec",
+                    credential: "7Y4blbcvHOg1Uhwm"
+                }
+            ],
+            bundlePolicy: 'max-bundle',
+            rtcpMuxPolicy: 'require'
+        };
+        
+        // DOM Elements
+        const teacherVideo = document.getElementById('teacherVideo');
+        const studentsVideoGrid = document.getElementById('studentsVideoGrid');
+        const studentsList = document.getElementById('studentsList');
+        const studentCount = document.getElementById('studentCount');
+        const liveStudentCount = document.getElementById('liveStudentCount');
+        const connectionStatus = document.getElementById('connectionStatus');
+        const connectionStatusBar = document.getElementById('connectionStatusBar');
+        const sessionTime = document.getElementById('sessionTime');
+        const notification = document.getElementById('notification');
+        const debugLog = document.getElementById('debugLog');
+        
+        // Teacher Authority Elements
+        const micRequestContainer = document.getElementById('micRequestContainer');
+        const micRequestBadge = document.getElementById('micRequestBadge');
+        const micRequestList = document.getElementById('micRequestList');
+        const struggleSignals = document.getElementById('struggleSignals');
+
+        // ============================================
+        // INITIALIZATION
+        // ============================================
+        document.addEventListener('DOMContentLoaded', async function() {
+            console.log('Teacher page loaded. Room: ' + roomId);
+            
+            // Show appropriate notification
+            if (isMobile) {
+                console.log('Running in mobile mode');
+            } else {
+                console.log('Running in desktop mode');
+            }
+            
+            try {
+                await initializeLocalMedia();
+                connectToRoom();
+                setupEventListeners();
+                startSessionTimer();
+                
+                console.log('Teacher initialized successfully');
+            } catch (error) {
+                console.error('Error initializing teacher:', error);
+                showNotification('error', 'Initialization Error', error.message);
+            }
+        });
+
+        // ============================================
+        // NOTIFICATION SYSTEM
+        // ============================================
+        function showNotification(type, title, message) {
+            if (!notification) return;
+            
+            const icons = {
+                success: 'fa-check-circle',
+                error: 'fa-exclamation-circle',
+                info: 'fa-info-circle',
+                warning: 'fa-exclamation-triangle'
+            };
+            
+            // Update notification
+            notification.className = `notification ${type}`;
+            notification.innerHTML = `
+                <i class="fas ${icons[type] || 'fa-info-circle'}"></i>
+                <div class="notification-content">
+                    <div class="notification-title">${title}</div>
+                    <div class="notification-message">${message}</div>
+                </div>
+            `;
+            
+            // Show notification
+            notification.classList.add('show');
+            
+            // Log for debugging
+            logDebug(`${type.toUpperCase()}: ${title} - ${message}`);
+            
+            // Auto-hide (longer on mobile)
+            const delay = isMobile ? 4000 : 3000;
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, delay);
+        }
+
+        // ============================================
+        // MEDIA INITIALIZATION
+        // ============================================
+        async function initializeLocalMedia() {
+            try {
+                const constraints = {
+                    video: {
+                        width: { ideal: 1280 },
+                        height: { ideal: 720 },
+                        frameRate: { ideal: 30 }
+                    },
+                    audio: {
+                        echoCancellation: true,
+                        noiseSuppression: true,
+                        autoGainControl: true
+                    }
+                };
+                
+                localStream = await navigator.mediaDevices.getUserMedia(constraints);
+                teacherVideo.srcObject = localStream;
+                await teacherVideo.play();
+                
+                console.log('Local media obtained');
+                showNotification('success', 'Media Ready', 'Camera and microphone are active');
+                
+            } catch (error) {
+                console.error('Error getting local media:', error);
+                showNotification('error', 'Media Error', 'Could not access camera/microphone');
+                
+                // Try audio-only fallback
+                try {
+                    localStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                    teacherVideo.style.display = 'none';
+                    showNotification('warning', 'Audio Only', 'Running in audio-only mode');
+                } catch (audioError) {
+                    throw error;
+                }
+            }
+        }
+
+        // ============================================
+        // SOCKET.IO EVENT HANDLERS
+        // ============================================
+        function setupEventListeners() {
+            // Connection events
+            socket.on('connect', () => {
+                console.log('✅ Connected to server');
+                updateConnectionStatus('connected');
+            });
+            
+            socket.on('disconnect', () => {
+                console.log('❌ Disconnected from server');
+                updateConnectionStatus('disconnected');
+            });
+            
+            socket.on('reconnect', () => {
+                console.log('🔄 Reconnected to server');
+                showNotification('info', 'Reconnected', 'Connection restored');
+                socket.emit('rejoin-room', { room: roomId, role: 'teacher' });
+            });
+            
+            socket.on('reconnect_attempt', () => {
+                console.log('Attempting to reconnect...');
+            });
+            
+            // Room events
+            socket.on('room-joined', handleRoomJoined);
+            socket.on('new-participant', handleNewParticipant);
+            socket.on('participant-left', handleParticipantLeft);
+            
+            // WebRTC events
+            socket.on('webrtc-offer', handleWebRTCOffer);
+            socket.on('webrtc-answer', handleWebRTCAnswer);
+            socket.on('webrtc-ice-candidate', handleWebRTCIceCandidate);
+            
+            // Teacher authority events - THESE ARE CRITICAL
+            socket.on('mic-request-received', handleMicRequestReceived);
+            socket.on('student-struggling', handleStudentStruggling);
+            socket.on('command-executed', handleCommandExecuted);
+            socket.on('room-state', handleRoomState);
+            
+            // Error handling
+            socket.on('error', handleError);
+            
+            // Button event listeners
+            setupButtonListeners();
+        }
+
+        function setupButtonListeners() {
+            // Media controls
+            document.getElementById('toggleVideo')?.addEventListener('click', toggleVideoStream);
+            document.getElementById('toggleAudio')?.addEventListener('click', toggleAudioStream);
+            document.getElementById('toggleScreenShare')?.addEventListener('click', toggleScreenSharing);
+            
+            // Session controls
+            document.getElementById('startBroadcast')?.addEventListener('click', toggleBroadcast);
+            document.getElementById('copyRoomId')?.addEventListener('click', copyRoomIdToClipboard);
+            document.getElementById('endSession')?.addEventListener('click', endTeachingSession);
+            document.getElementById('togglePrompterBtn')?.addEventListener('click', toggleAIPrompter);
+            
+            // Teacher authority controls
+            document.getElementById('muteAllBtn')?.addEventListener('click', () => {
+                socket.emit('teacher-mute-all', { room: roomId });
+                showNotification('info', 'Mute All', 'All students have been muted');
+            });
+            
+            document.getElementById('unmuteAllBtn')?.addEventListener('click', () => {
+                socket.emit('teacher-unmute-all', { room: roomId });
+                showNotification('info', 'Unmute All', 'All students have been unmuted');
+            });
+            
+            document.getElementById('disableCamsBtn')?.addEventListener('click', () => {
+                socket.emit('teacher-disable-cameras', { room: roomId });
+                showNotification('info', 'Cameras Disabled', 'All student cameras disabled');
+            });
+            
+            document.getElementById('enableCamsBtn')?.addEventListener('click', () => {
+                socket.emit('teacher-enable-cameras', { room: roomId });
+                showNotification('info', 'Cameras Enabled', 'All student cameras enabled');
+            });
+        }
+
+        // ============================================
+        // ROOM MANAGEMENT
+        // ============================================
+        function connectToRoom() {
+            socket.emit('join-room', {
+                room: roomId,
+                role: 'teacher',
+                username: 'Teacher'
+            });
+            console.log('Connecting to room: ' + roomId);
+        }
+
+        function handleRoomJoined(data) {
+            const { sid, username, role, existing_participants } = data;
+            
+            mySid = sid;
+            console.log(`✅ Room joined. SID: ${mySid}, Participants: ${existing_participants.length}`);
+            
+            // Store participants
+            existing_participants.forEach(participant => {
+                participants[participant.sid] = participant;
+                createPeerConnection(participant.sid, participant.username, participant.role);
+            });
+            
+            updateStudentCount();
+            showNotification('success', 'Connected', 'You are now the teacher');
+            
+            // Auto-start broadcasting
+            setTimeout(toggleBroadcast, 1000);
+        }
+
+        function handleNewParticipant(data) {
+            const { sid, username, role } = data;
+            
+            console.log(`👋 New participant: ${username} (${sid})`);
+            
+            participants[sid] = { username, role };
+            createPeerConnection(sid, username, role);
+            
+            updateStudentCount();
+            showNotification('info', 'Student Joined', `${username} has joined the class`);
+        }
+
+        function handleParticipantLeft(data) {
+            const { sid, username } = data;
+            
+            console.log(`👋 Participant left: ${username} (${sid})`);
+            
+            cleanupConnection(sid);
+            delete participants[sid];
+            
+            updateStudentCount();
+            showNotification('info', 'Student Left', `${username} has left the class`);
+        }
+
+        // ============================================
+        // TEACHER AUTHORITY FUNCTIONS (WORK ON BOTH MOBILE & DESKTOP)
+        // ============================================
+        function handleMicRequestReceived(data) {
+            const { student_sid, username } = data;
+            
+            console.log(`🎤 MIC REQUEST from ${username}`);
+            
+            // Update badge count
+            const currentCount = parseInt(micRequestBadge.textContent);
+            micRequestBadge.textContent = currentCount + 1;
+            
+            // Add to request list
+            const requestItem = document.createElement('div');
+            requestItem.className = 'mic-request-item';
+            requestItem.innerHTML = `
+                <span style="font-weight: 500;">${username}</span>
+                <div>
+                    <button onclick="approveMicRequest('${student_sid}')" 
+                            style="background: #2ed573; color: white; border: none; padding: 4px 10px; border-radius: 4px; font-size: 12px; margin-right: 5px;">
+                        Approve
+                    </button>
+                    <button onclick="denyMicRequest('${student_sid}')" 
+                            style="background: #ff4757; color: white; border: none; padding: 4px 10px; border-radius: 4px; font-size: 12px;">
+                        Deny
+                    </button>
+                </div>
+            `;
+            micRequestList.appendChild(requestItem);
+            
+            // Show notification
+            showNotification('info', '🎤 Mic Request', `${username} wants to speak`);
+            
+            // Scroll to show new request
+            requestItem.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+
+        function handleStudentStruggling(data) {
+            const { student_sid, signal, username } = data;
+            
+            console.log(`📢 STUDENT SIGNAL from ${username}: ${signal}`);
+            
+            // Remove empty state if present
+            const emptyState = struggleSignals.querySelector('.empty-state');
+            if (emptyState) emptyState.remove();
+            
+            const studentName = username || 'Student';
+            const signalText = getSignalText(signal);
+            
+            // Create signal item
+            const signalItem = document.createElement('div');
+            signalItem.className = 'signal-item';
+            signalItem.style.background = getSignalColor(signal);
+            signalItem.style.borderLeftColor = getSignalBorderColor(signal);
+            
+            signalItem.innerHTML = `
+                <strong>${studentName}</strong>: ${signalText}
+                <small style="float: right; color: #666; font-size: 11px;">
+                    ${new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                </small>
+            `;
+            
+            // Click to focus student
+            signalItem.onclick = () => {
+                focusStudentVideo(student_sid);
+                showNotification('info', 'Student Focused', `Scrolled to ${studentName}`);
+            };
+            
+            struggleSignals.prepend(signalItem);
+            
+            // Show notification
+            const icon = getSignalIcon(signal);
+            showNotification('info', `${icon} Student Signal`, `${studentName}: ${signalText}`);
+            
+            // Auto-remove after 30 seconds
+            setTimeout(() => {
+                if (signalItem.parentNode) {
+                    signalItem.remove();
+                    if (struggleSignals.children.length === 0) {
+                        struggleSignals.innerHTML = '<p class="empty-state" style="font-size: 13px; padding: 20px 0;">No signals yet</p>';
+                    }
+                }
+            }, 30000);
+        }
+
+        function getSignalText(signal) {
+            const signals = {
+                'confused': 'is confused',
+                'too_fast': 'says too fast',
+                'got_it': 'understands',
+                'help': 'needs help',
+                'question': 'has a question',
+                'slow_down': 'please slow down',
+                'repeat': 'please repeat'
+            };
+            return signals[signal] || signal;
+        }
+
+        function getSignalIcon(signal) {
+            const icons = {
+                'confused': '❓',
+                'too_fast': '⏩',
+                'got_it': '✅',
+                'help': '🆘',
+                'question': '❓',
+                'slow_down': '🐌',
+                'repeat': '🔁'
+            };
+            return icons[signal] || '📢';
+        }
+
+        function getSignalColor(signal) {
+            if (signal === 'got_it') return '#e8f5e9';
+            if (signal === 'too_fast') return '#fff3e0';
+            if (signal === 'help' || signal === 'question') return '#e3f2fd';
+            return '#ffebee';
+        }
+
+        function getSignalBorderColor(signal) {
+            if (signal === 'got_it') return '#2ed573';
+            if (signal === 'too_fast') return '#ffa502';
+            if (signal === 'help' || signal === 'question') return '#2196f3';
+            return '#ff4757';
+        }
+
+        function handleCommandExecuted(data) {
+            console.log(`Command ${data.command} executed: ${data.status}`);
+            showNotification('success', 'Command Executed', `${data.command} completed successfully`);
+        }
+
+        function handleRoomState(data) {
+            console.log('Room state updated:', data);
+        }
+
+        function handleError(data) {
+            console.log(`Error received: ${data.message}`);
+            showNotification('error', 'Error', data.message);
+        }
+
+        // ============================================
+        // MIC REQUEST FUNCTIONS
+        // ============================================
+        function approveMicRequest(studentSid) {
+            socket.emit('teacher-approve-mic', {
+                room: roomId,
+                student_sid: studentSid
+            });
+            
+            // Remove from UI
+            const requestItems = document.querySelectorAll('.mic-request-item');
+            requestItems.forEach(item => {
+                if (item.innerHTML.includes(studentSid)) {
+                    item.remove();
+                }
+            });
+            
+            // Update badge count
+            const currentCount = parseInt(micRequestBadge.textContent);
+            micRequestBadge.textContent = Math.max(0, currentCount - 1);
+            
+            console.log(`Approved mic for student: ${studentSid}`);
+            showNotification('success', 'Mic Approved', 'Student can now speak');
+        }
+
+        function denyMicRequest(studentSid) {
+            socket.emit('teacher-deny-mic', {
+                room: roomId,
+                student_sid: studentSid
+            });
+            
+            // Remove from UI
+            const requestItems = document.querySelectorAll('.mic-request-item');
+            requestItems.forEach(item => {
+                if (item.innerHTML.includes(studentSid)) {
+                    item.remove();
+                }
+            });
+            
+            // Update badge count
+            const currentCount = parseInt(micRequestBadge.textContent);
+            micRequestBadge.textContent = Math.max(0, currentCount - 1);
+            
+            console.log(`Denied mic for student: ${studentSid}`);
+            showNotification('info', 'Mic Denied', 'Student cannot speak');
+        }
+
+        // ============================================
+        // WEBRTC PEER CONNECTIONS
+        // ============================================
+        function createPeerConnection(targetSid, targetUsername, targetRole) {
+            if (targetSid === mySid || peerConnections[targetSid]) return;
+            
+            console.log(`🔗 Creating connection to ${targetUsername}`);
+            
+            try {
+                const peerConnection = new RTCPeerConnection(WEBRTC_CONFIG);
+                peerConnections[targetSid] = peerConnection;
+                
+                // Add local tracks
+                if (localStream) {
+                    localStream.getTracks().forEach(track => {
+                        peerConnection.addTrack(track, localStream);
+                    });
+                }
+                
+                // Handle incoming stream
+                peerConnection.ontrack = (event) => {
+                    console.log(`📥 Received stream from ${targetUsername}`);
+                    
+                    if (event.streams[0]) {
+                        remoteStreams[targetSid] = event.streams[0];
+                        displayRemoteVideo(targetSid, targetUsername, targetRole, event.streams[0]);
+                    }
+                };
+                
+                // ICE candidate handling
+                peerConnection.onicecandidate = (event) => {
+                    if (event.candidate) {
+                        socket.emit('webrtc-ice-candidate', {
+                            room: roomId,
+                            target_sid: targetSid,
+                            candidate: event.candidate
+                        });
+                    }
+                };
+                
+                // Connection state
+                peerConnection.onconnectionstatechange = () => {
+                    const state = peerConnection.connectionState;
+                    console.log(`🔌 ${targetUsername} connection: ${state}`);
+                    
+                    if (state === 'connected') {
+                        updateStudentConnectionStatus(targetSid, 'connected');
+                    } else if (state === 'failed' || state === 'disconnected') {
+                        updateStudentConnectionStatus(targetSid, 'disconnected');
+                        cleanupConnection(targetSid);
+                    }
+                };
+                
+                // Create offer if we should initiate
+                if (mySid && mySid < targetSid) {
+                    createAndSendOffer(peerConnection, targetSid);
+                }
+                
+            } catch (error) {
+                console.error(`❌ Error creating connection:`, error);
+            }
+        }
+
+        async function createAndSendOffer(peerConnection, targetSid) {
+            try {
+                const offer = await peerConnection.createOffer({
+                    offerToReceiveAudio: true,
+                    offerToReceiveVideo: true
+                });
+                
+                await peerConnection.setLocalDescription(offer);
+                
+                socket.emit('webrtc-offer', {
+                    room: roomId,
+                    target_sid: targetSid,
+                    offer: peerConnection.localDescription
+                });
+                
+                console.log(`📤 Offer sent to ${targetSid}`);
+            } catch (error) {
+                console.error('Error creating offer:', error);
+            }
+        }
+
+        async function handleWebRTCOffer(data) {
+            const { from_sid, offer } = data;
+            const participant = participants[from_sid];
+            
+            if (!participant) return;
+            
+            console.log(`📥 Received offer from ${participant.username}`);
+            
+            if (!peerConnections[from_sid]) {
+                createPeerConnection(from_sid, participant.username, participant.role);
+            }
+            
+            const peerConnection = peerConnections[from_sid];
+            if (!peerConnection) return;
+            
+            try {
+                await peerConnection.setRemoteDescription(new RTCSessionDescription(offer));
+                
+                if (localStream && peerConnection.getSenders().length === 0) {
+                    localStream.getTracks().forEach(track => {
+                        peerConnection.addTrack(track, localStream);
+                    });
+                }
+                
+                const answer = await peerConnection.createAnswer();
+                await peerConnection.setLocalDescription(answer);
+                
+                socket.emit('webrtc-answer', {
+                    room: roomId,
+                    target_sid: from_sid,
+                    answer: peerConnection.localDescription
+                });
+                
+                console.log(`📤 Answer sent to ${participant.username}`);
+            } catch (error) {
+                console.error('Error handling offer:', error);
+            }
+        }
+
+        async function handleWebRTCAnswer(data) {
+            const { from_sid, answer } = data;
+            const peerConnection = peerConnections[from_sid];
+            
+            if (peerConnection) {
+                try {
+                    await peerConnection.setRemoteDescription(new RTCSessionDescription(answer));
+                    console.log(`✅ Remote description set for ${from_sid}`);
+                } catch (error) {
+                    console.error('Error setting remote description:', error);
+                }
+            }
+        }
+
+        function handleWebRTCIceCandidate(data) {
+            const { from_sid, candidate } = data;
+            const peerConnection = peerConnections[from_sid];
+            
+            if (peerConnection) {
+                peerConnection.addIceCandidate(new RTCIceCandidate(candidate))
+                    .catch(error => console.error('Error adding ICE candidate:', error));
+            }
+        }
+
+        // ============================================
+        // VIDEO DISPLAY FUNCTIONS
+        // ============================================
+        function displayRemoteVideo(sid, username, role, stream) {
+            let videoContainer = document.getElementById(`video-${sid}`);
+            
+            if (!videoContainer) {
+                videoContainer = document.createElement('div');
+                videoContainer.id = `video-${sid}`;
+                videoContainer.className = 'student-video-item';
+                videoContainer.dataset.sid = sid;
+                
+                // Create video element
+                const video = document.createElement('video');
+                video.id = `remote-video-${sid}`;
+                video.autoplay = true;
+                video.playsInline = true;
+                video.className = 'student-video';
+                
+                // Create label
+                const label = document.createElement('div');
+                label.className = 'student-video-label';
+                label.innerHTML = `
+                    <i class="fas fa-${role === 'teacher' ? 'chalkboard-teacher' : 'user'}"></i>
+                    <span>${username}</span>
+                `;
+                
+                // Create controls
+                const controls = document.createElement('div');
+                controls.className = 'student-video-controls';
+                controls.innerHTML = `
+                    <button class="control-btn small" onclick="toggleRemoteMute('${sid}')" title="Mute/Unmute">
+                        <i class="fas fa-volume-up"></i>
+                    </button>
+                    <button class="control-btn small" onclick="pinStudentVideo('${sid}')" title="Pin Video">
+                        <i class="fas fa-thumbtack"></i>
+                    </button>
+                `;
+                
+                videoContainer.appendChild(video);
+                videoContainer.appendChild(label);
+                videoContainer.appendChild(controls);
+                
+                // Add to grid
+                const emptyState = studentsVideoGrid.querySelector('.empty-state');
+                if (emptyState) emptyState.remove();
+                studentsVideoGrid.appendChild(videoContainer);
+            }
+            
+            // Set stream
+            const video = document.getElementById(`remote-video-${sid}`);
+            if (video) {
+                video.srcObject = stream;
+                video.play().catch(e => console.log('Video play error:', e));
+                updateStudentConnectionStatus(sid, 'connected');
+            }
+        }
+
+        function removeVideoElement(sid) {
+            const videoElement = document.getElementById(`video-${sid}`);
+            if (videoElement) videoElement.remove();
+            
+            if (studentsVideoGrid.children.length === 0) {
+                studentsVideoGrid.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-user-friends"></i>
+                        <p>Students will appear here when they join</p>
+                    </div>
+                `;
+            }
+        }
+
+        // ============================================
+        // UTILITY FUNCTIONS
+        // ============================================
+        function cleanupConnection(sid) {
+            console.log(`🧹 Cleaning up connection to ${sid}`);
+            
+            if (peerConnections[sid]) {
+                peerConnections[sid].close();
+                delete peerConnections[sid];
+            }
+            
+            delete remoteStreams[sid];
+            removeVideoElement(sid);
+            updateStudentConnectionStatus(sid, 'disconnected');
+        }
+
+        function updateStudentCount() {
+            const studentParticipants = Object.values(participants).filter(p => p.role === 'student');
+            const count = studentParticipants.length;
+            
+            if (studentCount) studentCount.textContent = count;
+            if (liveStudentCount) liveStudentCount.textContent = count;
+            
+            updateStudentsList();
+        }
+
+        function updateStudentsList() {
+            if (!studentsList) return;
+            
+            const studentParticipants = Object.entries(participants)
+                .filter(([_, p]) => p.role === 'student')
+                .map(([sid, participant]) => ({ sid, ...participant }));
+            
+            if (studentParticipants.length === 0) {
+                studentsList.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-user-friends"></i>
+                        <p>Waiting for students to join...</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            studentsList.innerHTML = studentParticipants.map(({ sid, username }) => {
+                const connection = peerConnections[sid];
+                let status = 'disconnected';
+                
+                if (connection) {
+                    status = connection.connectionState;
+                }
+                
+                return `
+                    <div class="student-item" data-sid="${sid}" onclick="focusStudentVideo('${sid}')">
+                        <div class="student-avatar">${username.charAt(0).toUpperCase()}</div>
+                        <div class="student-info">
+                            <h4>${username}</h4>
+                            <div class="status ${status}">
+                                <i class="fas fa-circle"></i> ${status.charAt(0).toUpperCase() + status.slice(1)}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function updateStudentConnectionStatus(sid, status) {
+            const studentItem = document.querySelector(`.student-item[data-sid="${sid}"]`);
+            if (studentItem) {
+                const statusDiv = studentItem.querySelector('.status');
+                if (statusDiv) {
+                    statusDiv.className = `status ${status}`;
+                    statusDiv.innerHTML = `<i class="fas fa-circle"></i> ${status.charAt(0).toUpperCase() + status.slice(1)}`;
+                }
+            }
+        }
+
+        function updateConnectionStatus(status) {
+            if (!connectionStatus || !connectionStatusBar) return;
+            
+            switch(status) {
+                case 'connected':
+                    connectionStatus.textContent = '●';
+                    connectionStatus.style.color = '#2ed573';
+                    connectionStatusBar.innerHTML = `<i class="fas fa-check-circle" style="color:#2ed573"></i><span>Connected to classroom</span>`;
+                    connectionStatusBar.className = 'connection-status';
+                    break;
+                case 'connecting':
+                    connectionStatus.textContent = '↻';
+                    connectionStatus.style.color = '#ffa502';
+                    connectionStatusBar.innerHTML = `<i class="fas fa-sync-alt fa-spin" style="color:#ffa502"></i><span>Connecting to classroom...</span>`;
+                    connectionStatusBar.className = 'connection-status connecting';
+                    break;
+                case 'disconnected':
+                    connectionStatus.textContent = '●';
+                    connectionStatus.style.color = '#ff4757';
+                    connectionStatusBar.innerHTML = `<i class="fas fa-exclamation-circle" style="color:#ff4757"></i><span>Disconnected</span>`;
+                    connectionStatusBar.className = 'connection-status error';
+                    break;
+            }
+        }
+
+        function startSessionTimer() {
+            sessionStartTime = new Date();
+            if (sessionTimer) clearInterval(sessionTimer);
+            
+            sessionTimer = setInterval(() => {
+                const now = new Date();
+                const diff = Math.floor((now - sessionStartTime) / 1000);
+                const minutes = Math.floor(diff / 60).toString().padStart(2, '0');
+                const seconds = (diff % 60).toString().padStart(2, '0');
+                
+                if (sessionTime) {
+                    sessionTime.textContent = `${minutes}:${seconds}`;
+                }
+            }, 1000);
+        }
+
+        function logDebug(message) {
+            if (!debugLog) return;
+            
+            const timestamp = new Date().toLocaleTimeString();
+            const logEntry = document.createElement('div');
+            logEntry.textContent = `[${timestamp}] ${message}`;
+            debugLog.prepend(logEntry);
+            
+            while (debugLog.children.length > 20) {
+                debugLog.removeChild(debugLog.lastChild);
+            }
+        }
+
+        // ============================================
+        // CONTROL FUNCTIONS
+        // ============================================
+        async function toggleBroadcast() {
+            const startBroadcast = document.getElementById('startBroadcast');
+            
+            if (isBroadcasting) {
+                isBroadcasting = false;
+                startBroadcast.innerHTML = '<i class="fas fa-play"></i> Start Broadcast';
+                startBroadcast.classList.remove('danger');
+                startBroadcast.classList.add('success');
+                
+                Object.values(peerConnections).forEach(pc => pc.close());
+                Object.keys(peerConnections).forEach(sid => cleanupConnection(sid));
+                
+                showNotification('info', 'Broadcast Stopped', 'Stopped broadcasting to students');
+            } else {
+                isBroadcasting = true;
+                startBroadcast.innerHTML = '<i class="fas fa-pause"></i> Stop Broadcast';
+                startBroadcast.classList.remove('success');
+                startBroadcast.classList.add('danger');
+                
+                Object.entries(participants).forEach(([sid, participant]) => {
+                    if (sid !== mySid) {
+                        createPeerConnection(sid, participant.username, participant.role);
+                    }
+                });
+                
+                showNotification('success', 'Broadcast Started', 'Now broadcasting to all students');
+            }
+        }
+
+        function toggleVideoStream() {
+            if (localStream) {
+                const videoTrack = localStream.getVideoTracks()[0];
+                if (videoTrack) {
+                    videoTrack.enabled = !videoTrack.enabled;
+                    const toggleVideo = document.getElementById('toggleVideo');
+                    toggleVideo.classList.toggle('active', !videoTrack.enabled);
+                    toggleVideo.innerHTML = videoTrack.enabled ? 
+                        '<i class="fas fa-video"></i>' : 
+                        '<i class="fas fa-video-slash"></i>';
+                    
+                    Object.values(peerConnections).forEach(pc => {
+                        const senders = pc.getSenders();
+                        const videoSender = senders.find(s => s.track?.kind === 'video');
+                        if (videoSender && videoTrack) {
+                            videoSender.replaceTrack(videoTrack);
+                        }
+                    });
+                    
+                    console.log(`Video ${videoTrack.enabled ? 'enabled' : 'disabled'}`);
+                }
+            }
+        }
+
+        function toggleAudioStream() {
+            if (localStream) {
+                const audioTrack = localStream.getAudioTracks()[0];
+                if (audioTrack) {
+                    audioTrack.enabled = !audioTrack.enabled;
+                    const toggleAudio = document.getElementById('toggleAudio');
+                    toggleAudio.classList.toggle('active', !audioTrack.enabled);
+                    toggleAudio.innerHTML = audioTrack.enabled ? 
+                        '<i class="fas fa-microphone"></i>' : 
+                        '<i class="fas fa-microphone-slash"></i>';
+                    
+                    Object.values(peerConnections).forEach(pc => {
+                        const senders = pc.getSenders();
+                        const audioSender = senders.find(s => s.track?.kind === 'audio');
+                        if (audioSender && audioTrack) {
+                            audioSender.replaceTrack(audioTrack);
+                        }
+                    });
+                    
+                    console.log(`Audio ${audioTrack.enabled ? 'enabled' : 'disabled'}`);
+                }
+            }
+        }
+
+        async function toggleScreenSharing() {
+            try {
+                if (!screenStream) {
+                    screenStream = await navigator.mediaDevices.getDisplayMedia({
+                        video: { cursor: "always" },
+                        audio: true
+                    });
+
+                    const screenTrack = screenStream.getVideoTracks()[0];
+                    teacherVideo.srcObject = screenStream;
+                    
+                    Object.values(peerConnections).forEach(pc => {
+                        const senders = pc.getSenders();
+                        const videoSender = senders.find(s => s.track?.kind === 'video');
+                        if (videoSender && screenTrack) {
+                            videoSender.replaceTrack(screenTrack);
+                        }
+                    });
+
+                    const toggleScreenShare = document.getElementById('toggleScreenShare');
+                    toggleScreenShare.classList.add('active');
+                    toggleScreenShare.innerHTML = '<i class="fas fa-stop"></i>';
+                    showNotification('info', 'Screen Sharing', 'Your screen is now being shared');
+                    
+                    screenTrack.onended = toggleScreenSharing;
+                    
+                } else {
+                    screenStream.getTracks().forEach(track => track.stop());
+                    screenStream = null;
+                    
+                    if (localStream) {
+                        const cameraTrack = localStream.getVideoTracks()[0];
+                        teacherVideo.srcObject = localStream;
+                        
+                        Object.values(peerConnections).forEach(pc => {
+                            const senders = pc.getSenders();
+                            const videoSender = senders.find(s => s.track?.kind === 'video');
+                            if (videoSender && cameraTrack) {
+                                videoSender.replaceTrack(cameraTrack);
+                            }
+                        });
+                    }
+
+                    const toggleScreenShare = document.getElementById('toggleScreenShare');
+                    toggleScreenShare.classList.remove('active');
+                    toggleScreenShare.innerHTML = '<i class="fas fa-desktop"></i>';
+                    showNotification('info', 'Screen Sharing Stopped', 'Screen sharing has been stopped');
+                }
+            } catch (error) {
+                console.error('Error toggling screen share:', error);
+                showNotification('error', 'Error', 'Could not share screen');
+            }
+        }
+
+        function toggleRemoteMute(sid) {
+            const video = document.getElementById(`remote-video-${sid}`);
+            if (video) {
+                video.muted = !video.muted;
+                const btn = document.querySelector(`#video-${sid} .control-btn.small`);
+                if (btn) {
+                    btn.innerHTML = video.muted ? 
+                        '<i class="fas fa-volume-mute"></i>' : 
+                        '<i class="fas fa-volume-up"></i>';
+                }
+            }
+        }
+
+        function pinStudentVideo(sid) {
+            const videoContainer = document.getElementById(`video-${sid}`);
+            if (videoContainer) {
+                document.querySelectorAll('.pinned').forEach(el => el.classList.remove('pinned'));
+                videoContainer.classList.add('pinned');
+                studentsVideoGrid.insertBefore(videoContainer, studentsVideoGrid.firstChild);
+            }
+        }
+
+        function focusStudentVideo(sid) {
+            const videoContainer = document.getElementById(`video-${sid}`);
+            if (videoContainer) {
+                videoContainer.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                videoContainer.classList.add('highlighted');
+                setTimeout(() => videoContainer.classList.remove('highlighted'), 2000);
+            }
+        }
+
+        function toggleAIPrompter() {
+            const prompter = document.getElementById('aiPrompter');
+            const toggleBtn = document.getElementById('togglePrompterBtn');
+            
+            if (prompter.style.display === 'none' || prompter.style.display === '') {
+                prompter.style.display = 'block';
+                if (toggleBtn) {
+                    toggleBtn.innerHTML = '<i class="fas fa-robot"></i> Hide Prompter';
+                    toggleBtn.classList.add('active');
+                }
+            } else {
+                prompter.style.display = 'none';
+                if (toggleBtn) {
+                    toggleBtn.innerHTML = '<i class="fas fa-robot"></i> AI Prompter';
+                    toggleBtn.classList.remove('active');
+                }
+            }
+        }
+
+        function copyRoomIdToClipboard() {
+            navigator.clipboard.writeText(roomId)
+                .then(() => showNotification('success', 'Copied!', 'Room ID copied to clipboard'))
+                .catch(() => showNotification('error', 'Error', 'Could not copy Room ID'));
+        }
+
+        function endTeachingSession() {
+            if (confirm('End teaching session? All students will be disconnected.')) {
+                Object.keys(peerConnections).forEach(sid => cleanupConnection(sid));
+                
+                if (localStream) localStream.getTracks().forEach(track => track.stop());
+                if (screenStream) screenStream.getTracks().forEach(track => track.stop());
+                
+                if (sessionTimer) clearInterval(sessionTimer);
+                
+                socket.disconnect();
+                window.location.href = '/';
+            }
+        }
+
+        // ============================================
+        // CLEANUP ON UNLOAD
+        // ============================================
+        window.addEventListener('beforeunload', () => {
+            Object.keys(peerConnections).forEach(sid => cleanupConnection(sid));
+            
+            if (localStream) localStream.getTracks().forEach(track => track.stop());
+            if (screenStream) screenStream.getTracks().forEach(track => track.stop());
+            
+            if (sessionTimer) clearInterval(sessionTimer);
+            
+            if (socket) socket.disconnect();
+        });
+
+        // Global functions for HTML onclick handlers
+        window.approveMicRequest = approveMicRequest;
+        window.denyMicRequest = denyMicRequest;
+        window.focusStudentVideo = focusStudentVideo;
+        window.pinStudentVideo = pinStudentVideo;
+        window.toggleRemoteMute = toggleRemoteMute;
+        window.toggleAIPrompter = toggleAIPrompter;
+    </script>
+</body>
+</html>
