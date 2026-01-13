@@ -11,5 +11,9 @@ huggingface_hub
 redis
 Flask-SQLAlchemy
 psycopg2
-flask_migrate
-beautifulsoup4
+Flask-SocketIO
+eventlet
+SpeechRecognition
+python-socketio
+python-engineio
+psycopg2-binary
