@@ -8,7 +8,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
 <!-- Force update -->
-<meta name="version" content="1.0.4">
+<meta name="version" content="1.0.1">
 
 <!-- External CSS -->
 <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
@@ -305,31 +305,6 @@ button:hover {
   transform: scale(1.02);
 }
 
-/* Icon buttons for chat bar */
-.icon-button {
-  background: none;
-  border: none;
-  font-size: 1.4rem;
-  cursor: pointer;
-  padding: 8px 12px;
-  border-radius: 8px;
-  transition: background 0.2s;
-  margin-top: 0;
-  width: auto;
-  min-width: auto;
-  min-height: auto;
-  box-shadow: none;
-  color: inherit;
-}
-
-.icon-button:hover {
-  background: rgba(0, 0, 0, 0.1);
-}
-
-.dark-mode .icon-button:hover {
-  background: rgba(255, 255, 255, 0.1);
-}
-
 /* Messages container styles (for chat bubbles) */
 .messages {
   margin-top: 20px;
@@ -337,8 +312,7 @@ button:hover {
   padding: 15px;
   border-radius: 10px;
   box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-  max-height: 60vh;
-  min-height: 200px;
+  max-height: 300px;
   overflow-y: auto;
   font-family: inherit;
   display: flex;
@@ -373,17 +347,6 @@ button:hover {
   box-shadow: 0 1px 3px rgba(0,0,0,0.1);
 }
 
-/* Vision AI message style */
-.ai-message.vision-mode {
-  border-left: 4px solid #4a7ebB;
-  background-color: #f0f8ff;
-}
-
-.dark-mode .ai-message.vision-mode {
-  background-color: #2a3b52;
-  border-left-color: #66b3ff;
-}
-
 /* Optional hover effect on chat bubbles */
 .user-message:hover, .ai-message:hover {
   box-shadow: 0 2px 6px rgba(0,0,0,0.2);
@@ -406,24 +369,12 @@ body {
   scrollbar-color: rgba(0,0,0,0.2) transparent;
 }
 
-/* Input container styles - UPDATED FOR CHAT BAR */
+/* Input container styles */
 .input-container {
   display: flex;
-  gap: 8px;
+  gap: 10px;
   margin-top: 10px;
-  flex-direction: row;
-  align-items: center;
-}
-
-.input-container input[type="text"] {
-  flex: 1;
-  margin-top: 0;
-}
-
-.input-container button#askButton {
-  width: auto;
-  min-width: 60px;
-  margin-top: 0;
+  flex-direction: column;
 }
 
 /* Iframe styles for reels */
@@ -594,21 +545,6 @@ body.dark-mode .reel-caption {
   .audio-time {
     text-align: center;
   }
-  
-  /* Mobile adjustments for chat bar */
-  .input-container {
-    flex-wrap: nowrap;
-  }
-  
-  .icon-button {
-    padding: 6px 8px;
-    font-size: 1.2rem;
-  }
-  
-  #askButton {
-    padding: 10px 12px;
-    font-size: 0.9rem;
-  }
 }
 
 @media (min-width: 481px) and (max-width: 768px) {
@@ -632,7 +568,7 @@ body.dark-mode .reel-caption {
     flex: 1;
   }
   
-  .input-container button#askButton {
+  .input-container button {
     width: auto;
     min-width: 100px;
   }
@@ -655,7 +591,7 @@ body.dark-mode .reel-caption {
     flex: 1;
   }
   
-  .input-container button#askButton {
+  .input-container button {
     width: auto;
     min-width: 120px;
   }
@@ -733,10 +669,6 @@ button, .tab, #menu-toggle, #theme-toggle {
   justify-content: center;
 }
 
-.icon-button {
-  min-height: auto;
-}
-
 /* Better text contrast */
 body.light-mode .reel-caption {
   color: #333;
@@ -770,36 +702,6 @@ select {
 body.dark-mode select {
   background-image: url("data:image/svg+xml;charset=US-ASCII,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 4 5'><path fill='%23fff' d='M2 0L0 2h4zm0 5L0 3h4z'/></svg>");
 }
-
-/* Hidden file input */
-#fileInput {
-  display: none;
-}
-
-/* Clear context button */
-#clearContextBtn {
-  display: none;
-  margin-top: 10px;
-  padding: 8px 16px;
-  background-color: #6c757d;
-  font-size: 0.9rem;
-}
-
-#clearContextBtn:hover {
-  background-color: #5a6268;
-}
-
-/* Vision indicator */
-.vision-indicator {
-  display: inline-block;
-  padding: 2px 6px;
-  background-color: #4a7ebB;
-  color: white;
-  border-radius: 4px;
-  font-size: 0.8rem;
-  margin-left: 5px;
-  vertical-align: middle;
-}
 </style>
 </head>
 <body class="light-mode">
@@ -818,17 +720,17 @@ body.dark-mode select {
 <!-- Sidebar menu toggle -->
 <div id="menu-toggle" onclick="toggleMenu()">☰</div>
 
-<!-- Sidebar menu - SIMPLIFIED FOR DEMO -->
+<!-- Sidebar menu -->
 <div id="side-menu" class="hidden">
   <ul>
     <li><a href="/profile">👤 Profile</a></li>
+    <li><a href="/talk-to-nelavista">🎙️ Talk To Nelavista</a></li>
+     <li><a href="/live-meeting">🎙️ Live Meeting</a></li>
+     <li><a href="/materials">📚 Materials</a></li>
     <li><a href="/reels">🎥 Reels</a></li>
     <li><a href="/CBT">🧠 CBT Test</a></li>
-    <li><a href="/talk-to-nelavista">🎙️ Talk To Nelavista</a></li>
-    <li><a href="/live-meeting">🎙️ Live Meeting</a></li>
-    <li><a href="/materials">📚 Materials</a></li>
     <li><a href="/about">ℹ️ About</a></li>
-   <li><a href="/settings">⚙️ Settings</a></li>
+    <li><a href="/settings">⚙️ Settings</a></li>
     <li><a href="/privacy-policy">ℹ️ Privacy Policy</a></li>
   </ul>
 </div>
@@ -841,32 +743,14 @@ body.dark-mode select {
 
 <!-- Tabs -->
 <div class="tabs">
-  <div class="tab active" data-section="aiSection" onclick="activateTab(this)">🤖 AI Chat</div>
+  <div class="tab active" data-section="aiSection" onclick="activateTab(this)">🤖 AI</div>
 </div>
 
 <!-- AI Section -->
 <div class="section active" id="aiSection">
   <div class="messages" id="messages"></div>
-  
-  <!-- Clear context button (hidden by default) -->
-  <button id="clearContextBtn" onclick="clearContext()">🧹 Clear Uploaded File Context</button>
-  
   <div class="input-container">
-    <!-- LEFT: Voice button -->
-    <button id="micButton" class="icon-button" title="Voice input">
-      🎤
-    </button>
-    
-    <!-- CENTER: Text input -->
-    <input type="text" id="userInput" placeholder="Ask Nelavista or upload image/PDF..." />
-    
-    <!-- RIGHT: Upload button (hidden file input) -->
-    <button id="uploadButton" class="icon-button" title="Upload image/PDF">
-      📎
-    </button>
-    <input type="file" id="fileInput" accept="image/*,.pdf" />
-    
-    <!-- Send button -->
+    <input type="text" id="userInput" placeholder="Ask Nelavista about your studies, motivation, or learning tips..." />
     <button id="askButton" onclick="sendQuestion()">Ask</button>
   </div>
 </div>
@@ -911,8 +795,6 @@ function activateTab(tab) {
 
 // AI CHAT
 const chatHistory = [];
-let hasImageContext = false;
-
 function sendQuestion() {
   const input = document.getElementById("userInput");
   const msgBox = document.getElementById("messages");
@@ -920,274 +802,54 @@ function sendQuestion() {
   
   if (!question) return;
   
-  // Show user message (without "You:" label)
+  // Show user message
   const userMsg = document.createElement('p');
   userMsg.className = 'user-message';
-  userMsg.innerText = question;
+  userMsg.innerText = `You: ${question}`;
   msgBox.appendChild(userMsg);
   input.value = '';
   msgBox.scrollTop = msgBox.scrollHeight;
 
-  // Add to chat history (limit to last 15 messages)
+  // Add to chat history
   chatHistory.push({ role: 'user', content: question });
-  if (chatHistory.length > 30) { // 15 exchanges
-    chatHistory.splice(0, 2); // Remove oldest user+assistant pair
-  }
 
-  // Show loading - check if we might use vision
+  // Show loading
   const loadingMsg = document.createElement('p');
   loadingMsg.className = 'ai-message';
-  
-  // Check if this looks like a vision-related question
-  const visionKeywords = ['image', 'picture', 'diagram', 'photo', 'screenshot', 
-                         'what is this', 'explain this', 'can you see', 
-                         'what do you see', 'describe this', 'analyze this'];
-  const questionLower = question.toLowerCase();
-  const mightUseVision = hasImageContext && visionKeywords.some(keyword => questionLower.includes(keyword));
-  
-  loadingMsg.innerText = mightUseVision ? 
-    '👁️ Analyzing image with vision AI...' : 
-    '🤔 Nelavista is thinking...';
-    
+  loadingMsg.innerText = 'Tellavista is thinking...';
   msgBox.appendChild(loadingMsg);
   msgBox.scrollTop = msgBox.scrollHeight;
 
-  // Send to backend with message parameter
   fetch('/ask', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ 
-      history: chatHistory,
-      message: question
-    })
+    body: JSON.stringify({ history: chatHistory })
   }).then(res => res.json())
     .then(data => {
       loadingMsg.remove();
-      
-      if (data.error) {
-        const errorMsg = document.createElement('p');
-        errorMsg.className = 'ai-message';
-        errorMsg.innerText = `❌ Error: ${data.error}`;
-        msgBox.appendChild(errorMsg);
-        msgBox.scrollTop = msgBox.scrollHeight;
-        return;
-      }
-      
       const answer = data.choices?.[0]?.message?.content || "Sorry, I couldn't answer.";
       chatHistory.push({ role: 'assistant', content: answer });
-      
       const aiMsg = document.createElement('p');
       aiMsg.className = 'ai-message';
-      
-      // Add vision indicator if vision was used
-      if (data.vision_used) {
-        aiMsg.classList.add('vision-mode');
-        aiMsg.innerHTML = `
-          <strong>👁️ Nelavista (Vision AI):</strong><br>
-          ${answer}<br>
-          <small style="opacity:0.7">✓ Analyzed with AI Vision</small>
-        `;
-      } else if (data.file_used) {
-        aiMsg.innerHTML = `
-          <strong>📄 Nelavista (Document Mode):</strong><br>
-          ${answer}
-        `;
-      } else {
-        aiMsg.innerHTML = `<strong>Nelavista:</strong> ${answer}`;
-      }
-      
+      aiMsg.innerHTML = `<strong>Nelavista:</strong> ${answer}`;
       msgBox.appendChild(aiMsg);
       msgBox.scrollTop = msgBox.scrollHeight;
     })
-    .catch((error) => {
+    .catch(() => {
       loadingMsg.remove();
       const errorMsg = document.createElement('p');
       errorMsg.className = 'ai-message';
       errorMsg.innerText = 'Error reaching Nelavista. Please try again.';
       msgBox.appendChild(errorMsg);
       msgBox.scrollTop = msgBox.scrollHeight;
-      console.error('Error:', error);
     });
-}
-
-// VOICE BUTTON - Basic demo functionality
-document.getElementById('micButton').addEventListener('click', function() {
-  // Check for browser speech recognition support
-  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-  
-  if (SpeechRecognition) {
-    alert("🎤 Voice input is supported! In the full version, I'll record and transcribe your question automatically.");
-    
-    // Simulate voice-to-text for demo
-    setTimeout(() => {
-      document.getElementById('userInput').value = "Explain photosynthesis to me like I'm 15 years old";
-      alert("Demo: Your voice would be converted to text automatically. Try asking this question!");
-    }, 500);
-  } else {
-    alert("🎤 Voice input preview: In production, this will use professional speech-to-text APIs for accurate transcription.");
-    
-    // Still simulate for demo purposes
-    setTimeout(() => {
-      document.getElementById('userInput').value = "How do I solve quadratic equations?";
-      alert("Demo mode: Voice input would convert to text here. Try clicking Ask!");
-    }, 500);
-  }
-});
-
-// UPLOAD BUTTON - Basic demo functionality
-document.getElementById('uploadButton').addEventListener('click', function() {
-  document.getElementById('fileInput').click();
-});
-
-// UPDATED FILE UPLOAD HANDLER WITH VISION SUPPORT
-document.getElementById('fileInput').addEventListener('change', async function(e) {
-  const file = e.target.files[0];
-  if (!file) return;
-  
-  const msgBox = document.getElementById("messages");
-  const clearContextBtn = document.getElementById("clearContextBtn");
-  
-  // Show uploading message
-  const uploadingMsg = document.createElement('p');
-  uploadingMsg.className = 'user-message';
-  uploadingMsg.innerText = `📤 Uploading ${file.name}...`;
-  msgBox.appendChild(uploadingMsg);
-  msgBox.scrollTop = msgBox.scrollHeight;
-  
-  const formData = new FormData();
-  formData.append('file', file);
-  
-  try {
-    const uploadResponse = await fetch('/upload', {
-      method: 'POST',
-      body: formData
-    });
-    
-    const uploadData = await uploadResponse.json();
-    
-    uploadingMsg.remove();
-    
-    if (uploadData.success) {
-      // Show appropriate message based on file type
-      const successMsg = document.createElement('p');
-      successMsg.className = 'user-message';
-      
-      if (file.type.includes('pdf')) {
-        successMsg.innerHTML = `
-          📄 <strong>Study Material Uploaded:</strong> ${file.name}<br>
-          <small>${uploadData.message}</small>
-        `;
-        hasImageContext = false;
-      } else {
-        // Image uploaded - set vision context flag
-        hasImageContext = true;
-        
-        if (uploadData.vision_ready) {
-          successMsg.innerHTML = `
-            🖼️ <strong>Vision-Ready Image Uploaded:</strong> ${file.name}<br>
-            <small>I can now <strong>SEE</strong> this image using AI Vision! Ask me questions about it.</small>
-          `;
-        } else if (uploadData.is_diagram) {
-          successMsg.innerHTML = `
-            🖼️ <strong>Diagram/Visual Uploaded:</strong> ${file.name}<br>
-            <small>I'll do my best to understand this visual content.</small>
-          `;
-        } else {
-          successMsg.innerHTML = `
-            🖼️ <strong>Image Uploaded:</strong> ${file.name}<br>
-            <small>${uploadData.message}</small>
-          `;
-        }
-      }
-      
-      msgBox.appendChild(successMsg);
-      msgBox.scrollTop = msgBox.scrollHeight;
-      
-      // Show clear context button
-      clearContextBtn.style.display = 'block';
-      
-      // AUTO-ASK ONLY IF CHAT IS EMPTY (STRATEGIC IMPROVEMENT)
-      const hasExistingMessages = msgBox.querySelectorAll('.user-message, .ai-message').length > 1;
-      
-      if (!hasExistingMessages) {
-        // Auto-ask for summary on first upload
-        setTimeout(() => {
-          const autoQuestion = file.type.includes('pdf') ? 
-            "Can you summarize the key points from this document?" : 
-            "What do you see in this image and can you explain it to me?";
-          
-          document.getElementById('userInput').value = autoQuestion;
-          sendQuestion();
-        }, 1000);
-      } else {
-        // Just notify user they can ask about it
-        const helpMsg = document.createElement('p');
-        helpMsg.className = 'ai-message';
-        
-        if (file.type.includes('pdf')) {
-          helpMsg.innerHTML = `<small>💡 You can now ask questions about this document.</small>`;
-        } else if (uploadData.vision_ready) {
-          helpMsg.innerHTML = `<small>💡 Try asking: "What's in this image?" or "Explain this diagram"</small>`;
-        } else {
-          helpMsg.innerHTML = `<small>💡 You can now ask questions about this image.</small>`;
-        }
-        
-        msgBox.appendChild(helpMsg);
-        msgBox.scrollTop = msgBox.scrollHeight;
-      }
-    } else {
-      // Upload failed
-      const errorMsg = document.createElement('p');
-      errorMsg.className = 'ai-message';
-      errorMsg.innerText = `❌ ${uploadData.error || 'Upload failed'}`;
-      msgBox.appendChild(errorMsg);
-      msgBox.scrollTop = msgBox.scrollHeight;
-    }
-    
-  } catch (error) {
-    uploadingMsg.remove();
-    
-    const errorMsg = document.createElement('p');
-    errorMsg.className = 'ai-message';
-    errorMsg.innerText = `❌ Upload failed: ${error.message}`;
-    msgBox.appendChild(errorMsg);
-    msgBox.scrollTop = msgBox.scrollHeight;
-  }
-  
-  // Reset file input
-  document.getElementById('fileInput').value = '';
-});
-
-// Clear context function
-function clearContext() {
-  fetch('/clear_context', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' }
-  })
-  .then(res => res.json())
-  .then(data => {
-    if (data.success) {
-      hasImageContext = false;
-      document.getElementById('clearContextBtn').style.display = 'none';
-      
-      const msgBox = document.getElementById("messages");
-      const successMsg = document.createElement('p');
-      successMsg.className = 'ai-message';
-      successMsg.innerText = '✅ File context cleared. You can upload a new file.';
-      msgBox.appendChild(successMsg);
-      msgBox.scrollTop = msgBox.scrollHeight;
-    }
-  })
-  .catch(error => {
-    console.error('Error clearing context:', error);
-  });
 }
 
 // MATERIALS SEARCH
-document.getElementById('searchBtn')?.addEventListener('click', () => {
-  const course = document.getElementById('course')?.value;
-  const level = document.getElementById('level')?.value;
-  const topic = document.getElementById('topic')?.value.trim();
+document.getElementById('searchBtn').addEventListener('click', () => {
+  const course = document.getElementById('course').value;
+  const level = document.getElementById('level').value;
+  const topic = document.getElementById('topic').value.trim();
   const btn = document.getElementById('searchBtn');
 
   if (!course || !level || !topic) {
@@ -1207,14 +869,14 @@ document.getElementById('searchBtn')?.addEventListener('click', () => {
       container.innerHTML = '';
 
       if (data.books && data.books.length > 0) {
-        container.innerHTML += '<h4>📖 Books</h4>';
+        container.innerHTML += `<h4>📖 Books</h4>`;
         data.books.forEach(book => {
           container.innerHTML += `<div><b>${book.title}</b> - ${book.author} <a href="${book.link}" target="_blank">Read</a></div>`;
         });
       }
 
       if (data.videos && data.videos.length > 0) {
-        container.innerHTML += '<h4>🎥 Videos</h4>';
+        container.innerHTML += `<h4>🎥 Videos</h4>`;
         data.videos.forEach(video => {
           container.innerHTML += `<div><a href="${video.link}" target="_blank">${video.title}</a></div>`;
         });
@@ -1240,8 +902,7 @@ const educationalReels = [
     {"course": "Accountancy", "caption": "Auditing Principles", "video_url": "https://youtu.be/27gabbJQZqc?si=rsOLmkD2QXOoxSoi"},
     {"course": "Accountancy", "caption": "Taxation Fundamentals", "video_url": "https://youtu.be/Cox8rLXYAGQ?si=CvKUaPuPJOxPb6cr"},
     {"course": "Accountancy", "caption": "Learn Accounting in under 5 hours", "video_url": "https://youtu.be/gPBhGkBN30s?si=bUYfaccZPlBni3aZ"},
-
-  ];
+ ];
 
 function isYouTube(url) {
   return url.includes("youtube.com") || url.includes("youtu.be");
@@ -1254,11 +915,8 @@ function getYouTubeEmbed(url) {
 }
 
 async function loadReels() {
-  const course = document.getElementById("reelCourse")?.value;
+  const course = document.getElementById("reelCourse").value;
   const reelBox = document.getElementById("reels");
-  
-  if (!reelBox) return;
-  
   reelBox.innerHTML = "⏳ Loading...";
 
   if (!course) {
@@ -1280,10 +938,10 @@ async function loadReels() {
         
         const reelItem = document.createElement('div');
         reelItem.className = 'reel-item';
-        reelItem.innerHTML = 
-          `${embed}
-          <div class="reel-caption">${reel.caption}</div>`
-        ;
+        reelItem.innerHTML = `
+          ${embed}
+          <div class="reel-caption">${reel.caption}</div>
+        `;
         reelBox.appendChild(reelItem);
       });
     } else {
@@ -1319,13 +977,13 @@ const allQuestions = {
       { q: "In accounting, what does 'posting' mean?", o: ["Recording transactions in journals", "Transferring journal entries to ledger accounts", "Preparing financial statements", "Closing accounts"], a: 1 },
       { q: "Which of these is considered a non-current asset?", o: ["Cash", "Building", "Inventory", "Prepaid expenses"], a: 1 },
       { q: "What is the primary goal of financial reporting?", o: ["To inform investors and creditors", "To calculate taxes", "To manage internal operations", "To prepare budgets"], a: 0 }
-    ]
+  ]
   }
 };
 
 function startQuiz() {
-  const course = document.getElementById("cbt-course")?.value;
-  const level = document.getElementById("cbt-level")?.value;
+  const course = document.getElementById("cbt-course").value;
+  const level = document.getElementById("cbt-level").value;
   if (!course || !level) return alert("Please select both course and level");
 
   const questions = allQuestions[course]?.[level];
@@ -1344,8 +1002,8 @@ function startQuiz() {
     block.className = "question-block";
     block.innerHTML = `<div class="question-text">${i+1}. ${q.q}</div>`;
     q.o.forEach((opt, j) => {
-      block.innerHTML += 
-        `<label>
+      block.innerHTML += `
+        <label>
           <input name="q${i}" type="radio" value="${j}" />
           <span>${opt}</span>
         </label><br>`;
@@ -1355,8 +1013,8 @@ function startQuiz() {
 }
 
 function submitQuiz() {
-  const course = document.getElementById("cbt-course")?.value;
-  const level = document.getElementById("cbt-level")?.value;
+  const course = document.getElementById("cbt-course").value;
+  const level = document.getElementById("cbt-level").value;
   const questions = allQuestions[course][level];
   const form = document.getElementById("quiz-form");
 
@@ -1389,7 +1047,7 @@ function restartQuiz() {
 
 // GPA Section
 function askGPA() {
-  const course = document.getElementById('courseDropdown')?.value;
+  const course = document.getElementById('courseDropdown').value;
   if (!course) {
     alert("Please select a course first.");
     return;
@@ -1414,22 +1072,11 @@ document.addEventListener('DOMContentLoaded', function() {
       sendQuestion();
     }
   });
-  
-  // Auto-focus on the input for better UX
-  setTimeout(() => {
-    document.getElementById('userInput')?.focus();
-  }, 500);
-  
-  // Check for existing file context on page load
-  fetch('/clear_context', { method: 'POST' })
-    .then(res => res.json())
-    .then(data => {
-      if (data.success) {
-        console.log('Cleared any stale file context on page load');
-      }
-    })
-    .catch(err => console.log('No existing context or error clearing:', err));
 });
 </script>
 </body>
 </html>
+
+
+
+
