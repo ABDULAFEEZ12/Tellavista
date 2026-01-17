@@ -19,5 +19,5 @@ Pillow
 beautifulsoup4
 lxml
 sqlalchemy
-python
+
 
