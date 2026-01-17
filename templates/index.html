@@ -8,7 +8,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
 <!-- Force update -->
-<meta name="version" content="1.0.1">
+<meta name="version" content="1.0.2">
 
 <!-- External CSS -->
 <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
@@ -312,7 +312,7 @@ button:hover {
   padding: 15px;
   border-radius: 10px;
   box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-  max-height: 300px;
+  max-height: 400px;
   overflow-y: auto;
   font-family: inherit;
   display: flex;
@@ -369,12 +369,55 @@ body {
   scrollbar-color: rgba(0,0,0,0.2) transparent;
 }
 
-/* Input container styles */
+/* Enhanced Input Container */
 .input-container {
   display: flex;
-  gap: 10px;
-  margin-top: 10px;
-  flex-direction: column;
+  gap: 8px;
+  margin-top: 15px;
+  flex-direction: row;
+  align-items: center;
+}
+
+.input-container input[type="text"] {
+  flex: 1;
+  margin-top: 0;
+}
+
+.input-container button {
+  margin-top: 0;
+  flex: 0 0 auto;
+  min-width: 80px;
+}
+
+/* Voice and Upload Button Styles */
+.icon-button {
+  padding: 10px;
+  border-radius: 50%;
+  background: #f0f0f0;
+  border: none;
+  cursor: pointer;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  transition: all 0.2s;
+  margin-top: 0;
+}
+
+.icon-button:hover {
+  background: #e0e0e0;
+  transform: scale(1.05);
+}
+
+body.dark-mode .icon-button {
+  background: #444;
+  color: #fff;
+}
+
+body.dark-mode .icon-button:hover {
+  background: #555;
 }
 
 /* Iframe styles for reels */
@@ -545,6 +588,21 @@ body.dark-mode .reel-caption {
   .audio-time {
     text-align: center;
   }
+  
+  /* Responsive input container */
+  .input-container {
+    flex-wrap: wrap;
+  }
+  
+  .input-container .icon-button,
+  .input-container button {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  
+  .messages {
+    max-height: 300px;
+  }
 }
 
 @media (min-width: 481px) and (max-width: 768px) {
@@ -702,6 +760,145 @@ select {
 body.dark-mode select {
   background-image: url("data:image/svg+xml;charset=US-ASCII,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 4 5'><path fill='%23fff' d='M2 0L0 2h4zm0 5L0 3h4z'/></svg>");
 }
+
+/* NEW: Attachment Preview Styles (ChatGPT-style) */
+.attachment-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 10px;
+  padding: 10px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  border: 1px solid #e9ecef;
+}
+
+body.dark-mode .attachment-container {
+  background: #2c2c3a;
+  border-color: #444;
+}
+
+.attachment-preview {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  background: white;
+  border-radius: 6px;
+  border: 1px solid #dee2e6;
+  max-width: 200px;
+}
+
+body.dark-mode .attachment-preview {
+  background: #3c3c4a;
+  border-color: #555;
+  color: #fff;
+}
+
+.attachment-preview img {
+  width: 32px;
+  height: 32px;
+  object-fit: cover;
+  border-radius: 4px;
+}
+
+.attachment-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.attachment-name {
+  font-size: 12px;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.attachment-size {
+  font-size: 11px;
+  color: #6c757d;
+}
+
+body.dark-mode .attachment-size {
+  color: #aaa;
+}
+
+.attachment-remove {
+  background: none;
+  border: none;
+  color: #dc3545;
+  cursor: pointer;
+  font-size: 14px;
+  padding: 2px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.attachment-remove:hover {
+  background: rgba(220, 53, 69, 0.1);
+}
+
+body.dark-mode .attachment-remove:hover {
+  background: rgba(220, 53, 69, 0.2);
+}
+
+.attachment-icon {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #e9ecef;
+  border-radius: 4px;
+  color: #495057;
+}
+
+body.dark-mode .attachment-icon {
+  background: #444;
+  color: #ddd;
+}
+
+.attachment-icon.pdf { background: #fff5f5; color: #e53e3e; }
+body.dark-mode .attachment-icon.pdf { background: #4a2c2c; color: #ff6b6b; }
+
+.attachment-icon.image { background: #f0f9ff; color: #3182ce; }
+body.dark-mode .attachment-icon.image { background: #2c3a4a; color: #63b3ed; }
+
+/* Send button disabled state */
+#askButton:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+  transform: none;
+}
+
+#askButton:disabled:hover {
+  background-color: #ccc;
+  transform: none;
+}
+
+/* Loading state for send button */
+#askButton.sending {
+  position: relative;
+  color: transparent;
+}
+
+#askButton.sending::after {
+  content: '';
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  border: 2px solid #fff;
+  border-radius: 50%;
+  border-top-color: transparent;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
 </style>
 </head>
 <body class="light-mode">
@@ -725,8 +922,8 @@ body.dark-mode select {
   <ul>
     <li><a href="/profile">👤 Profile</a></li>
     <li><a href="/talk-to-nelavista">🎙️ Talk To Nelavista</a></li>
-     <li><a href="/live-meeting">🎙️ Live Meeting</a></li>
-     <li><a href="/materials">📚 Materials</a></li>
+    <li><a href="/live-meeting">🎙️ Live Meeting</a></li>
+    <li><a href="/materials">📚 Materials</a></li>
     <li><a href="/reels">🎥 Reels</a></li>
     <li><a href="/CBT">🧠 CBT Test</a></li>
     <li><a href="/about">ℹ️ About</a></li>
@@ -743,19 +940,57 @@ body.dark-mode select {
 
 <!-- Tabs -->
 <div class="tabs">
-  <div class="tab active" data-section="aiSection" onclick="activateTab(this)">🤖 AI</div>
+  <div class="tab active" data-section="aiSection" onclick="activateTab(this)">🤖 AI Chat</div>
 </div>
 
 <!-- AI Section -->
 <div class="section active" id="aiSection">
   <div class="messages" id="messages"></div>
+  
+  <!-- Attachment preview area (ChatGPT-style) -->
+  <div class="attachment-container" id="attachmentContainer" style="display: none;"></div>
+  
   <div class="input-container">
+    <!-- Voice Input Button (Left) -->
+    <button id="voiceButton" class="icon-button" onclick="startVoiceInput()" title="Voice Input">
+      🎤
+    </button>
+    
+    <!-- File Upload Button (Right) -->
+    <div style="position: relative;">
+      <button id="uploadButton" class="icon-button" onclick="document.getElementById('fileInput').click()" title="Attach File">
+        📎
+      </button>
+      <input type="file" id="fileInput" accept=".pdf,.png,.jpg,.jpeg,.gif" 
+        style="display: none;" onchange="handleFileSelect(this.files)" />
+    </div>
+    
+    <!-- Text Input (Center) -->
     <input type="text" id="userInput" placeholder="Ask Nelavista about your studies, motivation, or learning tips..." />
-    <button id="askButton" onclick="sendQuestion()">Ask</button>
+    
+    <!-- Send Button -->
+    <button id="askButton" onclick="sendQuestion()">Send</button>
   </div>
 </div>
 
 <script>
+// ============================================
+// DEBUG HELPER
+// ============================================
+function debugLog(...args) {
+  console.log('[Nelavista]', ...args);
+}
+
+// Set this to true to see detailed logs
+const DEBUG_MODE = true;
+
+// ============================================
+// GLOBAL STATE
+// ============================================
+const chatHistory = [];
+let pendingAttachments = []; // Store files locally, not on server
+let isSending = false;
+
 // Theme toggle logic
 const themeBtn = document.getElementById('theme-toggle');
 if (localStorage.getItem('theme') === 'dark') {
@@ -793,60 +1028,342 @@ function activateTab(tab) {
   document.getElementById(tab.dataset.section).classList.add('active');
 }
 
-// AI CHAT
-const chatHistory = [];
-function sendQuestion() {
+// Voice Input Functionality
+let isRecording = false;
+let recognition = null;
+
+function startVoiceInput() {
+  if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+    alert("Voice input is not supported in this browser. Try Chrome or Edge.");
+    return;
+  }
+  
+  const voiceBtn = document.getElementById('voiceButton');
+  
+  if (!isRecording) {
+    // Start recording
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    recognition = new SpeechRecognition();
+    recognition.lang = 'en-US';
+    recognition.interimResults = false;
+    recognition.maxAlternatives = 1;
+    
+    recognition.onresult = function(event) {
+      const transcript = event.results[0][0].transcript;
+      document.getElementById('userInput').value = transcript;
+      voiceBtn.innerHTML = '🎤';
+      isRecording = false;
+    };
+    
+    recognition.onerror = function(event) {
+      console.error('Speech recognition error:', event.error);
+      voiceBtn.innerHTML = '🎤';
+      isRecording = false;
+    };
+    
+    recognition.onend = function() {
+      voiceBtn.innerHTML = '🎤';
+      isRecording = false;
+    };
+    
+    recognition.start();
+    voiceBtn.innerHTML = '🔴';
+    isRecording = true;
+  } else {
+    // Stop recording
+    if (recognition) {
+      recognition.stop();
+    }
+    voiceBtn.innerHTML = '🎤';
+    isRecording = false;
+  }
+}
+
+// ============================================
+// CHATGPT-STYLE FILE ATTACHMENT SYSTEM
+// ============================================
+
+// Handle file selection (like ChatGPT - no auto upload)
+function handleFileSelect(files) {
+  if (!files || files.length === 0) return;
+  
+  const file = files[0];
+  
+  // Validate file size (16MB max)
+  const maxSize = 16 * 1024 * 1024;
+  if (file.size > maxSize) {
+    showMessage('ai-message', `❌ File too large (${(file.size/1024/1024).toFixed(1)}MB). Maximum size is 16MB.`);
+    return;
+  }
+  
+  // Validate file type
+  const allowedTypes = ['image/png', 'image/jpeg', 'image/gif', 'application/pdf'];
+  if (!allowedTypes.includes(file.type)) {
+    showMessage('ai-message', '❌ Please upload only PDF or image files (PNG, JPG, GIF).');
+    return;
+  }
+  
+  // Add to pending attachments
+  const attachmentId = 'att_' + Date.now();
+  const attachment = {
+    id: attachmentId,
+    file: file,
+    name: file.name,
+    size: file.size,
+    type: file.type,
+    previewUrl: file.type.startsWith('image/') ? URL.createObjectURL(file) : null
+  };
+  
+  pendingAttachments.push(attachment);
+  
+  // Show attachment preview
+  renderAttachmentPreview();
+  
+  // Show the attachment container
+  document.getElementById('attachmentContainer').style.display = 'flex';
+}
+
+// Render attachment previews (ChatGPT-style)
+function renderAttachmentPreview() {
+  const container = document.getElementById('attachmentContainer');
+  container.innerHTML = '';
+  
+  pendingAttachments.forEach(attachment => {
+    const preview = document.createElement('div');
+    preview.className = 'attachment-preview';
+    preview.dataset.id = attachment.id;
+    
+    if (attachment.type.startsWith('image/') && attachment.previewUrl) {
+      // Image preview
+      preview.innerHTML = `
+        <img src="${attachment.previewUrl}" alt="${attachment.name}" />
+        <div class="attachment-info">
+          <div class="attachment-name">${attachment.name}</div>
+          <div class="attachment-size">${formatFileSize(attachment.size)}</div>
+        </div>
+        <button class="attachment-remove" onclick="removeAttachment('${attachment.id}')">✕</button>
+      `;
+    } else if (attachment.type === 'application/pdf') {
+      // PDF icon preview
+      preview.innerHTML = `
+        <div class="attachment-icon pdf">📄</div>
+        <div class="attachment-info">
+          <div class="attachment-name">${attachment.name}</div>
+          <div class="attachment-size">${formatFileSize(attachment.size)}</div>
+        </div>
+        <button class="attachment-remove" onclick="removeAttachment('${attachment.id}')">✕</button>
+      `;
+    }
+    
+    container.appendChild(preview);
+  });
+}
+
+// Remove attachment
+function removeAttachment(attachmentId) {
+  // Revoke object URL if it's an image
+  const attachment = pendingAttachments.find(a => a.id === attachmentId);
+  if (attachment && attachment.previewUrl) {
+    URL.revokeObjectURL(attachment.previewUrl);
+  }
+  
+  // Remove from pending attachments
+  pendingAttachments = pendingAttachments.filter(a => a.id !== attachmentId);
+  
+  // Update preview
+  if (pendingAttachments.length > 0) {
+    renderAttachmentPreview();
+  } else {
+    // Hide container if no attachments
+    document.getElementById('attachmentContainer').style.display = 'none';
+  }
+}
+
+// Format file size
+function formatFileSize(bytes) {
+  if (bytes < 1024) return bytes + ' B';
+  if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+  return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+}
+
+// Helper function to show messages
+function showMessage(className, html) {
+  const msgBox = document.getElementById("messages");
+  const msg = document.createElement('p');
+  msg.className = className;
+  msg.innerHTML = html;
+  msgBox.appendChild(msg);
+  msgBox.scrollTop = msgBox.scrollHeight;
+}
+
+// ============================================
+// FIXED: sendQuestion Function (Atomic File+Text)
+// ============================================
+async function sendQuestion() {
+  if (isSending) return;
+  
   const input = document.getElementById("userInput");
   const msgBox = document.getElementById("messages");
+  const sendBtn = document.getElementById("askButton");
   const question = input.value.trim();
   
-  if (!question) return;
+  // Don't send empty messages without attachments
+  if (!question && pendingAttachments.length === 0) {
+    return;
+  }
   
-  // Show user message
+  isSending = true;
+  sendBtn.disabled = true;
+  sendBtn.textContent = 'Sending...';
+  sendBtn.classList.add('sending');
+  
+  // Show user message with attachment info
   const userMsg = document.createElement('p');
   userMsg.className = 'user-message';
-  userMsg.innerText = `You: ${question}`;
+  
+  let messageContent = question || "Analyze this file";
+  if (pendingAttachments.length > 0) {
+    const fileNames = pendingAttachments.map(a => a.name).join(', ');
+    messageContent += ` 📎[${fileNames}]`;
+  }
+  
+  userMsg.innerHTML = `<strong>You:</strong> ${messageContent}`;
   msgBox.appendChild(userMsg);
   input.value = '';
   msgBox.scrollTop = msgBox.scrollHeight;
-
-  // Add to chat history
-  chatHistory.push({ role: 'user', content: question });
-
+  
+  // Add to chat history (just the text)
+  chatHistory.push({ role: 'user', content: question || "Analyze this file" });
+  
   // Show loading
   const loadingMsg = document.createElement('p');
   loadingMsg.className = 'ai-message';
-  loadingMsg.innerText = 'Tellavista is thinking...';
+  loadingMsg.innerText = '🤔 Nelavista is thinking...';
   msgBox.appendChild(loadingMsg);
   msgBox.scrollTop = msgBox.scrollHeight;
-
-  fetch('/ask', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ history: chatHistory })
-  }).then(res => res.json())
-    .then(data => {
-      loadingMsg.remove();
-      const answer = data.choices?.[0]?.message?.content || "Sorry, I couldn't answer.";
+  
+  try {
+    // Create FormData for sending (text + files in ONE request)
+    const formData = new FormData();
+    
+    // Add the text message (ALWAYS include message)
+    formData.append('message', question || "Analyze this file");
+    
+    // Add chat history
+    formData.append('history', JSON.stringify(chatHistory));
+    
+    // IMPORTANT: Add all attachments using the same key 'files' for multiple files
+    if (pendingAttachments.length > 0) {
+      debugLog(`📤 Sending ${pendingAttachments.length} file(s) with message: "${question}"`);
+      
+      pendingAttachments.forEach((attachment) => {
+        formData.append('files', attachment.file); // Key must be 'files' (plural)
+      });
+    }
+    
+    // Debug: Log FormData contents
+    if (DEBUG_MODE) {
+      for (let [key, value] of formData.entries()) {
+        if (key === 'history') {
+          debugLog(`FormData: ${key} = ${value}`);
+        } else if (value instanceof File) {
+          debugLog(`FormData: ${key} = File: ${value.name} (${value.type}, ${value.size} bytes)`);
+        } else {
+          debugLog(`FormData: ${key} = ${value}`);
+        }
+      }
+    }
+    
+    // Send everything in ONE atomic request
+    const response = await fetch('/ask_with_files', {
+      method: 'POST',
+      body: formData
+      // Don't set Content-Type header - let browser set it for FormData
+    });
+    
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`HTTP ${response.status}: ${errorText}`);
+    }
+    
+    const data = await response.json();
+    debugLog('Response received:', data);
+    
+    // Remove loading message
+    loadingMsg.remove();
+    
+    if (data.error) {
+      showMessage('ai-message', `❌ Error: ${data.error}`);
+    } else {
+      const answer = data.choices?.[0]?.message?.content || data.summary || "Sorry, I couldn't process your request.";
+      
+      // Add to chat history
       chatHistory.push({ role: 'assistant', content: answer });
+      
+      // Show AI response
       const aiMsg = document.createElement('p');
       aiMsg.className = 'ai-message';
       aiMsg.innerHTML = `<strong>Nelavista:</strong> ${answer}`;
       msgBox.appendChild(aiMsg);
+      
+      // Show file usage indicator if files were processed
+      if (pendingAttachments.length > 0) {
+        const fileIndicator = document.createElement('p');
+        fileIndicator.className = 'ai-message';
+        fileIndicator.style.fontSize = '0.8em';
+        fileIndicator.style.opacity = '0.7';
+        fileIndicator.innerHTML = `📎 <small>Analyzed ${pendingAttachments.length} attachment${pendingAttachments.length > 1 ? 's' : ''}</small>`;
+        msgBox.appendChild(fileIndicator);
+      }
+      
       msgBox.scrollTop = msgBox.scrollHeight;
-    })
-    .catch(() => {
-      loadingMsg.remove();
-      const errorMsg = document.createElement('p');
-      errorMsg.className = 'ai-message';
-      errorMsg.innerText = 'Error reaching Nelavista. Please try again.';
-      msgBox.appendChild(errorMsg);
-      msgBox.scrollTop = msgBox.scrollHeight;
+    }
+    
+  } catch (error) {
+    debugLog('❌ Chat error:', error);
+    showMessage('ai-message', `❌ Error: ${error.message || 'Failed to send message'}`);
+    
+    // Remove loading message on error
+    const loadingMsgs = msgBox.querySelectorAll('.ai-message');
+    loadingMsgs.forEach(msg => {
+      if (msg.textContent.includes('thinking...')) msg.remove();
     });
+  } finally {
+    // Clear attachments ONLY after successful send
+    clearAttachments();
+    
+    // Reset UI
+    isSending = false;
+    sendBtn.disabled = false;
+    sendBtn.textContent = 'Send';
+    sendBtn.classList.remove('sending');
+  }
 }
 
+// Clear all attachments
+function clearAttachments() {
+  // Revoke all object URLs
+  pendingAttachments.forEach(attachment => {
+    if (attachment.previewUrl) {
+      URL.revokeObjectURL(attachment.previewUrl);
+    }
+  });
+  
+  // Clear the array
+  pendingAttachments = [];
+  
+  // Hide the attachment container
+  document.getElementById('attachmentContainer').style.display = 'none';
+}
+
+// ============================================
+// BACKEND UPDATES REQUIRED
+// ============================================
+// You need to create a new endpoint `/ask_with_files` in your Flask app
+// that handles multipart form data with files and text together.
+
 // MATERIALS SEARCH
-document.getElementById('searchBtn').addEventListener('click', () => {
+document.getElementById('searchBtn')?.addEventListener('click', () => {
   const course = document.getElementById('course').value;
   const level = document.getElementById('level').value;
   const topic = document.getElementById('topic').value.trim();
@@ -894,7 +1411,7 @@ document.getElementById('searchBtn').addEventListener('click', () => {
     });
 });
 
-// REELS SECTION - Enhanced with the provided educational videos
+// REELS SECTION
 const educationalReels = [
   // Accountancy
     {"course": "Accountancy", "caption": "Financial Statements Basics", "video_url": "https://youtu.be/fb7YCVR5fIU?si=XWozkxGoBV2HP2HW"},
@@ -902,7 +1419,8 @@ const educationalReels = [
     {"course": "Accountancy", "caption": "Auditing Principles", "video_url": "https://youtu.be/27gabbJQZqc?si=rsOLmkD2QXOoxSoi"},
     {"course": "Accountancy", "caption": "Taxation Fundamentals", "video_url": "https://youtu.be/Cox8rLXYAGQ?si=CvKUaPuPJOxPb6cr"},
     {"course": "Accountancy", "caption": "Learn Accounting in under 5 hours", "video_url": "https://youtu.be/gPBhGkBN30s?si=bUYfaccZPlBni3aZ"},
- ];
+
+  ];
 
 function isYouTube(url) {
   return url.includes("youtube.com") || url.includes("youtu.be");
@@ -915,8 +1433,10 @@ function getYouTubeEmbed(url) {
 }
 
 async function loadReels() {
-  const course = document.getElementById("reelCourse").value;
+  const course = document.getElementById("reelCourse")?.value;
   const reelBox = document.getElementById("reels");
+  if (!reelBox) return;
+  
   reelBox.innerHTML = "⏳ Loading...";
 
   if (!course) {
@@ -977,13 +1497,13 @@ const allQuestions = {
       { q: "In accounting, what does 'posting' mean?", o: ["Recording transactions in journals", "Transferring journal entries to ledger accounts", "Preparing financial statements", "Closing accounts"], a: 1 },
       { q: "Which of these is considered a non-current asset?", o: ["Cash", "Building", "Inventory", "Prepaid expenses"], a: 1 },
       { q: "What is the primary goal of financial reporting?", o: ["To inform investors and creditors", "To calculate taxes", "To manage internal operations", "To prepare budgets"], a: 0 }
-  ]
+    ]
   }
 };
 
 function startQuiz() {
-  const course = document.getElementById("cbt-course").value;
-  const level = document.getElementById("cbt-level").value;
+  const course = document.getElementById("cbt-course")?.value;
+  const level = document.getElementById("cbt-level")?.value;
   if (!course || !level) return alert("Please select both course and level");
 
   const questions = allQuestions[course]?.[level];
@@ -1047,7 +1567,7 @@ function restartQuiz() {
 
 // GPA Section
 function askGPA() {
-  const course = document.getElementById('courseDropdown').value;
+  const course = document.getElementById('courseDropdown')?.value;
   if (!course) {
     alert("Please select a course first.");
     return;
@@ -1072,11 +1592,19 @@ document.addEventListener('DOMContentLoaded', function() {
       sendQuestion();
     }
   });
+  
+  // Add welcome message
+  setTimeout(() => {
+    if (document.getElementById('messages').children.length === 0) {
+      showMessage('ai-message', '👋 <strong>Welcome to Nelavista!</strong> I\'m your AI educational companion. Ask me anything about your studies, attach files for analysis, or use the menu to explore other features.');
+    }
+  }, 1000);
+  
+  // Clean up object URLs on page unload
+  window.addEventListener('beforeunload', () => {
+    clearAttachments();
+  });
 });
 </script>
 </body>
 </html>
-
-
-
-
