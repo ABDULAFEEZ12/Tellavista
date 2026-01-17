@@ -1,16 +1,29 @@
 import eventlet
 eventlet.monkey_patch()
 print("✅ Eventlet monkey patch applied")
-
+# ============================================
+# Imports
+# ============================================
 # ============================================
 # Imports
 # ============================================
 import os
 import json
+import time
+import base64
 from datetime import datetime
+from io import BytesIO
+import tempfile
+import PyPDF2
+import pdfplumber
+from PIL import Image
+import pytesseract
+import openai
 from flask import Flask, render_template, session, redirect, url_for, request, flash, jsonify, send_file, send_from_directory
 from flask_socketio import SocketIO, join_room, emit, leave_room
+from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
+from sqlalchemy import inspect, text
 from hashlib import sha256
 from functools import wraps
 import uuid
@@ -18,6 +31,7 @@ import requests
 from dotenv import load_dotenv
 import random
 from difflib import get_close_matches
+from bs4 import BeautifulSoup
 
 # Load environment variables
 load_dotenv()
@@ -31,6 +45,80 @@ app = Flask(__name__)
 app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
 app.config['SESSION_COOKIE_SECURE'] = False
 app.config['SECRET_KEY'] = os.getenv('MY_SECRET', 'fallback_secret_for_dev')
+app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max file size
+
+# ============================================
+# Upload Configuration - ADDED SECTION
+# ============================================
+
+# Configure upload folder
+UPLOAD_FOLDER = 'uploads'
+ALLOWED_EXTENSIONS = {'pdf', 'png', 'jpg', 'jpeg', 'gif'}
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)  # Create folder if it doesn't exist
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+# ============================================
+# Session Cleanup Functions - ADDED SECTION
+# ============================================
+def cleanup_old_files():
+    """Remove old uploaded files from session and disk"""
+    try:
+        current_time = time.time()
+        # Clean files older than 1 hour (3600 seconds)
+        if session.get('last_upload_time') and (current_time - session.get('last_upload_time', 0)) > 3600:
+            # Remove file from disk
+            if session.get('last_file_path'):
+                try:
+                    if os.path.exists(session['last_file_path']):
+                        os.remove(session['last_file_path'])
+                        debug_print(f"🗑️ Cleaned up old file: {session['last_file_path']}")
+                except Exception as e:
+                    debug_print(f"⚠️ Could not delete file: {e}")
+            
+            # Clear session references
+            session.pop('last_file_id', None)
+            session.pop('last_file_type', None)
+            session.pop('last_file_name', None)
+            session.pop('last_file_path', None)
+            session.pop('last_image_base64', None)
+            session.pop('last_file_preview', None)
+            session.pop('last_upload_time', None)
+            
+    except Exception as e:
+        debug_print(f"⚠️ Cleanup error: {e}")
+
+def cleanup_stale_files():
+    """Remove files older than 24 hours on startup"""
+    try:
+        current_time = time.time()
+        for filename in os.listdir(UPLOAD_FOLDER):
+            file_path = os.path.join(UPLOAD_FOLDER, filename)
+            if os.path.isfile(file_path):
+                file_age = current_time - os.path.getmtime(file_path)
+                if file_age > 24 * 3600:  # 24 hours
+                    os.remove(file_path)
+                    debug_print(f"🗑️ Removed stale file: {filename}")
+    except Exception as e:
+        debug_print(f"⚠️ Stale file cleanup error: {e}")
+
+# Clean up stale files on startup
+cleanup_stale_files()
+
+# Database configuration
+DATABASE_URL = os.getenv('DATABASE_URL')
+app.config['SQLALCHEMY_DATABASE_URI'] = DATABASE_URL or 'sqlite:///tellavista.db'
+app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
+    'pool_recycle': 300,
+    'pool_pre_ping': True,
+    'connect_args': {
+        'connect_timeout': 10,
+        'application_name': 'tellavista_app'
+    }
+}
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 # Debug mode - set to False in production
 DEBUG_MODE = True
@@ -39,12 +127,223 @@ def debug_print(*args, **kwargs):
     if DEBUG_MODE:
         print(*args, **kwargs)
 
-# Initialize SocketIO
+# Initialize extensions
+db = SQLAlchemy(app)
 socketio = SocketIO(app, cors_allowed_origins="*", async_mode='eventlet')
+
+# ============================================
+# Database Models
+# ============================================
+class User(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(150), unique=True, nullable=False)
+    email = db.Column(db.String(150), unique=True, nullable=False)
+    password_hash = db.Column(db.String(200), nullable=False)
+    level = db.Column(db.Integer, default=1)
+    joined_on = db.Column(db.DateTime, default=datetime.utcnow)
+    last_login = db.Column(db.DateTime)
+
+    def set_password(self, password):
+        self.password_hash = generate_password_hash(password)
+
+    def check_password(self, password):
+        return check_password_hash(self.password_hash, password)
+
+class UserQuestions(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(150), nullable=False)
+    question = db.Column(db.Text, nullable=False)
+    answer = db.Column(db.Text, nullable=False)
+    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+
+class Room(db.Model):
+    id = db.Column(db.String(32), primary_key=True)
+    teacher_id = db.Column(db.String(120))
+    teacher_name = db.Column(db.String(80))
+    is_active = db.Column(db.Boolean, default=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+# ============================================
+# File Processing Helper Functions
+# ============================================
+def encode_image_to_base64(file):
+    """Encode image file to base64 string"""
+    try:
+        file.seek(0)
+        image_bytes = file.read()
+        return base64.b64encode(image_bytes).decode('utf-8')
+    except Exception as e:
+        debug_print(f"❌ Error encoding image to base64: {e}")
+        return None
+
+def extract_text_from_pdf(file):
+    """Extract text from PDF file - SMART LIMITED"""
+    text = ""
+    
+    try:
+        # First 3 pages only for demo stability
+        file.seek(0)
+        with pdfplumber.open(BytesIO(file.read())) as pdf:
+            total_pages = min(3, len(pdf.pages))
+            for page in pdf.pages[:total_pages]:
+                page_text = page.extract_text()
+                if page_text:
+                    text += page_text + "\n\n"
+                    # Stop if we already have enough text
+                    if len(text) > 2000:
+                        text = text[:2000] + "\n...[Content truncated for demo]"
+                        break
+        
+        # Fallback to PyPDF2 if pdfplumber fails
+        if not text.strip() or len(text.strip()) < 10:
+            file.seek(0)
+            pdf_reader = PyPDF2.PdfReader(BytesIO(file.read()))
+            total_pages = min(3, len(pdf_reader.pages))
+            for page_num in range(total_pages):
+                page = pdf_reader.pages[page_num]
+                page_text = page.extract_text()
+                if page_text:
+                    text += page_text + "\n\n"
+                    if len(text) > 2000:
+                        text = text[:2000] + "\n...[Content truncated for demo]"
+                        break
+                
+    except Exception as e:
+        text = f"[Note: PDF extraction encountered issues. Some content may not be available.]"
+    
+    return text.strip()
+
+def extract_text_from_image(file):
+    """Extract text from image using OCR with smart detection"""
+    try:
+        # Save to temp file for OCR
+        with tempfile.NamedTemporaryFile(delete=False, suffix='.png') as tmp:
+            file.save(tmp.name)
+            img = Image.open(tmp.name)
+            
+            # Try OCR
+            text = pytesseract.image_to_string(img)
+            
+            # Clean up
+            os.unlink(tmp.name)
+            
+            # Smart detection: is this a text-based image or diagram?
+            cleaned_text = text.strip()
+            if len(cleaned_text) < 30:  # Very little text
+                return "DIAGRAM_OR_VISUAL_CONTENT"
+            elif "http://" in cleaned_text or "www." in cleaned_text:
+                # Might be a screenshot with URLs
+                return cleaned_text
+            else:
+                return cleaned_text
+            
+    except Exception as e:
+        return f"[Note: Image processing incomplete. Treat this as visual content.]"
+
+def is_diagram_or_visual(text_content):
+    """Detect if content is primarily visual/diagram"""
+    if not text_content:
+        return True
+    if text_content == "DIAGRAM_OR_VISUAL_CONTENT":
+        return True
+    if len(text_content.strip()) < 50:
+        return True
+    return False
 
 # ============================================
 # Helper Functions
 # ============================================
+def login_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if 'user' not in session:
+            return redirect(url_for('login', next=request.url))
+        return f(*args, **kwargs)
+    return decorated_function
+
+def create_database_if_not_exists():
+    """Create database if it doesn't exist"""
+    try:
+        # Parse the DATABASE_URL to get connection details without database name
+        db_url = os.getenv('DATABASE_URL')
+        if not db_url:
+            print("ℹ️  No DATABASE_URL, using SQLite")
+            return True
+            
+        # Extract parts from the connection string
+        if 'postgresql://' in db_url:
+            # Remove the database name from the URL to connect to default database
+            parts = db_url.split('/')
+            base_url = '/'.join(parts[:-1])  # Everything before the last /
+            db_name = parts[-1]  # The database name
+            
+            # Connect to default postgres database to create our database
+            conn = psycopg2.connect(base_url + '/postgres')
+            conn.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
+            cursor = conn.cursor()
+            
+            # Check if database exists
+            cursor.execute("SELECT 1 FROM pg_catalog.pg_database WHERE datname = %s", (db_name,))
+            exists = cursor.fetchone()
+            
+            if not exists:
+                print(f"🔄 Creating database: {db_name}")
+                cursor.execute(f'CREATE DATABASE "{db_name}"')
+                print(f"✅ Database {db_name} created")
+            else:
+                print(f"✅ Database {db_name} already exists")
+                
+            cursor.close()
+            conn.close()
+            return True
+            
+    except Exception as e:
+        print(f"⚠️  Could not create database (might already exist): {e}")
+        return False
+
+def init_database():
+    """Initialize database with error handling"""
+    try:
+        # Try to create database first
+        create_database_if_not_exists()
+        
+        with app.app_context():
+            db.create_all()
+            print("✅ Database tables created/verified")
+            # Test the connection
+            db.session.execute('SELECT 1')
+            print("✅ Database connection successful")
+            return True
+    except Exception as e:
+        print(f"❌ Database initialization failed: {e}")
+        print("🚨 Falling back to SQLite database")
+        # Fallback to SQLite
+        app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///tellavista.db'
+        try:
+            with app.app_context():
+                db.create_all()
+                print("✅ SQLite database created as fallback")
+                return True
+        except Exception as e2:
+            print(f"❌ SQLite fallback also failed: {e2}")
+            return False
+
+def create_default_user():
+    """Create default user with error handling"""
+    with app.app_context():
+        try:
+            user = User.query.filter_by(username='test').first()
+            if not user:
+                user = User(username='test', email='test@example.com')
+                user.set_password('test123')
+                db.session.add(user)
+                db.session.commit()
+                print("✅ Created default user: test / test123")
+            else:
+                print("✅ Default user already exists: test / test123")
+        except Exception as e:
+            print(f"❌ Error creating default user: {e}")
+
 def is_academic_book(title, topic, department):
     if not title:
         return False
@@ -129,23 +428,9 @@ def cleanup_room(room_id):
             del rooms[room_id]
             if room_id in room_authority:
                 del room_authority[room_id]
-
-# ============================================
-# Cache Setup
-# ============================================
-CACHE_FILE = "tellavista_cache.json"
-if os.path.exists(CACHE_FILE):
-    try:
-        with open(CACHE_FILE, "r", encoding="utf-8") as f:
-            question_cache = json.load(f)
-    except json.JSONDecodeError:
-        question_cache = {}
-else:
-    question_cache = {}
-
-def save_cache():
-    with open(CACHE_FILE, "w", encoding="utf-8") as f:
-        json.dump(question_cache, f, indent=2, ensure_ascii=False)
+            with app.app_context():
+                Room.query.filter_by(id=room_id).delete()
+                db.session.commit()
 
 # ============================================
 # Socket.IO Event Handlers - Live Meetings
@@ -238,6 +523,21 @@ def handle_join_room(data):
             room['teacher_sid'] = sid
             authority_state['teacher_sid'] = sid
             
+            with app.app_context():
+                existing_room = Room.query.get(room_id)
+                if not existing_room:
+                    room_db = Room(
+                        id=room_id,
+                        teacher_id=sid,
+                        teacher_name=username,
+                        is_active=True
+                    )
+                    db.session.add(room_db)
+                else:
+                    existing_room.teacher_id = sid
+                    existing_room.teacher_name = username
+                db.session.commit()
+            
             # Notify all students that teacher joined
             for participant_sid in room['participants']:
                 if room['participants'][participant_sid]['role'] == 'student':
@@ -267,7 +567,7 @@ def handle_join_room(data):
             'role': role,
             'existing_participants': existing_participants,
             'teacher_sid': room['teacher_sid'],
-            'is_waiting': (role == 'student' and not room['teacher_sid'])
+            'is_waiting': (role == 'student' and not room['teacher_sid'])  # Inform student they're waiting
         })
         
         # Notify all other participants about new joiner
@@ -324,7 +624,7 @@ def handle_webrtc_offer(data):
             'from_sid': request.sid,
             'offer': offer,
             'room': room_id
-        }, room=target_sid)
+        }, room=target_sid)  # This now works because we joined SID room in connect
         
     except Exception as e:
         debug_print(f"❌ Error relaying offer: {e}")
@@ -567,15 +867,541 @@ def handle_ping(data):
 # ============================================
 @app.route('/')
 def index():
-    return render_template('index.html')
+    user = session.get('user')
+    if not user:
+        return redirect(url_for('login'))
+    return render_template('index.html', user=user)
 
+@app.route('/signup', methods=['GET', 'POST'])
+def signup():
+    if request.method == 'POST':
+        username = request.form.get('username', '').strip()
+        email = request.form.get('email', '').strip()
+        password = request.form.get('password', '').strip()
+
+        print(f"📝 Signup attempt - Username: '{username}', Email: '{email}'")
+
+        if not username or not email or not password:
+            flash('Please fill out all fields.')
+            return redirect(url_for('signup'))
+
+        try:
+            # Check if user exists
+            existing_user = User.query.filter(
+                (User.username == username) | (User.email == email)
+            ).first()
+            
+            if existing_user:
+                if existing_user.username == username:
+                    flash('Username already exists.')
+                else:
+                    flash('Email already registered.')
+                return redirect(url_for('signup'))
+
+            # Create new user
+            user = User(username=username, email=email)
+            user.set_password(password)
+            db.session.add(user)
+            db.session.commit()
+
+            print(f"✅ Successfully created user: {username}")
+
+            session['user'] = {
+                'username': username,
+                'email': email,
+                'joined_on': user.joined_on.strftime('%Y-%m-%d'),
+                'last_login': datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')
+            }
+            flash('Account created successfully!')
+            return redirect(url_for('index'))
+            
+        except Exception as e:
+            print(f"❌ Error during signup: {e}")
+            db.session.rollback()
+            flash('Error creating account. Please try again.')
+            return redirect(url_for('signup'))
+    
+    return render_template('signup.html')
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        print("🔄 Login POST received")
+        
+        # Get the specific field names from your form
+        login_input = request.form.get('username_or_email', '').strip()
+        password = request.form.get('password', '').strip()
+        
+        print(f"🔐 Login attempt - Input: '{login_input}', Password: {'*' * len(password)}")
+
+        if not login_input:
+            flash('Please enter username or email.')
+            return redirect(url_for('login'))
+            
+        if not password:
+            flash('Please enter password.')
+            return redirect(url_for('login'))
+
+        print(f"🔍 Looking for user by username or email: '{login_input}'")
+        
+        try:
+            # Try to find user by username OR email
+            user = User.query.filter(
+                (User.username == login_input) | (User.email == login_input)
+            ).first()
+            
+            if user:
+                print(f"✅ User found: {user.username} (email: {user.email})")
+                print(f"🔑 Checking password...")
+                if user.check_password(password):
+                    user.last_login = datetime.utcnow()
+                    db.session.commit()
+                    
+                    session['user'] = {
+                        'username': user.username,
+                        'email': user.email,
+                        'joined_on': user.joined_on.strftime('%Y-%m-%d'),
+                        'last_login': user.last_login.strftime('%Y-%m-%d %H:%M:%S')
+                    }
+                    
+                    print(f"🎉 Login successful for user: {user.username}")
+                    flash('Logged in successfully!')
+                    return redirect(url_for('index'))
+                else:
+                    print(f"❌ Password incorrect for user: {login_input}")
+                    flash('Invalid password.')
+            else:
+                print(f"❌ User not found: {login_input}")
+                # Debug: Show all users in database
+                try:
+                    all_users = User.query.all()
+                    print(f"📊 All users in database: {[u.username for u in all_users]}")
+                except Exception as e:
+                    print(f"📊 Could not fetch users: {e}")
+                flash('User not found.')
+                
+        except Exception as e:
+            print(f"❌ Database error during login: {e}")
+            flash('Database error. Please try again.')
+
+        return redirect(url_for('login'))
+    
+    return render_template('login.html')
+
+@app.route('/logout')
+def logout():
+    session.clear()
+    flash('You have been logged out.')
+    return redirect(url_for('login'))
+
+@app.route('/profile')
+@login_required
+def profile():
+    user = session.get('user', {})
+    return render_template('profile.html', user=user)
+
+@app.route('/talk-to-nelavista')
+@login_required
+def talk_to_nelavista():
+    return render_template('talk-to-nelavista.html')
+
+# ============================================
+# UPDATED /ask_with_files ENDPOINT - CHATGPT-STYLE ATOMIC BEHAVIOR
+# ============================================
+# ============================================
+# FIXED: /ask_with_files Endpoint (Atomic Processing)
+# ============================================
+@app.route('/ask_with_files', methods=['POST'])
+@login_required
+def ask_with_files():
+    """Handle atomic file+text requests like ChatGPT"""
+    try:
+        username = session['user']['username']
+        
+        # Get the text message (REQUIRED for context)
+        message = request.form.get('message', '').strip()
+        
+        print(f"🚀 /ask_with_files called by {username}")
+        print(f"📝 Message: '{message}'")
+        print(f"📁 Files received: {list(request.files.keys())}")
+        
+        # Process ALL files from the request
+        file_contents = []
+        image_base64_list = []
+        file_count = 0
+        
+        # Handle multiple files
+        if 'files' in request.files:
+            files = request.files.getlist('files')  # Get ALL files with key 'files'
+            print(f"📦 Processing {len(files)} file(s)")
+            
+            for file in files:
+                if file and file.filename and file.filename.strip():
+                    file_count += 1
+                    filename = file.filename.lower()
+                    
+                    print(f"  📄 File {file_count}: {filename}")
+                    
+                    if filename.endswith('.pdf'):
+                        # Extract text from PDF
+                        text = extract_text_from_pdf(file)
+                        if text and text.strip():
+                            file_contents.append(f"[PDF CONTENT: {file.filename}]\n{text[:2000]}")
+                            print(f"    ✅ Extracted {len(text)} chars from PDF")
+                        else:
+                            file_contents.append(f"[PDF: {file.filename} - Could not extract text]")
+                            print(f"    ⚠️ Could not extract text from PDF")
+                    
+                    elif filename.endswith(('.png', '.jpg', '.jpeg', '.gif')):
+                        # Encode image for vision
+                        file.seek(0)
+                        image_bytes = file.read()
+                        image_base64 = base64.b64encode(image_bytes).decode('utf-8')
+                        
+                        # Determine MIME type
+                        mime_type = file.content_type
+                        if not mime_type:
+                            if filename.endswith('.png'):
+                                mime_type = 'image/png'
+                            elif filename.endswith('.jpg') or filename.endswith('.jpeg'):
+                                mime_type = 'image/jpeg'
+                            elif filename.endswith('.gif'):
+                                mime_type = 'image/gif'
+                            else:
+                                mime_type = 'image/jpeg'
+                        
+                        image_base64_list.append({
+                            'base64': image_base64,
+                            'filename': file.filename,
+                            'mime_type': mime_type,
+                            'type': 'image'
+                        })
+                        print(f"    ✅ Prepared image for vision: {mime_type}")
+        
+        print(f"📊 Summary: {file_count} files, {len(image_base64_list)} images")
+        
+        # CRITICAL: If files exist, they ARE the context
+        if file_count > 0:
+            print("🔧 Mode: SOLUTION (files attached)")
+            
+            # Build context from files
+            file_context = ""
+            if file_contents:
+                file_context = "\n\n".join(file_contents)
+            
+            # SYSTEM PROMPT when files are attached
+            system_prompt = (
+                "You are Nelavista, an advanced AI tutor for Nigerian university students.\n\n"
+                
+                "IMPORTANT: The user has attached file(s) with their message. "
+                "The file(s) contain the primary content to analyze.\n\n"
+                
+                "USER'S FILES:\n"
+            )
+            
+            if file_context:
+                system_prompt += f"Document content:\n{file_context}\n\n"
+            
+            if image_base64_list:
+                system_prompt += f"Images attached: {len(image_base64_list)} image(s)\n\n"
+            
+            system_prompt += (
+                "USER'S INSTRUCTION:\n"
+                f"\"{message}\"\n\n"
+                
+                "RESPONSE REQUIREMENTS:\n"
+                "1. Acknowledge you're analyzing the attached file(s)\n"
+                "2. Respond based SOLELY on the file content\n"
+                "3. If summarizing, summarize the file content\n"
+                "4. If analyzing, analyze what's in the files\n"
+                "5. Use clean HTML formatting\n"
+                "6. Do NOT ask for the text - you already have it\n"
+            )
+            
+            messages = [{"role": "system", "content": system_prompt}]
+            
+            # Add user message if there's no text from files
+            if not file_context and not image_base64_list:
+                messages.append({"role": "user", "content": message})
+            
+            # Use vision model for images
+            if image_base64_list:
+                content_parts = [{"type": "text", "text": message}]
+                
+                for image_data in image_base64_list:
+                    content_parts.append({
+                        "type": "image_url",
+                        "image_url": {
+                            "url": f"data:{image_data['mime_type']};base64,{image_data['base64']}"
+                        }
+                    })
+                
+                messages.append({
+                    "role": "user",
+                    "content": content_parts
+                })
+                model = "openai/gpt-4o"
+                print(f"👁️ Using vision model: {model}")
+            else:
+                model = "openai/gpt-4o-mini"
+                print(f"💬 Using text model: {model}")
+        
+        else:
+            # NO FILES: Normal chat mode
+            print("🔧 Mode: CHAT (no files)")
+            
+            chatty_keywords = ["hi", "hello", "hey", "how are you", "good morning", "good evening"]
+            is_chatty = any(k in message.lower() for k in chatty_keywords)
+            
+            if is_chatty:
+                system_prompt = (
+                    "You are Nelavista, an AI tutor for Nigerian university students. "
+                    "For casual conversation:\n"
+                    "- Respond in clean HTML using <p> only.\n"
+                    "- Be natural, brief, and human.\n"
+                    "- Emojis are allowed.\n"
+                    "- No structuring, no steps, no analysis tone."
+                )
+                model = "openai/gpt-4o-mini"
+            else:
+                system_prompt = (
+                    "You are Nelavista, an advanced AI tutor for Nigerian university students.\n\n"
+                    "Provide helpful, accurate academic assistance.\n"
+                    "Use clean HTML formatting.\n"
+                    "Be concise and informative."
+                )
+                model = "openai/gpt-4o-mini"
+            
+            messages = [
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": message}
+            ]
+        
+        print(f"🚀 Calling API with {len(messages)} messages")
+        
+        # --- Call OpenRouter API ---
+        headers = {
+            "Authorization": f"Bearer {os.getenv('OPENROUTER_API_KEY')}",
+            "Content-Type": "application/json",
+            "HTTP-Referer": "https://nelavista.com",
+            "X-Title": "Nelavista AI Tutor"
+        }
+        
+        payload = {
+            "model": model,
+            "messages": messages,
+            "temperature": 0.6,
+            "max_tokens": 1500
+        }
+        
+        response = requests.post(
+            "https://openrouter.ai/api/v1/chat/completions",
+            headers=headers,
+            json=payload,
+            timeout=60
+        )
+        
+        if response.status_code != 200:
+            print(f"❌ API Error: {response.status_code} - {response.text}")
+            return jsonify({'error': f'API error: {response.status_code}'}), 500
+        
+        answer = response.json()["choices"][0]["message"]["content"]
+        print(f"✅ Response: {len(answer)} chars")
+        
+        # Save to database
+        new_q = UserQuestions(
+            username=username,
+            question=message + (" [with file(s)]" if file_count > 0 else ""),
+            answer=answer
+        )
+        db.session.add(new_q)
+        db.session.commit()
+        
+        return jsonify({
+            "choices": [{
+                "message": {
+                    "role": "assistant",
+                    "content": answer
+                }
+            }],
+            "file_count": file_count,
+            "has_files": file_count > 0
+        })
+        
+    except Exception as e:
+        print(f"❌ Error in /ask_with_files: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({'error': 'Server error processing your request'}), 500
+
+@app.route('/upload', methods=['POST'])
+@login_required
+def upload_file():
+    """Handle file upload - Store files on disk, not in session"""
+    if 'file' not in request.files:
+        return jsonify({"success": False, "error": "No file provided"}), 400
+    
+    file = request.files['file']
+    if file.filename == '':
+        return jsonify({"success": False, "error": "No file selected"}), 400
+    
+    # Delete the previous uploaded file if it exists
+    old_file_path = session.get('last_file_path')
+    if old_file_path and os.path.exists(old_file_path):
+        try:
+            os.remove(old_file_path)
+            debug_print(f"🗑️ Deleted old file: {old_file_path}")
+        except Exception as e:
+            debug_print(f"⚠️ Error deleting old file: {e}")
+    
+    # Clear old file session data
+    session.pop('last_file_path', None)
+    session.pop('last_file_type', None)
+    session.pop('last_file_content', None)
+    session.pop('last_file_preview', None)
+    session.pop('last_file_id', None)
+    session.pop('last_upload_time', None)
+    session.pop('last_image_base64', None)
+    
+    try:
+        filename = file.filename.lower()
+        
+        if not allowed_file(filename):
+            return jsonify({"success": False, "error": "Unsupported file type. Use PDF or images."}), 400
+        
+        file_size = 0
+        
+        # Read file content once for size calculation
+        file_data = file.read()
+        file_size = len(file_data)
+        file.seek(0)  # Reset file pointer for later use
+        
+        if filename.endswith('.pdf'):
+            # Generate unique filename for PDF
+            file_id = str(uuid.uuid4())
+            pdf_filename = f"{file_id}.pdf"
+            pdf_path = os.path.join(app.config['UPLOAD_FOLDER'], pdf_filename)
+            
+            # Save PDF to disk
+            with open(pdf_path, 'wb') as f:
+                f.write(file_data)
+            
+            # Extract text from saved file
+            with open(pdf_path, 'rb') as pdf_file:
+                text = extract_text_from_pdf(BytesIO(pdf_file.read()))
+            
+            # Store only references in session
+            session['last_file_id'] = file_id
+            session['last_file_type'] = 'pdf'
+            session['last_file_name'] = pdf_filename
+            session['last_file_path'] = pdf_path
+            session['last_upload_time'] = time.time()
+            
+            if text:
+                # Store only first 2000 chars in session for preview
+                session['last_file_content'] = text[:2000]
+            else:
+                session['last_file_content'] = "PDF loaded but text extraction failed"
+            
+            debug_print(f"📄 PDF saved: {pdf_filename}, Size: {file_size} bytes")
+            
+            return jsonify({
+                "success": True,
+                "message": "PDF uploaded successfully",
+                "preview": text[:300] + "..." if len(text) > 300 else text,
+                "type": "pdf",
+                "filename": file.filename,
+                "size_kb": round(file_size / 1024, 1),
+                "has_text": len(text.strip()) > 50,
+                "file_id": file_id
+            })
+            
+        elif filename.endswith(('.png', '.jpg', '.jpeg', '.gif')):
+            # Generate unique filename for image
+            file_id = str(uuid.uuid4())
+            ext = filename.rsplit('.', 1)[1].lower()
+            image_filename = f"{file_id}.{ext}"
+            image_path = os.path.join(app.config['UPLOAD_FOLDER'], image_filename)
+            
+            # Save image to disk
+            with open(image_path, 'wb') as f:
+                f.write(file_data)
+            
+            # Encode image to base64 for vision
+            image_base64 = base64.b64encode(file_data).decode('utf-8')
+            
+            # Store only references in session
+            session['last_file_id'] = file_id
+            session['last_file_type'] = 'image'
+            session['last_file_name'] = image_filename
+            session['last_file_path'] = image_path
+            session['last_image_base64'] = image_base64  # Keep base64 in session temporarily
+            session['last_upload_time'] = time.time()
+            
+            # Extract text via OCR for fallback
+            file.seek(0)  # Reset file pointer
+            text = extract_text_from_image(file)
+            session['last_file_content'] = text[:500] if text else ""
+            
+            # Determine if it's text or diagram
+            is_diagram = is_diagram_or_visual(text)
+            
+            debug_print(f"🖼️ Image saved: {image_filename}, Size: {file_size} bytes")
+            
+            return jsonify({
+                "success": True,
+                "message": "Image uploaded - ready for vision analysis",
+                "type": "image",
+                "filename": file.filename,
+                "size_kb": round(file_size / 1024, 1),
+                "is_diagram": is_diagram,
+                "has_text": text != "DIAGRAM_OR_VISUAL_CONTENT" and len(text.strip()) > 10,
+                "vision_ready": True,
+                "file_id": file_id
+            })
+            
+        else:
+            return jsonify({"success": False, "error": "Unsupported file type. Use PDF or images."}), 400
+            
+    except Exception as e:
+        debug_print(f"❌ Upload error: {e}")
+        return jsonify({"success": False, "error": f"Processing failed: {str(e)[:100]}"}), 500
+
+@app.route('/cleanup_attachments', methods=['POST'])
+@login_required
+def cleanup_attachments():
+    """Clean up uploaded files from session"""
+    try:
+        # Clear all file-related session data
+        keys_to_remove = [
+            'last_file_id', 'last_file_type', 'last_file_name',
+            'last_file_path', 'last_upload_time', 'last_image_base64',
+            'last_file_content', 'last_file_preview'
+        ]
+        
+        for key in keys_to_remove:
+            session.pop(key, None)
+        
+        return jsonify({
+            "success": True,
+            "message": "Attachment context cleared"
+        })
+    except Exception as e:
+        debug_print(f"❌ Cleanup error: {e}")
+        return jsonify({"success": False, "error": str(e)}), 500
+        
+# ============================================
+# UPDATED /ask ENDPOINT - VISION INTEGRATION
+# ============================================
 @app.route('/ask', methods=['POST'])
+@login_required
 def ask():
     try:
         data = request.get_json()
         if not data:
             return jsonify({'error': 'No JSON data provided'}), 400
 
+        username = session['user']['username']
         history = data.get('history', [])
         user_question = data.get('message', '')
 
@@ -589,78 +1415,173 @@ def ask():
         if not user_question:
             return jsonify({'error': 'No question provided'}), 400
 
-        print(f"🤖 Processing question: {user_question}")
+        debug_print(f"🤖 Processing question from {username}: {user_question[:100]}...")
 
-        # --- Detect Chatty vs Solution Mode ---
-        chatty_keywords = ["hi", "hello", "hey", "how are you", "good morning", "good evening"]
-        solution_triggers = ["?", "solve", "calculate", "explain", "why", "how", "find", "prove"]
+        # --- File context handling ---
+        file_content = ""
+        file_type = ""
+        last_upload_time = session.get('last_upload_time', 0)
 
-        # Default mode = Chatty
-        if any(word in user_question.lower() for word in chatty_keywords) and not any(
-            kw in user_question.lower() for kw in solution_triggers
-        ):
-            mode = "chatty"
+        if time.time() - last_upload_time < 300:
+            file_content = session.get('last_file_content', '')
+            file_type = session.get('last_file_type', '')
+            image_base64 = session.get('last_image_base64', '')
         else:
-            mode = "solution"
+            session.pop('last_file_content', None)
+            session.pop('last_file_type', None)
+            session.pop('last_upload_time', None)
+            session.pop('last_image_base64', None)
+            session.pop('last_file_path', None)  # Also remove the file path
+            image_base64 = ''
 
-        # --- System prompt changes depending on mode ---
+        # --- Vision detection ---
+        use_vision = False
+        vision_image_base64 = None
+
+        if session.get('last_file_type') == 'image' and session.get('last_image_base64'):
+            vision_keywords = [
+                'image', 'picture', 'diagram', 'photo', 'screenshot',
+                'explain this', 'what is this', 'describe', 'analyze',
+                'what does this show', 'tell me about this', 'summarize this',
+                'can you see', 'look at this', 'what is in this', 'explain the image'
+            ]
+            user_q_lower = user_question.lower()
+            use_vision = any(k in user_q_lower for k in vision_keywords)
+            
+            if use_vision:
+                vision_image_base64 = session.get('last_image_base64')
+                debug_print("👁️ Vision enabled for image analysis")
+
+        # --- Mode detection ---
+        chatty_keywords = ["hi", "hello", "hey", "how are you", "good morning", "good evening"]
+        is_chatty = any(k in user_question.lower() for k in chatty_keywords)
+
+        if (file_content or vision_image_base64) and not is_chatty:
+            mode = "solution"
+        else:
+            mode = "chatty" if is_chatty else "solution"
+
+        # --- SYSTEM PROMPTS ---
         if mode == "chatty":
             system_prompt = (
-                "You are Nelavista, a friendly and motivational AI tutor. "
-                "For casual chats:\n"
-                "- Reply in clean HTML using <p> only.\n"
-                "- Be warm, short, and natural like a human friend.\n"
-                "- Use emojis for friendliness.\n"
-                "- DO NOT structure into steps or Final Answer.\n"
-                "- Example: <p>👋 Hey! Great to see you. What's on your mind today?</p>"
+                "You are Nelavista, an AI tutor created by Afeez Adewale Tella for Nigerian university students (100–400 level). "
+                "For casual conversation:\n"
+                "- Respond in clean HTML using <p> only.\n"
+                "- Be natural, brief, and human.\n"
+                "- Emojis are allowed.\n"
+                "- No structuring, no steps, no analysis tone."
             )
         else:
+            vision_context = ""
+            if vision_image_base64:
+                vision_context = (
+                    "You are analyzing an image. Base your explanation strictly on what is visible."
+                )
+
             system_prompt = (
-                "You are Nelavista, a motivational AI tutor. "
-                "Always respond in clean HTML for problem-solving. "
-                "Format answers like this:\n\n"
-                "<p><strong>Intro:</strong> Short motivational opener.</p>\n"
-                "<h3>🔹 Step 1:</h3>\n"
-                "<p>Explain clearly with short sentences or bullets.</p>\n"
-                "<h3>🔹 Step 2:</h3>\n"
-                "<p>Keep guiding step by step like a tutor.</p>\n"
-                "<hr>\n"
-                "<h2>✅ Final Answer</h2>\n"
-                "<pre><strong>🎯 Show the final solution here, copyable</strong></pre>\n\n"
-                "⚡ Rules:\n"
-                "- Do NOT start with 'Nelavista Solution'.\n"
-                "- Use <h2>, <h3>, <p>, <ul>, <li> for clarity.\n"
-                "- Final Answer must be inside <pre> so it's easy to copy.\n"
-                "- Use emojis for friendliness."
+                "You are Nelavista, an advanced AI tutor created by Afeez Adewale Tella for Nigerian university students (100–400 level).\n\n"
+
+                "ROLE:\n"
+                "You are a specialized analytical tutor and researcher.\n\n"
+
+                "STYLE: Analytical Expert\n"
+                "Follow these rules strictly.\n\n"
+
+                "GLOBAL RULES:\n"
+                "- Always respond in clean HTML using <p>, <ul>, <li>, <strong>, <h2>, <h3>, and <table> when appropriate.\n"
+                "- No greetings.\n"
+                "- Do NOT use labels like Step 1, Step 2, Intro, or Final Answer.\n"
+                "- No emojis in academic explanations.\n"
+                "- Use neutral, precise language. Avoid hype, emotion, or filler.\n\n"
+
+                "STRUCTURE REQUIREMENTS:\n"
+                "- Begin with a concise <strong>TL;DR</strong> section summarizing the core conclusion.\n"
+                "- Use clear headers and bullet points to organize information.\n"
+                "- Break complex ideas into logical components and explain the reasoning behind them.\n"
+                "- Use short paragraphs (1–2 sentences).\n\n"
+
+                "REASONING:\n"
+                "- Show the reasoning path clearly but naturally.\n"
+                "- Explain why conclusions follow from facts or data.\n\n"
+
+                "DATA & ACCURACY:\n"
+                "- Include formulas, definitions, metrics, or comparisons when relevant.\n"
+                "- Do not speculate or invent facts.\n\n"
+
+                f"{vision_context}\n\n"
+
+                "ENDING:\n"
+                "- End naturally after the explanation. Do not add summaries beyond the TL;DR."
             )
 
-        # --- Call OpenRouter API ---
-        OPENROUTER_API_KEY = os.getenv('OPENROUTER_API_KEY')
-        if not OPENROUTER_API_KEY:
-            return jsonify({'error': 'OpenRouter API key not configured'}), 500
+        # --- Build messages ---
+        messages = [{"role": "system", "content": system_prompt}]
 
+        for msg in history:
+            if msg.get('role') in ['user', 'assistant']:
+                messages.append({"role": msg['role'], "content": msg['content']})
+
+        if file_content and file_type and not vision_image_base64:
+            context = f"[DOCUMENT CONTEXT]\n{file_content[:1500]}"
+            messages.append({"role": "user", "content": context})
+
+        if vision_image_base64:
+            messages.append({
+                "role": "user",
+                "content": [
+                    {"type": "text", "text": user_question},
+                    {
+                        "type": "image_url",
+                        "image_url": {
+                            "url": f"data:image/jpeg;base64,{vision_image_base64}"
+                        }
+                    }
+                ]
+            })
+            model = "openai/gpt-4o"
+        else:
+            messages.append({"role": "user", "content": user_question})
+            model = "openai/gpt-4o-mini"
+
+        # --- API call ---
         headers = {
-            "Authorization": f"Bearer {OPENROUTER_API_KEY}",
-            "Content-Type": "application/json"
+            "Authorization": f"Bearer {os.getenv('OPENROUTER_API_KEY')}",
+            "Content-Type": "application/json",
+            "HTTP-Referer": "https://nelavista.com",
+            "X-Title": "Nelavista AI Tutor"
         }
 
         payload = {
-            "model": "openai/gpt-4o-mini",
-            "messages": [
-                {"role": "system", "content": system_prompt},
-                {"role": "user", "content": user_question}
-            ]
+            "model": model,
+            "messages": messages,
+            "temperature": 0.6,
+            "max_tokens": 1500
         }
 
-        response = requests.post("https://openrouter.ai/api/v1/chat/completions",
-                                 headers=headers, data=json.dumps(payload))
+        response = requests.post(
+            "https://openrouter.ai/api/v1/chat/completions",
+            headers=headers,
+            data=json.dumps(payload),
+            timeout=60
+        )
 
         if response.status_code != 200:
-            print(f"❌ OpenRouter API error: {response.text}")
-            return jsonify({'error': 'AI service failed. Try again later.'}), 500
+            raise Exception(response.text)
 
-        api_result = response.json()
-        answer = api_result["choices"][0]["message"]["content"]
+        answer = response.json()["choices"][0]["message"]["content"]
+
+        # --- Save solution responses ---
+        if mode == "solution":
+            new_q = UserQuestions(
+                username=username,
+                question=user_question,
+                answer=answer
+            )
+            db.session.add(new_q)
+            db.session.commit()
+
+        # Clean up old files
+        cleanup_old_files()
 
         return jsonify({
             "choices": [{
@@ -668,13 +1589,47 @@ def ask():
                     "role": "assistant",
                     "content": answer
                 }
-            }]
+            }],
+            "file_used": bool(file_content or vision_image_base64),
+            "vision_used": bool(vision_image_base64)
         })
 
     except Exception as e:
-        print(f"Error in /ask route: {str(e)}")
+        debug_print(f"❌ Error in /ask route: {str(e)}")
+        return jsonify({'error': 'Failed to process your question.'}), 500
+
+# ============================================
+# NEW: Clear Context Endpoint
+# ============================================
+@app.route('/clear_context', methods=['POST'])
+@login_required
+def clear_context():
+    """Clear uploaded file context from session and delete the file from disk"""
+    try:
+        # Delete the file from disk if it exists
+        file_path = session.get('last_file_path')
+        if file_path and os.path.exists(file_path):
+            os.remove(file_path)
+            debug_print(f"🗑️ Deleted file: {file_path}")
+        
+        # Clear session variables
+        session.pop('last_file_content', None)
+        session.pop('last_file_type', None)
+        session.pop('last_upload_time', None)
+        session.pop('last_image_base64', None)
+        session.pop('last_file_path', None)
+        session.pop('last_file_id', None)
+        session.pop('last_file_name', None)
+        
         return jsonify({
-            'error': 'Failed to process your question. Please try again.'
+            "success": True,
+            "message": "File context cleared successfully"
+        })
+    except Exception as e:
+        debug_print(f"❌ Error clearing context: {e}")
+        return jsonify({
+            "success": False,
+            "error": "Failed to clear context"
         }), 500
 
 @app.route('/about')
@@ -686,6 +1641,7 @@ def privacy_policy():
     return render_template('privacy-policy.html')
 
 @app.route('/settings')
+@login_required
 def settings():
     memory = {
         "traits": session.get('traits', []),
@@ -695,6 +1651,7 @@ def settings():
     return render_template('settings.html', memory=memory, theme=session.get('theme'), language=session.get('language'))
 
 @app.route('/memory', methods=['POST'])
+@login_required
 def save_memory():
     session['theme'] = request.form.get('theme')
     session['language'] = request.form.get('language')
@@ -703,12 +1660,14 @@ def save_memory():
     return redirect('/settings')
 
 @app.route('/telavista/memory', methods=['POST'])
+@login_required
 def telavista_save_memory():
     print("Saving Telavista memory!")
     flash('Memory saved!')
     return redirect('/settings')
 
 @app.route('/materials')
+@login_required
 def materials():
     all_courses = ["Python", "Data Science", "AI Basics", "Math", "Physics"]
     selected_course = request.args.get("course")
@@ -746,7 +1705,6 @@ def get_study_materials():
             headers={"User-Agent": "Mozilla/5.0"},
             timeout=10
         ).text
-        from bs4 import BeautifulSoup
         soup = BeautifulSoup(pdf_html, 'html.parser')
         for book in soup.select('.file-left')[:5]:
             title = book.select_one('img')['alt']
@@ -797,7 +1755,6 @@ def ai_materials():
     explanation = ""
     try:
         if os.getenv('OPENAI_API_KEY'):
-            import openai
             response = openai.ChatCompletion.create(
                 model="gpt-3.5-turbo",
                 messages=[
@@ -819,7 +1776,6 @@ def ai_materials():
             headers={"User-Agent": "Mozilla/5.0"},
             timeout=10
         ).text
-        from bs4 import BeautifulSoup
         soup = BeautifulSoup(pdf_html, 'html.parser')
         for book in soup.select('.file-left')[:10]:
             title = book.select_one('img')['alt']
@@ -864,6 +1820,7 @@ def ai_materials():
     })
 
 @app.route('/reels', methods=['GET'])
+@login_required
 def reels():
     categories = ["Tech", "Motivation", "Islamic", "AI"]
     selected_category = request.args.get("category")
@@ -876,6 +1833,7 @@ def reels():
         ]
 
     return render_template("reels.html",
+                           user=session.get("user"),
                            categories=categories,
                            selected_category=selected_category,
                            videos=videos)
@@ -1361,6 +2319,7 @@ def get_reels():
     return jsonify({"reels": matching})
 
 @app.route('/CBT', methods=['GET'])
+@login_required
 def CBT():
     topics = ["Python", "Hadith", "AI", "Math"]
     selected_topic = request.args.get("topic")
@@ -1372,11 +2331,13 @@ def CBT():
             {"question": f"Why is {selected_topic} important?", "options": ["Reason 1", "Reason 2", "Reason 3"], "answer": "Reason 2"}
         ]
     return render_template("CBT.html", 
+                         user=session.get("user"), 
                          topics=topics, 
                          selected_topic=selected_topic, 
                          questions=questions)
 
 @app.route('/teach-me-ai')
+@login_required
 def teach_me_ai():
     return render_template('teach-me-ai.html')
 
@@ -1392,7 +2353,6 @@ def ai_teach():
 
     try:
         if os.getenv('OPENAI_API_KEY'):
-            import openai
             response = openai.ChatCompletion.create(
                 model="gpt-3.5-turbo",
                 messages=[
@@ -1532,16 +2492,28 @@ def debug_rooms():
     return json.dumps(debug_info, indent=2, default=str)
 
 # ============================================
+# Create default user
+# ============================================
+create_default_user()
+
+# ============================================
 # Run Server
 # ============================================
 if __name__ == '__main__':
     print(f"\n{'='*60}")
     print("🚀 NELAVISTA LIVE + Tellavista Platform")
-    print("🌟 Full Educational Platform with Live Meetings")
+    print("🌟 Full Educational Platform with Vision AI")
     print("📚 AI Tutor + Study Materials + Live Classes")
     print(f"{'='*60}")
-    print("✅ Educational Platform Features:")
-    print("   - AI Tutor (Nelavista)")
+    print("✅ Vision AI Features:")
+    print("   - GPT-4o Vision for image analysis")
+    print("   - Automatic image context detection")
+    print("   - Fallback to OCR when vision fails")
+    print("   - Image base64 storage in session")
+    print("\n✅ Educational Platform Features:")
+    print("   - User Authentication (Signup/Login)")
+    print("   - AI Tutor (Nelavista) with File Upload")
+    print("   - PDF & Image Processing (OCR, Text Extraction)")
     print("   - Study Materials & PDFs")
     print("   - Course Reels & Videos")
     print("   - CBT Test System")
@@ -1554,7 +2526,10 @@ if __name__ == '__main__':
     print("\n📡 Connection test: http://localhost:5000/test-connection")
     print("👨‍🏫 Teacher test: http://localhost:5000/live_meeting/teacher")
     print("👨‍🎓 Student test: http://localhost:5000/live_meeting")
-    print("🎓 Platform: http://localhost:5000/")
+    print("🎓 Platform login: http://localhost:5000/login (test/test123)")
+    print(f"{'='*60}")
+    print("\n⚠️  IMPORTANT: Install required packages:")
+    print("   pip install PyPDF2 pdfplumber Pillow pytesseract openai")
     print(f"{'='*60}\n")
     
     port = int(os.environ.get('PORT', 5000))
