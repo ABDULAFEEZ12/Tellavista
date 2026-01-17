@@ -17,3 +17,4 @@ SpeechRecognition
 python-socketio
 python-engineio
 psycopg2-binary
+PyPDF2
