@@ -18,3 +18,4 @@ python-socketio
 python-engineio
 psycopg2-binary
 PyPDF2
+pdfplumber
