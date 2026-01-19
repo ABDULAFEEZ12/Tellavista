@@ -879,8 +879,7 @@
       voices: [],
       bestVoice: null,
       conversationHistory: JSON.parse(localStorage.getItem('nelavistaVoiceHistory')) || [],
-      recognition: null,
-      currentLogMessageId: 0
+      recognition: null
     };
 
     // ===== INITIALIZATION =====
@@ -896,6 +895,7 @@
       }, 800);
     });
 
+    // ===== VOICE RECOGNITION =====
     function initializeVoiceRecognition() {
       const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
       
@@ -946,6 +946,7 @@
       };
     }
 
+    // ===== VOICE SYNTHESIS =====
     function initializeVoices() {
       if ('speechSynthesis' in window) {
         window.speechSynthesis.onvoiceschanged = populateVoiceOptions;
@@ -966,7 +967,7 @@
         .map(v => `<option value="${v.name}">${v.name} (${v.lang})</option>`)
         .join('');
       
-      // Find best voice (Google US English or first US English)
+      // Find best voice
       state.bestVoice = state.voices.find(v => 
         v.name.includes('Google US English') || 
         v.lang === 'en-US' ||
@@ -978,6 +979,24 @@
       }
     }
 
+    // ===== ORB STATE MANAGEMENT =====
+    function updateOrbState() {
+      const orb = document.getElementById('orb');
+      const wave = document.getElementById('wave');
+      
+      orb.classList.remove('listening', 'speaking');
+      wave.classList.remove('active');
+      
+      if (state.isListening) {
+        orb.classList.add('listening');
+        wave.classList.add('active');
+      } else if (state.isSpeaking) {
+        orb.classList.add('speaking');
+        wave.classList.add('active');
+      }
+    }
+
+    // ===== EVENT LISTENERS =====
     function setupEventListeners() {
       const voiceSelect = document.getElementById('voiceSelect');
       voiceSelect.addEventListener('change', () => {
@@ -997,14 +1016,9 @@
       // Update button state based on input
       typedInput.addEventListener('input', updateAskButton);
       updateAskButton();
-
-      // Handle Android WebView specific behavior
-      if (/Android/.test(navigator.userAgent)) {
-        document.body.style.webkitOverflowScrolling = 'touch';
-      }
     }
 
-    // ===== VOICE HANDLING =====
+    // ===== VOICE RECORDING TOGGLE =====
     function toggleVoiceRecording() {
       if (!state.recognition) return;
       
@@ -1023,23 +1037,7 @@
       }
     }
 
-    function updateOrbState() {
-      const orb = document.getElementById('orb');
-      const wave = document.getElementById('wave');
-      
-      orb.classList.remove('listening', 'speaking');
-      wave.classList.remove('active');
-      
-      if (state.isListening) {
-        orb.classList.add('listening');
-        wave.classList.add('active');
-      } else if (state.isSpeaking) {
-        orb.classList.add('speaking');
-        wave.classList.add('active');
-      }
-    }
-
-    // ===== INPUT HANDLING =====
+    // ===== TEXT INPUT HANDLING =====
     function handleTypedInput() {
       const typedInput = document.getElementById('typedQuestion');
       const text = typedInput.value.trim();
@@ -1057,23 +1055,12 @@
       askBtn.disabled = !typedInput.value.trim();
     }
 
+    // ===== MAIN INPUT HANDLER =====
     async function handleUserInput(text, inputType) {
       if (!text.trim()) return;
       
       // Add user message to log
       addLogMessage(text, 'user', inputType);
-      
-      const username = document.getElementById('username').value.trim() || 'Guest';
-      
-      // Add to history
-      state.conversationHistory.push({
-        role: 'user',
-        content: text,
-        timestamp: new Date().toISOString(),
-        inputType: inputType
-      });
-      
-      saveHistory();
       
       // Show loading state
       document.getElementById('orbStatus').textContent = 'Thinking...';
@@ -1081,9 +1068,9 @@
       updateOrbState();
       
       try {
-        const response = await sendToBackend(text, username);
-        const answer = response.choices?.[0]?.message?.content || 
-                      "I'm sorry, I couldn't generate a response. Please try again.";
+        // Send to backend
+        const response = await sendToBackend(text);
+        const answer = response.choices[0].message.content;
         
         // Add AI response to log
         addLogMessage(answer, 'ai');
@@ -1091,7 +1078,14 @@
         // Speak the response
         speakResponse(answer);
         
-        // Add to history
+        // Save to history
+        state.conversationHistory.push({
+          role: 'user',
+          content: text,
+          timestamp: new Date().toISOString(),
+          inputType: inputType
+        });
+        
         state.conversationHistory.push({
           role: 'assistant',
           content: answer,
@@ -1113,14 +1107,14 @@
       }
     }
 
-    async function sendToBackend(message, username) {
+    // ===== BACKEND COMMUNICATION =====
+    async function sendToBackend(message) {
+      // Send ONLY 'message' field (matches your backend /ask endpoint)
       const response = await fetch('/ask', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
-          message: message,
-          username: username,
-          history: state.conversationHistory.slice(-10) // Last 10 messages
+          message: message  // Backend expects ONLY 'message'
         })
       });
       
@@ -1128,7 +1122,33 @@
         throw new Error(`HTTP error! status: ${response.status}`);
       }
       
-      return await response.json();
+      const data = await response.json();
+      console.log('Backend response:', data);
+      
+      // Handle different response formats
+      let answer = "";
+      
+      if (data.choices && data.choices[0] && data.choices[0].message) {
+        // Format: {choices: [{message: {content: "..."}}]}
+        answer = data.choices[0].message.content;
+      } else if (data.answer) {
+        // Format: {success: true, answer: "..."}
+        answer = data.answer;
+      } else if (data.choices && data.choices[0] && data.choices[0].text) {
+        // Format: {choices: [{text: "..."}]}
+        answer = data.choices[0].text;
+      } else {
+        answer = "I received your message but couldn't find the answer in the response.";
+      }
+      
+      // Always return in the format frontend expects
+      return { 
+        choices: [{ 
+          message: { 
+            content: answer 
+          } 
+        }] 
+      };
     }
 
     // ===== TEXT-TO-SPEECH =====
@@ -1140,7 +1160,7 @@
         return;
       }
       
-      // Clean text (remove markdown, emojis, etc.)
+      // Clean text
       const cleanedText = text.replace(/[#*_`~]/g, '').replace(/\p{Emoji}/gu, '');
       
       const utterance = new SpeechSynthesisUtterance(cleanedText);
@@ -1185,13 +1205,9 @@
         placeholder.remove();
       }
       
-      const messageId = ++state.currentLogMessageId;
       const messageDiv = document.createElement('div');
       messageDiv.className = `log-message ${type}-message`;
-      messageDiv.dataset.id = messageId;
-      messageDiv.style.animationDelay = `${messageId * 0.1}s`;
       
-      // Format message
       let prefix = type === 'user' ? '🧑 You' : '🧠 Nelavista';
       if (type === 'user' && inputType === 'voice') {
         prefix = '🎤 You (Voice)';
@@ -1342,10 +1358,10 @@
       }
     }
 
-    // Handle page visibility for better Android experience
+    // Handle page visibility changes
     document.addEventListener('visibilitychange', function() {
       if (!document.hidden) {
-        // Page became visible again, refresh animations
+        // Page became visible again
         document.body.style.animation = 'none';
         setTimeout(() => {
           document.body.style.animation = 'fadeIn 0.6s ease-out forwards';
