@@ -28,6 +28,8 @@
       --correct-color: #4caf50;
       --incorrect-color: #f44336;
       --selected-color: rgba(255, 255, 255, 0.15);
+      --review-correct: rgba(76, 175, 80, 0.2);
+      --review-incorrect: rgba(244, 67, 54, 0.2);
     }
 
     * {
@@ -267,16 +269,38 @@
     .styled-select {
       width: 100%;
       padding: 1rem 1.2rem;
-      background: none;
+      background: var(--input-bg);
       border: none;
       outline: none;
       font-size: 1rem;
-      color: var(--text-dark);
+      color: #ffffff; /* Fixed: Changed from var(--text-dark) to white */
       appearance: none;
       -webkit-appearance: none;
       cursor: pointer;
-      background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23ffffff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E") no-repeat right 1rem center;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23ffffff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 1rem center;
       background-size: 16px;
+    }
+
+    /* Style dropdown options */
+    .styled-select option {
+      background-color: #1a1a1a;
+      color: #ffffff;
+      padding: 12px;
+      font-size: 1rem;
+    }
+
+    /* For Firefox */
+    @-moz-document url-prefix() {
+      .styled-select {
+        text-overflow: '';
+        color: #ffffff;
+      }
+      .styled-select option {
+        background-color: #1a1a1a;
+        color: #ffffff;
+      }
     }
 
     .start-btn {
@@ -685,6 +709,159 @@
       margin-top: 2rem;
     }
 
+    /* ===== REVIEW SECTION ===== */
+    .review-section {
+      background: var(--card-dark);
+      border: 1px solid var(--border-dark);
+      border-radius: 16px;
+      padding: 2rem;
+      margin-bottom: 2rem;
+      display: none;
+      opacity: 0;
+    }
+
+    .review-section.active {
+      display: block;
+      animation: slideUp 0.6s ease-out forwards;
+    }
+
+    .review-header {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+
+    .review-title {
+      font-size: 1.8rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 0.5rem;
+    }
+
+    .review-subtitle {
+      color: #a0a0a0;
+      font-size: 1rem;
+    }
+
+    .review-list {
+      max-height: 500px;
+      overflow-y: auto;
+      padding-right: 10px;
+    }
+
+    .review-question {
+      background: var(--accent-color);
+      border: 1px solid var(--border-dark);
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .review-question.correct {
+      background: var(--review-correct);
+      border-left: 4px solid var(--correct-color);
+    }
+
+    .review-question.incorrect {
+      background: var(--review-incorrect);
+      border-left: 4px solid var(--incorrect-color);
+    }
+
+    .review-question-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+
+    .review-question-number {
+      font-weight: 600;
+      color: #e0e0e0;
+    }
+
+    .review-status {
+      font-size: 0.85rem;
+      padding: 0.3rem 0.8rem;
+      border-radius: 20px;
+      font-weight: 500;
+    }
+
+    .review-status.correct {
+      background: var(--correct-color);
+      color: white;
+    }
+
+    .review-status.incorrect {
+      background: var(--incorrect-color);
+      color: white;
+    }
+
+    .review-question-text {
+      font-size: 1.1rem;
+      margin-bottom: 1rem;
+      color: #ffffff;
+    }
+
+    .review-options {
+      display: grid;
+      gap: 0.5rem;
+    }
+
+    .review-option {
+      padding: 0.8rem 1rem;
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border-dark);
+    }
+
+    .review-option.correct-answer {
+      background: rgba(76, 175, 80, 0.2);
+      border-color: var(--correct-color);
+      color: #ffffff;
+    }
+
+    .review-option.user-answer {
+      background: rgba(244, 67, 54, 0.2);
+      border-color: var(--incorrect-color);
+      color: #ffffff;
+    }
+
+    .review-option.user-correct {
+      background: rgba(76, 175, 80, 0.3);
+      border-color: var(--correct-color);
+      color: #ffffff;
+    }
+
+    .option-indicator {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      margin-right: 10px;
+      text-align: center;
+      font-size: 0.8rem;
+      line-height: 20px;
+    }
+
+    .correct-indicator {
+      background: var(--correct-color);
+      color: white;
+    }
+
+    .incorrect-indicator {
+      background: var(--incorrect-color);
+      color: white;
+    }
+
+    .review-actions {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1rem;
+      margin-top: 2rem;
+    }
+
     @media (max-width: 768px) {
       .score-display {
         flex-direction: column;
@@ -696,7 +873,8 @@
         width: 100%;
       }
       
-      .result-actions {
+      .result-actions,
+      .review-actions {
         grid-template-columns: 1fr;
       }
     }
@@ -806,7 +984,8 @@
 
       .selection-section,
       .quiz-section,
-      .result-section {
+      .result-section,
+      .review-section {
         padding: 1.5rem;
         border-radius: 12px;
       }
@@ -849,7 +1028,8 @@
 
       .selection-section,
       .quiz-section,
-      .result-section {
+      .result-section,
+      .review-section {
         padding: 1.2rem;
         border-radius: 10px;
       }
@@ -1025,9 +1205,32 @@
 
       <!-- RESULT ACTIONS -->
       <div class="result-actions">
-        <button class="nav-btn" onclick="reviewAnswers()">
+        <button class="nav-btn" onclick="showReview()">
           <span>📖</span>
           Review Answers
+        </button>
+        <button class="nav-btn primary" onclick="restartQuiz()">
+          <span>🔄</span>
+          Try Another Test
+        </button>
+      </div>
+    </div>
+
+    <!-- REVIEW SECTION -->
+    <div class="review-section" id="reviewSection">
+      <div class="review-header">
+        <h2 class="review-title">Answer Review</h2>
+        <p class="review-subtitle">Check what you got right and wrong</p>
+      </div>
+
+      <div class="review-list" id="reviewList">
+        <!-- Review questions will be inserted here -->
+      </div>
+
+      <div class="review-actions">
+        <button class="nav-btn" onclick="goBackToResults()">
+          <span>←</span>
+          Back to Results
         </button>
         <button class="nav-btn primary" onclick="restartQuiz()">
           <span>🔄</span>
@@ -7430,6 +7633,7 @@
       document.getElementById('selectionSection').style.display = 'none';
       document.getElementById('quizSection').classList.add('active');
       document.getElementById('resultSection').classList.remove('active');
+      document.getElementById('reviewSection').classList.remove('active');
       
       // Update quiz title
       document.getElementById('quizTitle').textContent = `${cbtState.course} - ${cbtState.level} Level`;
@@ -7500,17 +7704,21 @@
         }
       });
       
-      // Auto-advance after short delay for better UX
-      setTimeout(() => {
-        if (currentIndex < cbtState.totalQuestions - 1) {
-          nextQuestion();
-        }
-      }, 300);
+      // FIXED: REMOVED auto-advance feature
+      // User must click "Next" to proceed
     }
 
     function nextQuestion() {
-      if (cbtState.currentQuestion < cbtState.totalQuestions - 1) {
-        loadQuestion(cbtState.currentQuestion + 1);
+      const currentIndex = cbtState.currentQuestion;
+      
+      // Check if current question has been answered
+      if (cbtState.selectedAnswers[currentIndex] === null) {
+        alert('Please select an answer before proceeding.');
+        return;
+      }
+      
+      if (currentIndex < cbtState.totalQuestions - 1) {
+        loadQuestion(currentIndex + 1);
       } else {
         submitQuiz();
       }
@@ -7523,7 +7731,13 @@
     }
 
     function submitQuiz() {
-      if (!confirm('Are you sure you want to submit the quiz?')) return;
+      // Check if all questions have been answered
+      const unanswered = cbtState.selectedAnswers.filter(answer => answer === null).length;
+      if (unanswered > 0) {
+        if (!confirm(`You have ${unanswered} unanswered question(s). Are you sure you want to submit?`)) {
+          return;
+        }
+      }
       
       calculateScore();
       showResults();
@@ -7545,6 +7759,7 @@
       // Hide quiz section, show result section
       document.getElementById('quizSection').classList.remove('active');
       document.getElementById('resultSection').classList.add('active');
+      document.getElementById('reviewSection').classList.remove('active');
       
       const total = cbtState.totalQuestions;
       const correct = cbtState.score;
@@ -7588,9 +7803,71 @@
       localStorage.setItem('cbtResults', JSON.stringify(results));
     }
 
-    function reviewAnswers() {
-      // In a full implementation, this would show a review of all questions with correct/incorrect answers
-      alert('Review feature coming soon! You can view detailed explanations for each question in future updates.');
+    function showReview() {
+      // Hide result section, show review section
+      document.getElementById('resultSection').classList.remove('active');
+      document.getElementById('reviewSection').classList.add('active');
+      
+      const reviewList = document.getElementById('reviewList');
+      reviewList.innerHTML = '';
+      
+      for (let i = 0; i < cbtState.quizData.length; i++) {
+        const question = cbtState.quizData[i];
+        const userAnswer = cbtState.selectedAnswers[i];
+        const correctAnswer = question.a;
+        const isCorrect = userAnswer === correctAnswer;
+        
+        const reviewItem = document.createElement('div');
+        reviewItem.className = `review-question ${isCorrect ? 'correct' : 'incorrect'}`;
+        
+        let optionsHTML = '';
+        question.o.forEach((option, index) => {
+          let optionClass = '';
+          let indicator = '';
+          
+          if (index === correctAnswer) {
+            optionClass = 'correct-answer';
+            indicator = '<span class="option-indicator correct-indicator">✓</span>';
+          } else if (index === userAnswer && !isCorrect) {
+            optionClass = 'user-answer';
+            indicator = '<span class="option-indicator incorrect-indicator">✗</span>';
+          } else if (index === userAnswer && isCorrect) {
+            optionClass = 'user-correct';
+            indicator = '<span class="option-indicator correct-indicator">✓</span>';
+          }
+          
+          optionsHTML += `
+            <div class="review-option ${optionClass}">
+              ${indicator}
+              ${option}
+              ${index === correctAnswer && index !== userAnswer && !isCorrect ? ' (Correct Answer)' : ''}
+              ${index === userAnswer && !isCorrect ? ' (Your Answer)' : ''}
+            </div>
+          `;
+        });
+        
+        reviewItem.innerHTML = `
+          <div class="review-question-header">
+            <div class="review-question-number">Question ${i + 1}</div>
+            <div class="review-status ${isCorrect ? 'correct' : 'incorrect'}">
+              ${isCorrect ? 'Correct' : 'Incorrect'}
+            </div>
+          </div>
+          <div class="review-question-text">${question.q}</div>
+          <div class="review-options">${optionsHTML}</div>
+        `;
+        
+        reviewList.appendChild(reviewItem);
+      }
+      
+      // Scroll to top of review
+      reviewList.scrollTop = 0;
+    }
+
+    function goBackToResults() {
+      // Hide review section, show result section
+      document.getElementById('reviewSection').classList.remove('active');
+      document.getElementById('resultSection').classList.add('active');
     }
 
     function restartQuiz() {
@@ -7604,6 +7881,7 @@
       
       // Reset UI
       document.getElementById('resultSection').classList.remove('active');
+      document.getElementById('reviewSection').classList.remove('active');
       document.getElementById('selectionSection').style.display = 'block';
       document.getElementById('quizSection').classList.remove('active');
       
@@ -7624,6 +7902,23 @@
 
     // ===== UTILITY FUNCTIONS =====
     function goBack() {
+      if (document.getElementById('reviewSection').classList.contains('active')) {
+        goBackToResults();
+        return;
+      }
+      
+      if (document.getElementById('resultSection').classList.contains('active')) {
+        restartQuiz();
+        return;
+      }
+      
+      if (document.getElementById('quizSection').classList.contains('active')) {
+        if (confirm('Are you sure you want to leave the quiz? Your progress will be lost.')) {
+          restartQuiz();
+        }
+        return;
+      }
+      
       // Smooth page transition
       document.body.style.opacity = '0';
       document.body.style.transform = 'translateX(20px)';
@@ -7668,6 +7963,16 @@
         const optionIndex = parseInt(e.key) - 1;
         if (optionIndex < cbtState.quizData[cbtState.currentQuestion]?.o.length) {
           selectAnswer(optionIndex);
+        }
+      }
+      
+      // Space bar to submit/next
+      if (e.key === ' ' && cbtState.quizStarted) {
+        e.preventDefault();
+        if (cbtState.currentQuestion === cbtState.totalQuestions - 1) {
+          submitQuiz();
+        } else {
+          nextQuestion();
         }
       }
     });
