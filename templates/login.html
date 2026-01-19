@@ -9,167 +9,418 @@
   <meta http-equiv="Pragma" content="no-cache" />
   <meta http-equiv="Expires" content="0" />
   
-  <!-- Style Section - Android WebView Optimized -->
+  <!-- Style Section - Redesigned to match index.html -->
   <style>
-    * {
-      box-sizing: border-box;
-      -webkit-tap-highlight-color: transparent;
+    /* ===== CSS VARIABLES & RESET ===== */
+    :root {
+      --primary-color: #000000;
+      --primary-dark: #333333;
+      --light-bg: #ffffff;
+      --dark-bg: #000000;
+      --card-light: #ffffff;
+      --card-dark: #0a0a0a;
+      --text-light: #000000;
+      --text-dark: #ffffff;
+      --input-bg: #0a0a0a;
+      --border-light: rgba(0, 0, 0, 0.1);
+      --border-dark: rgba(255, 255, 255, 0.1);
+      --gradient-start: #ffffff;
+      --gradient-end: #888888;
     }
-    
-    body {
+
+    * {
       margin: 0;
       padding: 0;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
-      color: white;
+      box-sizing: border-box;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      background: var(--dark-bg);
+      color: var(--text-dark);
       min-height: 100vh;
       display: flex;
       flex-direction: column;
       justify-content: center;
       align-items: center;
-      overflow-y: auto;
-      -webkit-overflow-scrolling: touch;
+      overflow-x: hidden;
+      padding: 20px;
+      opacity: 0;
+      animation: fadeIn 0.6s ease-out forwards;
+      animation-delay: 0.1s;
     }
-    
-    .login-container {
-      background-color: rgba(255, 255, 255, 0.15); /* Increased opacity for better visibility */
-      padding: 2rem 1.5rem;
-      border-radius: 15px;
-      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5); /* Darker shadow for contrast */
-      width: 90%;
-      max-width: 400px;
-      border: 1px solid rgba(255, 255, 255, 0.1); /* Added border for definition */
+
+    /* ===== ANIMATIONS ===== */
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+      }
+      to {
+        opacity: 1;
+      }
     }
-    
-    .login-container h1 {
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(15px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateX(-20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+
+    @keyframes subtlePulse {
+      0%, 100% {
+        opacity: 1;
+      }
+      50% {
+        opacity: 0.9;
+      }
+    }
+
+    /* ===== LOGO SECTION ===== */
+    .logo-section {
       text-align: center;
+      margin-bottom: 3rem;
+      animation: fadeInUp 0.7s ease-out forwards;
+      opacity: 0;
+    }
+
+    .logo {
+      font-size: 2.8rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
       margin-bottom: 0.5rem;
+      letter-spacing: -0.5px;
+    }
+
+    .tagline {
+      color: #a0a0a0;
+      font-size: 1.1rem;
+      max-width: 500px;
+      line-height: 1.5;
+      animation: fadeInUp 0.7s ease-out 0.1s forwards;
+      opacity: 0;
+    }
+
+    /* ===== LOGIN CONTAINER ===== */
+    .login-container {
+      background: var(--card-dark);
+      padding: 2.5rem 2rem;
+      border-radius: 16px;
+      width: 100%;
+      max-width: 400px;
+      border: 1px solid var(--border-dark);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+      opacity: 0;
+      transform: translateY(10px);
+      animation: fadeInUp 0.7s ease-out 0.2s forwards;
+    }
+
+    .login-container h1 {
       font-size: 1.8rem;
-      color: #fff;
-      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3); /* Added text shadow */
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      color: var(--text-dark);
+      opacity: 0;
+      animation: fadeInUp 0.6s ease-out 0.3s forwards;
     }
-    
-    .login-container p.subtitle {
-      text-align: center;
+
+    .subtitle {
+      color: #a0a0a0;
       font-size: 0.95rem;
-      color: #e0e0e0; /* Brighter color */
-      margin-top: -2px;
-      margin-bottom: 1.5rem;
-      font-weight: 500;
+      margin-bottom: 2rem;
+      opacity: 0;
+      animation: fadeInUp 0.6s ease-out 0.4s forwards;
     }
-    
-    form div {
-      margin-bottom: 1.5rem; /* Increased spacing */
+
+    /* ===== FORM STYLES ===== */
+    form {
+      opacity: 0;
+      animation: fadeInUp 0.6s ease-out 0.5s forwards;
     }
-    
+
+    .form-group {
+      margin-bottom: 1.8rem;
+      position: relative;
+      opacity: 0;
+      animation: slideIn 0.6s ease-out forwards;
+    }
+
+    .form-group:nth-child(1) {
+      animation-delay: 0.5s;
+    }
+
+    .form-group:nth-child(2) {
+      animation-delay: 0.6s;
+    }
+
     label {
       display: block;
-      margin-bottom: 0.6rem; /* Increased spacing */
-      font-weight: 600; /* Bolder labels */
-      font-size: 1rem;
-      color: #f0f0f0; /* Brighter label color */
+      margin-bottom: 0.7rem;
+      font-size: 0.95rem;
+      font-weight: 500;
+      color: #e0e0e0;
+      transition: color 0.3s ease;
     }
-    
-    input[type="text"], input[type="password"] {
+
+    .input-wrapper {
+      position: relative;
+      background: var(--input-bg);
+      border-radius: 12px;
+      border: 1px solid var(--border-dark);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      will-change: transform, border-color;
+    }
+
+    .input-wrapper:focus-within {
+      border-color: rgba(255, 255, 255, 0.3);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    }
+
+    input[type="text"],
+    input[type="password"] {
       width: 100%;
-      padding: 0.9rem 1rem; /* Increased padding */
-      border: 2px solid rgba(255, 255, 255, 0.2); /* Added border */
-      border-radius: 10px; /* Slightly larger radius */
+      padding: 1rem 1.2rem;
+      background: none;
+      border: none;
       outline: none;
-      font-size: 1.05rem; /* Slightly larger font */
-      background-color: rgba(255, 255, 255, 0.2); /* More opaque background */
-      color: #fff;
-      transition: all 0.3s ease;
-      -webkit-appearance: none; /* Remove default styling on iOS/Android */
+      font-size: 1rem;
+      color: var(--text-dark);
+      transition: opacity 0.3s ease;
     }
-    
-    input[type="text"]:focus, input[type="password"]:focus {
-      background-color: rgba(255, 255, 255, 0.3);
-      border-color: #00cba9;
-      box-shadow: 0 0 0 3px rgba(0, 203, 169, 0.3);
+
+    input::placeholder {
+      color: #888;
+      transition: opacity 0.3s ease;
     }
-    
-    input[type="text"]::placeholder, input[type="password"]::placeholder {
-      color: rgba(255, 255, 255, 0.7); /* Visible placeholder */
-    }
-    
-    button {
+
+    /* ===== BUTTON STYLES ===== */
+    .submit-btn {
       width: 100%;
-      padding: 1rem; /* Increased padding */
-      background: linear-gradient(135deg, #00cba9, #00b897); /* Gradient button */
+      padding: 1rem;
+      background: var(--primary-color);
       color: white;
       border: none;
-      border-radius: 10px;
-      font-size: 1.1rem; /* Larger font */
-      cursor: pointer;
-      transition: all 0.3s ease;
-      font-weight: 700; /* Bolder text */
-      box-shadow: 0 4px 15px rgba(0, 203, 169, 0.3);
-    }
-    
-    button:active {
-      transform: translateY(1px); /* Press effect */
-      box-shadow: 0 2px 8px rgba(0, 203, 169, 0.3);
-    }
-    
-    p {
-      text-align: center;
-      margin-top: 1.5rem;
+      border-radius: 12px;
       font-size: 1rem;
-      color: #f0f0f0; /* Brighter text */
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      margin-top: 0.5rem;
+      opacity: 0;
+      animation: fadeInUp 0.6s ease-out 0.7s forwards;
+      will-change: transform, opacity;
     }
-    
-    a {
-      color: #00ffd5; /* Brighter link color */
+
+    .submit-btn:hover:not(:disabled) {
+      opacity: 0.9;
+      transform: translateY(-1px);
+    }
+
+    .submit-btn:active:not(:disabled) {
+      transform: translateY(0);
+    }
+
+    .submit-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    /* ===== LINK STYLES ===== */
+    .link-section {
+      text-align: center;
+      margin-top: 2rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid var(--border-dark);
+      opacity: 0;
+      animation: fadeInUp 0.6s ease-out 0.8s forwards;
+    }
+
+    .link-section p {
+      color: #a0a0a0;
+      font-size: 0.95rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .link-section a {
+      color: #ffffff;
       text-decoration: none;
-      font-weight: 600;
+      font-weight: 500;
+      transition: opacity 0.3s ease;
+      position: relative;
     }
-    
-    a:hover {
-      text-decoration: underline;
+
+    .link-section a::after {
+      content: '';
+      position: absolute;
+      bottom: -2px;
+      left: 0;
+      width: 0;
+      height: 1px;
+      background: #ffffff;
+      transition: width 0.3s ease;
     }
-    
-    /* Flash messages - More visible */
+
+    .link-section a:hover::after {
+      width: 100%;
+    }
+
+    /* ===== FLASH MESSAGES ===== */
     .flashes {
       list-style: none;
       padding: 0;
       margin-bottom: 1.5rem;
+      opacity: 0;
+      animation: fadeInUp 0.6s ease-out forwards;
     }
-    
+
     .flashes li {
-      background: linear-gradient(135deg, #ff6b6b, #ff5252);
+      background: rgba(255, 255, 255, 0.1);
       color: white;
-      padding: 1rem;
+      padding: 1rem 1.2rem;
       margin-bottom: 0.8rem;
-      border-radius: 10px;
-      font-weight: bold;
+      border-radius: 12px;
+      font-size: 0.95rem;
+      font-weight: 500;
       text-align: center;
-      box-shadow: 0 4px 15px rgba(255, 107, 107, 0.3);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      animation: subtlePulse 2s ease-in-out infinite;
     }
-    
-    /* Android WebView specific fixes */
-    @media screen and (max-width: 768px) {
+
+    /* ===== LOADING STATE ===== */
+    .loading {
+      position: relative;
+      pointer-events: none;
+    }
+
+    .loading::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 20px;
+      height: 20px;
+      margin: -10px 0 0 -10px;
+      border: 2px solid transparent;
+      border-top-color: white;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    /* ===== SCROLLBAR ===== */
+    ::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 3px;
+      transition: background 0.3s ease;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(255, 255, 255, 0.2);
+    }
+
+    /* ===== RESPONSIVE DESIGN ===== */
+    @media (max-width: 768px) {
       body {
         padding: 1rem;
-        background-attachment: fixed; /* Fix gradient on scroll */
+        justify-content: flex-start;
+        padding-top: 3rem;
       }
-      
+
+      .logo {
+        font-size: 2.5rem;
+      }
+
+      .tagline {
+        font-size: 1rem;
+        padding: 0 1rem;
+      }
+
       .login-container {
-        padding: 1.8rem 1.2rem;
-        margin: 1rem 0;
+        padding: 2rem 1.5rem;
+        margin: 0;
+        max-width: 100%;
+        border-radius: 12px;
       }
-      
-      input, button {
+
+      input,
+      button {
         font-size: 16px; /* Prevent zoom on focus in iOS */
         min-height: 44px; /* Better touch targets */
+      }
+
+      .input-wrapper {
+        border-radius: 10px;
+      }
+
+      input[type="text"],
+      input[type="password"] {
+        padding: 0.9rem 1rem;
+      }
+
+      .submit-btn {
+        padding: 0.9rem;
+        border-radius: 10px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .logo {
+        font-size: 2.2rem;
+      }
+
+      .login-container {
+        padding: 1.8rem 1.2rem;
+        border-radius: 10px;
+      }
+
+      .login-container h1 {
+        font-size: 1.6rem;
       }
     }
   </style>
 </head>
 <body>
+  <div class="logo-section">
+    <div class="logo">Nelavista</div>
+    <div class="tagline">Your AI Educational Companion</div>
+  </div>
+
   <div class="login-container">
-    <h1>Login to Nelavista</h1>
-    <p class="subtitle">(formerly Tellavista)</p>
+    <h1>Welcome Back</h1>
+    <p class="subtitle">Continue your learning journey</p>
     
     {% with messages = get_flashed_messages() %}
       {% if messages %}
@@ -181,58 +432,141 @@
       {% endif %}
     {% endwith %}
     
-    <form method="POST" action="/login" autocomplete="off">
-      <div>
-        <label for="username_or_email">Username or Email:</label>
-        <input 
-          type="text" 
-          id="username_or_email" 
-          name="username_or_email" 
-          required 
-          autocomplete="username"
-          placeholder="Enter your username or email"
-        />
+    <form method="POST" action="/login" autocomplete="off" id="loginForm">
+      <div class="form-group">
+        <label for="username_or_email">Username or Email</label>
+        <div class="input-wrapper">
+          <input 
+            type="text" 
+            id="username_or_email" 
+            name="username_or_email" 
+            required 
+            autocomplete="username"
+            placeholder="Enter your username or email"
+            autocapitalize="none"
+          />
+        </div>
       </div>
-      <div>
-        <label for="password">Password:</label>
-        <input 
-          type="password" 
-          id="password" 
-          name="password" 
-          required 
-          autocomplete="current-password"
-          placeholder="Enter your password"
-        />
+      <div class="form-group">
+        <label for="password">Password</label>
+        <div class="input-wrapper">
+          <input 
+            type="password" 
+            id="password" 
+            name="password" 
+            required 
+            autocomplete="current-password"
+            placeholder="Enter your password"
+          />
+        </div>
       </div>
-      <button type="submit">Login</button>
+      <button type="submit" class="submit-btn" id="submitBtn">Login</button>
     </form>
     
-    <p>Don't have an account? <a href="/signup">Sign up here</a></p>
+    <div class="link-section">
+      <p>Don't have an account? <a href="/signup">Sign up here</a></p>
+    </div>
   </div>
 
-  <!-- Simple JavaScript for better Android compatibility -->
   <script>
-    // Prevent default behaviors that might cause issues
+    // Initialize animations and interactions
     document.addEventListener('DOMContentLoaded', function() {
-      // Fix for Android WebView input focus issues
+      // Form submission handling
+      const form = document.getElementById('loginForm');
+      const submitBtn = document.getElementById('submitBtn');
+      
+      form.addEventListener('submit', function(e) {
+        // Basic validation
+        const username = document.getElementById('username_or_email').value.trim();
+        const password = document.getElementById('password').value;
+        
+        if (!username || !password) {
+          e.preventDefault();
+          // Gentle shake animation for empty fields
+          const inputs = document.querySelectorAll('input[required]');
+          inputs.forEach(input => {
+            if (!input.value.trim()) {
+              input.parentElement.style.animation = 'none';
+              setTimeout(() => {
+                input.parentElement.style.animation = 'slideIn 0.6s ease-out, shake 0.5s ease-in-out';
+              }, 10);
+            }
+          });
+          return;
+        }
+        
+        // Add loading state
+        submitBtn.classList.add('loading');
+        submitBtn.innerHTML = '';
+        submitBtn.disabled = true;
+      });
+
+      // Input focus effects
       const inputs = document.querySelectorAll('input');
       inputs.forEach(input => {
         input.addEventListener('focus', function() {
-          this.style.backgroundColor = 'rgba(255, 255, 255, 0.3)';
+          this.parentElement.style.borderColor = 'rgba(255, 255, 255, 0.3)';
+          this.parentElement.style.transform = 'translateY(-1px)';
         });
+        
         input.addEventListener('blur', function() {
-          this.style.backgroundColor = 'rgba(255, 255, 255, 0.2)';
+          this.parentElement.style.borderColor = 'rgba(255, 255, 255, 0.1)';
+          this.parentElement.style.transform = 'translateY(0)';
+        });
+        
+        // Auto-animate label on input
+        input.addEventListener('input', function() {
+          const label = this.closest('.form-group').querySelector('label');
+          if (this.value) {
+            label.style.color = '#ffffff';
+          } else {
+            label.style.color = '#e0e0e0';
+          }
         });
       });
-      
-      // Add loading state to button
-      const form = document.querySelector('form');
-      const button = document.querySelector('button');
-      
-      form.addEventListener('submit', function() {
-        button.innerHTML = 'Logging in...';
-        button.disabled = true;
-      });
+
+      // Add shake animation for validation
+      const style = document.createElement('style');
+      style.textContent = `
+        @keyframes shake {
+          0%, 100% { transform: translateX(0); }
+          10%, 30%, 50%, 70%, 90% { transform: translateX(-3px); }
+          20%, 40%, 60%, 80% { transform: translateX(3px); }
+        }
+      `;
+      document.head.appendChild(style);
+
+      // Handle Android WebView specific behavior
+      if (/Android/.test(navigator.userAgent)) {
+        // Prevent default behaviors
+        document.addEventListener('touchstart', function(e) {
+          if (e.target.tagName === 'INPUT') {
+            e.target.style.backgroundColor = 'transparent';
+          }
+        }, { passive: true });
+        
+        // Better scrolling behavior
+        document.body.style.webkitOverflowScrolling = 'touch';
+      }
+
+      // Auto-focus first input on load
+      setTimeout(() => {
+        const firstInput = document.querySelector('input[type="text"]');
+        if (firstInput) {
+          firstInput.focus();
+        }
+      }, 800);
+    });
+
+    // Handle page visibility for better Android experience
+    document.addEventListener('visibilitychange', function() {
+      if (!document.hidden) {
+        // Page became visible again, refresh any animations
+        document.body.style.animation = 'none';
+        setTimeout(() => {
+          document.body.style.animation = 'fadeIn 0.6s ease-out forwards';
+        }, 10);
+      }
     });
   </script>
 </body>
