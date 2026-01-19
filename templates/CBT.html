@@ -2,230 +2,1080 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Tellavista CBT Quiz</title>
-
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
+  <title>CBT Platform - Nelavista</title>
+  
   <style>
-    /* ==== RESET ==== */
+    /* ===== CSS VARIABLES & RESET ===== */
+    :root {
+      --primary-color: #000000;
+      --primary-dark: #333333;
+      --light-bg: #ffffff;
+      --dark-bg: #000000;
+      --card-light: #ffffff;
+      --card-dark: #0a0a0a;
+      --text-light: #000000;
+      --text-dark: #ffffff;
+      --input-bg: #0a0a0a;
+      --border-light: rgba(0, 0, 0, 0.1);
+      --border-dark: rgba(255, 255, 255, 0.1);
+      --gradient-start: #ffffff;
+      --gradient-end: #888888;
+      --accent-color: #1a1a1a;
+      --correct-color: #4caf50;
+      --incorrect-color: #f44336;
+      --selected-color: rgba(255, 255, 255, 0.15);
+    }
+
     * {
       margin: 0;
       padding: 0;
       box-sizing: border-box;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      -webkit-tap-highlight-color: transparent;
     }
 
     body {
-      font-family: "Poppins", sans-serif;
-      background: #f8f9fa;
-      color: #222;
-      padding: 15px;
-      display: flex;
-      justify-content: center;
-      align-items: center;
+      background: var(--dark-bg);
+      color: var(--text-dark);
       min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      overflow-x: hidden;
+      padding: 0 20px;
+      opacity: 0;
+      animation: fadeIn 0.6s ease-out forwards;
+      animation-delay: 0.1s;
     }
 
-    .container {
-      background: white;
-      width: 100%;
-      max-width: 500px;
-      padding: 20px;
-      border-radius: 15px;
-      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    /* ===== TOP BAR ===== */
+    #top-bar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 60px;
+      background: rgba(0, 0, 0, 0.95);
+      backdrop-filter: blur(10px);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 16px;
+      z-index: 1002;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      opacity: 0;
+      animation: fadeInDown 0.5s ease-out 0.2s forwards;
     }
 
-    h2, h3 {
-      text-align: center;
-      margin-bottom: 15px;
-    }
-
-    select, button {
-      width: 100%;
-      padding: 12px;
-      font-size: 16px;
-      margin-bottom: 15px;
-      border: 1px solid #ccc;
-      border-radius: 10px;
-      outline: none;
-    }
-
-    select:focus, button:focus {
-      border-color: #4caf50;
-    }
-
-    button {
-      background: #4caf50;
-      color: white;
+    #back-btn {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       cursor: pointer;
-      transition: background 0.3s ease;
+      font-size: 20px;
+      background: rgba(255, 255, 255, 0.1);
+      border: none;
+      color: white;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
-    button:hover {
-      background: #3e8e41;
+    #back-btn:hover {
+      background: rgba(255, 255, 255, 0.2);
+      transform: translateX(-2px);
     }
 
+    #top-bar-title {
+      font-weight: 600;
+      font-size: 1.1rem;
+      background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    /* ===== ANIMATIONS ===== */
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+      }
+      to {
+        opacity: 1;
+      }
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(15px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes fadeInDown {
+      from {
+        opacity: 0;
+        transform: translateY(-10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateX(-20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+
+    @keyframes slideUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes pulse {
+      0%, 100% {
+        transform: scale(1);
+        opacity: 1;
+      }
+      50% {
+        transform: scale(1.02);
+        opacity: 0.9;
+      }
+    }
+
+    @keyframes checkmark {
+      0% {
+        opacity: 0;
+        transform: scale(0) rotate(-45deg);
+      }
+      50% {
+        opacity: 1;
+        transform: scale(1.2) rotate(-45deg);
+      }
+      100% {
+        opacity: 1;
+        transform: scale(1) rotate(-45deg);
+      }
+    }
+
+    /* ===== MAIN CONTAINER ===== */
+    .cbt-container {
+      width: 100%;
+      max-width: 700px;
+      margin-top: 80px;
+      opacity: 0;
+      animation: fadeInUp 0.7s ease-out 0.3s forwards;
+    }
+
+    /* ===== HEADER SECTION ===== */
+    .header-section {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+
+    .header-title {
+      font-size: 2rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 0.5rem;
+      opacity: 0;
+      animation: fadeInUp 0.7s ease-out 0.4s forwards;
+    }
+
+    .header-subtitle {
+      color: #a0a0a0;
+      font-size: 1rem;
+      line-height: 1.5;
+      max-width: 500px;
+      margin: 0 auto;
+      opacity: 0;
+      animation: fadeInUp 0.7s ease-out 0.5s forwards;
+    }
+
+    /* ===== SELECTION SECTION ===== */
+    .selection-section {
+      background: var(--card-dark);
+      border: 1px solid var(--border-dark);
+      border-radius: 16px;
+      padding: 2rem;
+      margin-bottom: 2rem;
+      opacity: 0;
+      animation: fadeInUp 0.7s ease-out 0.6s forwards;
+    }
+
+    .input-group {
+      margin-bottom: 1.8rem;
+      opacity: 0;
+      animation: slideIn 0.6s ease-out forwards;
+    }
+
+    .input-group:nth-child(1) {
+      animation-delay: 0.6s;
+    }
+
+    .input-group:nth-child(2) {
+      animation-delay: 0.7s;
+    }
+
+    .input-label {
+      display: block;
+      margin-bottom: 0.7rem;
+      font-size: 0.95rem;
+      font-weight: 500;
+      color: #e0e0e0;
+    }
+
+    .input-wrapper {
+      position: relative;
+      background: var(--input-bg);
+      border-radius: 12px;
+      border: 1px solid var(--border-dark);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .input-wrapper:focus-within {
+      border-color: rgba(255, 255, 255, 0.3);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    }
+
+    .styled-select {
+      width: 100%;
+      padding: 1rem 1.2rem;
+      background: none;
+      border: none;
+      outline: none;
+      font-size: 1rem;
+      color: var(--text-dark);
+      appearance: none;
+      -webkit-appearance: none;
+      cursor: pointer;
+      background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23ffffff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E") no-repeat right 1rem center;
+      background-size: 16px;
+    }
+
+    .start-btn {
+      width: 100%;
+      padding: 1rem;
+      background: var(--primary-color);
+      color: white;
+      border: none;
+      border-radius: 12px;
+      font-size: 1rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      margin-top: 0.5rem;
+      opacity: 0;
+      animation: fadeInUp 0.6s ease-out 0.8s forwards;
+    }
+
+    .start-btn:hover:not(:disabled) {
+      opacity: 0.9;
+      transform: translateY(-2px);
+    }
+
+    .start-btn:active:not(:disabled) {
+      transform: translateY(0);
+    }
+
+    .start-btn:disabled {
+      opacity: 0.3;
+      cursor: not-allowed;
+    }
+
+    /* ===== QUIZ SECTION ===== */
+    .quiz-section {
+      background: var(--card-dark);
+      border: 1px solid var(--border-dark);
+      border-radius: 16px;
+      padding: 2rem;
+      margin-bottom: 2rem;
+      display: none;
+      opacity: 0;
+    }
+
+    .quiz-section.active {
+      display: block;
+      animation: slideUp 0.6s ease-out forwards;
+    }
+
+    .quiz-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid var(--border-dark);
+    }
+
+    .quiz-title {
+      font-size: 1.5rem;
+      font-weight: 600;
+      background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .quiz-stats {
+      display: flex;
+      gap: 1rem;
+    }
+
+    .stat-item {
+      background: var(--accent-color);
+      border: 1px solid var(--border-dark);
+      border-radius: 8px;
+      padding: 0.5rem 1rem;
+      font-size: 0.85rem;
+      color: #a0a0a0;
+    }
+
+    .stat-value {
+      color: #ffffff;
+      font-weight: 600;
+      margin-left: 4px;
+    }
+
+    /* ===== PROGRESS BAR ===== */
+    .progress-section {
+      margin-bottom: 2rem;
+      opacity: 0;
+      animation: fadeInUp 0.6s ease-out forwards;
+    }
+
+    .progress-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.8rem;
+    }
+
+    .progress-text {
+      font-size: 0.9rem;
+      font-weight: 500;
+      color: #e0e0e0;
+    }
+
+    .progress-bar {
+      height: 6px;
+      background: var(--accent-color);
+      border-radius: 3px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--gradient-start), var(--gradient-end));
+      border-radius: 3px;
+      width: 0%;
+      transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    /* ===== QUESTION BLOCK ===== */
     .question-block {
-      background: #f1f1f1;
-      padding: 15px;
-      border-radius: 10px;
-      margin-bottom: 15px;
+      background: var(--accent-color);
+      border: 1px solid var(--border-dark);
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+      opacity: 0;
+      animation: slideIn 0.6s ease-out 0.3s forwards;
+    }
+
+    .question-number {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #888;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 0.5rem;
+      display: flex;
+      align-items: center;
+      gap: 8px;
     }
 
     .question-text {
-      font-weight: 600;
-      margin-bottom: 10px;
+      font-size: 1.1rem;
+      line-height: 1.6;
+      color: #ffffff;
+      margin-bottom: 1rem;
     }
 
-    label {
-      display: block;
-      font-size: 15px;
-      padding: 5px 0;
+    /* ===== OPTIONS ===== */
+    .options-container {
+      display: grid;
+      gap: 0.8rem;
+      margin-bottom: 2rem;
+      opacity: 0;
+      animation: fadeInUp 0.6s ease-out 0.4s forwards;
+    }
+
+    .option-label {
+      display: flex;
+      align-items: center;
+      padding: 1rem 1.2rem;
+      background: var(--input-bg);
+      border: 1px solid var(--border-dark);
+      border-radius: 12px;
       cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      overflow: hidden;
     }
 
-    input[type="radio"] {
-      margin-right: 8px;
-      accent-color: #4caf50;
+    .option-label:hover:not(.selected) {
+      border-color: rgba(255, 255, 255, 0.3);
+      transform: translateX(5px);
     }
 
-    .result {
+    .option-label.selected {
+      background: var(--selected-color);
+      border-color: rgba(255, 255, 255, 0.5);
+    }
+
+    .option-radio {
+      display: none;
+    }
+
+    .option-marker {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      margin-right: 12px;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s ease;
+      position: relative;
+    }
+
+    .option-label.selected .option-marker {
+      border-color: #ffffff;
+    }
+
+    .option-label.selected .option-marker::after {
+      content: '';
+      width: 8px;
+      height: 8px;
+      background: #ffffff;
+      border-radius: 50%;
+    }
+
+    .option-text {
+      flex: 1;
+      font-size: 0.95rem;
+      color: #e0e0e0;
+    }
+
+    .option-label.selected .option-text {
+      color: #ffffff;
+      font-weight: 500;
+    }
+
+    /* ===== NAVIGATION BUTTONS ===== */
+    .nav-buttons {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      opacity: 0;
+      animation: fadeInUp 0.6s ease-out 0.5s forwards;
+    }
+
+    .nav-btn {
+      padding: 1rem;
+      background: var(--accent-color);
+      border: 1px solid var(--border-dark);
+      color: white;
+      border-radius: 12px;
+      font-size: 0.95rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .nav-btn:hover:not(:disabled) {
+      border-color: rgba(255, 255, 255, 0.3);
+      transform: translateY(-2px);
+    }
+
+    .nav-btn:active:not(:disabled) {
+      transform: translateY(0);
+    }
+
+    .nav-btn:disabled {
+      opacity: 0.3;
+      cursor: not-allowed;
+    }
+
+    .nav-btn.primary {
+      background: var(--primary-color);
+      border: none;
+    }
+
+    /* ===== RESULT SECTION ===== */
+    .result-section {
+      background: var(--card-dark);
+      border: 1px solid var(--border-dark);
+      border-radius: 16px;
+      padding: 2rem;
+      margin-bottom: 2rem;
+      display: none;
+      opacity: 0;
+    }
+
+    .result-section.active {
+      display: block;
+      animation: slideUp 0.6s ease-out forwards;
+    }
+
+    .result-header {
       text-align: center;
-      font-size: 18px;
-      font-weight: bold;
-      margin: 20px 0;
+      margin-bottom: 2rem;
     }
 
-    @media (max-width: 480px) {
+    .result-title {
+      font-size: 1.8rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 0.5rem;
+    }
+
+    .result-subtitle {
+      color: #a0a0a0;
+      font-size: 1rem;
+    }
+
+    .score-display {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 2rem;
+      margin-bottom: 2rem;
+    }
+
+    .score-circle {
+      width: 120px;
+      height: 120px;
+      position: relative;
+    }
+
+    .score-circle svg {
+      width: 100%;
+      height: 100%;
+      transform: rotate(-90deg);
+    }
+
+    .score-circle-bg {
+      fill: none;
+      stroke: var(--accent-color);
+      stroke-width: 8;
+    }
+
+    .score-circle-fill {
+      fill: none;
+      stroke: url(#scoreGradient);
+      stroke-width: 8;
+      stroke-linecap: round;
+      stroke-dasharray: 314;
+      stroke-dashoffset: 314;
+      transition: stroke-dashoffset 1.5s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .score-text {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center;
+    }
+
+    .score-value {
+      font-size: 2rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      line-height: 1;
+    }
+
+    .score-label {
+      font-size: 0.9rem;
+      color: #a0a0a0;
+      margin-top: 5px;
+    }
+
+    .score-breakdown {
+      flex: 1;
+      max-width: 300px;
+    }
+
+    .breakdown-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.8rem 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .breakdown-item:last-child {
+      border-bottom: none;
+    }
+
+    .breakdown-label {
+      font-size: 0.95rem;
+      color: #e0e0e0;
+    }
+
+    .breakdown-value {
+      font-size: 0.95rem;
+      font-weight: 500;
+      color: #ffffff;
+    }
+
+    .breakdown-value.correct {
+      color: var(--correct-color);
+    }
+
+    .breakdown-value.incorrect {
+      color: var(--incorrect-color);
+    }
+
+    .result-actions {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1rem;
+      margin-top: 2rem;
+    }
+
+    @media (max-width: 768px) {
+      .score-display {
+        flex-direction: column;
+        gap: 1.5rem;
+      }
+      
+      .score-breakdown {
+        max-width: 100%;
+        width: 100%;
+      }
+      
+      .result-actions {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* ===== COURSE SEARCH ===== */
+    .course-search {
+      position: relative;
+      margin-bottom: 1.5rem;
+    }
+
+    .search-input {
+      width: 100%;
+      padding: 1rem 1.2rem 1rem 3rem;
+      background: var(--input-bg);
+      border: 1px solid var(--border-dark);
+      border-radius: 12px;
+      font-size: 1rem;
+      color: var(--text-dark);
+      transition: all 0.3s ease;
+    }
+
+    .search-input:focus {
+      border-color: rgba(255, 255, 255, 0.3);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    }
+
+    .search-icon {
+      position: absolute;
+      left: 1rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #888;
+      pointer-events: none;
+    }
+
+    /* ===== COURSE LIST ===== */
+    .course-list {
+      max-height: 300px;
+      overflow-y: auto;
+      margin-top: 1rem;
+      padding-right: 4px;
+    }
+
+    .course-option {
+      padding: 0.8rem 1rem;
+      background: var(--input-bg);
+      border: 1px solid var(--border-dark);
+      border-radius: 8px;
+      margin-bottom: 0.5rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-size: 0.9rem;
+      color: #e0e0e0;
+    }
+
+    .course-option:hover {
+      background: var(--selected-color);
+      border-color: rgba(255, 255, 255, 0.3);
+      transform: translateX(5px);
+    }
+
+    .course-option.selected {
+      background: var(--selected-color);
+      border-color: rgba(255, 255, 255, 0.5);
+      color: #ffffff;
+      font-weight: 500;
+    }
+
+    /* ===== SCROLLBAR ===== */
+    ::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 3px;
+      transition: background 0.3s ease;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(255, 255, 255, 0.2);
+    }
+
+    /* ===== RESPONSIVE DESIGN ===== */
+    @media (max-width: 768px) {
       body {
-        padding: 10px;
+        padding: 0 16px;
+        padding-top: 70px;
       }
 
-      .container {
-        padding: 15px;
-        border-radius: 10px;
+      .cbt-container {
+        margin-top: 70px;
       }
 
-      select, button {
-        font-size: 15px;
+      .header-title {
+        font-size: 1.6rem;
+      }
+
+      .header-subtitle {
+        font-size: 0.95rem;
+      }
+
+      .selection-section,
+      .quiz-section,
+      .result-section {
+        padding: 1.5rem;
+        border-radius: 12px;
+      }
+
+      .quiz-title {
+        font-size: 1.3rem;
+      }
+
+      .quiz-stats {
+        flex-direction: column;
+        gap: 0.5rem;
       }
 
       .question-text {
-        font-size: 15px;
+        font-size: 1rem;
       }
 
-      label {
-        font-size: 14px;
+      .option-label {
+        padding: 0.9rem 1rem;
       }
+
+      .nav-buttons {
+        grid-template-columns: 1fr;
+      }
+
+      .score-circle {
+        width: 100px;
+        height: 100px;
+      }
+
+      .score-value {
+        font-size: 1.8rem;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .header-title {
+        font-size: 1.4rem;
+      }
+
+      .selection-section,
+      .quiz-section,
+      .result-section {
+        padding: 1.2rem;
+        border-radius: 10px;
+      }
+
+      .option-label {
+        padding: 0.8rem;
+      }
+
+      .option-text {
+        font-size: 0.9rem;
+      }
+
+      .nav-btn {
+        padding: 0.9rem;
+        font-size: 0.9rem;
+      }
+    }
+
+    /* ===== UTILITY CLASSES ===== */
+    .hidden {
+      display: none !important;
+    }
+
+    .show {
+      display: block !important;
+    }
+
+    .flex-show {
+      display: flex !important;
     }
   </style>
 </head>
 <body>
-<div id="selection-section">
-  <h2>Select Course & Level</h2>
-  <label for="course">Course:</label>
- <select id="course">
-  <option value="">-- Select Course --</option>
-  <!-- Your full course list here -->
-<option value="Accountancy">Accountancy</option>
-<option value="Accounting">Accounting</option>
-<option value="Agriculture">Agriculture</option>
-<option value="Arabic Studies">Arabic Studies</option>
-<option value="Banking and Finance">Banking and Finance</option>
-<option value="Biochemistry">Biochemistry</option>
-<option value="Botany">Botany</option>
-<option value="Business Administration">Business Administration</option>
-<option value="Chemical and Polymer Engineering">Chemical and Polymer Engineering</option>
-<option value="Chemistry">Chemistry</option>
-<option value="Christian Religious Studies">Christian Religious Studies</option>
-<option value="Computer Science">Computer Science</option>
-<option value="Dentistry and Dental Surgery">Dentistry and Dental Surgery</option>
-<option value="Drama / Dramatic / Performing Arts">Drama / Dramatic / Performing Arts</option>
-<option value="Early Childhood Education">Early Childhood Education</option>
-<option value="Economics">Economics</option>
-<option value="Education and Accounting">Education and Accounting</option>
-<option value="Education and Biology">Education and Biology</option>
-<option value="Education and Chemistry">Education and Chemistry</option>
-<option value="Education and Christian Religious Studies">Education and Christian Religious Studies</option>
-<option value="Education and Computer Science">Education and Computer Science</option>
-<option value="Education and Economics">Education and Economics</option>
-<option value="Education and English Language">Education and English Language</option>
-<option value="Education and French">Education and French</option>
-<option value="Education and Geography">Education and Geography</option>
-<option value="Education and History">Education and History</option>
-<option value="Education and Islamic Studies">Education and Islamic Studies</option>
-<option value="Education and Mathematics">Education and Mathematics</option>
-<option value="Education and Physics">Education and Physics</option>
-<option value="Education and Political Science">Education and Political Science</option>
-<option value="Education and Yoruba">Education and Yoruba</option>
-<option value="Educational Management">Educational Management</option>
-<option value="Electronics and Computer Engineering">Electronics and Computer Engineering</option>
-<option value="English Language">English Language</option>
-<option value="Fine and Applied Arts">Fine and Applied Arts</option>
-<option value="Fisheries">Fisheries</option>
-<option value="French">French</option>
-<option value="Geography and Planning">Geography and Planning</option>
-<option value="Guidance and Counseling">Guidance and Counseling</option>
-<option value="Health Education">Health Education</option>
-<option value="History and International Studies">History and International Studies</option>
-<option value="Industrial Relations and Personnel Management">Industrial Relations and Personnel Management</option>
-<option value="Insurance">Insurance</option>
-<option value="Islamic Studies">Islamic Studies</option>
-<option value="Law">Law</option>
-<option value="Library and Information Science">Library and Information Science</option>
-<option value="Local Government and Development Studies">Local Government and Development Studies</option>
-<option value="Marketing">Marketing</option>
-<option value="Mass Communication">Mass Communication</option>
-<option value="Mathematics">Mathematics</option>
-<option value="Mechanical Engineering">Mechanical Engineering</option>
-<option value="Medicine and Surgery">Medicine and Surgery</option>
-<option value="Microbiology">Microbiology</option>
-<option value="Music">Music</option>
-<option value="Nursing / Nursing Science">Nursing / Nursing Science</option>
-<option value="Pharmacology">Pharmacology</option>
-<option value="Philosophy">Philosophy</option>
-<option value="Physical and Health Education">Physical and Health Education</option>
-<option value="Physics">Physics</option>
-<option value="Physiology">Physiology</option>
-<option value="Political Science">Political Science</option>
-<option value="Portuguese / English">Portuguese / English</option>
-<option value="Psychology">Psychology</option>
-<option value="Public Administration">Public Administration</option>
-<option value="Sociology">Sociology</option>
-<option value="Teacher Education Science">Teacher Education Science</option>
-<option value="Technology and Vocational Education">Technology and Vocational Education</option>
-<option value="Theatre Arts">Theatre Arts</option>
-<option value="Transport Management Technology">Transport Management Technology</option>
-<option value="Yoruba">Yoruba</option>
-<option value="Zoology">Zoology</option>
-</select>
-  <br>
-  <label for="level">Level:</label>
-  <select id="level">
-    <option value="">-- Select Level --</option>
-    <option>100</option>
-    <option>200</option>
-    <option>300</option>
-    <option>400</option>
-  </select>
-  <br>
-  <button onclick="startQuiz()">Start Test</button>
-</div>
+  <!-- TOP BAR -->
+  <div id="top-bar">
+    <button id="back-btn" onclick="goBack()">←</button>
+    <div id="top-bar-title">CBT Platform</div>
+    <div style="width: 40px;"></div> <!-- Spacer for symmetry -->
+  </div>
 
-<div id="quiz-section" style="display:none">
-  <h2 id="quiz-title"></h2>
-  <form id="quiz-form">
-  </form>
-  <button onclick="submitQuiz()">Submit</button>
-</div>
+  <!-- MAIN CONTAINER -->
+  <div class="cbt-container">
+    <!-- HEADER -->
+    <div class="header-section">
+      <h1 class="header-title">Computer-Based Testing</h1>
+      <p class="header-subtitle">Practice with comprehensive exam questions from various courses</p>
+    </div>
 
-<div id="result-section" style="display:none">
-  <h2>Your Result</h2>
-  <p id="score-text"></p>
-  <button onclick="restart()">Try Another</button>
-</div>
+    <!-- SELECTION SECTION -->
+    <div class="selection-section" id="selectionSection">
+      <div class="input-group">
+        <label class="input-label">Search Course</label>
+        <div class="course-search">
+          <div class="search-icon">🔍</div>
+          <input type="text" id="courseSearch" class="search-input" placeholder="Type to search courses..." />
+        </div>
+        <div class="course-list" id="courseList">
+          <!-- Course options will be dynamically inserted here -->
+        </div>
+      </div>
 
-<script>
-  const allQuestions = {
-  "Accountancy": {
+      <div class="input-group">
+        <label class="input-label">Select Level</label>
+        <div class="input-wrapper">
+          <select id="levelSelect" class="styled-select">
+            <option value="">-- Select Level --</option>
+            <option value="100">100 Level</option>
+            <option value="200">200 Level</option>
+            <option value="300">300 Level</option>
+            <option value="400">400 Level</option>
+          </select>
+        </div>
+      </div>
+
+      <button class="start-btn" id="startBtn" onclick="startQuiz()">Start Test</button>
+    </div>
+
+    <!-- QUIZ SECTION -->
+    <div class="quiz-section" id="quizSection">
+      <div class="quiz-header">
+        <div class="quiz-title" id="quizTitle"></div>
+        <div class="quiz-stats">
+          <div class="stat-item">
+            Questions: <span class="stat-value" id="currentQuestion">0</span>/<span id="totalQuestions">0</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- PROGRESS BAR -->
+      <div class="progress-section">
+        <div class="progress-header">
+          <div class="progress-text" id="progressText">Question 1</div>
+        </div>
+        <div class="progress-bar">
+          <div class="progress-fill" id="progressFill" style="width: 0%"></div>
+        </div>
+      </div>
+
+      <!-- QUESTION BLOCK -->
+      <div class="question-block">
+        <div class="question-number">
+          <span>📝</span>
+          <span>Multiple Choice</span>
+        </div>
+        <div class="question-text" id="questionText">
+          Loading question...
+        </div>
+      </div>
+
+      <!-- OPTIONS -->
+      <div class="options-container" id="optionsContainer">
+        <!-- Options will be dynamically inserted here -->
+      </div>
+
+      <!-- NAVIGATION BUTTONS -->
+      <div class="nav-buttons">
+        <button class="nav-btn" id="prevBtn" onclick="previousQuestion()" disabled>
+          <span>←</span>
+          Previous
+        </button>
+        <button class="nav-btn primary" id="nextBtn" onclick="nextQuestion()">
+          Next
+          <span>→</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- RESULT SECTION -->
+    <div class="result-section" id="resultSection">
+      <div class="result-header">
+        <h2 class="result-title">Test Completed!</h2>
+        <p class="result-subtitle">Review your performance</p>
+      </div>
+
+      <!-- SCORE DISPLAY -->
+      <div class="score-display">
+        <div class="score-circle">
+          <svg viewBox="0 0 100 100">
+            <defs>
+              <linearGradient id="scoreGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" style="stop-color:var(--gradient-start);stop-opacity:1" />
+                <stop offset="100%" style="stop-color:var(--gradient-end);stop-opacity:1" />
+              </linearGradient>
+            </defs>
+            <circle class="score-circle-bg" cx="50" cy="50" r="45"></circle>
+            <circle class="score-circle-fill" cx="50" cy="50" r="45" id="scoreCircle"></circle>
+          </svg>
+          <div class="score-text">
+            <div class="score-value" id="scoreValue">0%</div>
+            <div class="score-label">Score</div>
+          </div>
+        </div>
+
+        <div class="score-breakdown">
+          <div class="breakdown-item">
+            <div class="breakdown-label">Total Questions</div>
+            <div class="breakdown-value" id="totalQuestionsResult">0</div>
+          </div>
+          <div class="breakdown-item">
+            <div class="breakdown-label">Correct Answers</div>
+            <div class="breakdown-value correct" id="correctAnswers">0</div>
+          </div>
+          <div class="breakdown-item">
+            <div class="breakdown-label">Incorrect Answers</div>
+            <div class="breakdown-value incorrect" id="incorrectAnswers">0</div>
+          </div>
+          <div class="breakdown-item">
+            <div class="breakdown-label">Percentage</div>
+            <div class="breakdown-value" id="percentageScore">0%</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- RESULT ACTIONS -->
+      <div class="result-actions">
+        <button class="nav-btn" onclick="reviewAnswers()">
+          <span>📖</span>
+          Review Answers
+        </button>
+        <button class="nav-btn primary" onclick="restartQuiz()">
+          <span>🔄</span>
+          Try Another Test
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ===== CBT STATE MANAGEMENT =====
+    const cbtState = {
+      currentQuestion: 0,
+      score: 0,
+      quizStarted: false,
+      selectedAnswers: [],
+      quizData: [],
+      totalQuestions: 0,
+      course: '',
+      level: '',
+      courses: [
+        "Accountancy", "Accounting", "Agriculture", "Arabic Studies",
+        "Banking and Finance", "Biochemistry", "Botany", "Business Administration",
+        "Chemical and Polymer Engineering", "Chemistry", "Christian Religious Studies",
+        "Computer Science", "Dentistry and Dental Surgery", "Drama / Dramatic / Performing Arts",
+        "Early Childhood Education", "Economics", "Education and Accounting",
+        "Education and Biology", "Education and Chemistry", "Education and Christian Religious Studies",
+        "Education and Computer Science", "Education and Economics", "Education and English Language",
+        "Education and French", "Education and Geography", "Education and History",
+        "Education and Islamic Studies", "Education and Mathematics", "Education and Physics",
+        "Education and Political Science", "Education and Yoruba", "Educational Management",
+        "Electronics and Computer Engineering", "English Language", "Fine and Applied Arts",
+        "Fisheries", "French", "Geography and Planning", "Guidance and Counseling",
+        "Health Education", "History and International Studies", "Industrial Relations and Personnel Management",
+        "Insurance", "Islamic Studies", "Law", "Library and Information Science",
+        "Local Government and Development Studies", "Marketing", "Mass Communication",
+        "Mathematics", "Mechanical Engineering", "Medicine and Surgery", "Microbiology",
+        "Music", "Nursing / Nursing Science", "Pharmacology", "Philosophy",
+        "Physical and Health Education", "Physics", "Physiology", "Political Science",
+        "Portuguese / English", "Psychology", "Public Administration", "Sociology",
+        "Teacher Education Science", "Technology and Vocational Education", "Theatre Arts",
+        "Transport Management Technology", "Yoruba", "Zoology"
+      ]
+    };
+
+    // ===== QUESTION BANK =====
+    const allQuestions = {
+      "Accountancy": {
     "100": [
       { q: "What is a common concept in Accountancy - Level 100?", o: ["Double-entry bookkeeping", "Accrual basis", "Matching principle", "Conservatism"], a: 0 },
       { q: "Identify a key principle in Accountancy - Level 100?", o: ["Consistency", "Materiality", "Prudence", "Relevance"], a: 1 },
@@ -6468,66 +7318,359 @@
   ]
   }
 };
-  // Continue with other courses following the same pattern...
-  // For brevity, only a subset is shown here.
-  function startQuiz() {
-    const course = document.getElementById("course").value;
-    const level = document.getElementById("level").value;
-    if (!course || !level) return alert("Please select both course and level");
 
-    const questions = allQuestions[course]?.[level];
-    if (!questions) return alert("No questions available for this selection!");
+    // ===== INITIALIZATION =====
+    document.addEventListener('DOMContentLoaded', () => {
+      initializeCourseList();
+      setupEventListeners();
+      
+      // Auto-focus search input
+      setTimeout(() => {
+        document.getElementById('courseSearch').focus();
+      }, 800);
+    });
 
-    document.getElementById("selection-section").style.display = "none";
-    document.getElementById("quiz-section").style.display = "block";
-    document.getElementById("result-section").style.display = "none";
-    document.getElementById("quiz-title").innerText = `${course} - ${level} Level CBT`;
-
-    const form = document.getElementById("quiz-form");
-    form.innerHTML = "";
-
-    questions.forEach((q, i) => {
-      const block = document.createElement("div");
-      block.className = "question-block";
-      block.innerHTML = `<div class="question-text">${i+1}. ${q.q}</div>`;
-      q.o.forEach((opt, j) => {
-        block.innerHTML += `
-          <label>
-            <input name="q${i}" type="radio" value="${j}" />
-            <span>${opt}</span>
-          </label><br>`;
+    function initializeCourseList() {
+      const courseList = document.getElementById('courseList');
+      courseList.innerHTML = '';
+      
+      cbtState.courses.forEach(course => {
+        const option = document.createElement('div');
+        option.className = 'course-option';
+        option.textContent = course;
+        option.dataset.value = course;
+        option.addEventListener('click', () => selectCourse(course));
+        courseList.appendChild(option);
       });
-      form.appendChild(block);
+    }
+
+    function setupEventListeners() {
+      const courseSearch = document.getElementById('courseSearch');
+      const levelSelect = document.getElementById('levelSelect');
+      
+      courseSearch.addEventListener('input', filterCourses);
+      levelSelect.addEventListener('change', updateStartButton);
+      
+      updateStartButton();
+      
+      // Handle Android WebView specific behavior
+      if (/Android/.test(navigator.userAgent)) {
+        document.body.style.webkitOverflowScrolling = 'touch';
+      }
+    }
+
+    function filterCourses() {
+      const searchTerm = document.getElementById('courseSearch').value.toLowerCase();
+      const courseOptions = document.querySelectorAll('.course-option');
+      
+      courseOptions.forEach(option => {
+        const courseName = option.textContent.toLowerCase();
+        if (courseName.includes(searchTerm)) {
+          option.style.display = 'block';
+          // Add fade in animation
+          option.style.opacity = '0';
+          setTimeout(() => {
+            option.style.opacity = '1';
+          }, 10);
+        } else {
+          option.style.display = 'none';
+        }
+      });
+    }
+
+    function selectCourse(course) {
+      cbtState.course = course;
+      
+      // Update UI
+      const courseOptions = document.querySelectorAll('.course-option');
+      courseOptions.forEach(option => {
+        option.classList.remove('selected');
+        if (option.dataset.value === course) {
+          option.classList.add('selected');
+          // Scroll into view
+          option.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+      });
+      
+      // Update search input
+      document.getElementById('courseSearch').value = course;
+      updateStartButton();
+    }
+
+    function updateStartButton() {
+      const level = document.getElementById('levelSelect').value;
+      const startBtn = document.getElementById('startBtn');
+      startBtn.disabled = !cbtState.course || !level;
+    }
+
+    // ===== QUIZ CONTROL FUNCTIONS =====
+    function startQuiz() {
+      cbtState.level = document.getElementById('levelSelect').value;
+      
+      if (!cbtState.course || !cbtState.level) {
+        alert('Please select both course and level.');
+        return;
+      }
+      
+      const questions = allQuestions[cbtState.course]?.[cbtState.level];
+      if (!questions || questions.length === 0) {
+        alert('No questions available for this selection. Please try another combination.');
+        return;
+      }
+      
+      // Set quiz parameters
+      cbtState.quizData = questions;
+      cbtState.totalQuestions = questions.length;
+      cbtState.selectedAnswers = new Array(questions.length).fill(null);
+      cbtState.currentQuestion = 0;
+      cbtState.score = 0;
+      cbtState.quizStarted = true;
+      
+      // Update UI
+      document.getElementById('selectionSection').style.display = 'none';
+      document.getElementById('quizSection').classList.add('active');
+      document.getElementById('resultSection').classList.remove('active');
+      
+      // Update quiz title
+      document.getElementById('quizTitle').textContent = `${cbtState.course} - ${cbtState.level} Level`;
+      document.getElementById('totalQuestions').textContent = cbtState.totalQuestions;
+      
+      // Load first question
+      loadQuestion(0);
+      
+      // Update progress
+      updateProgress();
+    }
+
+    function loadQuestion(index) {
+      if (index < 0 || index >= cbtState.quizData.length) return;
+      
+      cbtState.currentQuestion = index;
+      const question = cbtState.quizData[index];
+      
+      // Update question text
+      document.getElementById('questionText').textContent = question.q;
+      
+      // Update question number
+      document.getElementById('currentQuestion').textContent = index + 1;
+      document.getElementById('progressText').textContent = `Question ${index + 1} of ${cbtState.totalQuestions}`;
+      
+      // Generate options
+      const optionsContainer = document.getElementById('optionsContainer');
+      optionsContainer.innerHTML = '';
+      
+      question.o.forEach((option, i) => {
+        const optionElement = document.createElement('label');
+        optionElement.className = 'option-label';
+        if (cbtState.selectedAnswers[index] === i) {
+          optionElement.classList.add('selected');
+        }
+        optionElement.dataset.index = i;
+        
+        optionElement.innerHTML = `
+          <div class="option-marker"></div>
+          <div class="option-text">${option}</div>
+          <input type="radio" class="option-radio" name="answer" value="${i}">
+        `;
+        
+        optionElement.addEventListener('click', () => selectAnswer(i));
+        optionsContainer.appendChild(optionElement);
+      });
+      
+      // Update navigation buttons
+      document.getElementById('prevBtn').disabled = index === 0;
+      document.getElementById('nextBtn').textContent = 
+        index === cbtState.totalQuestions - 1 ? 'Submit Quiz' : 'Next';
+      
+      // Update progress bar
+      const progressPercent = ((index + 1) / cbtState.totalQuestions) * 100;
+      document.getElementById('progressFill').style.width = `${progressPercent}%`;
+    }
+
+    function selectAnswer(optionIndex) {
+      const currentIndex = cbtState.currentQuestion;
+      cbtState.selectedAnswers[currentIndex] = optionIndex;
+      
+      // Update UI
+      const options = document.querySelectorAll('.option-label');
+      options.forEach((option, i) => {
+        option.classList.remove('selected');
+        if (i === optionIndex) {
+          option.classList.add('selected');
+        }
+      });
+      
+      // Auto-advance after short delay for better UX
+      setTimeout(() => {
+        if (currentIndex < cbtState.totalQuestions - 1) {
+          nextQuestion();
+        }
+      }, 300);
+    }
+
+    function nextQuestion() {
+      if (cbtState.currentQuestion < cbtState.totalQuestions - 1) {
+        loadQuestion(cbtState.currentQuestion + 1);
+      } else {
+        submitQuiz();
+      }
+    }
+
+    function previousQuestion() {
+      if (cbtState.currentQuestion > 0) {
+        loadQuestion(cbtState.currentQuestion - 1);
+      }
+    }
+
+    function submitQuiz() {
+      if (!confirm('Are you sure you want to submit the quiz?')) return;
+      
+      calculateScore();
+      showResults();
+    }
+
+    function calculateScore() {
+      let correct = 0;
+      
+      for (let i = 0; i < cbtState.quizData.length; i++) {
+        if (cbtState.selectedAnswers[i] === cbtState.quizData[i].a) {
+          correct++;
+        }
+      }
+      
+      cbtState.score = correct;
+    }
+
+    function showResults() {
+      // Hide quiz section, show result section
+      document.getElementById('quizSection').classList.remove('active');
+      document.getElementById('resultSection').classList.add('active');
+      
+      const total = cbtState.totalQuestions;
+      const correct = cbtState.score;
+      const incorrect = total - correct;
+      const percentage = Math.round((correct / total) * 100);
+      
+      // Update result elements
+      document.getElementById('totalQuestionsResult').textContent = total;
+      document.getElementById('correctAnswers').textContent = correct;
+      document.getElementById('incorrectAnswers').textContent = incorrect;
+      document.getElementById('percentageScore').textContent = `${percentage}%`;
+      
+      // Update score
+      document.getElementById('scoreValue').textContent = `${percentage}%`;
+      
+      // Animate score circle
+      const circle = document.getElementById('scoreCircle');
+      const circumference = 2 * Math.PI * 45;
+      const offset = circumference - (percentage / 100) * circumference;
+      circle.style.strokeDashoffset = offset;
+      
+      // Save result to local storage
+      saveQuizResult(percentage);
+    }
+
+    function saveQuizResult(score) {
+      const results = JSON.parse(localStorage.getItem('cbtResults')) || [];
+      results.push({
+        course: cbtState.course,
+        level: cbtState.level,
+        score: score,
+        total: cbtState.totalQuestions,
+        date: new Date().toISOString()
+      });
+      
+      // Keep only last 20 results
+      if (results.length > 20) {
+        results.shift();
+      }
+      
+      localStorage.setItem('cbtResults', JSON.stringify(results));
+    }
+
+    function reviewAnswers() {
+      // In a full implementation, this would show a review of all questions with correct/incorrect answers
+      alert('Review feature coming soon! You can view detailed explanations for each question in future updates.');
+    }
+
+    function restartQuiz() {
+      // Reset state
+      cbtState.currentQuestion = 0;
+      cbtState.score = 0;
+      cbtState.quizStarted = false;
+      cbtState.selectedAnswers = [];
+      cbtState.course = '';
+      cbtState.level = '';
+      
+      // Reset UI
+      document.getElementById('resultSection').classList.remove('active');
+      document.getElementById('selectionSection').style.display = 'block';
+      document.getElementById('quizSection').classList.remove('active');
+      
+      // Reset form
+      document.getElementById('courseSearch').value = '';
+      document.getElementById('levelSelect').value = '';
+      
+      // Clear course selection
+      const courseOptions = document.querySelectorAll('.course-option');
+      courseOptions.forEach(option => option.classList.remove('selected'));
+      
+      // Reset progress bar
+      document.getElementById('progressFill').style.width = '0%';
+      
+      // Focus search input
+      document.getElementById('courseSearch').focus();
+    }
+
+    // ===== UTILITY FUNCTIONS =====
+    function goBack() {
+      // Smooth page transition
+      document.body.style.opacity = '0';
+      document.body.style.transform = 'translateX(20px)';
+      document.body.style.transition = 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)';
+      
+      setTimeout(() => {
+        window.history.back();
+      }, 300);
+    }
+
+    // Handle page visibility for better Android experience
+    document.addEventListener('visibilitychange', function() {
+      if (!document.hidden) {
+        // Page became visible again, refresh animations
+        document.body.style.animation = 'none';
+        setTimeout(() => {
+          document.body.style.animation = 'fadeIn 0.6s ease-out forwards';
+        }, 10);
+      }
     });
-  }
 
-  function submitQuiz() {
-    const course = document.getElementById("course").value;
-    const level = document.getElementById("level").value;
-    const questions = allQuestions[course][level];
-    const form = document.getElementById("quiz-form");
-
-    let correct = 0;
-    questions.forEach((q, i) => {
-      const answer = form[`q${i}`].value;
-      if (+answer === q.a) correct++;
+    // Keyboard navigation
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') {
+        goBack();
+      }
+      
+      if (e.key === 'ArrowLeft' && !e.shiftKey && !e.ctrlKey && !e.altKey) {
+        if (cbtState.quizStarted && cbtState.currentQuestion > 0) {
+          previousQuestion();
+        }
+      }
+      
+      if (e.key === 'ArrowRight' && !e.shiftKey && !e.ctrlKey && !e.altKey) {
+        if (cbtState.quizStarted) {
+          nextQuestion();
+        }
+      }
+      
+      // Number keys 1-4 for answer selection
+      if (cbtState.quizStarted && e.key >= '1' && e.key <= '4') {
+        const optionIndex = parseInt(e.key) - 1;
+        if (optionIndex < cbtState.quizData[cbtState.currentQuestion]?.o.length) {
+          selectAnswer(optionIndex);
+        }
+      }
     });
-
-    const total = questions.length;
-    document.getElementById("quiz-section").style.display = "none";
-    document.getElementById("result-section").style.display = "block";
-    document.getElementById("score-text").innerText = `You scored ${correct} / ${total}`;
-  }
-
-  function restart() {
-    document.getElementById("selection-section").style.display = "block";
-    document.getElementById("quiz-section").style.display = "none";
-    document.getElementById("result-section").style.display = "none";
-    document.getElementById("course").value = "";
-    document.getElementById("level").value = "";
-  }
-</script>
-
+  </script>
 </body>
 </html>
-
