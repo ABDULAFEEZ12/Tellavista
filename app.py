@@ -1,9 +1,3 @@
-import eventlet
-eventlet.monkey_patch()
-print("✅ Eventlet monkey patch applied")
-# ============================================
-# Imports
-# ============================================
 # ============================================
 # Imports
 # ============================================
@@ -32,6 +26,13 @@ from dotenv import load_dotenv
 import random
 from difflib import get_close_matches
 from bs4 import BeautifulSoup
+import traceback
+
+# Memory system imports
+from memory.pdf_handler import PDFMemory
+from memory.chat_context import ChatContext
+from memory.memory_router import MemoryRouter
+from memory.layers import MemoryLayer as MemoryLayers
 
 # Load environment variables
 load_dotenv()
@@ -48,8 +49,15 @@ app.config['SECRET_KEY'] = os.getenv('MY_SECRET', 'fallback_secret_for_dev')
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max file size
 
 # ============================================
-# Upload Configuration - ADDED SECTION
+# Memory System Initialization
 # ============================================
+
+# Create separate directory for PDF memory storage
+PDF_MEMORY_DIR = 'pdf_memory'
+os.makedirs(PDF_MEMORY_DIR, exist_ok=True)
+
+# Create GLOBAL PDF memory instance
+pdf_memory = PDFMemory(PDF_MEMORY_DIR)
 
 # Configure upload folder
 UPLOAD_FOLDER = 'uploads'
@@ -58,13 +66,14 @@ os.makedirs(UPLOAD_FOLDER, exist_ok=True)  # Create folder if it doesn't exist
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 def allowed_file(filename):
+    """Check whether the file has an allowed extension."""
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 # ============================================
-# Session Cleanup Functions - ADDED SECTION
+# Session Cleanup Functions
 # ============================================
 def cleanup_old_files():
-    """Remove old uploaded files from session and disk"""
+    """Remove old uploaded files from session and disk."""
     try:
         current_time = time.time()
         # Clean files older than 1 hour (3600 seconds)
@@ -91,7 +100,7 @@ def cleanup_old_files():
         debug_print(f"⚠️ Cleanup error: {e}")
 
 def cleanup_stale_files():
-    """Remove files older than 24 hours on startup"""
+    """Remove files older than 24 hours on startup."""
     try:
         current_time = time.time()
         for filename in os.listdir(UPLOAD_FOLDER):
@@ -124,6 +133,7 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 DEBUG_MODE = True
 
 def debug_print(*args, **kwargs):
+    """Print debug information when DEBUG_MODE is True."""
     if DEBUG_MODE:
         print(*args, **kwargs)
 
@@ -135,6 +145,7 @@ socketio = SocketIO(app, cors_allowed_origins="*", async_mode='eventlet')
 # Database Models
 # ============================================
 class User(db.Model):
+    """User model for authentication and user management."""
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(150), unique=True, nullable=False)
     email = db.Column(db.String(150), unique=True, nullable=False)
@@ -144,19 +155,46 @@ class User(db.Model):
     last_login = db.Column(db.DateTime)
 
     def set_password(self, password):
+        """Hash and set the user's password."""
         self.password_hash = generate_password_hash(password)
 
     def check_password(self, password):
+        """Verify the user's password against the stored hash."""
         return check_password_hash(self.password_hash, password)
 
 class UserQuestions(db.Model):
+    """Model for storing user questions and AI responses."""
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(150), nullable=False)
     question = db.Column(db.Text, nullable=False)
     answer = db.Column(db.Text, nullable=False)
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+    memory_layer = db.Column(db.String(50))  # Store which memory layer was used
+
+class UserProfile(db.Model):
+    """Model for storing user preferences and learning styles."""
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(150), unique=True, nullable=False)
+    level = db.Column(db.String(50))
+    department = db.Column(db.String(100))
+    traits = db.Column(db.Text)  # JSON string of learning preferences
+    explanation_style = db.Column(db.String(50))
+    focus_areas = db.Column(db.Text)  # JSON string of focus areas
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    def to_dict(self):
+        """Convert profile object to dictionary."""
+        return {
+            "username": self.username,
+            "level": self.level,
+            "department": self.department,
+            "traits": json.loads(self.traits) if self.traits else [],
+            "explanation_style": self.explanation_style,
+            "focus_areas": json.loads(self.focus_areas) if self.focus_areas else []
+        }
 
 class Room(db.Model):
+    """Model for live meeting rooms."""
     id = db.Column(db.String(32), primary_key=True)
     teacher_id = db.Column(db.String(120))
     teacher_name = db.Column(db.String(80))
@@ -164,96 +202,10 @@ class Room(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
 # ============================================
-# File Processing Helper Functions
-# ============================================
-def encode_image_to_base64(file):
-    """Encode image file to base64 string"""
-    try:
-        file.seek(0)
-        image_bytes = file.read()
-        return base64.b64encode(image_bytes).decode('utf-8')
-    except Exception as e:
-        debug_print(f"❌ Error encoding image to base64: {e}")
-        return None
-
-def extract_text_from_pdf(file):
-    """Extract text from PDF file - SMART LIMITED"""
-    text = ""
-    
-    try:
-        # First 3 pages only for demo stability
-        file.seek(0)
-        with pdfplumber.open(BytesIO(file.read())) as pdf:
-            total_pages = min(3, len(pdf.pages))
-            for page in pdf.pages[:total_pages]:
-                page_text = page.extract_text()
-                if page_text:
-                    text += page_text + "\n\n"
-                    # Stop if we already have enough text
-                    if len(text) > 2000:
-                        text = text[:2000] + "\n...[Content truncated for demo]"
-                        break
-        
-        # Fallback to PyPDF2 if pdfplumber fails
-        if not text.strip() or len(text.strip()) < 10:
-            file.seek(0)
-            pdf_reader = PyPDF2.PdfReader(BytesIO(file.read()))
-            total_pages = min(3, len(pdf_reader.pages))
-            for page_num in range(total_pages):
-                page = pdf_reader.pages[page_num]
-                page_text = page.extract_text()
-                if page_text:
-                    text += page_text + "\n\n"
-                    if len(text) > 2000:
-                        text = text[:2000] + "\n...[Content truncated for demo]"
-                        break
-                
-    except Exception as e:
-        text = f"[Note: PDF extraction encountered issues. Some content may not be available.]"
-    
-    return text.strip()
-
-def extract_text_from_image(file):
-    """Extract text from image using OCR with smart detection"""
-    try:
-        # Save to temp file for OCR
-        with tempfile.NamedTemporaryFile(delete=False, suffix='.png') as tmp:
-            file.save(tmp.name)
-            img = Image.open(tmp.name)
-            
-            # Try OCR
-            text = pytesseract.image_to_string(img)
-            
-            # Clean up
-            os.unlink(tmp.name)
-            
-            # Smart detection: is this a text-based image or diagram?
-            cleaned_text = text.strip()
-            if len(cleaned_text) < 30:  # Very little text
-                return "DIAGRAM_OR_VISUAL_CONTENT"
-            elif "http://" in cleaned_text or "www." in cleaned_text:
-                # Might be a screenshot with URLs
-                return cleaned_text
-            else:
-                return cleaned_text
-            
-    except Exception as e:
-        return f"[Note: Image processing incomplete. Treat this as visual content.]"
-
-def is_diagram_or_visual(text_content):
-    """Detect if content is primarily visual/diagram"""
-    if not text_content:
-        return True
-    if text_content == "DIAGRAM_OR_VISUAL_CONTENT":
-        return True
-    if len(text_content.strip()) < 50:
-        return True
-    return False
-
-# ============================================
 # Helper Functions
 # ============================================
 def login_required(f):
+    """Decorator to require login for protected routes."""
     @wraps(f)
     def decorated_function(*args, **kwargs):
         if 'user' not in session:
@@ -262,7 +214,7 @@ def login_required(f):
     return decorated_function
 
 def create_database_if_not_exists():
-    """Create database if it doesn't exist"""
+    """Create database if it doesn't exist."""
     try:
         # Parse the DATABASE_URL to get connection details without database name
         db_url = os.getenv('DATABASE_URL')
@@ -302,7 +254,7 @@ def create_database_if_not_exists():
         return False
 
 def init_database():
-    """Initialize database with error handling"""
+    """Initialize database with error handling."""
     try:
         # Try to create database first
         create_database_if_not_exists()
@@ -329,7 +281,7 @@ def init_database():
             return False
 
 def create_default_user():
-    """Create default user with error handling"""
+    """Create default user with error handling."""
     with app.app_context():
         try:
             user = User.query.filter_by(username='test').first()
@@ -344,7 +296,95 @@ def create_default_user():
         except Exception as e:
             print(f"❌ Error creating default user: {e}")
 
+# ============================================
+# File Processing Helper Functions
+# ============================================
+def encode_image_to_base64(file):
+    """Encode image file to base64 string."""
+    try:
+        file.seek(0)
+        image_bytes = file.read()
+        return base64.b64encode(image_bytes).decode('utf-8')
+    except Exception as e:
+        debug_print(f"❌ Error encoding image to base64: {e}")
+        return None
+
+def extract_text_from_pdf(file):
+    """Extract text from PDF file with smart limitations."""
+    text = ""
+    
+    try:
+        # First 3 pages only for demo stability
+        file.seek(0)
+        with pdfplumber.open(BytesIO(file.read())) as pdf:
+            total_pages = min(3, len(pdf.pages))
+            for page in pdf.pages[:total_pages]:
+                page_text = page.extract_text()
+                if page_text:
+                    text += page_text + "\n\n"
+                    # Stop if we already have enough text
+                    if len(text) > 2000:
+                        text = text[:2000] + "\n...[Content truncated for demo]"
+                        break
+        
+        # Fallback to PyPDF2 if pdfplumber fails
+        if not text.strip() or len(text.strip()) < 10:
+            file.seek(0)
+            pdf_reader = PyPDF2.PdfReader(BytesIO(file.read()))
+            total_pages = min(3, len(pdf_reader.pages))
+            for page_num in range(total_pages):
+                page = pdf_reader.pages[page_num]
+                page_text = page.extract_text()
+                if page_text:
+                    text += page_text + "\n\n"
+                    if len(text) > 2000:
+                        text = text[:2000] + "\n...[Content truncated for demo]"
+                        break
+                
+    except Exception as e:
+        text = f"[Note: PDF extraction encountered issues. Some content may not be available.]"
+    
+    return text.strip()
+
+def extract_text_from_image(file):
+    """Extract text from image using OCR with smart detection."""
+    try:
+        # Save to temp file for OCR
+        with tempfile.NamedTemporaryFile(delete=False, suffix='.png') as tmp:
+            file.save(tmp.name)
+            img = Image.open(tmp.name)
+            
+            # Try OCR
+            text = pytesseract.image_to_string(img)
+            
+            # Clean up
+            os.unlink(tmp.name)
+            
+            # Smart detection: is this a text-based image or diagram?
+            cleaned_text = text.strip()
+            if len(cleaned_text) < 30:  # Very little text
+                return "DIAGRAM_OR_VISUAL_CONTENT"
+            elif "http://" in cleaned_text or "www." in cleaned_text:
+                # Might be a screenshot with URLs
+                return cleaned_text
+            else:
+                return cleaned_text
+            
+    except Exception as e:
+        return f"[Note: Image processing incomplete. Treat this as visual content.]"
+
+def is_diagram_or_visual(text_content):
+    """Detect if content is primarily visual/diagram."""
+    if not text_content:
+        return True
+    if text_content == "DIAGRAM_OR_VISUAL_CONTENT":
+        return True
+    if len(text_content.strip()) < 50:
+        return True
+    return False
+
 def is_academic_book(title, topic, department):
+    """Determine if a book title appears to be academic based on keywords."""
     if not title:
         return False
     title_lower = title.lower()
@@ -371,6 +411,166 @@ def is_academic_book(title, topic, department):
     return False
 
 # ============================================
+# Memory System Helper Functions
+# ============================================
+
+def validate_chat_history(history_data):
+    """
+    Validate and clean chat history from frontend.
+    Returns cleaned history with only user and assistant roles.
+    """
+    if not history_data:
+        return []
+
+    try:
+        if isinstance(history_data, str):
+            history = json.loads(history_data)
+        else:
+            history = history_data
+
+        cleaned_history = []
+        for msg in history:
+            if isinstance(msg, dict) and 'role' in msg and 'content' in msg:
+                role = msg['role'].lower()
+                content = str(msg['content']).strip()
+
+                if role in ['user', 'assistant'] and content:
+                    cleaned_history.append({
+                        'role': role,
+                        'content': content
+                    })
+
+        return cleaned_history
+    except Exception as e:
+        debug_print(f"❌ Error validating chat history: {e}")
+        return []
+
+def build_prompt_with_context(context: str, memory_layer: str) -> str:
+    """
+    Build Nelavista system prompt based on memory context.
+    Enforces Nelavista analytical expert behavior.
+    """
+
+    base_prompt = (
+        "You are Nelavista, an advanced AI tutor created by Afeez Adewale Tella "
+        "for Nigerian university students (100–400 level).\n\n"
+
+        "ROLE:\n"
+        "You are a specialized analytical tutor and researcher.\n\n"
+
+        "STYLE: Analytical Expert\n"
+        "Follow these rules strictly.\n\n"
+
+        "GLOBAL RULES:\n"
+"- Always respond in clean HTML using <p>, <ul>, <li>, <strong>, "
+"<h2>, <h3>, and <table> when appropriate.\n"
+"- Respond naturally to greetings when the user greets you, but do not add greetings unnecessarily.\n"
+"- Do not use labels like Step 1, Step 2, Intro, or Final Answer.\n"
+"- No emojis in academic explanations.\n"
+"- Use clear, calm, and friendly academic language.\n"
+"- Explain ideas patiently, like a lecturer guiding students through the topic.\n"
+"- Avoid hype, exaggeration, or unnecessary filler.\n\n"
+
+
+        "STRUCTURE REQUIREMENTS:\n"
+        "- Begin with a brief <strong>Key Idea</strong> statement introducing the core conclusion.\n"
+        "- Use clear headers and bullet points to organize information.\n"
+        "- Break complex ideas into logical components and explain the reasoning behind them.\n"
+        "- Use short paragraphs (1–2 sentences).\n\n"
+
+        "REASONING:\n"
+        "- Show the reasoning path clearly but naturally.\n"
+        "- Explain why conclusions follow from facts or data.\n\n"
+
+        "DATA & ACCURACY:\n"
+        "- Include formulas, definitions, metrics, or comparisons when relevant.\n"
+        "- Do not speculate or invent facts.\n\n"
+    )
+
+    if memory_layer == MemoryLayers.PDF:
+        return (
+            f"{base_prompt}"
+            "DOCUMENT CONTEXT:\n"
+            f"{context[:1500]}\n\n"
+            "DOCUMENT-SPECIFIC INSTRUCTIONS:\n"
+            "- Rely primarily on the document content.\n"
+            "- Reference specific sections or pages when possible.\n"
+            "- State clearly if the document lacks the answer.\n"
+            "- Do not hallucinate or invent content.\n"
+            "- Quote directly when appropriate.\n\n"
+            "ENDING:\n"
+            "- End naturally after the explanation. Do not add summaries beyond the TL;DR."
+        )
+
+    if memory_layer == MemoryLayers.HISTORY:
+        return (
+            f"{base_prompt}"
+            "CONVERSATION HISTORY:\n"
+            f"{context}\n\n"
+            "HISTORY-SPECIFIC INSTRUCTIONS:\n"
+            "- Build logically on prior explanations.\n"
+            "- Maintain consistency with earlier answers.\n"
+            "- Correct any previous errors when necessary.\n"
+            "- Reference relevant earlier points when useful.\n\n"
+            "ENDING:\n"
+            "- End naturally after the explanation. Do not add summaries beyond the TL;DR."
+        )
+
+    if memory_layer == MemoryLayers.PROFILE:
+        return (
+            f"{base_prompt}"
+            "STUDENT PROFILE:\n"
+            f"{context}\n\n"
+            "PROFILE-SPECIFIC INSTRUCTIONS:\n"
+            "- Adapt explanation depth to the student’s academic level.\n"
+            "- Use examples relevant to the student’s field or department.\n"
+            "- Keep explanations academically grounded and precise.\n\n"
+            "ENDING:\n"
+            "- End naturally after the explanation. Do not add summaries beyond the TL;DR."
+        )
+
+    # GENERAL (no special context)
+    return (
+        f"{base_prompt}"
+        "GENERAL INSTRUCTIONS:\n"
+        "- Provide accurate, structured academic explanations.\n"
+        "- Use relevant examples only when they add clarity.\n"
+        "- Maintain a logical flow from premises to conclusions.\n\n"
+        "ENDING:\n"
+        "- End naturally after the explanation. Do not add summaries beyond the TL;DR."
+    )
+
+def optimize_history_fetch(question: str, has_pdf_context: bool) -> bool:
+    """
+    Determine whether to fetch history based on question type and available context.
+    Returns True if history should be fetched.
+    """
+    question_lower = question.lower().strip()
+    
+    # Always fetch for follow-up questions
+    follow_up_phrases = [
+        "explain that", "tell me more", "go on", "continue",
+        "what about", "how about", "and then", "next",
+        "clarify", "elaborate", "expand", "detail"
+    ]
+    
+    if any(phrase in question_lower for phrase in follow_up_phrases):
+        return True
+    
+    # Don't fetch for greetings
+    greeting_phrases = ["hi", "hello", "hey", "how are you", "good morning", "good evening"]
+    if any(phrase in question_lower for phrase in greeting_phrases):
+        return False
+    
+    # If PDF context is available, only fetch history for complex or multi-part questions
+    if has_pdf_context:
+        words = question_lower.split()
+        return len(words) >= 8  # Longer questions might need additional context
+    
+    # No PDF context - use history more liberally
+    return True
+
+# ============================================
 # In-Memory Storage for Live Meetings
 # ============================================
 rooms = {}           # room_id -> room data
@@ -381,7 +581,7 @@ room_authority = {}  # room_id -> authority state
 # Live Meeting Helper Functions
 # ============================================
 def get_or_create_room(room_id):
-    """Get existing room or create new one"""
+    """Get existing room or create new one."""
     if room_id not in rooms:
         rooms[room_id] = {
             'participants': {},      # socket_id -> {'username', 'role', 'joined_at'}
@@ -391,7 +591,7 @@ def get_or_create_room(room_id):
     return rooms[room_id]
 
 def get_room_authority(room_id):
-    """Get or create authority state for a room"""
+    """Get or create authority state for a room."""
     if room_id not in room_authority:
         room_authority[room_id] = {
             'muted_all': False,
@@ -403,7 +603,7 @@ def get_room_authority(room_id):
     return room_authority[room_id]
 
 def get_participants_list(room_id, exclude_sid=None):
-    """Get list of all participants in room except exclude_sid"""
+    """Get list of all participants in room except exclude_sid."""
     if room_id not in rooms:
         return []
     
@@ -421,7 +621,7 @@ def get_participants_list(room_id, exclude_sid=None):
     return result
 
 def cleanup_room(room_id):
-    """Remove empty rooms"""
+    """Remove empty rooms."""
     if room_id in rooms:
         room = rooms[room_id]
         if not room['participants']:
@@ -437,6 +637,7 @@ def cleanup_room(room_id):
 # ============================================
 @socketio.on('connect')
 def handle_connect():
+    """Handle client connection to Socket.IO."""
     sid = request.sid
     # CRITICAL FIX: Join client to their private SID room for direct messaging
     join_room(sid)
@@ -445,6 +646,7 @@ def handle_connect():
 
 @socketio.on('disconnect')
 def handle_disconnect():
+    """Handle client disconnection from Socket.IO."""
     sid = request.sid
     
     # Find which room this participant is in
@@ -490,7 +692,7 @@ def handle_disconnect():
 
 @socketio.on('join-room')
 def handle_join_room(data):
-    """Join room and get all existing participants - FIXED"""
+    """Join room and get all existing participants."""
     try:
         sid = request.sid
         room_id = data.get('room')
@@ -594,11 +796,11 @@ def handle_join_room(data):
         emit('error', {'message': str(e)})
 
 # ============================================
-# WebRTC Signaling - Full Mesh Support - FIXED
+# WebRTC Signaling - Full Mesh Support
 # ============================================
 @socketio.on('webrtc-offer')
 def handle_webrtc_offer(data):
-    """Relay WebRTC offer to specific participant - FIXED"""
+    """Relay WebRTC offer to specific participant."""
     try:
         room_id = data.get('room')
         target_sid = data.get('target_sid')
@@ -631,7 +833,7 @@ def handle_webrtc_offer(data):
 
 @socketio.on('webrtc-answer')
 def handle_webrtc_answer(data):
-    """Relay WebRTC answer to specific participant - FIXED"""
+    """Relay WebRTC answer to specific participant."""
     try:
         room_id = data.get('room')
         target_sid = data.get('target_sid')
@@ -664,7 +866,7 @@ def handle_webrtc_answer(data):
 
 @socketio.on('webrtc-ice-candidate')
 def handle_webrtc_ice_candidate(data):
-    """Relay ICE candidate to specific participant - FIXED"""
+    """Relay ICE candidate to specific participant."""
     try:
         room_id = data.get('room')
         target_sid = data.get('target_sid')
@@ -696,11 +898,11 @@ def handle_webrtc_ice_candidate(data):
         debug_print(f"❌ Error relaying ICE candidate: {e}")
 
 # ============================================
-# NEW: Full Mesh Initiation System
+# Full Mesh Initiation System
 # ============================================
 @socketio.on('request-full-mesh')
 def handle_request_full_mesh(data):
-    """Initiate full mesh connections between all participants"""
+    """Initiate full mesh connections between all participants."""
     try:
         room_id = data.get('room')
         sid = request.sid
@@ -740,7 +942,7 @@ def handle_request_full_mesh(data):
 # ============================================
 @socketio.on('teacher-mute-all')
 def handle_teacher_mute_all(data):
-    """Teacher mutes all students"""
+    """Teacher mutes all students."""
     try:
         room_id = data.get('room')
         
@@ -769,7 +971,7 @@ def handle_teacher_mute_all(data):
 
 @socketio.on('teacher-unmute-all')
 def handle_teacher_unmute_all(data):
-    """Teacher unmutes all students"""
+    """Teacher unmutes all students."""
     try:
         room_id = data.get('room')
         
@@ -795,11 +997,11 @@ def handle_teacher_unmute_all(data):
         debug_print(f"❌ Error in teacher-unmute-all: {e}")
 
 # ============================================
-# Control Events - FIXED
+# Control Events
 # ============================================
 @socketio.on('start-broadcast')
 def handle_start_broadcast(data):
-    """Teacher starts broadcasting to all students - FIXED"""
+    """Teacher starts broadcasting to all students."""
     try:
         room_id = data.get('room')
         
@@ -835,7 +1037,7 @@ def handle_start_broadcast(data):
             'room': room_id
         }, room=teacher_sid)
         
-        # FIX: Initiate WebRTC connections for each student
+        # Initiate WebRTC connections for each student
         for student_sid in student_sids:
             # Send list of all peers to connect to (full mesh)
             peers_to_connect = []
@@ -859,14 +1061,267 @@ def handle_start_broadcast(data):
 
 @socketio.on('ping')
 def handle_ping(data):
-    """Keep-alive ping"""
+    """Keep-alive ping."""
     emit('pong', {'timestamp': datetime.utcnow().isoformat()})
+
+# ============================================
+# SINGLE ENTRY POINT: /ask_with_files
+# ============================================
+@app.route('/ask_with_files', methods=['POST'])
+@login_required
+def ask_with_files():
+    """
+    SINGLE ENTRY POINT for AI requests.
+    ALWAYS returns JSON with non-empty "answer" field.
+    Follows strict fallback requirements.
+    """
+    # Fallback message to use in case of any failure
+    GRACEFUL_FALLBACK = "I'm having a little trouble answering right now, but please try again."
+    
+    try:
+        # Get user info
+        username = session['user']['username']
+        user_id = session.get('user_id')
+        
+        # Get message (always present)
+        message = request.form.get('message', '').strip()
+        if not message:
+            return jsonify({
+                "success": True,
+                "answer": GRACEFUL_FALLBACK
+            })
+        
+        # Get and validate chat history
+        history_json = request.form.get('history', '[]')
+        chat_history = validate_chat_history(history_json)
+        
+        # Process files (0 or more)
+        file_texts = []
+        vision_images = []
+        has_pdfs = False
+        
+        if 'files' in request.files:
+            files = request.files.getlist('files')
+            
+            for file in files:
+                if file and file.filename and file.filename.strip():
+                    filename = file.filename.lower()
+                    
+                    if filename.endswith('.pdf'):
+                        has_pdfs = True
+                        # Extract text from PDF
+                        file.seek(0)
+                        text = extract_text_from_pdf(file)
+                        if text:
+                            file_texts.append(f"[PDF: {file.filename}]\n{text}")
+                    
+                    elif filename.endswith(('.png', '.jpg', '.jpeg', '.gif')):
+                        # Prepare for vision model
+                        file.seek(0)
+                        image_bytes = file.read()
+                        image_base64 = base64.b64encode(image_bytes).decode('utf-8')
+                        
+                        # Determine MIME type
+                        if filename.endswith('.png'):
+                            mime_type = 'image/png'
+                        elif filename.endswith('.jpg') or filename.endswith('.jpeg'):
+                            mime_type = 'image/jpeg'
+                        elif filename.endswith('.gif'):
+                            mime_type = 'image/gif'
+                        else:
+                            mime_type = 'image/jpeg'
+                        
+                        vision_images.append({
+                            'base64': image_base64,
+                            'mime_type': mime_type,
+                            'filename': file.filename
+                        })
+        
+        # STRICT REQUIREMENT: Build user content with clear context separation
+        user_content_parts = []
+        
+        # Add message text if present
+        if message:
+            user_content_parts.append(message)
+        
+        # Add file texts if present
+        if file_texts:
+            file_context = "\n\n".join(file_texts)
+            user_content_parts.append(f"DOCUMENT CONTENT:\n{file_context}")
+        
+        # Create final user content
+        if not user_content_parts and not vision_images:
+            return jsonify({
+                "success": True,
+                "answer": "Please provide a message or upload files for analysis."
+            })
+        
+        user_content = "\n\n".join(user_content_parts) if user_content_parts else "Please analyze the uploaded image(s)."
+        
+        # Check if we should answer from PDF context or general knowledge
+        answer_from_pdf = False
+        pdf_context = ""
+        
+        if has_pdfs and file_texts:
+            # Extract and clean PDF context
+            pdf_context = "\n\n".join(file_texts)
+            
+            # Simple keyword check - could be enhanced with embeddings
+            # For now, we'll assume PDF contains relevant info if it has content
+            if pdf_context and len(pdf_context) > 50:
+                answer_from_pdf = True
+            else:
+                answer_from_pdf = False
+        
+        # Prepare context for memory system
+        memory_context = ""
+        history_context = ""
+        profile_context = ""
+        memory_layer = MemoryLayers.GENERAL
+        
+        try:
+            # Get profile context if available
+            with app.app_context():
+                profile = UserProfile.query.filter_by(username=username).first()
+                if profile:
+                    profile_context = ChatContext.get_profile_context(profile.to_dict())
+                
+                # Route to appropriate memory layer
+                router = MemoryRouter(pdf_context, history_context, profile_context)
+                context, memory_layer = router.route()
+                memory_context = context
+        except Exception:
+            # Memory system failed, use basic context
+            memory_context = pdf_context if answer_from_pdf else ""
+            memory_layer = MemoryLayers.GENERAL
+        
+        # Build system prompt with memory context
+        system_prompt = build_prompt_with_context(memory_context, memory_layer)
+        
+        # Prepare messages array
+        messages = [{"role": "system", "content": system_prompt}]
+        
+        # Add chat history (validated)
+        for msg in chat_history:
+            messages.append({"role": msg['role'], "content": msg['content']})
+        
+        # STRICT REQUIREMENT: Handle different input types
+        openrouter_model = "openai/gpt-4o-mini"
+        
+        if vision_images:
+            # Use vision model
+            content_parts = [{"type": "text", "text": user_content}]
+            
+            for image_data in vision_images:
+                content_parts.append({
+                    "type": "image_url",
+                    "image_url": {
+                        "url": f"data:{image_data['mime_type']};base64,{image_data['base64']}"
+                    }
+                })
+            
+            messages.append({
+                "role": "user",
+                "content": content_parts
+            })
+            openrouter_model = "openai/gpt-4o"
+        else:
+            # Use text-only model
+            messages.append({"role": "user", "content": user_content})
+        
+        # STRICT REQUIREMENT: Call OpenRouter with timeout and error handling
+        try:
+            headers = {
+                "Authorization": f"Bearer {os.getenv('OPENROUTER_API_KEY')}",
+                "Content-Type": "application/json",
+                "HTTP-Referer": "https://nelavista.com",
+                "X-Title": "Nelavista AI Tutor"
+            }
+            
+            payload = {
+                "model": openrouter_model,
+                "messages": messages,
+                "temperature": 0.6,
+                "max_tokens": 1500
+            }
+            
+            # Make API call with timeout
+            response = requests.post(
+                "https://openrouter.ai/api/v1/chat/completions",
+                headers=headers,
+                json=payload,
+                timeout=30  # 30 second timeout
+            )
+            
+            if response.status_code != 200:
+                # OpenRouter failed, return fallback
+                return jsonify({
+                    "success": True,
+                    "answer": GRACEFUL_FALLBACK
+                })
+            
+            # Extract response
+            response_json = response.json()
+            ai_response = response_json.get("choices", [{}])[0].get("message", {}).get("content", "")
+            
+            # STRICT REQUIREMENT: Ensure response is non-empty
+            if not ai_response or not ai_response.strip():
+                ai_response = GRACEFUL_FALLBACK
+            
+        except requests.exceptions.Timeout:
+            # Timeout occurred
+            return jsonify({
+                "success": True,
+                "answer": GRACEFUL_FALLBACK
+            })
+        except Exception as e:
+            # Any other API error
+            debug_print(f"❌ OpenRouter API error: {e}")
+            return jsonify({
+                "success": True,
+                "answer": GRACEFUL_FALLBACK
+            })
+        
+        # Save to database (optional, don't fail if this doesn't work)
+        try:
+            with app.app_context():
+                new_q = UserQuestions(
+                    username=username,
+                    question=message[:500] if message else "[File analysis]",
+                    answer=ai_response[:1000],
+                    memory_layer=memory_layer
+                )
+                db.session.add(new_q)
+                db.session.commit()
+        except Exception as db_error:
+            debug_print(f"⚠️ Database save error: {db_error}")
+            # Don't fail the response
+        
+        # Clean up old files
+        cleanup_old_files()
+        
+        # STRICT REQUIREMENT: Return in MANDATORY format
+        return jsonify({
+            "success": True,
+            "answer": ai_response
+        })
+        
+    except Exception as e:
+        # STRICT REQUIREMENT: Catch ALL exceptions and return fallback
+        debug_print(f"❌ Unhandled error in /ask_with_files: {e}")
+        traceback.print_exc()
+        
+        return jsonify({
+            "success": True,
+            "answer": GRACEFUL_FALLBACK
+        })
 
 # ============================================
 # Flask Routes - Educational Platform
 # ============================================
 @app.route('/')
 def index():
+    """Render main index page."""
     user = session.get('user')
     if not user:
         return redirect(url_for('login'))
@@ -874,6 +1329,7 @@ def index():
 
 @app.route('/signup', methods=['GET', 'POST'])
 def signup():
+    """Handle user registration."""
     if request.method == 'POST':
         username = request.form.get('username', '').strip()
         email = request.form.get('email', '').strip()
@@ -925,6 +1381,7 @@ def signup():
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
+    """Handle user authentication."""
     if request.method == 'POST':
         print("🔄 Login POST received")
         
@@ -964,6 +1421,9 @@ def login():
                         'last_login': user.last_login.strftime('%Y-%m-%d %H:%M:%S')
                     }
                     
+                    # ✅ CRITICAL: Store user_id in session for memory system
+                    session['user_id'] = user.id
+                    
                     print(f"🎉 Login successful for user: {user.username}")
                     flash('Logged in successfully!')
                     return redirect(url_for('index'))
@@ -990,6 +1450,13 @@ def login():
 
 @app.route('/logout')
 def logout():
+    """Handle user logout and clear session."""
+    # Clear PDF memory for this user
+    username = session.get('user', {}).get('username')
+    user_id = session.get('user_id')
+    if username:
+        pdf_memory.clear_user_cache(username, user_id)
+    
     session.clear()
     flash('You have been logged out.')
     return redirect(url_for('login'))
@@ -997,253 +1464,32 @@ def logout():
 @app.route('/profile')
 @login_required
 def profile():
+    """Render user profile page."""
     user = session.get('user', {})
     return render_template('profile.html', user=user)
 
 @app.route('/talk-to-nelavista')
 @login_required
 def talk_to_nelavista():
+    """Render AI chat interface."""
     return render_template('talk-to-nelavista.html')
 
 # ============================================
-# UPDATED /ask_with_files ENDPOINT - CHATGPT-STYLE ATOMIC BEHAVIOR
+# File Upload Endpoint (for standalone uploads)
 # ============================================
-# ============================================
-# FIXED: /ask_with_files Endpoint (Atomic Processing)
-# ============================================
-@app.route('/ask_with_files', methods=['POST'])
-@login_required
-def ask_with_files():
-    """Handle atomic file+text requests like ChatGPT"""
-    try:
-        username = session['user']['username']
-        
-        # Get the text message (REQUIRED for context)
-        message = request.form.get('message', '').strip()
-        
-        print(f"🚀 /ask_with_files called by {username}")
-        print(f"📝 Message: '{message}'")
-        print(f"📁 Files received: {list(request.files.keys())}")
-        
-        # Process ALL files from the request
-        file_contents = []
-        image_base64_list = []
-        file_count = 0
-        
-        # Handle multiple files
-        if 'files' in request.files:
-            files = request.files.getlist('files')  # Get ALL files with key 'files'
-            print(f"📦 Processing {len(files)} file(s)")
-            
-            for file in files:
-                if file and file.filename and file.filename.strip():
-                    file_count += 1
-                    filename = file.filename.lower()
-                    
-                    print(f"  📄 File {file_count}: {filename}")
-                    
-                    if filename.endswith('.pdf'):
-                        # Extract text from PDF
-                        text = extract_text_from_pdf(file)
-                        if text and text.strip():
-                            file_contents.append(f"[PDF CONTENT: {file.filename}]\n{text[:2000]}")
-                            print(f"    ✅ Extracted {len(text)} chars from PDF")
-                        else:
-                            file_contents.append(f"[PDF: {file.filename} - Could not extract text]")
-                            print(f"    ⚠️ Could not extract text from PDF")
-                    
-                    elif filename.endswith(('.png', '.jpg', '.jpeg', '.gif')):
-                        # Encode image for vision
-                        file.seek(0)
-                        image_bytes = file.read()
-                        image_base64 = base64.b64encode(image_bytes).decode('utf-8')
-                        
-                        # Determine MIME type
-                        mime_type = file.content_type
-                        if not mime_type:
-                            if filename.endswith('.png'):
-                                mime_type = 'image/png'
-                            elif filename.endswith('.jpg') or filename.endswith('.jpeg'):
-                                mime_type = 'image/jpeg'
-                            elif filename.endswith('.gif'):
-                                mime_type = 'image/gif'
-                            else:
-                                mime_type = 'image/jpeg'
-                        
-                        image_base64_list.append({
-                            'base64': image_base64,
-                            'filename': file.filename,
-                            'mime_type': mime_type,
-                            'type': 'image'
-                        })
-                        print(f"    ✅ Prepared image for vision: {mime_type}")
-        
-        print(f"📊 Summary: {file_count} files, {len(image_base64_list)} images")
-        
-        # CRITICAL: If files exist, they ARE the context
-        if file_count > 0:
-            print("🔧 Mode: SOLUTION (files attached)")
-            
-            # Build context from files
-            file_context = ""
-            if file_contents:
-                file_context = "\n\n".join(file_contents)
-            
-            # SYSTEM PROMPT when files are attached
-            system_prompt = (
-                "You are Nelavista, an advanced AI tutor for Nigerian university students.\n\n"
-                
-                "IMPORTANT: The user has attached file(s) with their message. "
-                "The file(s) contain the primary content to analyze.\n\n"
-                
-                "USER'S FILES:\n"
-            )
-            
-            if file_context:
-                system_prompt += f"Document content:\n{file_context}\n\n"
-            
-            if image_base64_list:
-                system_prompt += f"Images attached: {len(image_base64_list)} image(s)\n\n"
-            
-            system_prompt += (
-                "USER'S INSTRUCTION:\n"
-                f"\"{message}\"\n\n"
-                
-                "RESPONSE REQUIREMENTS:\n"
-                "1. Acknowledge you're analyzing the attached file(s)\n"
-                "2. Respond based SOLELY on the file content\n"
-                "3. If summarizing, summarize the file content\n"
-                "4. If analyzing, analyze what's in the files\n"
-                "5. Use clean HTML formatting\n"
-                "6. Do NOT ask for the text - you already have it\n"
-            )
-            
-            messages = [{"role": "system", "content": system_prompt}]
-            
-            # Add user message if there's no text from files
-            if not file_context and not image_base64_list:
-                messages.append({"role": "user", "content": message})
-            
-            # Use vision model for images
-            if image_base64_list:
-                content_parts = [{"type": "text", "text": message}]
-                
-                for image_data in image_base64_list:
-                    content_parts.append({
-                        "type": "image_url",
-                        "image_url": {
-                            "url": f"data:{image_data['mime_type']};base64,{image_data['base64']}"
-                        }
-                    })
-                
-                messages.append({
-                    "role": "user",
-                    "content": content_parts
-                })
-                model = "openai/gpt-4o"
-                print(f"👁️ Using vision model: {model}")
-            else:
-                model = "openai/gpt-4o-mini"
-                print(f"💬 Using text model: {model}")
-        
-        else:
-            # NO FILES: Normal chat mode
-            print("🔧 Mode: CHAT (no files)")
-            
-            chatty_keywords = ["hi", "hello", "hey", "how are you", "good morning", "good evening"]
-            is_chatty = any(k in message.lower() for k in chatty_keywords)
-            
-            if is_chatty:
-                system_prompt = (
-                    "You are Nelavista, an AI tutor for Nigerian university students. "
-                    "For casual conversation:\n"
-                    "- Respond in clean HTML using <p> only.\n"
-                    "- Be natural, brief, and human.\n"
-                    "- Emojis are allowed.\n"
-                    "- No structuring, no steps, no analysis tone."
-                )
-                model = "openai/gpt-4o-mini"
-            else:
-                system_prompt = (
-                    "You are Nelavista, an advanced AI tutor for Nigerian university students.\n\n"
-                    "Provide helpful, accurate academic assistance.\n"
-                    "Use clean HTML formatting.\n"
-                    "Be concise and informative."
-                )
-                model = "openai/gpt-4o-mini"
-            
-            messages = [
-                {"role": "system", "content": system_prompt},
-                {"role": "user", "content": message}
-            ]
-        
-        print(f"🚀 Calling API with {len(messages)} messages")
-        
-        # --- Call OpenRouter API ---
-        headers = {
-            "Authorization": f"Bearer {os.getenv('OPENROUTER_API_KEY')}",
-            "Content-Type": "application/json",
-            "HTTP-Referer": "https://nelavista.com",
-            "X-Title": "Nelavista AI Tutor"
-        }
-        
-        payload = {
-            "model": model,
-            "messages": messages,
-            "temperature": 0.6,
-            "max_tokens": 1500
-        }
-        
-        response = requests.post(
-            "https://openrouter.ai/api/v1/chat/completions",
-            headers=headers,
-            json=payload,
-            timeout=60
-        )
-        
-        if response.status_code != 200:
-            print(f"❌ API Error: {response.status_code} - {response.text}")
-            return jsonify({'error': f'API error: {response.status_code}'}), 500
-        
-        answer = response.json()["choices"][0]["message"]["content"]
-        print(f"✅ Response: {len(answer)} chars")
-        
-        # Save to database
-        new_q = UserQuestions(
-            username=username,
-            question=message + (" [with file(s)]" if file_count > 0 else ""),
-            answer=answer
-        )
-        db.session.add(new_q)
-        db.session.commit()
-        
-        return jsonify({
-            "choices": [{
-                "message": {
-                    "role": "assistant",
-                    "content": answer
-                }
-            }],
-            "file_count": file_count,
-            "has_files": file_count > 0
-        })
-        
-    except Exception as e:
-        print(f"❌ Error in /ask_with_files: {str(e)}")
-        import traceback
-        traceback.print_exc()
-        return jsonify({'error': 'Server error processing your request'}), 500
-
 @app.route('/upload', methods=['POST'])
 @login_required
 def upload_file():
-    """Handle file upload - Store files on disk, not in session"""
+    """Handle file upload with memory system integration."""
     if 'file' not in request.files:
         return jsonify({"success": False, "error": "No file provided"}), 400
     
     file = request.files['file']
     if file.filename == '':
         return jsonify({"success": False, "error": "No file selected"}), 400
+    
+    username = session['user']['username']
+    user_id = session.get('user_id')
     
     # Delete the previous uploaded file if it exists
     old_file_path = session.get('last_file_path')
@@ -1271,49 +1517,41 @@ def upload_file():
         
         file_size = 0
         
-        # Read file content once for size calculation
+        # Read file content once
         file_data = file.read()
         file_size = len(file_data)
-        file.seek(0)  # Reset file pointer for later use
+        file.seek(0)
         
         if filename.endswith('.pdf'):
-            # Generate unique filename for PDF
+            # Generate unique file ID
             file_id = str(uuid.uuid4())
-            pdf_filename = f"{file_id}.pdf"
-            pdf_path = os.path.join(app.config['UPLOAD_FOLDER'], pdf_filename)
             
-            # Save PDF to disk
-            with open(pdf_path, 'wb') as f:
-                f.write(file_data)
+            # Store in PDF memory
+            pdf_memory.extract_and_store(file_data, username, file_id, user_id)
             
-            # Extract text from saved file
-            with open(pdf_path, 'rb') as pdf_file:
-                text = extract_text_from_pdf(BytesIO(pdf_file.read()))
-            
-            # Store only references in session
+            # Store references in session
             session['last_file_id'] = file_id
             session['last_file_type'] = 'pdf'
-            session['last_file_name'] = pdf_filename
-            session['last_file_path'] = pdf_path
+            session['last_file_name'] = filename
             session['last_upload_time'] = time.time()
             
-            if text:
-                # Store only first 2000 chars in session for preview
-                session['last_file_content'] = text[:2000]
-            else:
-                session['last_file_content'] = "PDF loaded but text extraction failed"
+            # Get preview from memory
+            user_key = pdf_memory._get_user_key(username, user_id)
+            chunks = pdf_memory._load_chunks(user_key, file_id)
+            preview = "\n".join(chunks)[:300] + "..." if chunks else "PDF processed successfully"
             
-            debug_print(f"📄 PDF saved: {pdf_filename}, Size: {file_size} bytes")
+            debug_print(f"📄 PDF stored in memory: {filename}, Size: {file_size} bytes")
             
             return jsonify({
                 "success": True,
-                "message": "PDF uploaded successfully",
-                "preview": text[:300] + "..." if len(text) > 300 else text,
+                "message": "PDF uploaded and processed",
+                "preview": preview,
                 "type": "pdf",
                 "filename": file.filename,
                 "size_kb": round(file_size / 1024, 1),
-                "has_text": len(text.strip()) > 50,
-                "file_id": file_id
+                "has_text": bool(chunks),
+                "file_id": file_id,
+                "cache_stats": pdf_memory.get_cache_stats()
             })
             
         elif filename.endswith(('.png', '.jpg', '.jpeg', '.gif')):
@@ -1330,18 +1568,17 @@ def upload_file():
             # Encode image to base64 for vision
             image_base64 = base64.b64encode(file_data).decode('utf-8')
             
-            # Store only references in session
+            # Store references in session
             session['last_file_id'] = file_id
             session['last_file_type'] = 'image'
             session['last_file_name'] = image_filename
             session['last_file_path'] = image_path
-            session['last_image_base64'] = image_base64  # Keep base64 in session temporarily
+            session['last_image_base64'] = image_base64
             session['last_upload_time'] = time.time()
             
             # Extract text via OCR for fallback
-            file.seek(0)  # Reset file pointer
+            file.seek(0)
             text = extract_text_from_image(file)
-            session['last_file_content'] = text[:500] if text else ""
             
             # Determine if it's text or diagram
             is_diagram = is_diagram_or_visual(text)
@@ -1365,12 +1602,120 @@ def upload_file():
             
     except Exception as e:
         debug_print(f"❌ Upload error: {e}")
+        traceback.print_exc()
         return jsonify({"success": False, "error": f"Processing failed: {str(e)[:100]}"}), 500
+
+# ============================================
+# Legacy /ask endpoint (redirects to single entry point)
+# ============================================
+@app.route('/ask', methods=['POST'])
+@login_required
+def ask():
+    """Legacy endpoint that redirects to /ask_with_files for compatibility."""
+    try:
+        # Get data from request
+        data = request.get_json() or {}
+        message = data.get('message', '').strip()
+        
+        if not message:
+            return jsonify({'error': 'No question provided'}), 400
+        
+        # Create form data for /ask_with_files
+        from werkzeug.datastructures import ImmutableMultiDict
+        
+        # Prepare request for /ask_with_files
+        with app.test_request_context('/ask_with_files', method='POST'):
+            # Create form data
+            form_data = ImmutableMultiDict([
+                ('message', message),
+                ('history', json.dumps([]))  # Empty history for compatibility
+            ])
+            
+            # Call the main handler
+            return ask_with_files()
+            
+    except Exception as e:
+        debug_print(f"❌ Error in /ask: {e}")
+        return jsonify({
+            "success": True,
+            "answer": "Sorry, an error occurred. Please use the /ask_with_files endpoint."
+        })
+
+# ============================================
+# Memory Management Endpoints
+# ============================================
+@app.route('/memory/stats', methods=['GET'])
+@login_required
+def get_memory_stats():
+    """Get memory system statistics."""
+    try:
+        username = session['user']['username']
+        user_id = session.get('user_id')
+        user_key = pdf_memory._get_user_key(username, user_id)
+        
+        user_files = []
+        if user_key in pdf_memory.cache:
+            for file_id in pdf_memory.cache[user_key]:
+                chunks = pdf_memory.cache[user_key][file_id]
+                user_files.append({
+                    'file_id': file_id,
+                    'chunk_count': len(chunks),
+                    'total_chars': sum(len(chunk) for chunk in chunks)
+                })
+        
+        return jsonify({
+            "success": True,
+            "user_stats": {
+                "username": username,
+                "user_id": user_id,
+                "file_count": len(user_files),
+                "files": user_files
+            },
+            "system_stats": pdf_memory.get_cache_stats(),
+            "health": pdf_memory.health_check(),
+            "memory_layers": MemoryLayers.get_all_metadata()
+        })
+    except Exception as e:
+        debug_print(f"❌ Error getting memory stats: {e}")
+        return jsonify({"success": False, "error": str(e)}), 500
+
+@app.route('/memory/clear', methods=['POST'])
+@login_required
+def clear_memory():
+    """Clear user's memory cache."""
+    try:
+        username = session['user']['username']
+        user_id = session.get('user_id')
+        
+        # Clear specific file or all files
+        file_id = request.json.get('file_id') if request.is_json else None
+        
+        if file_id:
+            pdf_memory.clear_file_cache(username, file_id, user_id)
+            message = f"Cleared file cache: {file_id}"
+        else:
+            pdf_memory.clear_user_cache(username, user_id)
+            message = "Cleared all memory cache"
+        
+        # Clear session references
+        session.pop('last_file_id', None)
+        session.pop('last_file_type', None)
+        session.pop('last_upload_time', None)
+        session.pop('last_image_base64', None)
+        
+        return jsonify({
+            "success": True,
+            "message": message,
+            "cache_stats": pdf_memory.get_cache_stats()
+        })
+    except Exception as e:
+        debug_print(f"❌ Error clearing memory: {e}")
+        return jsonify({"success": False, "error": str(e)}), 500
 
 @app.route('/cleanup_attachments', methods=['POST'])
 @login_required
 def cleanup_attachments():
-    """Clean up uploaded files from session"""
+    """Clean up uploaded files from session."""
     try:
         # Clear all file-related session data
         keys_to_remove = [
@@ -1389,223 +1734,20 @@ def cleanup_attachments():
     except Exception as e:
         debug_print(f"❌ Cleanup error: {e}")
         return jsonify({"success": False, "error": str(e)}), 500
-        
-# ============================================
-# UPDATED /ask ENDPOINT - VISION INTEGRATION
-# ============================================
-@app.route('/ask', methods=['POST'])
-@login_required
-def ask():
-    try:
-        data = request.get_json()
-        if not data:
-            return jsonify({'error': 'No JSON data provided'}), 400
 
-        username = session['user']['username']
-        history = data.get('history', [])
-        user_question = data.get('message', '')
-
-        # If no direct message, fall back to last user message in history
-        if not user_question:
-            for message in reversed(history):
-                if message.get('role') == 'user':
-                    user_question = message.get('content', '')
-                    break
-
-        if not user_question:
-            return jsonify({'error': 'No question provided'}), 400
-
-        debug_print(f"🤖 Processing question from {username}: {user_question[:100]}...")
-
-        # --- File context handling ---
-        file_content = ""
-        file_type = ""
-        last_upload_time = session.get('last_upload_time', 0)
-
-        if time.time() - last_upload_time < 300:
-            file_content = session.get('last_file_content', '')
-            file_type = session.get('last_file_type', '')
-            image_base64 = session.get('last_image_base64', '')
-        else:
-            session.pop('last_file_content', None)
-            session.pop('last_file_type', None)
-            session.pop('last_upload_time', None)
-            session.pop('last_image_base64', None)
-            session.pop('last_file_path', None)  # Also remove the file path
-            image_base64 = ''
-
-        # --- Vision detection ---
-        use_vision = False
-        vision_image_base64 = None
-
-        if session.get('last_file_type') == 'image' and session.get('last_image_base64'):
-            vision_keywords = [
-                'image', 'picture', 'diagram', 'photo', 'screenshot',
-                'explain this', 'what is this', 'describe', 'analyze',
-                'what does this show', 'tell me about this', 'summarize this',
-                'can you see', 'look at this', 'what is in this', 'explain the image'
-            ]
-            user_q_lower = user_question.lower()
-            use_vision = any(k in user_q_lower for k in vision_keywords)
-            
-            if use_vision:
-                vision_image_base64 = session.get('last_image_base64')
-                debug_print("👁️ Vision enabled for image analysis")
-
-        # --- Mode detection ---
-        chatty_keywords = ["hi", "hello", "hey", "how are you", "good morning", "good evening"]
-        is_chatty = any(k in user_question.lower() for k in chatty_keywords)
-
-        if (file_content or vision_image_base64) and not is_chatty:
-            mode = "solution"
-        else:
-            mode = "chatty" if is_chatty else "solution"
-
-        # --- SYSTEM PROMPTS ---
-        if mode == "chatty":
-            system_prompt = (
-                "You are Nelavista, an AI tutor created by Afeez Adewale Tella for Nigerian university students (100–400 level). "
-                "For casual conversation:\n"
-                "- Respond in clean HTML using <p> only.\n"
-                "- Be natural, brief, and human.\n"
-                "- Emojis are allowed.\n"
-                "- No structuring, no steps, no analysis tone."
-            )
-        else:
-            vision_context = ""
-            if vision_image_base64:
-                vision_context = (
-                    "You are analyzing an image. Base your explanation strictly on what is visible."
-                )
-
-            system_prompt = (
-                "You are Nelavista, an advanced AI tutor created by Afeez Adewale Tella for Nigerian university students (100–400 level).\n\n"
-
-                "ROLE:\n"
-                "You are a specialized analytical tutor and researcher.\n\n"
-
-                "STYLE: Analytical Expert\n"
-                "Follow these rules strictly.\n\n"
-
-                "GLOBAL RULES:\n"
-                "- Always respond in clean HTML using <p>, <ul>, <li>, <strong>, <h2>, <h3>, and <table> when appropriate.\n"
-                "- No greetings.\n"
-                "- Do NOT use labels like Step 1, Step 2, Intro, or Final Answer.\n"
-                "- No emojis in academic explanations.\n"
-                "- Use neutral, precise language. Avoid hype, emotion, or filler.\n\n"
-
-                "STRUCTURE REQUIREMENTS:\n"
-                "- Begin with a concise <strong>TL;DR</strong> section summarizing the core conclusion.\n"
-                "- Use clear headers and bullet points to organize information.\n"
-                "- Break complex ideas into logical components and explain the reasoning behind them.\n"
-                "- Use short paragraphs (1–2 sentences).\n\n"
-
-                "REASONING:\n"
-                "- Show the reasoning path clearly but naturally.\n"
-                "- Explain why conclusions follow from facts or data.\n\n"
-
-                "DATA & ACCURACY:\n"
-                "- Include formulas, definitions, metrics, or comparisons when relevant.\n"
-                "- Do not speculate or invent facts.\n\n"
-
-                f"{vision_context}\n\n"
-
-                "ENDING:\n"
-                "- End naturally after the explanation. Do not add summaries beyond the TL;DR."
-            )
-
-        # --- Build messages ---
-        messages = [{"role": "system", "content": system_prompt}]
-
-        for msg in history:
-            if msg.get('role') in ['user', 'assistant']:
-                messages.append({"role": msg['role'], "content": msg['content']})
-
-        if file_content and file_type and not vision_image_base64:
-            context = f"[DOCUMENT CONTEXT]\n{file_content[:1500]}"
-            messages.append({"role": "user", "content": context})
-
-        if vision_image_base64:
-            messages.append({
-                "role": "user",
-                "content": [
-                    {"type": "text", "text": user_question},
-                    {
-                        "type": "image_url",
-                        "image_url": {
-                            "url": f"data:image/jpeg;base64,{vision_image_base64}"
-                        }
-                    }
-                ]
-            })
-            model = "openai/gpt-4o"
-        else:
-            messages.append({"role": "user", "content": user_question})
-            model = "openai/gpt-4o-mini"
-
-        # --- API call ---
-        headers = {
-            "Authorization": f"Bearer {os.getenv('OPENROUTER_API_KEY')}",
-            "Content-Type": "application/json",
-            "HTTP-Referer": "https://nelavista.com",
-            "X-Title": "Nelavista AI Tutor"
-        }
-
-        payload = {
-            "model": model,
-            "messages": messages,
-            "temperature": 0.6,
-            "max_tokens": 1500
-        }
-
-        response = requests.post(
-            "https://openrouter.ai/api/v1/chat/completions",
-            headers=headers,
-            data=json.dumps(payload),
-            timeout=60
-        )
-
-        if response.status_code != 200:
-            raise Exception(response.text)
-
-        answer = response.json()["choices"][0]["message"]["content"]
-
-        # --- Save solution responses ---
-        if mode == "solution":
-            new_q = UserQuestions(
-                username=username,
-                question=user_question,
-                answer=answer
-            )
-            db.session.add(new_q)
-            db.session.commit()
-
-        # Clean up old files
-        cleanup_old_files()
-
-        return jsonify({
-            "choices": [{
-                "message": {
-                    "role": "assistant",
-                    "content": answer
-                }
-            }],
-            "file_used": bool(file_content or vision_image_base64),
-            "vision_used": bool(vision_image_base64)
-        })
-
-    except Exception as e:
-        debug_print(f"❌ Error in /ask route: {str(e)}")
-        return jsonify({'error': 'Failed to process your question.'}), 500
-
-# ============================================
-# NEW: Clear Context Endpoint
-# ============================================
 @app.route('/clear_context', methods=['POST'])
 @login_required
 def clear_context():
-    """Clear uploaded file context from session and delete the file from disk"""
+    """Clear uploaded file context from session and delete the file from disk."""
     try:
+        username = session['user']['username']
+        user_id = session.get('user_id')
+        
+        # Clear from memory system if it's a PDF
+        file_id = session.get('last_file_id')
+        if file_id and session.get('last_file_type') == 'pdf':
+            pdf_memory.clear_file_cache(username, file_id, user_id)
+        
         # Delete the file from disk if it exists
         file_path = session.get('last_file_path')
         if file_path and os.path.exists(file_path):
@@ -1632,17 +1774,23 @@ def clear_context():
             "error": "Failed to clear context"
         }), 500
 
+# ============================================
+# Other Routes
+# ============================================
 @app.route('/about')
 def about():
+    """Render about page."""
     return render_template('about.html')
 
 @app.route('/privacy-policy')
 def privacy_policy():
+    """Render privacy policy page."""
     return render_template('privacy-policy.html')
 
 @app.route('/settings')
 @login_required
 def settings():
+    """Render user settings page."""
     memory = {
         "traits": session.get('traits', []),
         "more_info": session.get('more_info', ''),
@@ -1653,6 +1801,7 @@ def settings():
 @app.route('/memory', methods=['POST'])
 @login_required
 def save_memory():
+    """Save user memory settings."""
     session['theme'] = request.form.get('theme')
     session['language'] = request.form.get('language')
     session['notifications'] = 'notifications' in request.form
@@ -1662,6 +1811,7 @@ def save_memory():
 @app.route('/telavista/memory', methods=['POST'])
 @login_required
 def telavista_save_memory():
+    """Save Telavista memory settings."""
     print("Saving Telavista memory!")
     flash('Memory saved!')
     return redirect('/settings')
@@ -1669,6 +1819,7 @@ def telavista_save_memory():
 @app.route('/materials')
 @login_required
 def materials():
+    """Render study materials page."""
     all_courses = ["Python", "Data Science", "AI Basics", "Math", "Physics"]
     selected_course = request.args.get("course")
     materials = []
@@ -1696,6 +1847,7 @@ def materials():
 
 @app.route('/api/materials')
 def get_study_materials():
+    """API endpoint to fetch study materials."""
     query = request.args.get("q", "python")
 
     pdfs = []
@@ -1736,6 +1888,7 @@ def get_study_materials():
 
 @app.route('/ai/materials')
 def ai_materials():
+    """API endpoint for AI-generated study materials."""
     topic = request.args.get("topic")
     level = request.args.get("level")
     department = request.args.get("department")
@@ -1822,6 +1975,7 @@ def ai_materials():
 @app.route('/reels', methods=['GET'])
 @login_required
 def reels():
+    """Render educational reels/videos page."""
     categories = ["Tech", "Motivation", "Islamic", "AI"]
     selected_category = request.args.get("category")
     videos = []
@@ -1840,6 +1994,7 @@ def reels():
 
 @app.route("/api/reels")
 def get_reels():
+    """API endpoint to fetch educational reels."""
     course = request.args.get("course")
 
     all_reels = [
@@ -1850,469 +2005,6 @@ def get_reels():
         {"course": "Accountancy", "caption": "Auditing Principles", "video_url": "https://youtu.be/27gabbJQZqc?si=rsOLmkD2QXOoxSoi"},
         {"course": "Accountancy", "caption": "Taxation Fundamentals", "video_url": "https://youtu.be/Cox8rLXYAGQ?si=CvKUaPuPJOxPb6cr"},
         {"course": "Accountancy", "caption": "Learn Accounting in under 5 hours", "video_url": "https://youtu.be/gPBhGkBN30s?si=bUYfaccZPlBni3aZ"},
-
-        # Accounting
-        {"course": "Accounting", "caption": "Basics of Double Entry", "video_url": "https://youtu.be/cjO8qHM5Wjg?si=P0hcqm9x-wjmXpN3"},
-        {"course": "Accounting", "caption": "Trail Balance Explained", "video_url": "https://youtu.be/3_PfoTzSCQE?si=SGRI7KVJ6ZC3iJe7"},
-        {"course": "Accounting", "caption": "Financial Analysis Techniques", "video_url": "https://youtu.be/g2wEFJ7upNs?si=ht44vAply2f7b-P0"},
-        {"course": "Accounting", "caption": "Cost Accounting Overview", "video_url": "https://youtu.be/a5D3Iopi0-4?si=vXOVFcV1NqPGt6Tk"},
-        {"course": "Accounting", "caption": "Budgeting and Forecasting", "video_url": "https://youtu.be/GjxhDo9luh8?si=BXn4Z5J-RdKJdBoP"},
-
-        # Agriculture
-        {"course": "Agriculture", "caption": "Introduction to Agriculture", "video_url": "https://youtu.be/1FLcijYWHZQ?si=B6iWcOVNXYCDWsKR"},
-        {"course": "Agriculture", "caption": "Crop Production Techniques", "video_url": "https://youtu.be/j4-0rNhxoKs?si=XaUcN8zOq1EtkVbX"},
-        {"course": "Agriculture", "caption": "Soil Fertility Management", "video_url": "https://youtu.be/TjbxOEEOCh0?si=grkiA5OewbgtFF78"},
-        {"course": "Agriculture", "caption": "Livestock Management", "video_url": "https://youtu.be/TjbxOEEOCh0?si=Jr_UpYvei_oieZxz"},
-        {"course": "Agriculture", "caption": "Agricultural Economics", "video_url": "https://youtu.be/fbOiwV3gBLg?si=f8HcQW1xdOEfQXEy"},
-
-        # Arabic Studies
-        {"course": "Arabic Studies", "caption": "Arabic Language Basics", "video_url": "https://youtu.be/X1mC1XY65Kc?si=gIIUVXBrseXau1Tj"},
-        {"course": "Arabic Studies", "caption": "Arabic Grammar Essentials", "video_url": "https://youtu.be/CKD1O4tKZUA?si=JwH8Hb090aZTAI7n"},
-        {"course": "Arabic Studies", "caption": "Conversational Arabic", "video_url": "https://youtu.be/dinQIb4ZFXY?si=eGF1Vhsdwm8imJ3Y"},
-        {"course": "Arabic Studies", "caption": "Arabic Poetry Introduction", "video_url": "https://youtu.be/ZmjK5cu81RA?si=XnRGefNNXTCws278"},
-        {"course": "Arabic Studies", "caption": "Arabic Writing Skills", "video_url": "https://youtu.be/b_WdZCrKr3k?si=pYe0F4bLx8FiT8HT"},
-
-        # Banking and Finance
-        {"course": "Banking and Finance", "caption": "Banking Systems Overview", "video_url": "https://youtu.be/fTTGALaRZoc?si=ThB2kkYTd_iIhFX1"},
-        {"course": "Banking and Finance", "caption": "Financial Markets Basics", "video_url": "https://youtu.be/UOwi7MBSfhk?si=XSyvxPRp4mEQx2OH"},
-        {"course": "Banking and Finance", "caption": "Loan and Credit Management", "video_url": "https://youtu.be/f3VgVOgAUoE?si=JwfSWSogIZeIMpY8"},
-        {"course": "Banking and Finance", "caption": "Investment Banking Intro", "video_url": "https://youtu.be/-PkN15TtFnc?si=xgcAoZBAdge-PBjb"},
-        {"course": "Banking and Finance", "caption": "Risk Management in Banking", "video_url": "https://youtu.be/BLAEuVSAlVM?si=hubXYQaexc2Iizjd"},
-
-        # Biochemistry
-        {"course": "Biochemistry", "caption": "Introduction to Biochemistry", "video_url": "https://youtu.be/CHJsaq2lNjU?si=owCTFJffO4MyBtPB"},
-        {"course": "Biochemistry", "caption": "Enzymes and their Functions", "video_url": "https://youtu.be/ozdO1mLXBQE?si=Xj6z5vY8rAgRMdA_"},
-        {"course": "Biochemistry", "caption": "Metabolism Basics", "video_url": "https://youtu.be/onDQ9KgDSVw?si=4IKHj5VVJoahw51B"},
-        {"course": "Biochemistry", "caption": "Protein Synthesis", "video_url": "https://youtu.be/8wAwLwJAGHs?si=vDuhcZbjQ0nNyhoL"},
-        {"course": "Biochemistry", "caption": "Biochemical Techniques", "video_url": "https://youtu.be/lDWL_EEhReo?si=F4nhulNv3l0nxRcA"},
-
-        # Botany
-        {"course": "Botany", "caption": "Plant Classification", "video_url": "https://youtu.be/SAM5mcHkSxU?si=P1cX_dbg0pGJFDBB"},
-        {"course": "Botany", "caption": "Photosynthesis Process", "video_url": "https://youtu.be/-ZRsLhaukn8?si=CfNMcb-tVWwq6-be"},
-        {"course": "Botany", "caption": "Plant Anatomy", "video_url": "https://youtu.be/pvVvCt6Kdp8?si=3ubgF8WibXgzFLcI"},
-        {"course": "Botany", "caption": "Plant Reproduction", "video_url": "https://youtu.be/h077JEQ8w6g?si=O5vHjcnuPetMLbCo"},
-        {"course": "Botany", "caption": "Ecology and Environment", "video_url": "https://youtu.be/fxVGiq1kggg?si=ESD-BALtjmX0Qxcb"},
-
-        # Business Administration
-        {"course": "Business Administration", "caption": "Principles of Management", "video_url": "https://example.com/videos/management1.mp4"},
-        {"course": "Business Administration", "caption": "Marketing Strategies", "video_url": "https://example.com/videos/marketing.mp4"},
-        {"course": "Business Administration", "caption": "Human Resources Management", "video_url": "https://example.com/videos/hr.mp4"},
-        {"course": "Business Administration", "caption": "Financial Planning", "video_url": "https://example.com/videos/financial_planning.mp4"},
-        {"course": "Business Administration", "caption": "Business Ethics", "video_url": "https://example.com/videos/ethics.mp4"},
-
-        # Chemical and Polymer Engineering
-        {"course": "Chemical and Polymer Engineering", "caption": "Introduction to Chemical Engineering", "video_url": "https://example.com/videos/chemical1.mp4"},
-        {"course": "Chemical and Polymer Engineering", "caption": "Polymer Chemistry", "video_url": "https://example.com/videos/polymer_chemistry.mp4"},
-        {"course": "Chemical and Polymer Engineering", "caption": "Process Control", "video_url": "https://example.com/videos/process_control.mp4"},
-        {"course": "Chemical and Polymer Engineering", "caption": "Chemical Reactor Design", "video_url": "https://example.com/videos/reactor_design.mp4"},
-        {"course": "Chemical and Polymer Engineering", "caption": "Environmental Impact of Chemical Processes", "video_url": "https://example.com/videos/environment.mp4"},
-
-        # Chemistry
-        {"course": "Chemistry", "caption": "Atomic Structure", "video_url": "https://example.com/videos/atomic_structure.mp4"},
-        {"course": "Chemistry", "caption": "Chemical Bonding", "video_url": "https://example.com/videos/chemical_bonding.mp4"},
-        {"course": "Chemistry", "caption": "Periodic Table Trends", "video_url": "https://example.com/videos/periodic_trends.mp4"},
-        {"course": "Chemistry", "caption": "Acids and Bases", "video_url": "https://example.com/videos/acids_bases.mp4"},
-        {"course": "Chemistry", "caption": "Organic Chemistry Basics", "video_url": "https://example.com/videos/organic_chemistry.mp4"},
-
-        # Christian Religious Studies
-        {"course": "Christian Religious Studies", "caption": "Introduction to Christianity", "video_url": "https://example.com/videos/crs1.mp4"},
-        {"course": "Christian Religious Studies", "caption": "Bible Overview", "video_url": "https://example.com/videos/bible_overview.mp4"},
-        {"course": "Christian Religious Studies", "caption": "Christian Doctrine", "video_url": "https://example.com/videos/doctrine.mp4"},
-        {"course": "Christian Religious Studies", "caption": "Christian Worship", "video_url": "https://example.com/videos/worship.mp4"},
-        {"course": "Christian Religious Studies", "caption": "Ethics in Christianity", "video_url": "https://example.com/videos/ethics.mp4"},
-
-        # Computer Science
-        {"course": "Computer Science", "caption": "Intro to Python 🔥", "video_url": "https://youtu.be/XKHEtdqhLK8?si=6wwK4EPdr9_A6L9w"},
-        {"course": "Computer Science", "caption": "Understanding APIs", "video_url": "/static/reels/api_basics.mp4"},
-        {"course": "Computer Science", "caption": "Data Structures Overview", "video_url": "https://example.com/videos/data_structures.mp4"},
-        {"course": "Computer Science", "caption": "Algorithms Explained", "video_url": "https://example.com/videos/algorithms.mp4"},
-        {"course": "Computer Science", "caption": "Database Management Systems", "video_url": "https://example.com/videos/dbms.mp4"},
-
-        # Dentistry and Dental Surgery
-        {"course": "Dentistry and Dental Surgery", "caption": "Basics of Oral Anatomy", "video_url": "https://example.com/videos/dentistry1.mp4"},
-        {"course": "Dentistry and Dental Surgery", "caption": "Dental Hygiene Tips", "video_url": "https://example.com/videos/dentistry2.mp4"},
-        {"course": "Dentistry and Dental Surgery", "caption": "Common Dental Procedures", "video_url": "https://example.com/videos/dentistry3.mp4"},
-        {"course": "Dentistry and Dental Surgery", "caption": "Dental Radiography", "video_url": "https://example.com/videos/dentistry4.mp4"},
-        {"course": "Dentistry and Dental Surgery", "caption": "Oral Disease Prevention", "video_url": "https://example.com/videos/dentistry5.mp4"},
-
-        # Drama / Dramatic / Performing Arts
-        {"course": "Drama / Dramatic / Performing Arts", "caption": "Introduction to Acting", "video_url": "https://example.com/videos/drama1.mp4"},
-        {"course": "Drama / Dramatic / Performing Arts", "caption": "Stage Management Basics", "video_url": "https://example.com/videos/drama2.mp4"},
-        {"course": "Drama / Dramatic / Performing Arts", "caption": "Theatrical Lighting Techniques", "video_url": "https://example.com/videos/drama3.mp4"},
-        {"course": "Drama / Dramatic / Performing Arts", "caption": "Voice Modulation", "video_url": "https://example.com/videos/drama4.mp4"},
-        {"course": "Drama / Dramatic / Performing Arts", "caption": "Costume Design", "video_url": "https://example.com/videos/drama5.mp4"},
-
-        # Early Childhood Education
-        {"course": "Early Childhood Education", "caption": "Child Development Stages", "video_url": "https://example.com/videos/early_childhood1.mp4"},
-        {"course": "Early Childhood Education", "caption": "Play-Based Learning", "video_url": "https://example.com/videos/early_childhood2.mp4"},
-        {"course": "Early Childhood Education", "caption": "Classroom Management", "video_url": "https://example.com/videos/early_childhood3.mp4"},
-        {"course": "Early Childhood Education", "caption": "Curriculum Planning", "video_url": "https://example.com/videos/early_childhood4.mp4"},
-        {"course": "Early Childhood Education", "caption": "Assessment Techniques", "video_url": "https://example.com/videos/early_childhood5.mp4"},
-
-        # Education and Accounting
-        {"course": "Education and Accounting", "caption": "Educational Accounting Principles", "video_url": "https://example.com/videos/educ_acc1.mp4"},
-        {"course": "Education and Accounting", "caption": "Budgeting in Education", "video_url": "https://example.com/videos/educ_acc2.mp4"},
-        {"course": "Education and Accounting", "caption": "Financial Planning for Schools", "video_url": "https://example.com/videos/educ_acc3.mp4"},
-        {"course": "Education and Accounting", "caption": "Accounting Records Management", "video_url": "https://example.com/videos/educ_acc4.mp4"},
-        {"course": "Education and Accounting", "caption": "Auditing in Educational Institutions", "video_url": "https://example.com/videos/educ_acc5.mp4"},
-
-        # Education and Biology
-        {"course": "Education and Biology", "caption": "Biology Curriculum Development", "video_url": "https://example.com/videos/educ_bio1.mp4"},
-        {"course": "Education and Biology", "caption": "Lab Techniques for Teachers", "video_url": "https://example.com/videos/educ_bio2.mp4"},
-        {"course": "Education and Biology", "caption": "Teaching Genetics", "video_url": "https://example.com/videos/educ_bio3.mp4"},
-        {"course": "Education and Biology", "caption": "Ecology in Education", "video_url": "https://example.com/videos/educ_bio4.mp4"},
-        {"course": "Education and Biology", "caption": "Biology Teaching Aids", "video_url": "https://example.com/videos/educ_bio5.mp4"},
-
-        # Education and Chemistry
-        {"course": "Education and Chemistry", "caption": "Chemistry Lab Safety", "video_url": "https://example.com/videos/educ_chem1.mp4"},
-        {"course": "Education and Chemistry", "caption": "Teaching Organic Chemistry", "video_url": "https://example.com/videos/educ_chem2.mp4"},
-        {"course": "Education and Chemistry", "caption": "Chemistry Demonstrations", "video_url": "https://example.com/videos/educ_chem3.mp4"},
-        {"course": "Education and Chemistry", "caption": "Curriculum for Chemistry Teachers", "video_url": "https://example.com/videos/educ_chem4.mp4"},
-        {"course": "Education and Chemistry", "caption": "Assessment Methods in Chemistry", "video_url": "https://example.com/videos/educ_chem5.mp4"},
-
-        # Education and Christian Religious Studies
-        {"course": "Education and Christian Religious Studies", "caption": "Teaching Religious Studies", "video_url": "https://example.com/videos/educ_crs1.mp4"},
-        {"course": "Education and Christian Religious Studies", "caption": "Curriculum Design for CRS", "video_url": "https://example.com/videos/educ_crs2.mp4"},
-        {"course": "Education and Christian Religious Studies", "caption": "Teaching Biblical Stories", "video_url": "https://example.com/videos/educ_crs3.mp4"},
-        {"course": "Education and Christian Religious Studies", "caption": "Classroom Discussions on Faith", "video_url": "https://example.com/videos/educ_crs4.mp4"},
-        {"course": "Education and Christian Religious Studies", "caption": "Assessment in Religious Education", "video_url": "https://example.com/videos/educ_crs5.mp4"},
-
-        # Education and Computer Science
-        {"course": "Education and Computer Science", "caption": "Integrating Tech in Education", "video_url": "https://example.com/videos/educ_comp1.mp4"},
-        {"course": "Education and Computer Science", "caption": "Basic Programming for Teachers", "video_url": "https://example.com/videos/educ_comp2.mp4"},
-        {"course": "Education and Computer Science", "caption": "E-learning Tools", "video_url": "https://example.com/videos/educ_comp3.mp4"},
-        {"course": "Education and Computer Science", "caption": "Computer Lab Management", "video_url": "https://example.com/videos/educ_comp4.mp4"},
-        {"course": "Education and Computer Science", "caption": "Curriculum Development in CS", "video_url": "https://example.com/videos/educ_comp5.mp4"},
-
-        # Education and Economics
-        {"course": "Education and Economics", "caption": "Teaching Economics Concepts", "video_url": "https://example.com/videos/educ_econ1.mp4"},
-        {"course": "Education and Economics", "caption": "Economic Models in Classroom", "video_url": "https://example.com/videos/educ_econ2.mp4"},
-        {"course": "Education and Economics", "caption": "Curriculum for Economics Education", "video_url": "https://example.com/videos/educ_econ3.mp4"},
-        {"course": "Education and Economics", "caption": "Assessing Economics Learning", "video_url": "https://example.com/videos/educ_econ4.mp4"},
-        {"course": "Education and Economics", "caption": "Using Data in Economics Teaching", "video_url": "https://example.com/videos/educ_econ5.mp4"},
-
-        # Education and English Language
-        {"course": "Education and English Language", "caption": "Teaching Grammar Effectively", "video_url": "https://example.com/videos/educ_eng1.mp4"},
-        {"course": "Education and English Language", "caption": "Literature in Education", "video_url": "https://example.com/videos/educ_eng2.mp4"},
-        {"course": "Education and English Language", "caption": "Language Teaching Strategies", "video_url": "https://example.com/videos/educ_eng3.mp4"},
-        {"course": "Education and English Language", "caption": "Assessing Language Skills", "video_url": "https://example.com/videos/educ_eng4.mp4"},
-        {"course": "Education and English Language", "caption": "Creating Engaging Lessons", "video_url": "https://example.com/videos/educ_eng5.mp4"},
-
-        # Education and French
-        {"course": "Education and French", "caption": "French Grammar for Teachers", "video_url": "https://example.com/videos/educ_french1.mp4"},
-        {"course": "Education and French", "caption": "French Vocabulary Building", "video_url": "https://example.com/videos/educ_french2.mp4"},
-        {"course": "Education and French", "caption": "Teaching French Conversation", "video_url": "https://example.com/videos/educ_french3.mp4"},
-        {"course": "Education and French", "caption": "French Language Curriculum", "video_url": "https://example.com/videos/educ_french4.mp4"},
-        {"course": "Education and French", "caption": "Assessment in French", "video_url": "https://example.com/videos/educ_french5.mp4"},
-
-        # Education and Geography
-        {"course": "Education and Geography", "caption": "Teaching Map Skills", "video_url": "https://example.com/videos/educ_geo1.mp4"},
-        {"course": "Education and Geography", "caption": "Curriculum in Geography", "video_url": "https://example.com/videos/educ_geo2.mp4"},
-        {"course": "Education and Geography", "caption": "Fieldwork and Practicals", "video_url": "https://example.com/videos/educ_geo3.mp4"},
-        {"course": "Education and Geography", "caption": "Using GIS in Education", "video_url": "https://example.com/videos/educ_geo4.mp4"},
-        {"course": "Education and Geography", "caption": "Assessment Techniques", "video_url": "https://example.com/videos/educ_geo5.mp4"},
-
-        # Education and History
-        {"course": "Education and History", "caption": "Teaching Historical Skills", "video_url": "https://example.com/videos/educ_hist1.mp4"},
-        {"course": "Education and History", "caption": "History Curriculum Design", "video_url": "https://example.com/videos/educ_hist2.mp4"},
-        {"course": "Education and History", "caption": "Integrating Primary Sources", "video_url": "https://example.com/videos/educ_hist3.mp4"},
-        {"course": "Education and History", "caption": "Assessment in History", "video_url": "https://example.com/videos/educ_hist4.mp4"},
-        {"course": "Education and History", "caption": "Project-Based History Learning", "video_url": "https://example.com/videos/educ_hist5.mp4"},
-
-        # Education and Islamic Studies
-        {"course": "Education and Islamic Studies", "caption": "Teaching Islamic History", "video_url": "https://example.com/videos/educ_islam1.mp4"},
-        {"course": "Education and Islamic Studies", "caption": "Islamic Religious Practices", "video_url": "https://example.com/videos/educ_islam2.mp4"},
-        {"course": "Education and Islamic Studies", "caption": "Curriculum for Islamic Studies", "video_url": "https://example.com/videos/educ_islam3.mp4"},
-        {"course": "Education and Islamic Studies", "caption": "Islamic Ethical Teachings", "video_url": "https://example.com/videos/educ_islam4.mp4"},
-        {"course": "Education and Islamic Studies", "caption": "Assessment Methods", "video_url": "https://example.com/videos/educ_islam5.mp4"},
-
-        # Education and Mathematics
-        {"course": "Education and Mathematics", "caption": "Teaching Mathematical Concepts", "video_url": "https://example.com/videos/educ_math1.mp4"},
-        {"course": "Education and Mathematics", "caption": "Developing Problem-Solving Skills", "video_url": "https://example.com/videos/educ_math2.mp4"},
-        {"course": "Education and Mathematics", "caption": "Mathematics Curriculum Design", "video_url": "https://example.com/videos/educ_math3.mp4"},
-        {"course": "Education and Mathematics", "caption": "Use of Technology in Math Teaching", "video_url": "https://example.com/videos/educ_math4.mp4"},
-        {"course": "Education and Mathematics", "caption": "Assessment in Mathematics", "video_url": "https://example.com/videos/educ_math5.mp4"},
-
-        # Education and Physics
-        {"course": "Education and Physics", "caption": "Teaching Physics Fundamentals", "video_url": "https://example.com/videos/educ_phys1.mp4"},
-        {"course": "Education and Physics", "caption": "Lab Techniques in Physics", "video_url": "https://example.com/videos/educ_phys2.mp4"},
-        {"course": "Education and Physics", "caption": "Curriculum Development for Physics", "video_url": "https://example.com/videos/educ_phys3.mp4"},
-        {"course": "Education and Physics", "caption": "Using Simulations in Physics", "video_url": "https://example.com/videos/educ_phys4.mp4"},
-        {"course": "Education and Physics", "caption": "Assessment Strategies in Physics", "video_url": "https://example.com/videos/educ_phys5.mp4"},
-
-        # Education and Political Science
-        {"course": "Education and Political Science", "caption": "Teaching Political Concepts", "video_url": "https://example.com/videos/educ_pol1.mp4"},
-        {"course": "Education and Political Science", "caption": "Curriculum Design for Political Science", "video_url": "https://example.com/videos/educ_pol2.mp4"},
-        {"course": "Education and Political Science", "caption": "Role of Discussion in Teaching Politics", "video_url": "https://example.com/videos/educ_pol3.mp4"},
-        {"course": "Education and Political Science", "caption": "Assessment Methods in Political Science", "video_url": "https://example.com/videos/educ_pol4.mp4"},
-        {"course": "Education and Political Science", "caption": "Using Case Studies in Teaching", "video_url": "https://example.com/videos/educ_pol5.mp4"},
-
-        # Education and Yoruba
-        {"course": "Education and Yoruba", "caption": "Teaching Yoruba Language", "video_url": "https://example.com/videos/educ_yoruba1.mp4"},
-        {"course": "Education and Yoruba", "caption": "Yoruba Literature in Education", "video_url": "https://example.com/videos/educ_yoruba2.mp4"},
-        {"course": "Education and Yoruba", "caption": "Curriculum Development for Yoruba", "video_url": "https://example.com/videos/educ_yoruba3.mp4"},
-        {"course": "Education and Yoruba", "caption": "Assessment Strategies", "video_url": "https://example.com/videos/educ_yoruba4.mp4"},
-        {"course": "Education and Yoruba", "caption": "Language Preservation Techniques", "video_url": "https://example.com/videos/educ_yoruba5.mp4"},
-
-        # Educational Management
-        {"course": "Educational Management", "caption": "School Administration Basics", "video_url": "https://example.com/videos/ed_mgmt1.mp4"},
-        {"course": "Educational Management", "caption": "Leadership in Education", "video_url": "https://example.com/videos/ed_mgmt2.mp4"},
-        {"course": "Educational Management", "caption": "Curriculum Planning", "video_url": "https://example.com/videos/ed_mgmt3.mp4"},
-        {"course": "Educational Management", "caption": "Resource Management", "video_url": "https://example.com/videos/ed_mgmt4.mp4"},
-        {"course": "Educational Management", "caption": "Policy Development in Schools", "video_url": "https://example.com/videos/ed_mgmt5.mp4"},
-
-        # Electronics and Computer Engineering
-        {"course": "Electronics and Computer Engineering", "caption": "Basics of Electronics", "video_url": "https://example.com/videos/ece1.mp4"},
-        {"course": "Electronics and Computer Engineering", "caption": "Digital Circuits", "video_url": "https://example.com/videos/ece2.mp4"},
-        {"course": "Electronics and Computer Engineering", "caption": "Microcontrollers and Applications", "video_url": "https://example.com/videos/ece3.mp4"},
-        {"course": "Electronics and Computer Engineering", "caption": "Signal Processing", "video_url": "https://example.com/videos/ece4.mp4"},
-        {"course": "Electronics and Computer Engineering", "caption": "Embedded Systems", "video_url": "https://example.com/videos/ece5.mp4"},
-
-        # English Language
-        {"course": "English Language", "caption": "Grammar and Sentence Structure", "video_url": "https://example.com/videos/eng1.mp4"},
-        {"course": "English Language", "caption": "Creative Writing Techniques", "video_url": "https://example.com/videos/eng2.mp4"},
-        {"course": "English Language", "caption": "Effective Communication Skills", "video_url": "https://example.com/videos/eng3.mp4"},
-        {"course": "English Language", "caption": "Literature Analysis", "video_url": "https://example.com/videos/eng4.mp4"},
-        {"course": "English Language", "caption": "Language Teaching Strategies", "video_url": "https://example.com/videos/eng5.mp4"},
-
-        # Fine and Applied Arts
-        {"course": "Fine and Applied Arts", "caption": "Introduction to Fine Arts", "video_url": "https://example.com/videos/finearts1.mp4"},
-        {"course": "Fine and Applied Arts", "caption": "Art Techniques and Styles", "video_url": "https://example.com/videos/finearts2.mp4"},
-        {"course": "Fine and Applied Arts", "caption": "Sculpture and Ceramics", "video_url": "https://example.com/videos/finearts3.mp4"},
-        {"course": "Fine and Applied Arts", "caption": "Design Principles", "video_url": "https://example.com/videos/finearts4.mp4"},
-        {"course": "Fine and Applied Arts", "caption": "Art History Overview", "video_url": "https://example.com/videos/finearts5.mp4"},
-
-        # Fisheries
-        {"course": "Fisheries", "caption": "Aquaculture Techniques", "video_url": "https://example.com/videos/fisheries1.mp4"},
-        {"course": "Fisheries", "caption": "Fish Species Identification", "video_url": "https://example.com/videos/fisheries2.mp4"},
-        {"course": "Fisheries", "caption": "Water Quality Management", "video_url": "https://example.com/videos/fisheries3.mp4"},
-        {"course": "Fisheries", "caption": "Fisheries Economics", "video_url": "https://example.com/videos/fisheries4.mp4"},
-        {"course": "Fisheries", "caption": "Sustainable Fishing Practices", "video_url": "https://example.com/videos/fisheries5.mp4"},
-
-        # French
-        {"course": "French", "caption": "French Grammar Basics", "video_url": "https://example.com/videos/french1.mp4"},
-        {"course": "French", "caption": "French Vocabulary Building", "video_url": "https://example.com/videos/french2.mp4"},
-        {"course": "French", "caption": "French Conversation Practice", "video_url": "https://example.com/videos/french3.mp4"},
-        {"course": "French", "caption": "French Culture and Traditions", "video_url": "https://example.com/videos/french4.mp4"},
-        {"course": "French", "caption": "Writing in French", "video_url": "https://example.com/videos/french5.mp4"},
-
-        # Geography and Planning
-        {"course": "Geography and Planning", "caption": "Urban Planning Basics", "video_url": "https://example.com/videos/geop1.mp4"},
-        {"course": "Geography and Planning", "caption": "GIS Applications", "video_url": "https://example.com/videos/geop2.mp4"},
-        {"course": "Geography and Planning", "caption": "Environmental Management", "video_url": "https://example.com/videos/geop3.mp4"},
-        {"course": "Geography and Planning", "caption": "Land Use Planning", "video_url": "https://example.com/videos/geop4.mp4"},
-        {"course": "Geography and Planning", "caption": "Sustainable Development", "video_url": "https://example.com/videos/geop5.mp4"},
-
-        # Guidance and Counseling
-        {"course": "Guidance and Counseling", "caption": "Guidance Techniques", "video_url": "https://example.com/videos/guidance1.mp4"},
-        {"course": "Guidance and Counseling", "caption": "Counseling Skills", "video_url": "https://example.com/videos/guidance2.mp4"},
-        {"course": "Guidance and Counseling", "caption": "Career Counseling", "video_url": "https://example.com/videos/guidance3.mp4"},
-        {"course": "Guidance and Counseling", "caption": "Student Welfare Programs", "video_url": "https://example.com/videos/guidance4.mp4"},
-        {"course": "Guidance and Counseling", "caption": "Psychological Support", "video_url": "https://example.com/videos/guidance5.mp4"},
-
-        # Health Education
-        {"course": "Health Education", "caption": "Health Promotion Strategies", "video_url": "https://example.com/videos/health1.mp4"},
-        {"course": "Health Education", "caption": "Disease Prevention", "video_url": "https://example.com/videos/health2.mp4"},
-        {"course": "Health Education", "caption": "Nutrition Education", "video_url": "https://example.com/videos/health3.mp4"},
-        {"course": "Health Education", "caption": "Mental Health Awareness", "video_url": "https://example.com/videos/health4.mp4"},
-        {"course": "Health Education", "caption": "First Aid Training", "video_url": "https://example.com/videos/health5.mp4"},
-
-        # History and International Studies
-        {"course": "History and International Studies", "caption": "World History Overview", "video_url": "https://example.com/videos/history1.mp4"},
-        {"course": "History and International Studies", "caption": "International Relations", "video_url": "https://example.com/videos/history2.mp4"},
-        {"course": "History and International Studies", "caption": "Colonial and Post-Colonial History", "video_url": "https://example.com/videos/history3.mp4"},
-        {"course": "History and International Studies", "caption": "Historical Research Methods", "video_url": "https://example.com/videos/history4.mp4"},
-        {"course": "History and International Studies", "caption": "Cultural Heritage Preservation", "video_url": "https://example.com/videos/history5.mp4"},
-
-        # Industrial Relations and Personnel Management
-        {"course": "Industrial Relations and Personnel Management", "caption": "Labor Laws Overview", "video_url": "https://example.com/videos/irp1.mp4"},
-        {"course": "Industrial Relations and Personnel Management", "caption": "Conflict Resolution", "video_url": "https://example.com/videos/irp2.mp4"},
-        {"course": "Industrial Relations and Personnel Management", "caption": "Staff Recruitment and Selection", "video_url": "https://example.com/videos/irp3.mp4"},
-        {"course": "Industrial Relations and Personnel Management", "caption": "Performance Appraisal", "video_url": "https://example.com/videos/irp4.mp4"},
-        {"course": "Industrial Relations and Personnel Management", "caption": "Workplace Motivation", "video_url": "https://example.com/videos/irp5.mp4"},
-
-        # Insurance
-        {"course": "Insurance", "caption": "Types of Insurance", "video_url": "https://example.com/videos/insurance1.mp4"},
-        {"course": "Insurance", "caption": "Risk Assessment in Insurance", "video_url": "https://example.com/videos/insurance2.mp4"},
-        {"course": "Insurance", "caption": "Claims Processing", "video_url": "https://example.com/videos/insurance3.mp4"},
-        {"course": "Insurance", "caption": "Insurance Policies", "video_url": "https://example.com/videos/insurance4.mp4"},
-        {"course": "Insurance", "caption": "Insurance Regulations", "video_url": "https://example.com/videos/insurance5.mp4"},
-
-        # Islamic Studies
-        {"course": "Islamic Studies", "caption": "Introduction to Islam", "video_url": "https://example.com/videos/islamic1.mp4"},
-        {"course": "Islamic Studies", "caption": "Quranic Studies", "video_url": "https://example.com/videos/islamic2.mp4"},
-        {"course": "Islamic Studies", "caption": "Islamic Jurisprudence", "video_url": "https://example.com/videos/islamic3.mp4"},
-        {"course": "Islamic Studies", "caption": "Islamic History", "video_url": "https://example.com/videos/islamic4.mp4"},
-        {"course": "Islamic Studies", "caption": "Islamic Ethics", "video_url": "https://example.com/videos/islamic5.mp4"},
-
-        # Law
-        {"course": "Law", "caption": "Introduction to Nigerian Law", "video_url": "https://example.com/videos/law1.mp4"},
-        {"course": "Law", "caption": "Legal Systems and Processes", "video_url": "https://example.com/videos/law2.mp4"},
-        {"course": "Law", "caption": "Constitutional Law", "video_url": "https://example.com/videos/law3.mp4"},
-        {"course": "Law", "caption": "Criminal Law Basics", "video_url": "https://example.com/videos/law4.mp4"},
-        {"course": "Law", "caption": "Legal Ethics and Practice", "video_url": "https://example.com/videos/law5.mp4"},
-
-        # Library and Information Science
-        {"course": "Library and Information Science", "caption": "Library Management", "video_url": "https://example.com/videos/library1.mp4"},
-        {"course": "Library and Information Science", "caption": "Information Retrieval", "video_url": "https://example.com/videos/library2.mp4"},
-        {"course": "Library and Information Science", "caption": "Cataloging and Classification", "video_url": "https://example.com/videos/library3.mp4"},
-        {"course": "Library and Information Science", "caption": "Digital Libraries", "video_url": "https://example.com/videos/library4.mp4"},
-        {"course": "Library and Information Science", "caption": "Reference Services", "video_url": "https://example.com/videos/library5.mp4"},
-
-        # Local Government and Development Studies
-        {"course": "Local Government and Development Studies", "caption": "Local Governance Structures", "video_url": "https://example.com/videos/lgds1.mp4"},
-        {"course": "Local Government and Development Studies", "caption": "Community Development", "video_url": "https://example.com/videos/lgds2.mp4"},
-        {"course": "Local Government and Development Studies", "caption": "Decentralization Policies", "video_url": "https://example.com/videos/lgds3.mp4"},
-        {"course": "Local Government and Development Studies", "caption": "Public Administration in Local Govt", "video_url": "https://example.com/videos/lgds4.mp4"},
-        {"course": "Local Government and Development Studies", "caption": "Development Planning", "video_url": "https://example.com/videos/lgds5.mp4"},
-
-        # Marketing
-        {"course": "Marketing", "caption": "Marketing Principles", "video_url": "https://example.com/videos/marketing1.mp4"},
-        {"course": "Marketing", "caption": "Market Research Techniques", "video_url": "https://example.com/videos/marketing2.mp4"},
-        {"course": "Marketing", "caption": "Advertising Strategies", "video_url": "https://example.com/videos/marketing3.mp4"},
-        {"course": "Marketing", "caption": "Digital Marketing", "video_url": "https://example.com/videos/marketing4.mp4"},
-        {"course": "Marketing", "caption": "Consumer Behavior", "video_url": "https://example.com/videos/marketing5.mp4"},
-
-        # Mass Communication
-        {"course": "Mass Communication", "caption": "Media and Society", "video_url": "https://example.com/videos/masscom1.mp4"},
-        {"course": "Mass Communication", "caption": "Broadcasting Techniques", "video_url": "https://example.com/videos/masscom2.mp4"},
-        {"course": "Mass Communication", "caption": "Public Relations", "video_url": "https://example.com/videos/masscom3.mp4"},
-        {"course": "Mass Communication", "caption": "Journalism Fundamentals", "video_url": "https://example.com/videos/masscom4.mp4"},
-        {"course": "Mass Communication", "caption": "Media Ethics", "video_url": "https://example.com/videos/masscom5.mp4"},
-
-        # Mathematics
-        {"course": "Mathematics", "caption": "Algebraic Expressions", "video_url": "https://example.com/videos/math1.mp4"},
-        {"course": "Mathematics", "caption": "Calculus Basics", "video_url": "https://example.com/videos/math2.mp4"},
-        {"course": "Mathematics", "caption": "Statistics Fundamentals", "video_url": "https://example.com/videos/math3.mp4"},
-        {"course": "Mathematics", "caption": "Geometry in Focus", "video_url": "https://example.com/videos/math4.mp4"},
-        {"course": "Mathematics", "caption": "Mathematical Problem Solving", "video_url": "https://example.com/videos/math5.mp4"},
-
-        # Mechanical Engineering
-        {"course": "Mechanical Engineering", "caption": "Thermodynamics Principles", "video_url": "https://example.com/videos/mech1.mp4"},
-        {"course": "Mechanical Engineering", "caption": "Fluid Mechanics", "video_url": "https://example.com/videos/mech2.mp4"},
-        {"course": "Mechanical Engineering", "caption": "Machine Design", "video_url": "https://example.com/videos/mech3.mp4"},
-        {"course": "Mechanical Engineering", "caption": "Manufacturing Processes", "video_url": "https://example.com/videos/mech4.mp4"},
-        {"course": "Mechanical Engineering", "caption": "Automation and Robotics", "video_url": "https://example.com/videos/mech5.mp4"},
-
-        # Medicine and Surgery
-        {"course": "Medicine and Surgery", "caption": "Introduction to Human Anatomy", "video_url": "https://example.com/videos/medsurg1.mp4"},
-        {"course": "Medicine and Surgery", "caption": "Basics of Pathology", "video_url": "https://example.com/videos/medsurg2.mp4"},
-        {"course": "Medicine and Surgery", "caption": "Pharmacology Overview", "video_url": "https://example.com/videos/medsurg3.mp4"},
-        {"course": "Medicine and Surgery", "caption": "Surgical Procedures", "video_url": "https://example.com/videos/medsurg4.mp4"},
-        {"course": "Medicine and Surgery", "caption": "Patient Care and Ethics", "video_url": "https://example.com/videos/medsurg5.mp4"},
-
-        # Microbiology
-        {"course": "Microbiology", "caption": "Microbial Classification", "video_url": "https://example.com/videos/micro1.mp4"},
-        {"course": "Microbiology", "caption": "Bacterial Pathogens", "video_url": "https://example.com/videos/micro2.mp4"},
-        {"course": "Microbiology", "caption": "Antibiotic Resistance", "video_url": "https://example.com/videos/micro3.mp4"},
-        {"course": "Microbiology", "caption": "Lab Techniques", "video_url": "https://example.com/videos/micro4.mp4"},
-        {"course": "Microbiology", "caption": "Infection Control", "video_url": "https://example.com/videos/micro5.mp4"},
-
-        # Music
-        {"course": "Music", "caption": "Music Theory Basics", "video_url": "https://example.com/videos/music1.mp4"},
-        {"course": "Music", "caption": "Instrumental Techniques", "video_url": "https://example.com/videos/music2.mp4"},
-        {"course": "Music", "caption": "Music Composition", "video_url": "https://example.com/videos/music3.mp4"},
-        {"course": "Music", "caption": "Music Performance Tips", "video_url": "https://example.com/videos/music4.mp4"},
-        {"course": "Music", "caption": "Music History", "video_url": "https://example.com/videos/music5.mp4"},
-
-        # Nursing / Nursing Science
-        {"course": "Nursing / Nursing Science", "caption": "Basics of Patient Care", "video_url": "https://example.com/videos/nursing1.mp4"},
-        {"course": "Nursing / Nursing Science", "caption": "Infection Control", "video_url": "https://example.com/videos/nursing2.mp4"},
-        {"course": "Nursing / Nursing Science", "caption": "Pharmacology for Nurses", "video_url": "https://example.com/videos/nursing3.mp4"},
-        {"course": "Nursing / Nursing Science", "caption": "Emergency Response", "video_url": "https://example.com/videos/nursing4.mp4"},
-        {"course": "Nursing / Nursing Science", "caption": "Patient Assessment", "video_url": "https://example.com/videos/nursing5.mp4"},
-
-        # Pharmacology
-        {"course": "Pharmacology", "caption": "Drug Classifications", "video_url": "https://example.com/videos/pharm1.mp4"},
-        {"course": "Pharmacology", "caption": "Pharmacokinetics", "video_url": "https://example.com/videos/pharm2.mp4"},
-        {"course": "Pharmacology", "caption": "Adverse Drug Reactions", "video_url": "https://example.com/videos/pharm3.mp4"},
-        {"course": "Pharmacology", "caption": "Drug Interactions", "video_url": "https://example.com/videos/pharm4.mp4"},
-        {"course": "Pharmacology", "caption": "Therapeutic Uses", "video_url": "https://example.com/videos/pharm5.mp4"},
-
-        # Philosophy
-        {"course": "Philosophy", "caption": "Introduction to Philosophy", "video_url": "https://example.com/videos/phil1.mp4"},
-        {"course": "Philosophy", "caption": "Ethical Theories", "video_url": "https://example.com/videos/phil2.mp4"},
-        {"course": "Philosophy", "caption": "Logic and Reasoning", "video_url": "https://example.com/videos/phil3.mp4"},
-        {"course": "Philosophy", "caption": "Philosophy of Mind", "video_url": "https://example.com/videos/phil4.mp4"},
-        {"course": "Philosophy", "caption": "Existentialism", "video_url": "https://example.com/videos/phil5.mp4"},
-
-        # Physical and Health Education
-        {"course": "Physical and Health Education", "caption": "Fitness Training Basics", "video_url": "https://example.com/videos/physh1.mp4"},
-        {"course": "Physical and Health Education", "caption": "Health and Wellness", "video_url": "https://example.com/videos/physh2.mp4"},
-        {"course": "Physical and Health Education", "caption": "Sports Management", "video_url": "https://example.com/videos/physh3.mp4"},
-        {"course": "Physical and Health Education", "caption": "Nutrition and Diet", "video_url": "https://example.com/videos/physh4.mp4"},
-        {"course": "Physical and Health Education", "caption": "First Aid and Emergency Procedures", "video_url": "https://example.com/videos/physh5.mp4"},
-
-        # Physics
-        {"course": "Physics", "caption": "Newton's Laws of Motion", "video_url": "https://example.com/videos/phys1.mp4"},
-        {"course": "Physics", "caption": "Electromagnetism Basics", "video_url": "https://example.com/videos/phys2.mp4"},
-        {"course": "Physics", "caption": "Wave Properties", "video_url": "https://example.com/videos/phys3.mp4"},
-        {"course": "Physics", "caption": "Optics Fundamentals", "video_url": "https://example.com/videos/phys4.mp4"},
-        {"course": "Physics", "caption": "Thermodynamics Principles", "video_url": "https://example.com/videos/phys5.mp4"},
-
-        # Physiology
-        {"course": "Physiology", "caption": "Human Body Systems", "video_url": "https://example.com/videos/physio1.mp4"},
-        {"course": "Physiology", "caption": "Circulatory System", "video_url": "https://example.com/videos/physio2.mp4"},
-        {"course": "Physiology", "caption": "Nervous System", "video_url": "https://example.com/videos/physio3.mp4"},
-        {"course": "Physiology", "caption": "Respiratory System", "video_url": "https://example.com/videos/physio4.mp4"},
-        {"course": "Physiology", "caption": "Digestive System", "video_url": "https://example.com/videos/physio5.mp4"},
-
-        # Political Science
-        {"course": "Political Science", "caption": "Introduction to Political Science", "video_url": "https://example.com/videos/pol1.mp4"},
-        {"course": "Political Science", "caption": "Government Systems", "video_url": "https://example.com/videos/pol2.mp4"},
-        {"course": "Political Science", "caption": "International Relations", "video_url": "https://example.com/videos/pol3.mp4"},
-        {"course": "Political Science", "caption": "Political Theories", "video_url": "https://example.com/videos/pol4.mp4"},
-        {"course": "Political Science", "caption": "Electoral Processes", "video_url": "https://example.com/videos/pol5.mp4"},
-
-        # Portuguese / English
-        {"course": "Portuguese / English", "caption": "Language Basics", "video_url": "https://example.com/videos/port_eng1.mp4"},
-        {"course": "Portuguese / English", "caption": "Vocabulary Building", "video_url": "https://example.com/videos/port_eng2.mp4"},
-        {"course": "Portuguese / English", "caption": "Conversational Skills", "video_url": "https://example.com/videos/port_eng3.mp4"},
-        {"course": "Portuguese / English", "caption": "Writing Skills", "video_url": "https://example.com/videos/port_eng4.mp4"},
-        {"course": "Portuguese / English", "caption": "Cultural Contexts", "video_url": "https://example.com/videos/port_eng5.mp4"},
-
-        # Psychology
-        {"course": "Psychology", "caption": "Introduction to Psychology", "video_url": "https://example.com/videos/psych1.mp4"},
-        {"course": "Psychology", "caption": "Developmental Psychology", "video_url": "https://example.com/videos/psych2.mp4"},
-        {"course": "Psychology", "caption": "Behavioral Theories", "video_url": "https://example.com/videos/psych3.mp4"},
-        {"course": "Psychology", "caption": "Counseling Techniques", "video_url": "https://example.com/videos/psych4.mp4"},
-        {"course": "Psychology", "caption": "Research Methods", "video_url": "https://example.com/videos/psych5.mp4"},
-
-        # Public Administration
-        {"course": "Public Administration", "caption": "Public Policy Making", "video_url": "https://example.com/videos/pubadmin1.mp4"},
-        {"course": "Public Administration", "caption": "Bureaucracy and Management", "video_url": "https://example.com/videos/pubadmin2.mp4"},
-        {"course": "Public Administration", "caption": "Ethics in Public Service", "video_url": "https://example.com/videos/pubadmin3.mp4"},
-        {"course": "Public Administration", "caption": "Budgeting and Finance", "video_url": "https://example.com/videos/pubadmin4.mp4"},
-        {"course": "Public Administration", "caption": "Governance and Development", "video_url": "https://example.com/videos/pubadmin5.mp4"},
-
-        # Sociology
-        {"course": "Sociology", "caption": "Basic Sociological Concepts", "video_url": "https://example.com/videos/sociology1.mp4"},
-        {"course": "Sociology", "caption": "Social Stratification", "video_url": "https://example.com/videos/sociology2.mp4"},
-        {"course": "Sociology", "caption": "Family and Society", "video_url": "https://example.com/videos/sociology3.mp4"},
-        {"course": "Sociology", "caption": "Social Change", "video_url": "https://example.com/videos/sociology4.mp4"},
-        {"course": "Sociology", "caption": "Research Methods in Sociology", "video_url": "https://example.com/videos/sociology5.mp4"},
-
-        # Teacher Education Science
-        {"course": "Teacher Education Science", "caption": "Curriculum Development", "video_url": "https://example.com/videos/ted_science1.mp4"},
-        {"course": "Teacher Education Science", "caption": "Teaching Methodologies", "video_url": "https://example.com/videos/ted_science2.mp4"},
-        {"course": "Teacher Education Science", "caption": "Practical Teaching Skills", "video_url": "https://example.com/videos/ted_science3.mp4"},
-        {"course": "Teacher Education Science", "caption": "Assessment and Evaluation", "video_url": "https://example.com/videos/ted_science4.mp4"},
-        {"course": "Teacher Education Science", "caption": "Classroom Management", "video_url": "https://example.com/videos/ted_science5.mp4"},
-
-        # Transport Management Technology
-        {"course": "Transport Management Technology", "caption": "Logistics and Supply Chain", "video_url": "https://example.com/videos/transport1.mp4"},
-        {"course": "Transport Management Technology", "caption": "Transport Planning", "video_url": "https://example.com/videos/transport2.mp4"},
-        {"course": "Transport Management Technology", "caption": "Fleet Management", "video_url": "https://example.com/videos/transport3.mp4"},
-        {"course": "Transport Management Technology", "caption": "Traffic Management", "video_url": "https://example.com/videos/transport4.mp4"},
-        {"course": "Transport Management Technology", "caption": "Safety Regulations", "video_url": "https://example.com/videos/transport5.mp4"},
-
-        # Yoruba
-        {"course": "Yoruba", "caption": "Yoruba Language Basics", "video_url": "https://example.com/videos/yoruba1.mp4"},
-        {"course": "Yoruba", "caption": "Yoruba Proverbs and Sayings", "video_url": "https://example.com/videos/yoruba2.mp4"},
-        {"course": "Yoruba", "caption": "Yoruba Cultural Practices", "video_url": "https://example.com/videos/yoruba3.mp4"},
-        {"course": "Yoruba", "caption": "Yoruba Traditional Attire", "video_url": "https://example.com/videos/yoruba4.mp4"},
-        {"course": "Yoruba", "caption": "Yoruba Folklore", "video_url": "https://example.com/videos/yoruba5.mp4"},
-
     ]
 
     matching = [r for r in all_reels if r["course"] == course] if course else all_reels
@@ -2321,6 +2013,7 @@ def get_reels():
 @app.route('/CBT', methods=['GET'])
 @login_required
 def CBT():
+    """Render Computer-Based Test page."""
     topics = ["Python", "Hadith", "AI", "Math"]
     selected_topic = request.args.get("topic")
     questions = []
@@ -2339,10 +2032,12 @@ def CBT():
 @app.route('/teach-me-ai')
 @login_required
 def teach_me_ai():
+    """Render AI teaching interface."""
     return render_template('teach-me-ai.html')
 
 @app.route('/api/ai-teach')
 def ai_teach():
+    """API endpoint for AI teaching."""
     course = request.args.get("course")
     level = request.args.get("level")
 
@@ -2371,52 +2066,58 @@ def ai_teach():
 # ============================================
 @app.route('/teacher')
 def teacher_create():
+    """Create a new teacher room."""
     room_id = str(uuid.uuid4())[:8]
     return redirect(f'/teacher/{room_id}')
 
 @app.route('/teacher/<room_id>')
 def teacher_view(room_id):
+    """Render teacher view for a specific room."""
     return render_template('teacher.html', room_id=room_id)
 
 @app.route('/student/<room_id>')
 def student_view(room_id):
+    """Render student view for a specific room."""
     return render_template('student.html', room_id=room_id)
 
 @app.route('/join', methods=['POST'])
 def join_room_post():
+    """Handle room joining via POST request."""
     room_id = request.form.get('room_id', '').strip()
     if not room_id:
         flash('Please enter a room ID')
         return redirect('/')
     return redirect(f'/student/{room_id}')
 
-# ============================================
-# Live Meeting Routes
-# ============================================
 @app.route('/live-meeting')
 @app.route('/live_meeting')
 def live_meeting():
+    """Render live meeting landing page."""
     return render_template('live_meeting.html')
 
 @app.route('/live-meeting/teacher')
 @app.route('/live_meeting/teacher')
 def live_meeting_teacher_create():
+    """Create a new live meeting teacher room."""
     room_id = str(uuid.uuid4())[:8]
     return redirect(url_for('live_meeting_teacher_view', room_id=room_id))
 
 @app.route('/live-meeting/teacher/<room_id>')
 @app.route('/live_meeting/teacher/<room_id>')
 def live_meeting_teacher_view(room_id):
+    """Render live meeting teacher view."""
     return render_template('teacher_live.html', room_id=room_id)
 
 @app.route('/live-meeting/student/<room_id>')
 @app.route('/live_meeting/student/<room_id>')
 def live_meeting_student_view(room_id):
+    """Render live meeting student view."""
     return render_template('student_live.html', room_id=room_id)
 
 @app.route('/live-meeting/join', methods=['POST'])
 @app.route('/live_meeting/join', methods=['POST'])
 def live_meeting_join():
+    """Handle live meeting joining."""
     room_id = request.form.get('room_id', '').strip()
     username = request.form.get('username', '').strip()
     
@@ -2432,11 +2133,11 @@ def live_meeting_join():
     return redirect(url_for('live_meeting_student_view', room_id=room_id))
 
 # ============================================
-# NEW: Connection Test Route
+# Connection Test Route
 # ============================================
 @app.route('/test-connection')
 def test_connection():
-    """Simple connection test page"""
+    """Simple connection test page."""
     return """
     <!DOCTYPE html>
     <html>
@@ -2481,7 +2182,7 @@ def test_connection():
 # ============================================
 @app.route('/debug/rooms')
 def debug_rooms():
-    """Debug endpoint to view current room states"""
+    """Debug endpoint to view current room states."""
     debug_info = {
         'rooms': rooms,
         'participants': participants,
@@ -2489,6 +2190,42 @@ def debug_rooms():
         'total_rooms': len(rooms),
         'total_participants': len(participants)
     }
+    return json.dumps(debug_info, indent=2, default=str)
+
+# ============================================
+# Memory System Debug Route
+# ============================================
+@app.route('/debug/memory')
+@login_required
+def debug_memory():
+    """Debug endpoint for memory system."""
+    username = session['user']['username']
+    user_id = session.get('user_id')
+    user_key = pdf_memory._get_user_key(username, user_id)
+    
+    debug_info = {
+        'user': {
+            'username': username,
+            'user_id': user_id,
+            'user_key': user_key
+        },
+        'session': {
+            'last_file_id': session.get('last_file_id'),
+            'last_file_type': session.get('last_file_type'),
+            'last_upload_time': session.get('last_upload_time')
+        },
+        'pdf_memory': {
+            'cache_stats': pdf_memory.get_cache_stats(),
+            'health_check': pdf_memory.health_check(),
+            'user_in_cache': user_key in pdf_memory.cache,
+            'user_file_count': len(pdf_memory.cache.get(user_key, {})),
+            'user_files': list(pdf_memory.cache.get(user_key, {}).keys()) if user_key in pdf_memory.cache else []
+        },
+        'memory_layers': MemoryLayers.get_all_metadata(),
+        'chat_context': ChatContext.get_context_stats(),
+        'memory_router': MemoryRouter.get_default_config()
+    }
+    
     return json.dumps(debug_info, indent=2, default=str)
 
 # ============================================
@@ -2502,18 +2239,17 @@ create_default_user()
 if __name__ == '__main__':
     print(f"\n{'='*60}")
     print("🚀 NELAVISTA LIVE + Tellavista Platform")
-    print("🌟 Full Educational Platform with Vision AI")
-    print("📚 AI Tutor + Study Materials + Live Classes")
+    print("🌟 Complete Educational Platform with Memory System")
+    print("🧠 INTEGRATED MEMORY SYSTEM:")
+    print("   - PDF Memory: Document extraction and storage")
+    print("   - Chat Context: History relevance scoring")
+    print("   - Memory Router: Intelligent context selection")
+    print("   - Profile Context: Personalized responses")
     print(f"{'='*60}")
-    print("✅ Vision AI Features:")
-    print("   - GPT-4o Vision for image analysis")
-    print("   - Automatic image context detection")
-    print("   - Fallback to OCR when vision fails")
-    print("   - Image base64 storage in session")
-    print("\n✅ Educational Platform Features:")
-    print("   - User Authentication (Signup/Login)")
-    print("   - AI Tutor (Nelavista) with File Upload")
-    print("   - PDF & Image Processing (OCR, Text Extraction)")
+    print("✅ Educational Platform Features:")
+    print("   - User Authentication with Memory Integration")
+    print("   - AI Tutor (Nelavista) with Multi-Context Memory")
+    print("   - PDF & Image Processing (OCR, Vision AI)")
     print("   - Study Materials & PDFs")
     print("   - Course Reels & Videos")
     print("   - CBT Test System")
@@ -2521,15 +2257,23 @@ if __name__ == '__main__':
     print("   - Full Mesh WebRTC Video Calls")
     print("   - Teacher Authority System")
     print("   - Real-time Collaboration")
-    print("   - Raise Hand & Quick Feedback")
     print(f"{'='*60}")
     print("\n📡 Connection test: http://localhost:5000/test-connection")
+    print("🧠 Memory debug: http://localhost:5000/debug/memory")
     print("👨‍🏫 Teacher test: http://localhost:5000/live_meeting/teacher")
     print("👨‍🎓 Student test: http://localhost:5000/live_meeting")
     print("🎓 Platform login: http://localhost:5000/login (test/test123)")
     print(f"{'='*60}")
     print("\n⚠️  IMPORTANT: Install required packages:")
     print("   pip install PyPDF2 pdfplumber Pillow pytesseract openai")
+    print(f"{'='*60}\n")
+    
+    # Print memory system status
+    print("🧠 Memory System Initialization:")
+    print(f"   PDF Memory Directory: {PDF_MEMORY_DIR}")
+    print(f"   Upload Directory: {UPLOAD_FOLDER}")
+    print(f"   Memory Layers: {', '.join(MemoryLayers.get_primary_layers())}")
+    print(f"   Cache Stats: {pdf_memory.get_cache_stats()}")
     print(f"{'='*60}\n")
     
     port = int(os.environ.get('PORT', 5000))
