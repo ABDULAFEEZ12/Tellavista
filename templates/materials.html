@@ -269,7 +269,7 @@
       border: none;
       outline: none;
       font-size: 1rem;
-      color: #ffffff !important; /* Force white text */
+      color: #ffffff !important;
       appearance: none;
       -webkit-appearance: none;
       cursor: pointer;
@@ -746,20 +746,6 @@
     .show {
       display: block !important;
     }
-
-    /* ===== TEST MODE ===== */
-    .test-mode {
-      position: fixed;
-      bottom: 20px;
-      right: 20px;
-      background: rgba(0, 0, 0, 0.9);
-      color: white;
-      padding: 10px 15px;
-      border-radius: 10px;
-      font-size: 0.8rem;
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      z-index: 1000;
-    }
   </style>
 </head>
 <body>
@@ -955,9 +941,6 @@
       </a>
     </div>
   </div>
-
-  <!-- TEST MODE INDICATOR -->
-  <div class="test-mode">Test Mode: All Materials Visible</div>
 
   <script>
     // ===== MATERIALS DATA =====
@@ -1766,24 +1749,6 @@
         searchMaterials();
       }
     });
-
-    // Test function to verify dropdowns are visible
-    function testDropdowns() {
-      // Set test values to make sure dropdowns are working
-      document.getElementById('courseSelect').value = 'Computer Science';
-      document.getElementById('levelSelect').value = '100';
-      document.getElementById('topicInput').value = 'programming';
-      
-      // Trigger change events
-      document.getElementById('courseSelect').dispatchEvent(new Event('change'));
-      document.getElementById('levelSelect').dispatchEvent(new Event('change'));
-      document.getElementById('topicInput').dispatchEvent(new Event('input'));
-      
-      showNotification('Test values set: Computer Science, 100 Level, programming', 'success');
-    }
-
-    // Run test on page load
-    setTimeout(testDropdowns, 1000);
   </script>
 </body>
 </html>
