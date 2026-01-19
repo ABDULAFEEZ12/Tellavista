@@ -1071,10 +1071,11 @@ async function sendToBackend(message, attachments = []) {
     // Show typing indicator
     showTypingIndicator();
     
-    // Send to backend endpoint
+    // 🔥 FIX: Add credentials for session cookies
     const response = await fetch('/ask_with_files', {
       method: 'POST',
-      body: formData
+      body: formData,
+      credentials: 'include'  // CRITICAL FOR RENDER
     });
     
     if (!response.ok) {
@@ -1083,7 +1084,17 @@ async function sendToBackend(message, attachments = []) {
     
     const data = await response.json();
     
-    // Remove typing indicator with fade out
+    // 🔥 DEBUG: Remove after fixing
+    console.log('🔍 API Response:', {
+      status: response.status,
+      ok: response.ok,
+      data: data,
+      answerExists: !!data.answer,
+      answerType: typeof data.answer,
+      answerLength: data.answer ? data.answer.length : 0
+    });
+    
+    // Remove typing indicator
     const messagesDiv = document.getElementById('messages');
     const typingIndicator = messagesDiv.querySelector('.typing-indicator');
     if (typingIndicator) {
@@ -1097,10 +1108,17 @@ async function sendToBackend(message, attachments = []) {
     
     state.isLoading = false;
     
-    // Add AI response to chat
-    if (data.answer) {
-      addMessage(data.answer, 'ai');
+    // 🔥 FIX: Strict validation for answer
+    if (data && typeof data.answer === 'string') {
+      const trimmedAnswer = data.answer.trim();
+      if (trimmedAnswer !== '') {
+        addMessage(trimmedAnswer, 'ai');
+      } else {
+        // Empty string from backend - use graceful fallback
+        addMessage("I'm having a little trouble answering right now, but please try again.", 'ai');
+      }
     } else {
+      // No answer field or wrong type
       addMessage("I received your message but couldn't generate a response. Please try again.", 'ai');
     }
     
@@ -1412,3 +1430,4 @@ if (window.location.hash === '#chat') {
 </script>
 </body>
 </html>
+
