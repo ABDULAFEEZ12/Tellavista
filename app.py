@@ -22,6 +22,7 @@ from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
 from sqlalchemy import inspect, text
 from hashlib import sha256
+from memory.pdf_handler import PDFMemory
 from functools import wraps
 import uuid
 import requests
@@ -2281,3 +2282,4 @@ if __name__ == '__main__':
     
     port = int(os.environ.get('PORT', 5000))
     socketio.run(app, host='0.0.0.0', port=port, debug=DEBUG_MODE)
+
