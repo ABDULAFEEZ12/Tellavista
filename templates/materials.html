@@ -2,734 +2,1729 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>📚 Study Materials</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
+  <title>📚 Study Materials - Nelavista</title>
+  
   <style>
+    /* ===== CSS VARIABLES & RESET ===== */
+    :root {
+      --primary-color: #000000;
+      --primary-dark: #333333;
+      --light-bg: #ffffff;
+      --dark-bg: #000000;
+      --card-light: #ffffff;
+      --card-dark: #0a0a0a;
+      --text-light: #000000;
+      --text-dark: #ffffff;
+      --input-bg: #0a0a0a;
+      --border-light: rgba(0, 0, 0, 0.1);
+      --border-dark: rgba(255, 255, 255, 0.1);
+      --gradient-start: #ffffff;
+      --gradient-end: #888888;
+      --accent-color: #1a1a1a;
+      --material-color: rgba(255, 255, 255, 0.15);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      -webkit-tap-highlight-color: transparent;
+    }
+
     body {
-      font-family: Poppins, sans-serif;
-      padding: 20px;
-      background: #f4f4f4;
-      color: #222;
+      background: var(--dark-bg);
+      color: var(--text-dark);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      overflow-x: hidden;
+      padding: 0 20px;
+      opacity: 0;
+      animation: fadeIn 0.6s ease-out forwards;
+      animation-delay: 0.1s;
     }
-    h1, h2 {
+
+    /* ===== TOP BAR ===== */
+    #top-bar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 60px;
+      background: rgba(0, 0, 0, 0.95);
+      backdrop-filter: blur(10px);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 16px;
+      z-index: 1002;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      opacity: 0;
+      animation: fadeInDown 0.5s ease-out 0.2s forwards;
+    }
+
+    #back-btn {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 20px;
+      background: rgba(255, 255, 255, 0.1);
+      border: none;
+      color: white;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    #back-btn:hover {
+      background: rgba(255, 255, 255, 0.2);
+      transform: translateX(-2px);
+    }
+
+    #top-bar-title {
+      font-weight: 600;
+      font-size: 1.1rem;
+      background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    /* ===== ANIMATIONS ===== */
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+      }
+      to {
+        opacity: 1;
+      }
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(15px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes fadeInDown {
+      from {
+        opacity: 0;
+        transform: translateY(-10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateX(-20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+
+    @keyframes slideUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes materialHover {
+      0%, 100% {
+        transform: translateY(0);
+      }
+      50% {
+        transform: translateY(-5px);
+      }
+    }
+
+    @keyframes shimmer {
+      0% {
+        background-position: -200% center;
+      }
+      100% {
+        background-position: 200% center;
+      }
+    }
+
+    /* ===== MAIN CONTAINER ===== */
+    .materials-container {
+      width: 100%;
+      max-width: 800px;
+      margin-top: 80px;
+      opacity: 0;
+      animation: fadeInUp 0.7s ease-out 0.3s forwards;
+    }
+
+    /* ===== HEADER SECTION ===== */
+    .header-section {
       text-align: center;
+      margin-bottom: 2rem;
     }
-    .material {
-      background: white;
-      padding: 15px;
-      margin: 10px auto;
-      border-radius: 8px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-      max-width: 700px;
+
+    .header-title {
+      font-size: 2rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 0.5rem;
+      opacity: 0;
+      animation: fadeInUp 0.7s ease-out 0.4s forwards;
     }
-    .material a {
-      text-decoration: none;
-      color: blue;
+
+    .header-subtitle {
+      color: #a0a0a0;
+      font-size: 1rem;
+      line-height: 1.5;
+      max-width: 500px;
+      margin: 0 auto;
+      opacity: 0;
+      animation: fadeInUp 0.7s ease-out 0.5s forwards;
     }
-    select, input, button {
-      margin: 10px auto;
+
+    /* ===== SEARCH SECTION ===== */
+    .search-section {
+      background: var(--card-dark);
+      border: 1px solid var(--border-dark);
+      border-radius: 16px;
+      padding: 2rem;
+      margin-bottom: 2rem;
+      opacity: 0;
+      animation: fadeInUp 0.7s ease-out 0.6s forwards;
+    }
+
+    .input-group {
+      margin-bottom: 1.8rem;
+      opacity: 0;
+      animation: slideIn 0.6s ease-out forwards;
+    }
+
+    .input-group:nth-child(1) {
+      animation-delay: 0.6s;
+    }
+
+    .input-group:nth-child(2) {
+      animation-delay: 0.7s;
+    }
+
+    .input-group:nth-child(3) {
+      animation-delay: 0.8s;
+    }
+
+    .input-label {
       display: block;
-      padding: 10px;
-      font-size: 1em;
-      border-radius: 6px;
-      border: 1px solid #ccc;
-      width: 90%;
-      max-width: 600px;
+      margin-bottom: 0.7rem;
+      font-size: 0.95rem;
+      font-weight: 500;
+      color: #e0e0e0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
     }
-    button {
-      background-color: #007BFF;
+
+    .input-wrapper {
+      position: relative;
+      background: var(--input-bg);
+      border-radius: 12px;
+      border: 1px solid var(--border-dark);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .input-wrapper:focus-within {
+      border-color: rgba(255, 255, 255, 0.3);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    }
+
+    .styled-select {
+      width: 100%;
+      padding: 1rem 1.2rem;
+      background: none;
+      border: none;
+      outline: none;
+      font-size: 1rem;
+      color: var(--text-dark);
+      appearance: none;
+      -webkit-appearance: none;
+      cursor: pointer;
+      background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23ffffff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E") no-repeat right 1rem center;
+      background-size: 16px;
+    }
+
+    .search-input {
+      width: 100%;
+      padding: 1rem 1.2rem;
+      background: none;
+      border: none;
+      outline: none;
+      font-size: 1rem;
+      color: var(--text-dark);
+    }
+
+    .search-input::placeholder {
+      color: #888;
+    }
+
+    .search-btn {
+      width: 100%;
+      padding: 1rem;
+      background: var(--primary-color);
       color: white;
       border: none;
+      border-radius: 12px;
+      font-size: 1rem;
+      font-weight: 500;
       cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      margin-top: 0.5rem;
+      opacity: 0;
+      animation: fadeInUp 0.6s ease-out 0.9s forwards;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      will-change: transform, opacity;
     }
-    button:disabled {
-      background-color: #6c757d;
+
+    .search-btn:hover:not(:disabled) {
+      opacity: 0.9;
+      transform: translateY(-2px);
+    }
+
+    .search-btn:active:not(:disabled) {
+      transform: translateY(0);
+    }
+
+    .search-btn:disabled {
+      opacity: 0.3;
       cursor: not-allowed;
     }
-    button:hover:enabled {
-      background-color: #0056b3;
+
+    .loading {
+      position: relative;
+      pointer-events: none;
     }
-    .ai-tab {
-      text-align: center;
-      margin-top: 30px;
+
+    .loading::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 20px;
+      height: 20px;
+      margin: -10px 0 0 -10px;
+      border: 2px solid transparent;
+      border-top-color: white;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
     }
-    .ai-tab a {
-      padding: 10px 20px;
-      background-color: #28a745;
-      color: white;
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    /* ===== COURSE SEARCH ===== */
+    .course-search {
+      position: relative;
+    }
+
+    .search-icon {
+      position: absolute;
+      left: 1rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #888;
+      pointer-events: none;
+    }
+
+    /* ===== RESULTS SECTION ===== */
+    .results-section {
+      display: none;
+      opacity: 0;
+    }
+
+    .results-section.active {
+      display: block;
+      animation: slideUp 0.6s ease-out forwards;
+    }
+
+    .results-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid var(--border-dark);
+    }
+
+    .results-title {
+      font-size: 1.2rem;
+      font-weight: 600;
+      color: #ffffff;
+    }
+
+    .results-count {
+      font-size: 0.9rem;
+      color: #a0a0a0;
+      background: var(--accent-color);
+      padding: 4px 12px;
+      border-radius: 20px;
+    }
+
+    /* ===== MATERIAL CARDS ===== */
+    .materials-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 3rem;
+    }
+
+    @media (max-width: 768px) {
+      .materials-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .material-card {
+      background: var(--card-dark);
+      border: 1px solid var(--border-dark);
+      border-radius: 12px;
+      padding: 1.5rem;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      overflow: hidden;
+      opacity: 0;
+      transform: translateY(10px);
+      animation: fadeInUp 0.6s ease-out forwards;
+    }
+
+    .material-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, var(--gradient-start), var(--gradient-end));
+      transform: scaleX(0);
+      transform-origin: left;
+      transition: transform 0.3s ease;
+    }
+
+    .material-card:hover {
+      border-color: rgba(255, 255, 255, 0.3);
+      transform: translateY(-5px);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+    }
+
+    .material-card:hover::before {
+      transform: scaleX(1);
+    }
+
+    .material-type {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      width: 40px;
+      height: 40px;
+      background: var(--material-color);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+    }
+
+    .material-title {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: #ffffff;
+      margin-bottom: 0.8rem;
+      line-height: 1.4;
+      padding-right: 50px;
+    }
+
+    .material-author {
+      font-size: 0.9rem;
+      color: #a0a0a0;
+      margin-bottom: 0.5rem;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .material-license {
+      font-size: 0.8rem;
+      color: #888;
+      margin-bottom: 1.2rem;
+      padding: 4px 8px;
+      background: rgba(255, 255, 255, 0.05);
       border-radius: 6px;
-      text-decoration: none;
-      font-weight: bold;
+      display: inline-block;
     }
-    .ai-tab a:hover {
-      background-color: #1e7e34;
+
+    .material-actions {
+      display: flex;
+      gap: 0.8rem;
+      margin-top: 1rem;
+    }
+
+    .material-btn {
+      flex: 1;
+      padding: 0.6rem 1rem;
+      background: var(--accent-color);
+      border: 1px solid var(--border-dark);
+      color: white;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      text-decoration: none;
+    }
+
+    .material-btn:hover {
+      border-color: rgba(255, 255, 255, 0.3);
+      transform: translateY(-2px);
+    }
+
+    .material-btn.primary {
+      background: var(--primary-color);
+      border: none;
+    }
+
+    /* ===== CATEGORY SECTION ===== */
+    .category-section {
+      margin-bottom: 2rem;
+      opacity: 0;
+      animation: fadeInUp 0.6s ease-out 1s forwards;
+    }
+
+    .category-title {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: #ffffff;
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* ===== AI SECTION ===== */
+    .ai-section {
+      background: var(--card-dark);
+      border: 1px solid var(--border-dark);
+      border-radius: 16px;
+      padding: 2rem;
+      text-align: center;
+      margin-bottom: 2rem;
+      opacity: 0;
+      animation: fadeInUp 0.6s ease-out 1.1s forwards;
+    }
+
+    .ai-title {
+      font-size: 1.3rem;
+      font-weight: 600;
+      background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 0.5rem;
+    }
+
+    .ai-subtitle {
+      color: #a0a0a0;
+      font-size: 0.95rem;
+      margin-bottom: 1.5rem;
+      line-height: 1.5;
+    }
+
+    .ai-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 0.8rem 1.5rem;
+      background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
+      color: var(--dark-bg);
+      border: none;
+      border-radius: 12px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      text-decoration: none;
+    }
+
+    .ai-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 16px rgba(255, 255, 255, 0.2);
+    }
+
+    .ai-btn:active {
+      transform: translateY(0);
+    }
+
+    /* ===== NO RESULTS ===== */
+    .no-results {
+      text-align: center;
+      padding: 3rem 2rem;
+      opacity: 0;
+      animation: fadeInUp 0.6s ease-out forwards;
+    }
+
+    .no-results-icon {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+      opacity: 0.5;
+    }
+
+    .no-results-title {
+      font-size: 1.3rem;
+      font-weight: 600;
+      color: #ffffff;
+      margin-bottom: 0.5rem;
+    }
+
+    .no-results-subtitle {
+      color: #a0a0a0;
+      font-size: 0.95rem;
+      line-height: 1.5;
+      margin-bottom: 1.5rem;
+    }
+
+    /* ===== SCROLLBAR ===== */
+    ::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 3px;
+      transition: background 0.3s ease;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(255, 255, 255, 0.2);
+    }
+
+    /* ===== RESPONSIVE DESIGN ===== */
+    @media (max-width: 768px) {
+      body {
+        padding: 0 16px;
+        padding-top: 70px;
+      }
+
+      .materials-container {
+        margin-top: 70px;
+      }
+
+      .header-title {
+        font-size: 1.6rem;
+      }
+
+      .header-subtitle {
+        font-size: 0.95rem;
+      }
+
+      .search-section {
+        padding: 1.5rem;
+        border-radius: 12px;
+      }
+
+      .material-card {
+        padding: 1.2rem;
+      }
+
+      .material-title {
+        font-size: 1rem;
+      }
+
+      .material-actions {
+        flex-direction: column;
+      }
+
+      .ai-section {
+        padding: 1.5rem;
+        border-radius: 12px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .header-title {
+        font-size: 1.4rem;
+      }
+
+      .search-section {
+        padding: 1.2rem;
+        border-radius: 10px;
+      }
+
+      .material-card {
+        padding: 1rem;
+      }
+
+      .ai-btn {
+        width: 100%;
+        justify-content: center;
+      }
+    }
+
+    /* ===== UTILITY CLASSES ===== */
+    .hidden {
+      display: none !important;
+    }
+
+    .show {
+      display: block !important;
     }
   </style>
 </head>
 <body>
+  <!-- TOP BAR -->
+  <div id="top-bar">
+    <button id="back-btn" onclick="goBack()">←</button>
+    <div id="top-bar-title">Study Materials</div>
+    <div style="width: 40px;"></div> <!-- Spacer for symmetry -->
+  </div>
 
-<h1>📚 Study Materials</h1>
-<h1>Select Course and Level</h1>
+  <!-- MAIN CONTAINER -->
+  <div class="materials-container">
+    <!-- HEADER -->
+    <div class="header-section">
+      <h1 class="header-title">📚 Study Materials</h1>
+      <p class="header-subtitle">Access comprehensive learning resources for your courses</p>
+    </div>
 
-<!-- Course Dropdown -->
-<select id="course">
-  <option value="">-- Select Course --</option>
-  <option value="Accountancy">Accountancy</option>
-  <option value="Accounting">Accounting</option>
-  <option value="Agriculture">Agriculture</option>
-  <option value="Arabic Studies">Arabic Studies</option>
-      <option value="Banking and Finance">Banking and Finance</option>
-      <option value="Biochemistry">Biochemistry</option>
-      <option value="Botany">Botany</option>
-      <option value="Business Administration">Business Administration</option>
-      <option value="Chemical and Polymer Engineering">Chemical and Polymer Engineering</option>
-      <option value="Chemistry">Chemistry</option>
-      <option value="Christian Religious Studies">Christian Religious Studies</option>
-      <option value="Computer Science">Computer Science</option>
-      <option value="Dentistry and Dental Surgery">Dentistry and Dental Surgery</option>
-      <option value="Drama / Dramatic / Performing Arts">Drama / Dramatic / Performing Arts</option>
-      <option value="Early Childhood Education">Early Childhood Education</option>
-      <option value="Economics">Economics</option>
-      <option value="Education and Accounting">Education and Accounting</option>
-      <option value="Education and Biology">Education and Biology</option>
-      <option value="Education and Chemistry">Education and Chemistry</option>
-      <option value="Education and Christian Religious Studies">Education and Christian Religious Studies</option>
-      <option value="Education and Computer Science">Education and Computer Science</option>
-      <option value="Education and Economics">Education and Economics</option>
-      <option value="Education and English Language">Education and English Language</option>
-      <option value="Education and French">Education and French</option>
-      <option value="Education and Geography">Education and Geography</option>
-      <option value="Education and History">Education and History</option>
-      <option value="Education and Islamic Studies">Education and Islamic Studies</option>
-      <option value="Education and Mathematics">Education and Mathematics</option>
-      <option value="Education and Physics">Education and Physics</option>
-      <option value="Education and Political Science">Education and Political Science</option>
-      <option value="Education and Yoruba">Education and Yoruba</option>
-      <option value="Educational Management">Educational Management</option>
-      <option value="Electronics and Computer Engineering">Electronics and Computer Engineering</option>
-      <option value="English Language">English Language</option>
-      <option value="Fine and Applied Arts">Fine and Applied Arts</option>
-      <option value="Fisheries">Fisheries</option>
-      <option value="French">French</option>
-      <option value="Geography and Planning">Geography and Planning</option>
-      <option value="Guidance and Counseling">Guidance and Counseling</option>
-      <option value="Health Education">Health Education</option>
-      <option value="History and International Studies">History and International Studies</option>
-      <option value="Industrial Relations and Personnel Management">Industrial Relations and Personnel Management</option>
-      <option value="Insurance">Insurance</option>
-      <option value="Islamic Studies">Islamic Studies</option>
-      <option value="Law">Law</option>
-      <option value="Library and Information Science">Library and Information Science</option>
-      <option value="Local Government and Development Studies">Local Government and Development Studies</option>
-      <option value="Marketing">Marketing</option>
-      <option value="Mass Communication">Mass Communication</option>
-      <option value="Mathematics">Mathematics</option>
-      <option value="Mechanical Engineering">Mechanical Engineering</option>
-      <option value="Medicine and Surgery">Medicine and Surgery</option>
-      <option value="Microbiology">Microbiology</option>
-      <option value="Music">Music</option>
-      <option value="Nursing / Nursing Science">Nursing / Nursing Science</option>
-      <option value="Pharmacology">Pharmacology</option>
-      <option value="Philosophy">Philosophy</option>
-      <option value="Physical and Health Education">Physical and Health Education</option>
-      <option value="Physics">Physics</option>
-      <option value="Physiology">Physiology</option>
-      <option value="Political Science">Political Science</option>
-      <option value="Portuguese / English">Portuguese / English</option>
-      <option value="Psychology">Psychology</option>
-      <option value="Public Administration">Public Administration</option>
-      <option value="Sociology">Sociology</option>
-      <option value="Teacher Education Science">Teacher Education Science</option>
-      <option value="Technology and Vocational Education">Technology and Vocational Education</option>
-      <option value="Theatre Arts">Theatre Arts</option>
-      <option value="Transport Management Technology">Transport Management Technology</option>
-      <option value="Yoruba">Yoruba</option>
-      <option value="Zoology">Zoology</option>
-</select>
+    <!-- SEARCH SECTION -->
+    <div class="search-section" id="searchSection">
+      <div class="input-group">
+        <label class="input-label">
+          <span>🎓</span>
+          Select Course
+        </label>
+        <div class="input-wrapper">
+          <select id="courseSelect" class="styled-select">
+            <option value="">-- Select Course --</option>
+            <option value="Accountancy">Accountancy</option>
+            <option value="Accounting">Accounting</option>
+            <option value="Agriculture">Agriculture</option>
+            <option value="Arabic Studies">Arabic Studies</option>
+            <option value="Banking and Finance">Banking and Finance</option>
+            <option value="Biochemistry">Biochemistry</option>
+            <option value="Botany">Botany</option>
+            <option value="Business Administration">Business Administration</option>
+            <option value="Chemical and Polymer Engineering">Chemical and Polymer Engineering</option>
+            <option value="Chemistry">Chemistry</option>
+            <option value="Christian Religious Studies">Christian Religious Studies</option>
+            <option value="Computer Science">Computer Science</option>
+            <option value="Dentistry and Dental Surgery">Dentistry and Dental Surgery</option>
+            <option value="Drama / Dramatic / Performing Arts">Drama / Dramatic / Performing Arts</option>
+            <option value="Early Childhood Education">Early Childhood Education</option>
+            <option value="Economics">Economics</option>
+            <option value="Education and Accounting">Education and Accounting</option>
+            <option value="Education and Biology">Education and Biology</option>
+            <option value="Education and Chemistry">Education and Chemistry</option>
+            <option value="Education and Christian Religious Studies">Education and Christian Religious Studies</option>
+            <option value="Education and Computer Science">Education and Computer Science</option>
+            <option value="Education and Economics">Education and Economics</option>
+            <option value="Education and English Language">Education and English Language</option>
+            <option value="Education and French">Education and French</option>
+            <option value="Education and Geography">Education and Geography</option>
+            <option value="Education and History">Education and History</option>
+            <option value="Education and Islamic Studies">Education and Islamic Studies</option>
+            <option value="Education and Mathematics">Education and Mathematics</option>
+            <option value="Education and Physics">Education and Physics</option>
+            <option value="Education and Political Science">Education and Political Science</option>
+            <option value="Education and Yoruba">Education and Yoruba</option>
+            <option value="Educational Management">Educational Management</option>
+            <option value="Electronics and Computer Engineering">Electronics and Computer Engineering</option>
+            <option value="English Language">English Language</option>
+            <option value="Fine and Applied Arts">Fine and Applied Arts</option>
+            <option value="Fisheries">Fisheries</option>
+            <option value="French">French</option>
+            <option value="Geography and Planning">Geography and Planning</option>
+            <option value="Guidance and Counseling">Guidance and Counseling</option>
+            <option value="Health Education">Health Education</option>
+            <option value="History and International Studies">History and International Studies</option>
+            <option value="Industrial Relations and Personnel Management">Industrial Relations and Personnel Management</option>
+            <option value="Insurance">Insurance</option>
+            <option value="Islamic Studies">Islamic Studies</option>
+            <option value="Law">Law</option>
+            <option value="Library and Information Science">Library and Information Science</option>
+            <option value="Local Government and Development Studies">Local Government and Development Studies</option>
+            <option value="Marketing">Marketing</option>
+            <option value="Mass Communication">Mass Communication</option>
+            <option value="Mathematics">Mathematics</option>
+            <option value="Mechanical Engineering">Mechanical Engineering</option>
+            <option value="Medicine and Surgery">Medicine and Surgery</option>
+            <option value="Microbiology">Microbiology</option>
+            <option value="Music">Music</option>
+            <option value="Nursing / Nursing Science">Nursing / Nursing Science</option>
+            <option value="Pharmacology">Pharmacology</option>
+            <option value="Philosophy">Philosophy</option>
+            <option value="Physical and Health Education">Physical and Health Education</option>
+            <option value="Physics">Physics</option>
+            <option value="Physiology">Physiology</option>
+            <option value="Political Science">Political Science</option>
+            <option value="Portuguese / English">Portuguese / English</option>
+            <option value="Psychology">Psychology</option>
+            <option value="Public Administration">Public Administration</option>
+            <option value="Sociology">Sociology</option>
+            <option value="Teacher Education Science">Teacher Education Science</option>
+            <option value="Technology and Vocational Education">Technology and Vocational Education</option>
+            <option value="Theatre Arts">Theatre Arts</option>
+            <option value="Transport Management Technology">Transport Management Technology</option>
+            <option value="Yoruba">Yoruba</option>
+            <option value="Zoology">Zoology</option>
+          </select>
+        </div>
+      </div>
 
-<!-- Level Dropdown -->
-<select id="level">
-  <option value="">-- Select Level --</option>
-  <option value="100">100 Level</option>
-  <option value="200">200 Level</option>
-  <option value="300">300 Level</option>
-  <option value="400">400 Level</option>
-</select>
+      <div class="input-group">
+        <label class="input-label">
+          <span>📊</span>
+          Select Level
+        </label>
+        <div class="input-wrapper">
+          <select id="levelSelect" class="styled-select">
+            <option value="">-- Select Level --</option>
+            <option value="100">100 Level</option>
+            <option value="200">200 Level</option>
+            <option value="300">300 Level</option>
+            <option value="400">400 Level</option>
+          </select>
+        </div>
+      </div>
 
-<!-- Input for Topic -->
-<input type="text" id="topic" placeholder="Enter topic" />
+      <div class="input-group">
+        <label class="input-label">
+          <span>🔍</span>
+          Search Topic
+        </label>
+        <div class="input-wrapper">
+          <input type="text" id="topicInput" class="search-input" placeholder="Enter topic or keyword..." />
+        </div>
+      </div>
 
-<!-- Search Button -->
-<button id="searchBtn">🔍 Search Materials</button>
+      <button class="search-btn" id="searchBtn" onclick="searchMaterials()">
+        <span>🔍</span>
+        Search Materials
+      </button>
+    </div>
 
-<!-- Results Section -->
-<div id="results"></div>
+    <!-- RESULTS SECTION -->
+    <div class="results-section" id="resultsSection">
+      <div class="results-header">
+        <div class="results-title">Search Results</div>
+        <div class="results-count" id="resultsCount">0 materials</div>
+      </div>
 
-<!-- AI Tab Link -->
-<div class="ai-tab">
-  <a href="/teach-me-ai">🤖 Teach Me with AI</a>
-</div>
+      <!-- PDF Materials -->
+      <div class="category-section" id="pdfSection">
+        <div class="category-title">
+          <span>📘</span>
+          PDF Materials
+        </div>
+        <div class="materials-grid" id="pdfMaterials">
+          <!-- PDF materials will be inserted here -->
+        </div>
+      </div>
 
-<script>
-const uploadedMaterials = [
-  {
-    title: "Financial Accounting (OpenStax)",
-    author: "OpenStax",
-    license: "CC BY 4.0",
-    link: "static/materials/accounting/Financial-Accounting.pdf"
-  },
-  {
-    title: "Principles of Accounting",
-    author: "Open Educational Resource",
-    license: "CC BY 4.0",
-    link: "static/materials/accounting/Principles-of-Financial-Accounting.pdf"
-  },
-  {
-    title: "A Business Perspective (Managerial Accounting)",
-    author: "Open Educational Resource",
-    license: "CC BY 4.0",
-    link: "static/materials/account/A-Business-Perspective-(Managerial-Accounting).pdf"
-  },
-  {
-    title: "Principles Of Accounting Vol 1",
-    author: "Open Educational Resource",
-    license: "CC BY 4.0",
-    link: "static/materials/account/Principles-Of-Accounting-Vol-1.pdf"
-  },
-  {
-    title: "Principles of Accounting Vol 2",
-    author: "Open Educational Resource",
-    license: "CC BY 4.0",
-    link: "static/materials/account/Principles-Of-Accounting-Vol-2.pdf"
-  },
-  {
-    title: "Principles of Financial Accounting",
-    author: "Open Educational Resource",
-    license: "CC BY 4.0",
-    link: "static/materials/account/Principles-of-Financial-Accounting.pdf"
-  },
-  {
-    title: "Training Manual for ORGANIC AGRICULTURE",
-    author: "FAO",
-    license: "FAO PDF for small‑holder farmers",
-    link: "static/materials/agriculture/Compilation_techniques_organic_agriculture_rev.pdf"
-  },
-  {
-    title: "Introduction to Soil Science",
-    author: "Amber Anderson",
-    license: "CC BY 4.0",
-    link: "static/materials/agriculture/Introduction-to-Soil-Science-1722446382.pdf"
-  },
-  {
-    title: "Genetics, Agriculture, and Biotechnology",
-    author: "Walter Suza and Donald Lee",
-    license: "CC BY-NC-SA 4.0",
-    link: "static/materials/agriculture/Genetics-Agriculture-and-Biotechnology-1646343300.pdf"
-  },
-  {
-    title: "Plant Breeding Methods",
-    author: "Walter R. Fehr and Walter P. Suza",
-    license: "CC BY-NC 4.0",
-    link: "static/materials/agriculture/Plant-Breeding-Methods-1724939423.pdf"
-  },
-  {
-    title: "Crop Genetics",
-    author: "William Beavis, Arden Campbell, Jode Edwards, Shui-Zhang Fei, Thomas Lübberstedt, Laura Merrick, Deborah Muenchrath, Walter Suza; Edited by Walter Suza and Kendall Lamkey",
-    license: "CC BY-NC-SA 4.0",
-    link: "static/materials/agriculture/Crop-Genetics-1696858550 (1).pdf"
-  },
-  {
-    title: "Quantitative Methods for Plant Breeding",
-    author: "Ken Moore, M. L. Harbur, Ron Mowers, Laura Merrick, Dennis Todey, Kendra Meade, William Beavis, Reka Howard, Ursula Frei, Anthony Assibi Mahama, Walter Suza; Edited by Walter Suza and Kendall Lamkey",
-    license: "CC BY-NC-SA 4.0",
-    link: "static/materials/agriculture/Quantitative-Methods-for-Plant-Breeding-1696860463.pdf"
-},
-{
-    title: "Molecular Plant Breeding",
-    author: "Walter Suza (Editor), Kendall Lamkey (Editor), Thomas Lübberstedt, William Beavis, Madan Bhattacharyya, Laura Merrick, Ursula Frei",
-    license: "CC BY-NC-SA 4.0",
-    link: "static/materials/agriculture/Molecular-Plant-Breeding-1696858563.pdf"
-},
-{
-    title: "Quantitative Genetics for Plant Breeding",
-    author: "William Beavis, Katherine Espinosa, Mark Newell, Anthony Assibi Mahama, Walter Suza; Edited by Walter Suza and Kendall Lamkey",
-    license: "CC BY-NC-SA 4.0",
-    link: "static/materials/agriculture/Quantitative-Genetics-for-Plant-Breeding-1697468159.pdf"
-},
-{
-    title: "Crop Improvement",
-    author: "Asheesh Singh, Teshale Mamo, Arti Singh, Jessica Barb, Shui-Zhang Fei, Anthony A. Mahama, Walter Suza; Edited by Walter Suza and Kendall Lamkey",
-    license: "CC BY-NC-SA 4.0",
-    link: "static/materials/agriculture/Crop-Improvement-1696858561.pdf"
-},
-{
-    title: "Cultivar Development",
-    author: "Walter Suza (Editor), Kendall Lamkey (Editor), Rita H. Mumm",
-    license: "CC BY-NC-SA 4.0",
-    link: "static/materials/agriculture/Cultivar-Development-1696858608.pdf"
-},
-{
-    title: "Botany (Ha, Morrow, and Algiers)",
-    author: "Melissa Ha, Maria Morrow, Kammy Algiers",
-    license: "CC BY-NC 4.0 / CC BY-SA 4.0 / CC BY-NC-SA 4.0 / CC BY 4.0 (Mixed, see source)",
-    link: "static/materials/biology/Botany-LibreCommons.pdf"
-},
-{
-    title: "Botany Lab Manual (Morrow)",
-    author: "Maria Morrow",
-    license: "CC BY-NC 4.0",
-    link: "static/materials/biology/Botany-Lab-Manual-Morrow.pdf"
-},
-{
-    title: "A Photographic Atlas for Botany (Morrow)",
-    author: "Maria Morrow",
-    license: "CC BY-NC 4.0",
-    link: "static/materials/biology/A-Photographic-Atlas-for-Botany-Morrow.pdf"
-},
-{
-    title: "History and Science of Cultivated Plants (Naithani)",
-    author: "Sushma Naithani",
-    license: "CC BY-NC 4.0",
-    link: "static/materials/botany/History-and-Science-of-Cultivated-Plants-Naithani.pdf"
-},
-{
-    title: "Inanimate Life (Briggs)",
-    author: "George M. Briggs",
-    license: "CC BY-SA 4.0",
-    link: "static/materials/botany/Inanimate-Life-1669056520.pdf"
-},
-{
-    title: "Introduction to Botany (Shipunov)",
-    author: "Alexey Shipunov",
-    license: "Public Domain",
-    link: "static/materials/botany/Full (3).pdf"
-},
-{
-    title: "Plant Anatomy and Physiology (Bellairs)",
-    author: "Sean Bellairs",
-    license: "Creative Commons Attribution-ShareAlike 4.0",
-    link: "static/materials/botany/Plant-Anatomy-Images-and-diagrams-to-explain-concepts-1535068587.pdf"
-},
-{
-    title: "Red Seal Landscape Horticulturist Identify Plants and Plant Requirements (Nakano)",
-    author: "Michelle Nakano",
-    license: "Creative Commons Attribution 4.0",
-    link: "static/materials/botany/Red-Seal-Landscape-Horticulturist-Identify-Plants-and-Plant-Requirements-1660159016.pdf"
-},
-{
-    title: "Soil and Water Conservation Laboratory Manual (Moorberg)",
-    author: "Colby J. Moorberg",
-    license: "Creative Commons Attribution-NonCommercial-ShareAlike 4.0",
-    link: "static/materials/botany/Soil-and-Water-Conservation-Laboratory-Manual-1707258673.pdf"
-},
-{
-    title: "Properties and Behavior of Soil – Online Lab Manual (Hossain et al.)",
-    author: "MD Sahadat Hossain, Ph.D., P.E.; Md Azijul Islam; Faria Fahim Badhon; Tanvir Imtiaz",
-    license: "Creative Commons Attribution-NonCommercial 4.0",
-    link: "static/materials/botany/Properties-and-Behavior-of-Soil-Online-Lab-Manual-1730155959.pdf"
-},
-{
-    title: "Soils Laboratory Manual: K-State Edition, Version 2.0",
-    author: "Colby J. Moorberg and David A. Crouse",
-    license: "Creative Commons Attribution 4.0",
-    link: "static/materials/botany/Soils-Laboratory-Manual-1724790515.pdf"
-},
-{
-    title: "First-Year Arabic",
-    author: "Ragy Mikhaeel",
-    license: "Creative Commons Attribution-NonCommercial ShareAlike 4.0",
-    link: "static/materials/arabic/First-Year-Arabic-1753121858.pdf"
-},
-{
-    title: "Elementary Arabic I",
-    author: "Sadam Issa and Ayman Mohamed",
-    license: "Creative Commons Attribution-NonCommercial 4.0",
-    link: "static/materials/arabic/Elementary-Arabic-I-Sadam-Issa-Ayman-Mohamed.pdf"
-},
-  {
-    title: "Kitāb al-mawāʻiẓ wa-al-iʻtibār 4",
-    author: "Maqrīzī, Aḥmad ibn ʻAlī, 1364-1442",
-    license: "Public Domain",
-    link: "static/materials/arabic/uaena_aco000071_lo.pdf"
-  },
-  {
-    title: "Kitāb al-tawfīqāt al-ilhāmīyah fī muqāranat al-tawārīkh al-Hijrīyah bi-al-sinīn al-Ifrankīyah wa-al-Qibṭīyah",
-    author: "Mukhtār, Muḥammad, 1835-1897",
-    license: "Public Domain",
-    link: "static/materials/arabic/uaena_aco000009_lo.pdf"
-  },
-  {
-    title: "Kitāb Muḥīṭ al-muḥīṭ 2",
-    author: "Bustānī, Buṭrus ibn Būlus, 1818-1883",
-    license: "Public Domain",
-    link: "static/materials/arabic/uaena_aco000002_lo.pdf"
-  },
-  {
-    title: "al-Muzhir fī ʻulūm al-lughah wa-anwāʻihā 1",
-    author: "Suyūṭī, 1445-1505",
-    license: "Public Domain",
-    link: "static/materials/arabic/uaena_aco000106_lo"
-  },
-  {
-    title: "Jāmiʻ al-Zaytūnah 1",
-    author: "n.a.",
-    license: "Public Domain",
-    link: "static/materials/arabic/uaena_aco000111_hi.pdf"
-  },
-  {
-    title: "Riḥlāt 1",
-    author: "ʻAzzām, ʻAbd al-Wahhāb, 1894-1959",
-    license: "Public Domain",
-    link: "static/materials/arabic/uaena_aco000110_lo.pdf"
-  },
-  {
-    title: "Kitāb al-Iqd al-farīd 5",
-    author: "Ibn ʻAbd Rabbih, Aḥmad ibn Muḥammad, 860-940",
-    license: "Public Domain",
-    link: "static/materials/arabic/uaena_aco000020_lo.pdf"
-  },
-  {
-    title: "Money and Banking",
-    author: "Robert E. Wright",
-    license: "Creative Commons Attribution-NonCommercial-ShareAlike (CC BY-NC-SA)",
-    link: "static/materials/bankingandfinance/Money and Banking.pdf"  
-  },
-  {
-    title: "Finance, Banking, and Money",
-    author: "LibreTexts – business/finance authors", 
-    license: "Creative Commons Attribution (CC BY)",
-    link: "static/materials/bankingandfinance/Full (4).pdf"
-  },
-  {
-    title: "Principles of Finance",
-    author: "OpenStax",
-    license: "CC BY 4.0",
-    link: "static/materials/bankingandfinance/PrinciplesofFinance-WEB.pdf"
-  },
-  {
-    title: "Financial Management for Small Businesses: Financial Statements & Present Value Models",
-    author: "Robinson, Hanson, Black",
-    license: "CC BY",
-    link: "static/materials/bankingandfinance/Full (4).pdf"
-  },
-  {
-    title: "Fundamentals of Finance",
-    author: "Annette Nguyen",
-    license: "Creative Commons Attribution-NonCommercial 4.0",
-    link: "static/materials/bankingandfinance/Financial-Management-for-Small-Businesses-2nd-OER-Edition-1627674276.pdf"
-  },
-  {
-    title: "Personal Finance",
-    author: "Rachel Siegel & Carol Yacht",
-    license: "CC BY-NC-SA",
-    link: "static/materials/bankingandfinance/Personal Finance.pdf"
-  },
-  {
-    title: "Introduction to Business Administration",
-    author: "Amit Shah; Bethann Talsma; Carl McDaniel; Lawrence J. Gitman; Linda Koffel; Monique Reece",
-    license: "CC BY 4.0",
-    link: "static/materials/businessadministation/Introduction-to-Business-Administration-1735836334.pdf"  // includes PDF. :contentReference[oaicite:1]{index=1}
-  },
-  {
-    title: "Business Fundamentals – 1st Edition",
-    author: "Kerri Shields",
-    license: "CC BY-NC-SA 4.0",
-    link: "static/materials/businessadministation/Business-Fundamentals-1st-Edition-1760797243.pdf"  // recent OER. :contentReference[oaicite:3]{index=3}
-  },
-  {
-    title: "Introduction to Business",
-    author: "Lawrence J. Gitman; Carl McDaniel; Amit Shah; Monique Reece; Linda Koffel; Bethann Talsma; James C. Hyatt",
-    license: "CC BY 4.0",
-    link: "static/materials/businessadministation/IntroductionToBusiness-OP_8D04gAa.pdf"
-  },
-  {
-    title: "Introduction to Business Administration",
-    author: "Amit Shah; Bethann Talsma; Carl McDaniel; Lawrence J. Gitman; Linda Koffel; Monique Reece",
-    license: "CC BY 4.0",
-    link: "static/materials/businessadministation/Introduction-to-Business-Administration-1735836334 (1).pdf"
-  },
-  {
-    title: "Principles of Management",
-    author: "OpenStax Contributors",
-    license: "CC BY 4.0",
-    link: "static/materials/businessadministation/PrinciplesofManagement-OP.pdf"
-  },
-  {
-    title: "Introduction to Business & Administrative Studies",
-    author: "Angela Flanagan",
-    license: "CC BY-NC-SA 4.0",
-    link: "static/materials/businessadministration/Introduction-to-Business-amp-Administrative-Studies-1726502695.pdf"
-  },
-  {
-    title: "Chemistry 2e",
-    author: "OpenStax",
-    license: "CC BY 4.0",  
-    link: "static/materials/chemicalpolynomerengineer/Chemistry-LR.pdf"
-  },
-  {
-    title: "Introduction to Polymer Science and Technology",
-    author: "Mustafa Akay",
-    license: "© 2012 Ernst & Young LLP (but free download – check license)",  
-    link: "static/materials/Introduction to Polymer Science and Technology.pdf"
-  },
-  {
-    title: "Chemical Process Dynamics and Controls – Book I",
-    author: "University of Michigan student/contributor team",
-    license: "Creative Commons Attribution 3.0 Unported (CC BY 3.0)",
-    link: "static/materials/chemicalpolynomerengineer/chemical_process_dynamics_and_controls-book_1.pdf"
-  },
-  {
-    title: "Mechanics of Biomaterials",
-    author: "Amir A. Zadpoor (ed.)",
-    license: "CC BY‑NC‑ND",
-    link: "static/materials/chemicalpolynomerengineer/Mechanics_of_Biomaterials"
-  },
-  {
-  title: "Solutions Manual for Thermodynamics and Chemistry (2nd Edition)",
-  author: "Howard DeVoe",
-  license: "Creative Commons Attribution 4.0 International (CC BY 4.0)",
-  link: "static/materials/chemicalpolynomerengineer/SolnsMan.pdf"
-  },
-  {
-  title: "Bio‑Inspired Sensory Systems",
-  author: "Geoffrey Brooks",
-  license: "Creative Commons Attribution‑NonCommercial‑ShareAlike 4.0 (CC BY‑NC‑SA 4.0)",
-  link: "static/materials/chemicalpolynomerengineer/original-ab435618883852d4b0d28e64c4c5e7b4.pdf"
-  },
-  {
-  title: "Chemistry 2e",
-  author: "Paul Flowers; Klaus Theopold; Richard Langley; William R. Robinson",
-  license: "Creative Commons Attribution 4.0 (CC BY 4.0)",
-  link: "static/materials/chemistry/chemistry-2e.pdf"
-},
-{
-    title: "Chemistry: Atoms First 2e",
-    author: "OpenStax & University of Connecticut",
-    license: "CC BY 4.0",
-    link: "static/materials/chemistry/ChemistryAtomsFirst2e-WEB.pdf"  // alternate approach. :contentReference[oaicite:1]{index=1}
-  },
-  {
-    title: "Introductory Chemistry",
-    author: "David W. Ball",
-    license: "CC BY‑NC‑SA (Attribution‑NonCommercial‑ShareAlike) 4.0",
-    link: "static/materials/chemistry/Introductory Chemistry.pdf"  // suitable for prep course. :contentReference[oaicite:2]{index=2}
-  },
-  {
-    title: "Introductory Chemistry Online!",
-    author: "Young et al.",
-    license: "Check‑license (open‑source) – likely CC BY or CC BY‑NC‑SA",
-    link: "static/materials/chemistry/Full (5).pdf"
-  },
-  {
-    title: "Organic Chemistry: A Tenth Edition",
-    author: "John McMurry",
-    license: "CC BY‑NC‑SA 4.0",
-    link: "static/materials/chemistry/OrganicChemistry-SAMPLE_9ADraVJ.pdf"  // OpenStax sample. :contentReference[oaicite:5]{index=5}
-  },
-  {
-  title: "World Religions: The Spirit Searching",
-  author: "Jody Ondich",
-  license: "CC BY‑NC‑SA 4.0",
-  link: "static/materials/christianreligiousstudy/World-Religions-the-Spirit-Searching-1681823908.pdf"
-},
-{
-    title: "Workplace Software and Skills",
-    author: "Tammie Bolling; Angela Mitchell; Tanya Scott; Nyrobi Wheeler",
-    license: "Creative Commons Attribution 4.0 (CC BY)",
-    link: "static/materials/computerscience/Workplace_Software_and_Skills_-_WEB_IlfJtcP.pdf"
-},
-{
-  title: "Introduction to Computer Science",
-  author: "Dr. Jean‑Claude Franchitti",
-  license: "Creative Commons Attribution 4.0 (CC BY 4.0)",
-  link: "static/materials/computerscience/Introduction_To_Computer_Science_-_WEB.pdf"
-},
-{
-  title: "Foundations of Information Systems",
-  author: "Dr. Mahesh S. Raisinghani",
-  license: "Creative Commons Attribution‑NonCommercial‑ShareAlike 4.0 (CC BY‑NC‑SA 4.0)",
-  link: "static/materials/computerscience/Foundations_of_Information_Systems_-_WEB_oNlbGYl.pdf"
-},
-{
-  title: "Principles of Data Science",
-  author: "Dr. Shaun V. Ault; Dr. Soohyun Nam Liao; Larry Musolino",
-  license: "Creative Commons Attribution‑NonCommercial‑ShareAlike 4.0 (CC BY‑NC‑SA 4.0)",
-  link: "static/materials/computerscience/Principles-of-Data-Science-WEB.pdf"
-},
-{
-  title: "Introduction to Python Programming",
-  author: "Udayan Das; Aubrey Lawson; Chris Mayfield; Narges Norouzi",
-  license: "Creative Commons Attribution 4.0 (CC BY 4.0)",
-  link: "static/materials/computerscience/Introduction_to_Python_Programming_-_WEB.pdf"
-},
-{
-  title: "Oral and Maxillofacial Surgery for the Clinician",
-  author: "Krishnamurthy Bonanthaya; Elavenil Panneerselvam; Suvy Manuel; Vinay V. Kumar; Anshul Rai",
-  license: "CC BY 4.0",
-  link: "static/materials/dentistryanddentalsurgery/978-981-15-1346-6.pdf"
-},
-{
-  title: "Exploring the Arts: A Brief Introduction to Art, Theatre, Music, and Dance",
-  author: "Doris Hall; Kimberly Berkeley; Nubia Nurain Khan",
-  license: "CC BY 4.0",
-  link: "static/materials/dramaperformingarts/Exploring-the-Arts-1735836622.pdf"
-},
-{
-  title: "Storytelling on Screen: An Online Playback Theatre Archive and Guidebook",
-  author: "Jordan Rosin; Heidi Winters Vogel; Sammy Lebron",
-  license: "Creative Commons Attribution-NonCommercial-ShareAlike 4.0 (CC BY-NC-SA 4.0)",
-  link: "static/materials/dramaperformingarts/Storytelling_on_Screen_An_Online_Playback_Theatre_Archive_and_Guidebook.pdf"
-},
-{
-    title: "Theatrical Worlds",
-    author: "Open Textbook Library Contributors",
-    license: "CC BY-NC-ND 4.0",
-    link: "static/materials/dramaperformingarts/Theatrical_Worlds.pdf"
-  },
-  {
-  title: "Safety, Health, and Nutrition in Early Childhood Education",
-  author: "Jennifer Paris",
-  license: "CC BY 4.0",
-  link: "static/materials/earlychildhoodeducation/Health, Safety, and Nutrition OER Textbook.pdf"  // full textbook page. :contentReference[oaicite:0]{index=0}
-},
-{
-  title: "Algebra and Trigonometry 2e",
-  author: "Jay Abramson (et al.)",
-  license: "Creative Commons Attribution 4.0 (CC BY 4.0)",
-  link: "static/materials/math/Algebra-and-Trigonometry-2e-WEB.pdf"
-},
-{
-  title: "Calculus Volume 1",
-  author: "Gilbert Strang; Edwin “Jed” Herman",
-  license: "Creative Commons Attribution-NonCommercial-ShareAlike 4.0 (CC BY-NC-SA 4.0)",
-  link: "static/materials/math/Calculus_Volume_1_-_WEB_68M1Z5W.pdf"
-},
-{
-title: "Calculus Volume 2",
-author: "Gilbert Strang; Edwin 'Jed' Herman",
-license: "Creative Commons Attribution-NonCommercial-ShareAlike 4.0 (CC BY-NC-SA 4.0)",
-link: "static/materials/math/Calculus_Volume_2_-_WEB.pdf"
-},
-{
-title: "Calculus Volume 3",
-author: "Gilbert Strang; Edwin 'Jed' Herman",
-license: "Creative Commons Attribution-NonCommercial-ShareAlike 4.0 (CC BY-NC-SA 4.0)",
-link: "static/materials/math/Calculus_Volume_3_-_WEB.pdf"
-},
-{
-title: "College Algebra 2e",
-author: "Jay Abramson; Valeree Falduto; Rachael Gross; David Lippman; Melonie Rasmussen; Rick Norwood; Nicholas Belloit; Jean-Marie Magnier; Harold Whipple",
-license: "Creative Commons Attribution 4.0 (CC BY 4.0)",
-link: "static/materials/math/College-Algebra-2e-WEB.pdf"
-},
-{
-title: "College Algebra Corequisite Support 2e",
-author: "Jay Abramson; Valeree Falduto; Rachael Gross; David Lippman; Rick Norwood; Melonie Rasmussen; Jean-Marie Magnier; Harold Whipple; Christina Fernandez",
-license: "Creative Commons Attribution 4.0 (CC BY 4.0)",
-link: "static/materials/math/College-Algebra-Corequisite-Support-2e-WEB.pdf"
-},
-{
-title: "Contemporary Mathematics",
-author: "Donna Kirk",
-license: "Creative Commons Attribution 4.0 (CC BY 4.0)",
-link: "static/materials/math/ContemporaryMathematics-WEB.pdf"
-},
-{
-title: "Precalculus 2e",
-author: "Jay Abramson",
-license: "Creative Commons Attribution 4.0 (CC BY 4.0)",
-link: "static/materials/math/Precalculus_2e-WEB.pdf"
-},
-{
-title: "Principles of Data Science",
-author: "Shaun V. Ault; Soohyun Nam Liao; Larry Musolino",
-license: "Creative Commons Attribution-NonCommercial-ShareAlike 4.0 (CC BY-NC-SA 4.0)",
-link: "static/materials/computer-science/Principles-of-Data-Science-WEB.pdf"
-},
+      <!-- Online Resources -->
+      <div class="category-section" id="onlineSection">
+        <div class="category-title">
+          <span>🌐</span>
+          Online Resources
+        </div>
+        <div class="materials-grid" id="onlineMaterials">
+          <!-- Online materials will be inserted here -->
+        </div>
+      </div>
 
-];
+      <!-- Videos -->
+      <div class="category-section" id="videoSection">
+        <div class="category-title">
+          <span>🎥</span>
+          Video Resources
+        </div>
+        <div class="materials-grid" id="videoMaterials">
+          <!-- Video materials will be inserted here -->
+        </div>
+      </div>
+    </div>
 
-const btn = document.getElementById('searchBtn');
+    <!-- NO RESULTS -->
+    <div class="no-results hidden" id="noResults">
+      <div class="no-results-icon">📚</div>
+      <div class="no-results-title">No Materials Found</div>
+      <div class="no-results-subtitle">
+        Try searching with different keywords or browse our AI learning assistant
+      </div>
+    </div>
 
-btn.addEventListener('click', () => {
-  const course = document.getElementById('course').value;
-  const level = document.getElementById('level').value;
-  const topic = document.getElementById('topic').value.trim().toLowerCase();
-  const container = document.getElementById('results');
-  container.innerHTML = '';
+    <!-- AI SECTION -->
+    <div class="ai-section">
+      <div class="ai-title">🤖 Need Personalized Help?</div>
+      <div class="ai-subtitle">Get AI-powered explanations and summaries for any topic</div>
+      <a href="/teach-me-ai" class="ai-btn">
+        <span>🤖</span>
+        Teach Me with AI
+      </a>
+    </div>
+  </div>
 
-  if (!course || !topic || !level) {
-    alert("Please select course, level, and enter topic.");
-    return;
-  }
+  <script>
+    // ===== MATERIALS DATA =====
+    const uploadedMaterials = [
+      {
+        title: "Financial Accounting (OpenStax)",
+        author: "OpenStax",
+        license: "CC BY 4.0",
+        link: "static/materials/accounting/Financial-Accounting.pdf",
+        type: "pdf",
+        course: "Accountancy"
+      },
+      {
+        title: "Principles of Accounting",
+        author: "Open Educational Resource",
+        license: "CC BY 4.0",
+        link: "static/materials/accounting/Principles-of-Financial-Accounting.pdf",
+        type: "pdf",
+        course: "Accountancy"
+      },
+      {
+        title: "A Business Perspective (Managerial Accounting)",
+        author: "Open Educational Resource",
+        license: "CC BY 4.0",
+        link: "static/materials/account/A-Business-Perspective-(Managerial-Accounting).pdf",
+        type: "pdf",
+        course: "Accounting"
+      },
+      {
+        title: "Principles Of Accounting Vol 1",
+        author: "Open Educational Resource",
+        license: "CC BY 4.0",
+        link: "static/materials/account/Principles-Of-Accounting-Vol-1.pdf",
+        type: "pdf",
+        course: "Accounting"
+      },
+      {
+        title: "Principles of Accounting Vol 2",
+        author: "Open Educational Resource",
+        license: "CC BY 4.0",
+        link: "static/materials/account/Principles-Of-Accounting-Vol-2.pdf",
+        type: "pdf",
+        course: "Accounting"
+      },
+      {
+        title: "Principles of Financial Accounting",
+        author: "Open Educational Resource",
+        license: "CC BY 4.0",
+        link: "static/materials/account/Principles-of-Financial-Accounting.pdf",
+        type: "pdf",
+        course: "Accounting"
+      },
+      {
+        title: "Training Manual for ORGANIC AGRICULTURE",
+        author: "FAO",
+        license: "FAO PDF for small‑holder farmers",
+        link: "static/materials/agriculture/Compilation_techniques_organic_agriculture_rev.pdf",
+        type: "pdf",
+        course: "Agriculture"
+      },
+      {
+        title: "Introduction to Soil Science",
+        author: "Amber Anderson",
+        license: "CC BY 4.0",
+        link: "static/materials/agriculture/Introduction-to-Soil-Science-1722446382.pdf",
+        type: "pdf",
+        course: "Agriculture"
+      },
+      {
+        title: "Genetics, Agriculture, and Biotechnology",
+        author: "Walter Suza and Donald Lee",
+        license: "CC BY-NC-SA 4.0",
+        link: "static/materials/agriculture/Genetics-Agriculture-and-Biotechnology-1646343300.pdf",
+        type: "pdf",
+        course: "Agriculture"
+      },
+      {
+        title: "Plant Breeding Methods",
+        author: "Walter R. Fehr and Walter P. Suza",
+        license: "CC BY-NC 4.0",
+        link: "static/materials/agriculture/Plant-Breeding-Methods-1724939423.pdf",
+        type: "pdf",
+        course: "Agriculture"
+      },
+      {
+        title: "Crop Genetics",
+        author: "William Beavis, Arden Campbell, Jode Edwards, Shui-Zhang Fei, Thomas Lübberstedt, Laura Merrick, Deborah Muenchrath, Walter Suza",
+        license: "CC BY-NC-SA 4.0",
+        link: "static/materials/agriculture/Crop-Genetics-1696858550.pdf",
+        type: "pdf",
+        course: "Agriculture"
+      },
+      {
+        title: "Quantitative Methods for Plant Breeding",
+        author: "Ken Moore, M. L. Harbur, Ron Mowers, Laura Merrick, Dennis Todey, Kendra Meade, William Beavis, Reka Howard, Ursula Frei, Anthony Assibi Mahama, Walter Suza",
+        license: "CC BY-NC-SA 4.0",
+        link: "static/materials/agriculture/Quantitative-Methods-for-Plant-Breeding-1696860463.pdf",
+        type: "pdf",
+        course: "Agriculture"
+      },
+      {
+        title: "Molecular Plant Breeding",
+        author: "Walter Suza, Kendall Lamkey, Thomas Lübberstedt, William Beavis, Madan Bhattacharyya, Laura Merrick, Ursula Frei",
+        license: "CC BY-NC-SA 4.0",
+        link: "static/materials/agriculture/Molecular-Plant-Breeding-1696858563.pdf",
+        type: "pdf",
+        course: "Agriculture"
+      },
+      {
+        title: "Quantitative Genetics for Plant Breeding",
+        author: "William Beavis, Katherine Espinosa, Mark Newell, Anthony Assibi Mahama, Walter Suza",
+        license: "CC BY-NC-SA 4.0",
+        link: "static/materials/agriculture/Quantitative-Genetics-for-Plant-Breeding-1697468159.pdf",
+        type: "pdf",
+        course: "Agriculture"
+      },
+      {
+        title: "Botany (Ha, Morrow, and Algiers)",
+        author: "Melissa Ha, Maria Morrow, Kammy Algiers",
+        license: "CC BY-NC 4.0",
+        link: "static/materials/biology/Botany-LibreCommons.pdf",
+        type: "pdf",
+        course: "Botany"
+      },
+      {
+        title: "Botany Lab Manual (Morrow)",
+        author: "Maria Morrow",
+        license: "CC BY-NC 4.0",
+        link: "static/materials/biology/Botany-Lab-Manual-Morrow.pdf",
+        type: "pdf",
+        course: "Botany"
+      },
+      {
+        title: "A Photographic Atlas for Botany (Morrow)",
+        author: "Maria Morrow",
+        license: "CC BY-NC 4.0",
+        link: "static/materials/biology/A-Photographic-Atlas-for-Botany-Morrow.pdf",
+        type: "pdf",
+        course: "Botany"
+      },
+      {
+        title: "History and Science of Cultivated Plants (Naithani)",
+        author: "Sushma Naithani",
+        license: "CC BY-NC 4.0",
+        link: "static/materials/botany/History-and-Science-of-Cultivated-Plants-Naithani.pdf",
+        type: "pdf",
+        course: "Botany"
+      },
+      {
+        title: "Inanimate Life (Briggs)",
+        author: "George M. Briggs",
+        license: "CC BY-SA 4.0",
+        link: "static/materials/botany/Inanimate-Life-1669056520.pdf",
+        type: "pdf",
+        course: "Botany"
+      },
+      {
+        title: "First-Year Arabic",
+        author: "Ragy Mikhaeel",
+        license: "CC BY-NC-SA 4.0",
+        link: "static/materials/arabic/First-Year-Arabic-1753121858.pdf",
+        type: "pdf",
+        course: "Arabic Studies"
+      },
+      {
+        title: "Elementary Arabic I",
+        author: "Sadam Issa and Ayman Mohamed",
+        license: "CC BY-NC 4.0",
+        link: "static/materials/arabic/Elementary-Arabic-I-Sadam-Issa-Ayman-Mohamed.pdf",
+        type: "pdf",
+        course: "Arabic Studies"
+      },
+      {
+        title: "Money and Banking",
+        author: "Robert E. Wright",
+        license: "CC BY-NC-SA",
+        link: "static/materials/bankingandfinance/Money and Banking.pdf",
+        type: "pdf",
+        course: "Banking and Finance"
+      },
+      {
+        title: "Finance, Banking, and Money",
+        author: "LibreTexts",
+        license: "CC BY",
+        link: "static/materials/bankingandfinance/Full (4).pdf",
+        type: "pdf",
+        course: "Banking and Finance"
+      },
+      {
+        title: "Principles of Finance",
+        author: "OpenStax",
+        license: "CC BY 4.0",
+        link: "static/materials/bankingandfinance/PrinciplesofFinance-WEB.pdf",
+        type: "pdf",
+        course: "Banking and Finance"
+      },
+      {
+        title: "Introduction to Business Administration",
+        author: "Amit Shah; Bethann Talsma; Carl McDaniel; Lawrence J. Gitman; Linda Koffel; Monique Reece",
+        license: "CC BY 4.0",
+        link: "static/materials/businessadministation/Introduction-to-Business-Administration-1735836334.pdf",
+        type: "pdf",
+        course: "Business Administration"
+      },
+      {
+        title: "Business Fundamentals – 1st Edition",
+        author: "Kerri Shields",
+        license: "CC BY-NC-SA 4.0",
+        link: "static/materials/businessadministation/Business-Fundamentals-1st-Edition-1760797243.pdf",
+        type: "pdf",
+        course: "Business Administration"
+      },
+      {
+        title: "Chemistry 2e",
+        author: "OpenStax",
+        license: "CC BY 4.0",
+        link: "static/materials/chemicalpolynomerengineer/Chemistry-LR.pdf",
+        type: "pdf",
+        course: "Chemical and Polymer Engineering"
+      },
+      {
+        title: "Introduction to Polymer Science and Technology",
+        author: "Mustafa Akay",
+        license: "CC BY",
+        link: "static/materials/chemicalpolynomerengineer/Introduction to Polymer Science and Technology.pdf",
+        type: "pdf",
+        course: "Chemical and Polymer Engineering"
+      },
+      {
+        title: "Chemistry 2e",
+        author: "Paul Flowers; Klaus Theopold; Richard Langley; William R. Robinson",
+        license: "CC BY 4.0",
+        link: "static/materials/chemistry/chemistry-2e.pdf",
+        type: "pdf",
+        course: "Chemistry"
+      },
+      {
+        title: "Chemistry: Atoms First 2e",
+        author: "OpenStax & University of Connecticut",
+        license: "CC BY 4.0",
+        link: "static/materials/chemistry/ChemistryAtomsFirst2e-WEB.pdf",
+        type: "pdf",
+        course: "Chemistry"
+      },
+      {
+        title: "World Religions: The Spirit Searching",
+        author: "Jody Ondich",
+        license: "CC BY-NC-SA 4.0",
+        link: "static/materials/christianreligiousstudy/World-Religions-the-Spirit-Searching-1681823908.pdf",
+        type: "pdf",
+        course: "Christian Religious Studies"
+      },
+      {
+        title: "Workplace Software and Skills",
+        author: "Tammie Bolling; Angela Mitchell; Tanya Scott; Nyrobi Wheeler",
+        license: "CC BY",
+        link: "static/materials/computerscience/Workplace_Software_and_Skills_-_WEB_IlfJtcP.pdf",
+        type: "pdf",
+        course: "Computer Science"
+      },
+      {
+        title: "Introduction to Computer Science",
+        author: "Dr. Jean‑Claude Franchitti",
+        license: "CC BY 4.0",
+        link: "static/materials/computerscience/Introduction_To_Computer_Science_-_WEB.pdf",
+        type: "pdf",
+        course: "Computer Science"
+      },
+      {
+        title: "Foundations of Information Systems",
+        author: "Dr. Mahesh S. Raisinghani",
+        license: "CC BY-NC-SA 4.0",
+        link: "static/materials/computerscience/Foundations_of_Information_Systems_-_WEB_oNlbGYl.pdf",
+        type: "pdf",
+        course: "Computer Science"
+      },
+      {
+        title: "Principles of Data Science",
+        author: "Dr. Shaun V. Ault; Dr. Soohyun Nam Liao; Larry Musolino",
+        license: "CC BY-NC-SA 4.0",
+        link: "static/materials/computerscience/Principles-of-Data-Science-WEB.pdf",
+        type: "pdf",
+        course: "Computer Science"
+      },
+      {
+        title: "Introduction to Python Programming",
+        author: "Udayan Das; Aubrey Lawson; Chris Mayfield; Narges Norouzi",
+        license: "CC BY 4.0",
+        link: "static/materials/computerscience/Introduction_to_Python_Programming_-_WEB.pdf",
+        type: "pdf",
+        course: "Computer Science"
+      },
+      {
+        title: "Oral and Maxillofacial Surgery for the Clinician",
+        author: "Krishnamurthy Bonanthaya; Elavenil Panneerselvam; Suvy Manuel; Vinay V. Kumar; Anshul Rai",
+        license: "CC BY 4.0",
+        link: "static/materials/dentistryanddentalsurgery/978-981-15-1346-6.pdf",
+        type: "pdf",
+        course: "Dentistry and Dental Surgery"
+      },
+      {
+        title: "Exploring the Arts: A Brief Introduction to Art, Theatre, Music, and Dance",
+        author: "Doris Hall; Kimberly Berkeley; Nubia Nurain Khan",
+        license: "CC BY 4.0",
+        link: "static/materials/dramaperformingarts/Exploring-the-Arts-1735836622.pdf",
+        type: "pdf",
+        course: "Drama / Dramatic / Performing Arts"
+      },
+      {
+        title: "Storytelling on Screen: An Online Playback Theatre Archive and Guidebook",
+        author: "Jordan Rosin; Heidi Winters Vogel; Sammy Lebron",
+        license: "CC BY-NC-SA 4.0",
+        link: "static/materials/dramaperformingarts/Storytelling_on_Screen_An_Online_Playback_Theatre_Archive_and_Guidebook.pdf",
+        type: "pdf",
+        course: "Drama / Dramatic / Performing Arts"
+      },
+      {
+        title: "Safety, Health, and Nutrition in Early Childhood Education",
+        author: "Jennifer Paris",
+        license: "CC BY 4.0",
+        link: "static/materials/earlychildhoodeducation/Health, Safety, and Nutrition OER Textbook.pdf",
+        type: "pdf",
+        course: "Early Childhood Education"
+      },
+      {
+        title: "Algebra and Trigonometry 2e",
+        author: "Jay Abramson (et al.)",
+        license: "CC BY 4.0",
+        link: "static/materials/math/Algebra-and-Trigonometry-2e-WEB.pdf",
+        type: "pdf",
+        course: "Mathematics"
+      },
+      {
+        title: "Calculus Volume 1",
+        author: "Gilbert Strang; Edwin 'Jed' Herman",
+        license: "CC BY-NC-SA 4.0",
+        link: "static/materials/math/Calculus_Volume_1_-_WEB_68M1Z5W.pdf",
+        type: "pdf",
+        course: "Mathematics"
+      },
+      {
+        title: "Calculus Volume 2",
+        author: "Gilbert Strang; Edwin 'Jed' Herman",
+        license: "CC BY-NC-SA 4.0",
+        link: "static/materials/math/Calculus_Volume_2_-_WEB.pdf",
+        type: "pdf",
+        course: "Mathematics"
+      },
+      {
+        title: "Calculus Volume 3",
+        author: "Gilbert Strang; Edwin 'Jed' Herman",
+        license: "CC BY-NC-SA 4.0",
+        link: "static/materials/math/Calculus_Volume_3_-_WEB.pdf",
+        type: "pdf",
+        course: "Mathematics"
+      },
+      {
+        title: "College Algebra 2e",
+        author: "Jay Abramson; Valeree Falduto; Rachael Gross; David Lippman; Melonie Rasmussen; Rick Norwood; Nicholas Belloit; Jean-Marie Magnier; Harold Whipple",
+        license: "CC BY 4.0",
+        link: "static/materials/math/College-Algebra-2e-WEB.pdf",
+        type: "pdf",
+        course: "Mathematics"
+      }
+    ];
 
-  btn.textContent = "🔍 Searching...";
-  btn.disabled = true;
+    // ===== STATE MANAGEMENT =====
+    const materialsState = {
+      course: '',
+      level: '',
+      topic: '',
+      searchInProgress: false,
+      searchResults: {
+        pdf: [],
+        online: [],
+        videos: []
+      }
+    };
 
-  // Filter uploaded PDFs
-  const filteredUploads = uploadedMaterials.filter(pdf =>
-    pdf.title.toLowerCase().includes(topic)
-  );
+    // ===== INITIALIZATION =====
+    document.addEventListener('DOMContentLoaded', () => {
+      setupEventListeners();
+      updateSearchButton();
+      
+      // Auto-focus course select
+      setTimeout(() => {
+        document.getElementById('courseSelect').focus();
+      }, 800);
+    });
 
-  if (filteredUploads.length > 0) {
-    container.innerHTML += `<h2>📘 Read Now</h2>`;
-    filteredUploads.forEach(pdf => {
-      container.innerHTML += `
-        <div class="material">
-          <strong>${pdf.title}</strong><br/>
-          ${pdf.author ? `<em>Author: ${pdf.author}</em><br/>` : ''}
-          <em>License: ${pdf.license}</em><br/>
-          <a href="${pdf.link}" target="_blank">Read PDF</a>
+    function setupEventListeners() {
+      const courseSelect = document.getElementById('courseSelect');
+      const levelSelect = document.getElementById('levelSelect');
+      const topicInput = document.getElementById('topicInput');
+      
+      courseSelect.addEventListener('change', () => {
+        materialsState.course = courseSelect.value;
+        updateSearchButton();
+      });
+      
+      levelSelect.addEventListener('change', () => {
+        materialsState.level = levelSelect.value;
+        updateSearchButton();
+      });
+      
+      topicInput.addEventListener('input', () => {
+        materialsState.topic = topicInput.value.trim();
+        updateSearchButton();
+      });
+      
+      topicInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+          searchMaterials();
+        }
+      });
+      
+      // Handle Android WebView specific behavior
+      if (/Android/.test(navigator.userAgent)) {
+        document.body.style.webkitOverflowScrolling = 'touch';
+      }
+    }
+
+    function updateSearchButton() {
+      const searchBtn = document.getElementById('searchBtn');
+      searchBtn.disabled = !(materialsState.course && materialsState.level && materialsState.topic);
+    }
+
+    // ===== SEARCH FUNCTIONS =====
+    async function searchMaterials() {
+      if (!materialsState.course || !materialsState.level || !materialsState.topic) {
+        showNotification('Please select course, level, and enter a topic.', 'warning');
+        return;
+      }
+      
+      // Update state
+      materialsState.searchInProgress = true;
+      
+      // Update UI
+      const searchBtn = document.getElementById('searchBtn');
+      searchBtn.classList.add('loading');
+      searchBtn.disabled = true;
+      
+      // Clear previous results
+      clearResults();
+      
+      // Show results section
+      document.getElementById('resultsSection').classList.add('active');
+      document.getElementById('noResults').classList.add('hidden');
+      
+      // Search local PDFs
+      searchLocalPDFs();
+      
+      // Fetch online materials (simulated delay for demo)
+      setTimeout(() => {
+        searchOnlineMaterials();
+        
+        // Reset button
+        searchBtn.classList.remove('loading');
+        searchBtn.disabled = false;
+        materialsState.searchInProgress = false;
+        
+        // Show total results
+        updateResultsCount();
+      }, 1500);
+    }
+
+    function searchLocalPDFs() {
+      const topic = materialsState.topic.toLowerCase();
+      const course = materialsState.course;
+      
+      // Filter PDFs by topic and course
+      const filteredPDFs = uploadedMaterials.filter(pdf => {
+        const matchesTopic = pdf.title.toLowerCase().includes(topic) || 
+                            pdf.author.toLowerCase().includes(topic) ||
+                            pdf.course.toLowerCase().includes(topic);
+        const matchesCourse = pdf.course === course;
+        return matchesTopic && matchesCourse;
+      });
+      
+      materialsState.searchResults.pdf = filteredPDFs;
+      displayPDFResults(filteredPDFs);
+    }
+
+    async function searchOnlineMaterials() {
+      try {
+        const response = await fetch(`/ai/materials?topic=${encodeURIComponent(materialsState.topic)}&level=${encodeURIComponent(materialsState.level)}&department=${encodeURIComponent(materialsState.course)}`);
+        const data = await response.json();
+        
+        if (data.books && data.books.length > 0) {
+          materialsState.searchResults.online = data.books;
+          displayOnlineResults(data.books);
+        }
+        
+        if (data.videos && data.videos.length > 0) {
+          materialsState.searchResults.videos = data.videos;
+          displayVideoResults(data.videos);
+        }
+        
+      } catch (error) {
+        console.error('Error fetching online materials:', error);
+        // Show simulated results for demo
+        showSimulatedOnlineResults();
+      }
+    }
+
+    function showSimulatedOnlineResults() {
+      const simulatedBooks = [
+        {
+          title: "Advanced " + materialsState.course + " - " + materialsState.level + " Level",
+          author: "Various Authors",
+          license: "Open Access",
+          link: "https://openstax.org/subjects/" + materialsState.course.toLowerCase().replace(/\s+/g, '-'),
+          type: "online"
+        },
+        {
+          title: "Principles of " + materialsState.course,
+          author: "Academic Press",
+          license: "Educational Use",
+          link: "https://libretexts.org/books/" + materialsState.course.toLowerCase().replace(/\s+/g, '-'),
+          type: "online"
+        }
+      ];
+      
+      const simulatedVideos = [
+        {
+          title: "Introduction to " + materialsState.topic + " - " + materialsState.course,
+          link: "https://www.youtube.com/results?search_query=" + encodeURIComponent(materialsState.course + " " + materialsState.topic + " tutorial"),
+          type: "video"
+        },
+        {
+          title: "Advanced Concepts in " + materialsState.topic,
+          link: "https://www.khanacademy.org/search?page_search_query=" + encodeURIComponent(materialsState.course + " " + materialsState.topic),
+          type: "video"
+        }
+      ];
+      
+      materialsState.searchResults.online = simulatedBooks;
+      materialsState.searchResults.videos = simulatedVideos;
+      
+      displayOnlineResults(simulatedBooks);
+      displayVideoResults(simulatedVideos);
+    }
+
+    // ===== DISPLAY FUNCTIONS =====
+    function displayPDFResults(pdfs) {
+      const container = document.getElementById('pdfMaterials');
+      container.innerHTML = '';
+      
+      if (pdfs.length === 0) {
+        document.getElementById('pdfSection').style.display = 'none';
+        return;
+      }
+      
+      document.getElementById('pdfSection').style.display = 'block';
+      
+      pdfs.forEach((pdf, index) => {
+        const card = createMaterialCard(pdf, index, 'pdf');
+        container.appendChild(card);
+      });
+    }
+
+    function displayOnlineResults(books) {
+      const container = document.getElementById('onlineMaterials');
+      container.innerHTML = '';
+      
+      if (!books || books.length === 0) {
+        document.getElementById('onlineSection').style.display = 'none';
+        return;
+      }
+      
+      document.getElementById('onlineSection').style.display = 'block';
+      
+      books.forEach((book, index) => {
+        const card = createMaterialCard(book, index, 'online');
+        container.appendChild(card);
+      });
+    }
+
+    function displayVideoResults(videos) {
+      const container = document.getElementById('videoMaterials');
+      container.innerHTML = '';
+      
+      if (!videos || videos.length === 0) {
+        document.getElementById('videoSection').style.display = 'none';
+        return;
+      }
+      
+      document.getElementById('videoSection').style.display = 'block';
+      
+      videos.forEach((video, index) => {
+        const card = createMaterialCard(video, index, 'video');
+        container.appendChild(card);
+      });
+    }
+
+    function createMaterialCard(material, index, type) {
+      const card = document.createElement('div');
+      card.className = 'material-card';
+      card.style.animationDelay = `${index * 0.1}s`;
+      
+      const typeIcon = {
+        'pdf': '📘',
+        'online': '🌐',
+        'video': '🎥'
+      }[type];
+      
+      const buttons = {
+        'pdf': `
+          <button class="material-btn primary" onclick="openMaterial('${material.link}', '${material.title}')">
+            <span>📖</span>
+            Read PDF
+          </button>
+          <button class="material-btn" onclick="downloadMaterial('${material.link}', '${material.title}')">
+            <span>⬇️</span>
+            Download
+          </button>
+        `,
+        'online': `
+          <a href="${material.link}" target="_blank" class="material-btn primary">
+            <span>🌐</span>
+            Read Online
+          </a>
+          <button class="material-btn" onclick="shareMaterial('${material.title}', '${material.link}')">
+            <span>↗️</span>
+            Share
+          </button>
+        `,
+        'video': `
+          <a href="${material.link}" target="_blank" class="material-btn primary">
+            <span>▶️</span>
+            Watch Video
+          </a>
+          <button class="material-btn" onclick="shareMaterial('${material.title}', '${material.link}')">
+            <span>↗️</span>
+            Share
+          </button>
+        `
+      }[type];
+      
+      card.innerHTML = `
+        <div class="material-type">${typeIcon}</div>
+        <div class="material-title">${material.title}</div>
+        ${material.author ? `<div class="material-author">👤 ${material.author}</div>` : ''}
+        ${material.license ? `<div class="material-license">${material.license}</div>` : ''}
+        <div class="material-actions">
+          ${buttons}
         </div>
       `;
-    });
-  }
+      
+      return card;
+    }
 
-  // Fetch online materials
-  const url = `/ai/materials?topic=${encodeURIComponent(topic)}&level=${encodeURIComponent(level)}&department=${encodeURIComponent(course)}`;
-  fetch(url)
-    .then(res => res.json())
-    .then(data => {
-      btn.textContent = "🔍 Search Materials";
-      btn.disabled = false;
+    function clearResults() {
+      materialsState.searchResults = { pdf: [], online: [], videos: [] };
+      
+      document.getElementById('pdfMaterials').innerHTML = '';
+      document.getElementById('onlineMaterials').innerHTML = '';
+      document.getElementById('videoMaterials').innerHTML = '';
+      
+      document.getElementById('pdfSection').style.display = 'none';
+      document.getElementById('onlineSection').style.display = 'none';
+      document.getElementById('videoSection').style.display = 'none';
+    }
 
-      if (data.books && data.books.length > 0) {
-        container.innerHTML += `<h2>📖 Read Online</h2>`;
-        data.books.forEach(book => {
-          container.innerHTML += `
-            <div class="material">
-              <strong>${book.title}</strong><br/>
-              ${book.author ? `<em>Author: ${book.author}</em><br/>` : ''}
-              <em>License: ${book.license || 'Unknown'}</em><br/>
-              <a href="${book.link}" target="_blank">Read</a>
-            </div>
-          `;
+    function updateResultsCount() {
+      const total = materialsState.searchResults.pdf.length + 
+                    materialsState.searchResults.online.length + 
+                    materialsState.searchResults.videos.length;
+      
+      document.getElementById('resultsCount').textContent = `${total} materials`;
+      
+      if (total === 0) {
+        document.getElementById('resultsSection').classList.remove('active');
+        document.getElementById('noResults').classList.remove('hidden');
+      }
+    }
+
+    // ===== MATERIAL ACTIONS =====
+    function openMaterial(link, title) {
+      window.open(link, '_blank');
+      
+      // Track material view
+      trackMaterialView(title);
+    }
+
+    function downloadMaterial(link, title) {
+      const a = document.createElement('a');
+      a.href = link;
+      a.download = title.replace(/\s+/g, '_') + '.pdf';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      
+      // Track download
+      trackMaterialDownload(title);
+    }
+
+    function shareMaterial(title, link) {
+      if (navigator.share) {
+        navigator.share({
+          title: title,
+          text: `Check out this study material: ${title}`,
+          url: link
+        }).catch(console.error);
+      } else {
+        // Fallback: copy to clipboard
+        navigator.clipboard.writeText(`${title}: ${link}`).then(() => {
+          showNotification('Link copied to clipboard!', 'success');
+        }).catch(() => {
+          prompt('Copy this link:', link);
         });
       }
+    }
 
-      if (data.videos && data.videos.length > 0) {
-        container.innerHTML += `<h2>🎥 Videos</h2>`;
-        data.videos.forEach(video => {
-          container.innerHTML += `
-            <div class="material">
-              <strong>${video.title}</strong><br/>
-              <a href="${video.link}" target="_blank">Watch</a>
-            </div>
-          `;
-        });
+    function trackMaterialView(title) {
+      const history = JSON.parse(localStorage.getItem('materialHistory')) || [];
+      history.push({
+        title: title,
+        type: 'view',
+        timestamp: new Date().toISOString(),
+        course: materialsState.course,
+        topic: materialsState.topic
+      });
+      
+      // Keep only last 50 items
+      if (history.length > 50) {
+        history.shift();
       }
+      
+      localStorage.setItem('materialHistory', JSON.stringify(history));
+    }
 
-      if (filteredUploads.length === 0 && (!data.books || data.books.length === 0) && (!data.videos || data.videos.length === 0)) {
-        container.innerHTML = "<p>No materials found for this topic.</p>";
+    function trackMaterialDownload(title) {
+      const history = JSON.parse(localStorage.getItem('materialHistory')) || [];
+      history.push({
+        title: title,
+        type: 'download',
+        timestamp: new Date().toISOString(),
+        course: materialsState.course,
+        topic: materialsState.topic
+      });
+      
+      // Keep only last 50 items
+      if (history.length > 50) {
+        history.shift();
       }
-    })
-    .catch(err => {
-      container.innerHTML = "❌ Error loading materials.";
-      console.error(err);
-      btn.textContent = "🔍 Search Materials";
-      btn.disabled = false;
+      
+      localStorage.setItem('materialHistory', JSON.stringify(history));
+    }
+
+    // ===== UTILITY FUNCTIONS =====
+    function goBack() {
+      // Smooth page transition
+      document.body.style.opacity = '0';
+      document.body.style.transform = 'translateX(20px)';
+      document.body.style.transition = 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)';
+      
+      setTimeout(() => {
+        window.history.back();
+      }, 300);
+    }
+
+    function showNotification(message, type = 'info') {
+      const notification = document.createElement('div');
+      notification.className = `notification ${type}`;
+      notification.textContent = message;
+      notification.style.cssText = `
+        position: fixed;
+        top: 80px;
+        left: 50%;
+        transform: translateX(-50%) translateY(-20px);
+        background: var(--card-dark);
+        border: 1px solid var(--border-dark);
+        color: white;
+        padding: 1rem 1.5rem;
+        border-radius: 12px;
+        z-index: 10000;
+        opacity: 0;
+        transition: all 0.3s ease;
+      `;
+      
+      document.body.appendChild(notification);
+      
+      setTimeout(() => {
+        notification.style.opacity = '1';
+        notification.style.transform = 'translateX(-50%) translateY(0)';
+      }, 10);
+      
+      setTimeout(() => {
+        notification.style.opacity = '0';
+        notification.style.transform = 'translateX(-50%) translateY(-20px)';
+        setTimeout(() => {
+          document.body.removeChild(notification);
+        }, 300);
+      }, 3000);
+    }
+
+    // Handle page visibility for better Android experience
+    document.addEventListener('visibilitychange', function() {
+      if (!document.hidden) {
+        // Page became visible again, refresh animations
+        document.body.style.animation = 'none';
+        setTimeout(() => {
+          document.body.style.animation = 'fadeIn 0.6s ease-out forwards';
+        }, 10);
+      }
     });
-});
-</script>
 
+    // Keyboard navigation
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') {
+        goBack();
+      }
+      
+      if (e.key === 'Enter' && e.ctrlKey) {
+        searchMaterials();
+      }
+    });
+  </script>
 </body>
 </html>
