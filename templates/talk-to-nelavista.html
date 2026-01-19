@@ -54,6 +54,204 @@
       animation-delay: 0.1s;
     }
 
+    /* ===== AUTHENTICATION MODAL ===== */
+    .auth-modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.95);
+      backdrop-filter: blur(10px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 10000;
+      opacity: 0;
+      animation: fadeIn 0.5s ease-out forwards;
+    }
+
+    .auth-container {
+      background: var(--card-dark);
+      border: 1px solid var(--border-dark);
+      border-radius: 16px;
+      padding: 2.5rem;
+      width: 90%;
+      max-width: 400px;
+      text-align: center;
+      animation: fadeInUp 0.7s ease-out;
+    }
+
+    .auth-title {
+      font-size: 1.8rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 1rem;
+    }
+
+    .auth-subtitle {
+      color: #a0a0a0;
+      font-size: 1rem;
+      margin-bottom: 2rem;
+      line-height: 1.5;
+    }
+
+    .auth-form {
+      margin-bottom: 1.5rem;
+    }
+
+    .auth-input-group {
+      margin-bottom: 1.2rem;
+      text-align: left;
+    }
+
+    .auth-label {
+      display: block;
+      margin-bottom: 0.5rem;
+      color: #e0e0e0;
+      font-size: 0.9rem;
+      font-weight: 500;
+    }
+
+    .auth-input {
+      width: 100%;
+      padding: 0.9rem 1.2rem;
+      background: var(--input-bg);
+      border: 1px solid var(--border-dark);
+      border-radius: 12px;
+      color: var(--text-dark);
+      font-size: 1rem;
+      transition: all 0.3s ease;
+    }
+
+    .auth-input:focus {
+      outline: none;
+      border-color: rgba(255, 255, 255, 0.3);
+      transform: translateY(-1px);
+    }
+
+    .auth-btn {
+      width: 100%;
+      padding: 1rem;
+      background: var(--primary-color);
+      color: white;
+      border: none;
+      border-radius: 12px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      margin-top: 0.5rem;
+    }
+
+    .auth-btn:hover {
+      opacity: 0.9;
+      transform: translateY(-1px);
+    }
+
+    .auth-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .auth-error {
+      color: #ff6b6b;
+      font-size: 0.9rem;
+      margin-top: 1rem;
+      padding: 0.8rem;
+      background: rgba(255, 107, 107, 0.1);
+      border-radius: 8px;
+      display: none;
+    }
+
+    .auth-success {
+      color: #4caf50;
+      font-size: 0.9rem;
+      margin-top: 1rem;
+      padding: 0.8rem;
+      background: rgba(76, 175, 80, 0.1);
+      border-radius: 8px;
+      display: none;
+    }
+
+    .auth-footer {
+      color: #888;
+      font-size: 0.9rem;
+      margin-top: 1.5rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid var(--border-dark);
+    }
+
+    .auth-user-info {
+      background: var(--accent-color);
+      border: 1px solid var(--border-dark);
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-top: 2rem;
+      text-align: left;
+      display: none;
+    }
+
+    .user-info-title {
+      font-size: 1rem;
+      font-weight: 600;
+      color: #ffffff;
+      margin-bottom: 0.5rem;
+    }
+
+    .user-info-detail {
+      color: #a0a0a0;
+      font-size: 0.9rem;
+      margin-bottom: 0.3rem;
+    }
+
+    .logout-btn {
+      margin-top: 1rem;
+      padding: 0.6rem 1.2rem;
+      background: transparent;
+      border: 1px solid var(--border-dark);
+      color: #ff6b6b;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .logout-btn:hover {
+      background: rgba(255, 107, 107, 0.1);
+      border-color: #ff6b6b;
+    }
+
+    .auth-loading {
+      display: none;
+      margin-top: 1rem;
+      color: #a0a0a0;
+    }
+
+    .password-wrapper {
+      position: relative;
+    }
+
+    .toggle-password {
+      position: absolute;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      color: #a0a0a0;
+      cursor: pointer;
+      font-size: 0.9rem;
+    }
+
+    .toggle-password:hover {
+      color: #ffffff;
+    }
+
     /* ===== TOP BAR ===== */
     #top-bar {
       position: fixed;
@@ -768,6 +966,52 @@
   </style>
 </head>
 <body>
+  <!-- AUTHENTICATION MODAL -->
+  <div id="authModal" class="auth-modal">
+    <div class="auth-container">
+      <h2 class="auth-title">🔐 Login Required</h2>
+      <p class="auth-subtitle">Please login to access Nelavista AI</p>
+      
+      <!-- Login Form -->
+      <div id="loginForm">
+        <form class="auth-form" id="loginFormElement">
+          <div class="auth-input-group">
+            <label class="auth-label">Username or Email</label>
+            <input type="text" id="loginInput" class="auth-input" placeholder="Enter username or email" required>
+          </div>
+          
+          <div class="auth-input-group">
+            <label class="auth-label">Password</label>
+            <div class="password-wrapper">
+              <input type="password" id="loginPassword" class="auth-input" placeholder="Enter password" required>
+              <button type="button" class="toggle-password" onclick="togglePassword()">👁️</button>
+            </div>
+          </div>
+          
+          <button type="submit" class="auth-btn" id="loginBtn">
+            <span id="loginBtnText">Login to Continue</span>
+            <span id="loginLoading" class="auth-loading">Logging in...</span>
+          </button>
+          
+          <div id="loginError" class="auth-error"></div>
+          <div id="loginSuccess" class="auth-success"></div>
+        </form>
+        
+        <div class="auth-footer">
+          <p>Don't have an account? <a href="/signup" style="color: var(--gradient-start);">Sign up here</a></p>
+        </div>
+      </div>
+      
+      <!-- User Info (shown after login) -->
+      <div id="userInfo" class="auth-user-info">
+        <div class="user-info-title">🎉 Welcome, <span id="userName"></span>!</div>
+        <div class="user-info-detail">Email: <span id="userEmail"></span></div>
+        <div class="user-info-detail">Joined: <span id="userJoined"></span></div>
+        <button class="logout-btn" onclick="handleLogout()">Logout</button>
+      </div>
+    </div>
+  </div>
+
   <!-- TOP BAR -->
   <div id="top-bar">
     <button id="back-btn" onclick="goBack()">←</button>
@@ -872,6 +1116,13 @@
   </div>
 
   <script>
+    // ===== AUTHENTICATION STATE =====
+    const authState = {
+      isAuthenticated: false,
+      user: null,
+      checkingAuth: true
+    };
+
     // ===== STATE MANAGEMENT =====
     const state = {
       isListening: false,
@@ -882,17 +1133,187 @@
       recognition: null
     };
 
+    // ===== AUTHENTICATION FUNCTIONS =====
+    async function checkAuthentication() {
+      try {
+        const response = await fetch('/api/check_auth');
+        if (response.status === 200) {
+          const data = await response.json();
+          authState.isAuthenticated = true;
+          authState.user = data.user;
+          showChatInterface();
+        } else {
+          authState.isAuthenticated = false;
+          showLoginModal();
+        }
+      } catch (error) {
+        console.error('Auth check failed:', error);
+        showLoginModal();
+      } finally {
+        authState.checkingAuth = false;
+      }
+    }
+
+    async function handleLogin(event) {
+      if (event) event.preventDefault();
+      
+      const loginInput = document.getElementById('loginInput').value.trim();
+      const password = document.getElementById('loginPassword').value.trim();
+      const loginError = document.getElementById('loginError');
+      const loginSuccess = document.getElementById('loginSuccess');
+      const loginBtn = document.getElementById('loginBtn');
+      const loginBtnText = document.getElementById('loginBtnText');
+      const loginLoading = document.getElementById('loginLoading');
+      
+      // Reset messages
+      loginError.style.display = 'none';
+      loginSuccess.style.display = 'none';
+      
+      // Validate
+      if (!loginInput || !password) {
+        loginError.textContent = 'Please fill in all fields';
+        loginError.style.display = 'block';
+        return;
+      }
+      
+      // Show loading
+      loginBtn.disabled = true;
+      loginBtnText.style.display = 'none';
+      loginLoading.style.display = 'inline';
+      
+      try {
+        const response = await fetch('/api/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            username_or_email: loginInput,
+            password: password
+          })
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok && data.success) {
+          authState.isAuthenticated = true;
+          authState.user = data.user;
+          
+          loginSuccess.textContent = 'Login successful! Loading chat...';
+          loginSuccess.style.display = 'block';
+          
+          // Hide login form, show success message briefly
+          document.getElementById('loginForm').style.display = 'none';
+          
+          setTimeout(() => {
+            showChatInterface();
+          }, 1000);
+        } else {
+          loginError.textContent = data.message || 'Login failed';
+          loginError.style.display = 'block';
+        }
+      } catch (error) {
+        console.error('Login error:', error);
+        loginError.textContent = 'Network error. Please try again.';
+        loginError.style.display = 'block';
+      } finally {
+        // Reset button
+        loginBtn.disabled = false;
+        loginBtnText.style.display = 'inline';
+        loginLoading.style.display = 'none';
+      }
+    }
+
+    async function handleLogout() {
+      try {
+        await fetch('/api/logout', { method: 'POST' });
+        authState.isAuthenticated = false;
+        authState.user = null;
+        showLoginModal();
+      } catch (error) {
+        console.error('Logout error:', error);
+      }
+    }
+
+    function showLoginModal() {
+      const authModal = document.getElementById('authModal');
+      const loginForm = document.getElementById('loginForm');
+      const userInfo = document.getElementById('userInfo');
+      
+      // Reset form
+      document.getElementById('loginInput').value = '';
+      document.getElementById('loginPassword').value = '';
+      document.getElementById('loginError').style.display = 'none';
+      document.getElementById('loginSuccess').style.display = 'none';
+      
+      // Show login form, hide user info
+      loginForm.style.display = 'block';
+      userInfo.style.display = 'none';
+      
+      // Show modal, hide chat
+      authModal.style.display = 'flex';
+      document.getElementById('top-bar').style.display = 'none';
+      document.querySelector('.talk-container').style.display = 'none';
+    }
+
+    function showChatInterface() {
+      const authModal = document.getElementById('authModal');
+      const loginForm = document.getElementById('loginForm');
+      const userInfo = document.getElementById('userInfo');
+      
+      if (authState.isAuthenticated && authState.user) {
+        // Update user info display
+        document.getElementById('userName').textContent = authState.user.username;
+        document.getElementById('userEmail').textContent = authState.user.email;
+        document.getElementById('userJoined').textContent = authState.user.joined_on;
+        
+        // Show user info, hide login form
+        loginForm.style.display = 'none';
+        userInfo.style.display = 'block';
+        
+        // Hide modal after brief display of success
+        setTimeout(() => {
+          authModal.style.display = 'none';
+          document.getElementById('top-bar').style.display = 'flex';
+          document.querySelector('.talk-container').style.display = 'block';
+          
+          // Initialize chat features
+          initializeVoiceRecognition();
+          initializeVoices();
+          loadConversationHistory();
+          setupEventListeners();
+          
+          // Auto-focus username input
+          setTimeout(() => {
+            document.getElementById('username').focus();
+          }, 100);
+        }, 1500);
+      } else {
+        showLoginModal();
+      }
+    }
+
+    function togglePassword() {
+      const passwordInput = document.getElementById('loginPassword');
+      const toggleBtn = document.querySelector('.toggle-password');
+      
+      if (passwordInput.type === 'password') {
+        passwordInput.type = 'text';
+        toggleBtn.textContent = '🙈';
+      } else {
+        passwordInput.type = 'password';
+        toggleBtn.textContent = '👁️';
+      }
+    }
+
     // ===== INITIALIZATION =====
     document.addEventListener('DOMContentLoaded', () => {
-      initializeVoiceRecognition();
-      initializeVoices();
-      loadConversationHistory();
-      setupEventListeners();
+      // First, check authentication
+      checkAuthentication();
       
-      // Auto-focus username input
-      setTimeout(() => {
-        document.getElementById('username').focus();
-      }, 800);
+      // Setup form submit handler
+      const loginForm = document.getElementById('loginFormElement');
+      if (loginForm) {
+        loginForm.addEventListener('submit', handleLogin);
+      }
     });
 
     // ===== VOICE RECOGNITION =====
@@ -1109,14 +1530,27 @@
 
     // ===== BACKEND COMMUNICATION =====
     async function sendToBackend(message) {
+      // Check authentication first
+      if (!authState.isAuthenticated) {
+        showLoginModal();
+        throw new Error('Authentication required');
+      }
+      
       // Send ONLY 'message' field (matches your backend /ask endpoint)
       const response = await fetch('/ask', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
-          message: message  // Backend expects ONLY 'message'
+          message: message
         })
       });
+      
+      if (response.status === 401) {
+        // Session expired, re-authenticate
+        authState.isAuthenticated = false;
+        showLoginModal();
+        throw new Error('Session expired. Please login again.');
+      }
       
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
