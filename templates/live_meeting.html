@@ -15,47 +15,74 @@
 
         body {
             font-family: 'Poppins', sans-serif;
-            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+            background: #000000;
             min-height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
             padding: 20px;
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
         }
 
         .container {
-            background: rgba(255, 255, 255, 0.95);
-            border-radius: 20px;
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+            background: #ffffff;
+            border-radius: 10px;
             padding: 40px;
             max-width: 500px;
             width: 100%;
             text-align: center;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.3);
+            border: 1px solid #e0e0e0;
+            animation: slideUp 0.5s ease-out 0.1s both;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         .logo {
             margin-bottom: 30px;
+            animation: fadeIn 0.8s ease-out 0.2s both;
         }
 
         .logo-icon {
             font-size: 48px;
-            color: #6a11cb;
+            color: #000000;
             margin-bottom: 15px;
+            transition: transform 0.3s ease;
+        }
+
+        .logo-icon:hover {
+            transform: scale(1.05);
         }
 
         .logo h1 {
-            color: #333;
+            color: #000000;
             font-size: 32px;
             font-weight: 700;
             margin-bottom: 5px;
         }
 
         .logo p {
-            color: #666;
+            color: #666666;
             font-size: 16px;
             font-weight: 400;
+            opacity: 0.9;
         }
 
         .role-cards {
@@ -66,58 +93,81 @@
 
         .role-card {
             flex: 1;
-            background: white;
-            border-radius: 15px;
+            background: #ffffff;
+            border-radius: 10px;
             padding: 30px 20px;
             cursor: pointer;
             transition: all 0.3s ease;
-            border: 2px solid transparent;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+            border: 2px solid #e0e0e0;
+            animation: fadeInUp 0.5s ease-out;
+            animation-fill-mode: both;
+        }
+
+        .role-card:first-child {
+            animation-delay: 0.3s;
+        }
+
+        .role-card:last-child {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(8px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         .role-card:hover {
-            transform: translateY(-5px);
-            border-color: #6a11cb;
-            box-shadow: 0 10px 25px rgba(106, 17, 203, 0.15);
+            transform: translateY(-3px);
+            border-color: #000000;
         }
 
-        .role-card.teacher:hover {
-            border-color: #2575fc;
+        .role-card:active {
+            transform: translateY(0);
+            transition: transform 0.1s ease;
         }
 
         .role-icon {
             font-size: 36px;
             margin-bottom: 15px;
-            color: #6a11cb;
+            color: #000000;
+            transition: transform 0.3s ease;
         }
 
-        .role-card.teacher .role-icon {
-            color: #2575fc;
+        .role-card:hover .role-icon {
+            transform: scale(1.1);
         }
 
         .role-card h3 {
-            color: #333;
+            color: #000000;
             font-size: 20px;
             font-weight: 600;
             margin-bottom: 10px;
         }
 
         .role-card p {
-            color: #666;
+            color: #666666;
             font-size: 14px;
             line-height: 1.5;
+            opacity: 0.8;
         }
 
         .join-section {
-            background: #f8f9ff;
-            border-radius: 15px;
+            background: #f5f5f5;
+            border-radius: 10px;
             padding: 30px;
             margin-top: 30px;
             text-align: left;
+            animation: fadeIn 0.5s ease-out 0.5s both;
         }
 
         .join-section h3 {
-            color: #333;
+            color: #000000;
             font-size: 20px;
             font-weight: 600;
             margin-bottom: 20px;
@@ -127,44 +177,56 @@
         }
 
         .join-section h3 i {
-            color: #6a11cb;
+            color: #000000;
         }
 
         .form-group {
             margin-bottom: 20px;
+            animation: fadeIn 0.5s ease-out;
+            animation-fill-mode: both;
+        }
+
+        .form-group:first-of-type {
+            animation-delay: 0.6s;
+        }
+
+        .form-group:last-of-type {
+            animation-delay: 0.7s;
         }
 
         .form-group label {
             display: block;
-            color: #555;
+            color: #555555;
             font-size: 14px;
             font-weight: 500;
             margin-bottom: 8px;
+            transition: color 0.3s ease;
         }
 
         .form-group input {
             width: 100%;
             padding: 12px 15px;
             border: 2px solid #e0e0e0;
-            border-radius: 10px;
+            border-radius: 8px;
             font-size: 16px;
             font-family: 'Poppins', sans-serif;
             transition: all 0.3s ease;
+            background: #ffffff;
+            color: #000000;
         }
 
         .form-group input:focus {
             outline: none;
-            border-color: #6a11cb;
-            box-shadow: 0 0 0 3px rgba(106, 17, 203, 0.1);
+            border-color: #000000;
         }
 
         .btn {
             display: inline-block;
             padding: 12px 30px;
-            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
-            color: white;
+            background: #000000;
+            color: #ffffff;
             border: none;
-            border-radius: 10px;
+            border-radius: 8px;
             font-size: 16px;
             font-weight: 600;
             cursor: pointer;
@@ -172,23 +234,37 @@
             text-decoration: none;
             text-align: center;
             width: 100%;
+            position: relative;
+            overflow: hidden;
+            animation: fadeInUp 0.5s ease-out 0.8s both;
         }
 
         .btn:hover {
+            background: #333333;
             transform: translateY(-2px);
-            box-shadow: 0 7px 20px rgba(106, 17, 203, 0.3);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+            transition: transform 0.1s ease;
         }
 
         .btn i {
             margin-right: 8px;
+            transition: transform 0.3s ease;
+        }
+
+        .btn:hover i {
+            transform: translateX(3px);
         }
 
         .divider {
             display: flex;
             align-items: center;
             margin: 30px 0;
-            color: #999;
+            color: #999999;
             font-size: 14px;
+            animation: fadeIn 0.5s ease-out 0.4s both;
         }
 
         .divider::before,
@@ -197,22 +273,34 @@
             flex: 1;
             height: 1px;
             background: #e0e0e0;
+            transition: background 0.3s ease;
+        }
+
+        .divider:hover::before,
+        .divider:hover::after {
+            background: #000000;
         }
 
         .divider span {
             padding: 0 15px;
+            transition: color 0.3s ease;
+        }
+
+        .divider:hover span {
+            color: #000000;
         }
 
         .instructions {
             margin-top: 30px;
             padding: 20px;
-            background: #f0f4ff;
-            border-radius: 10px;
+            background: #f5f5f5;
+            border-radius: 8px;
             text-align: left;
+            animation: fadeIn 0.5s ease-out 0.9s both;
         }
 
         .instructions h4 {
-            color: #333;
+            color: #000000;
             font-size: 16px;
             font-weight: 600;
             margin-bottom: 10px;
@@ -227,34 +315,71 @@
         }
 
         .instructions li {
-            color: #666;
+            color: #666666;
             font-size: 14px;
             margin-bottom: 8px;
             display: flex;
             align-items: flex-start;
             gap: 8px;
+            animation: fadeInLeft 0.5s ease-out;
+            animation-fill-mode: both;
         }
 
+        @keyframes fadeInLeft {
+            from {
+                opacity: 0;
+                transform: translateX(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .instructions li:nth-child(1) { animation-delay: 1s; }
+        .instructions li:nth-child(2) { animation-delay: 1.1s; }
+        .instructions li:nth-child(3) { animation-delay: 1.2s; }
+        .instructions li:nth-child(4) { animation-delay: 1.3s; }
+        .instructions li:nth-child(5) { animation-delay: 1.4s; }
+
         .instructions li i {
-            color: #6a11cb;
+            color: #000000;
             font-size: 12px;
             margin-top: 3px;
+            transition: transform 0.3s ease;
+        }
+
+        .instructions li:hover i {
+            transform: scale(1.2);
         }
 
         .flash-message {
-            background: #ffebee;
-            color: #c62828;
+            background: #f0f0f0;
+            color: #333333;
             padding: 12px 20px;
-            border-radius: 10px;
+            border-radius: 8px;
             margin-bottom: 20px;
             font-size: 14px;
             text-align: left;
-            border-left: 4px solid #c62828;
+            border-left: 4px solid #333333;
+            animation: fadeIn 0.5s ease-out;
         }
 
         @media (max-width: 600px) {
             .container {
                 padding: 25px;
+                animation: slideUpMobile 0.5s ease-out 0.1s both;
+            }
+
+            @keyframes slideUpMobile {
+                from {
+                    opacity: 0;
+                    transform: translateY(20px);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
             }
             
             .role-cards {
@@ -263,6 +388,41 @@
             
             .logo h1 {
                 font-size: 28px;
+            }
+
+            .btn:hover {
+                transform: translateY(-1px);
+            }
+
+            .role-card:hover {
+                transform: translateY(-2px);
+            }
+        }
+
+        /* Smooth scrolling */
+        html {
+            scroll-behavior: smooth;
+        }
+
+        /* Selection color */
+        ::selection {
+            background: rgba(0, 0, 0, 0.1);
+            color: #000000;
+        }
+
+        /* Focus styles for accessibility */
+        *:focus {
+            outline: 2px solid rgba(0, 0, 0, 0.3);
+            outline-offset: 2px;
+        }
+
+        /* Smooth transitions for reduced motion users */
+        @media (prefers-reduced-motion: reduce) {
+            * {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+                scroll-behavior: auto !important;
             }
         }
     </style>
@@ -286,7 +446,7 @@
         {% endwith %}
 
         <div class="role-cards">
-            <div class="role-card teacher" onclick="window.location.href='/live_meeting/teacher'">
+            <div class="role-card teacher" onclick="handleRoleCardClick('teacher')">
                 <div class="role-icon">
                     <i class="fas fa-chalkboard-teacher"></i>
                 </div>
@@ -294,7 +454,7 @@
                 <p>Start a new classroom session as a teacher. Share your screen, video, and audio with students.</p>
             </div>
 
-            <div class="role-card student" onclick="document.getElementById('joinForm').scrollIntoView({behavior: 'smooth'})">
+            <div class="role-card student" onclick="handleRoleCardClick('student')">
                 <div class="role-icon">
                     <i class="fas fa-user-graduate"></i>
                 </div>
@@ -337,11 +497,17 @@
     </div>
 
     <script>
-        // Auto-focus on meeting ID input
+        // Auto-focus on meeting ID input with gentle animation
         document.addEventListener('DOMContentLoaded', function() {
             const roomIdInput = document.getElementById('room_id');
             if (roomIdInput) {
-                roomIdInput.focus();
+                setTimeout(() => {
+                    roomIdInput.focus();
+                    roomIdInput.style.transform = 'translateY(-2px)';
+                    setTimeout(() => {
+                        roomIdInput.style.transform = 'translateY(0)';
+                    }, 200);
+                }, 500);
             }
 
             // Generate a random student name if empty
@@ -354,17 +520,111 @@
                 usernameInput.placeholder = `${randomAdj} ${randomNoun}`;
             }
 
-            // Add click animation to role cards
+            // Add smooth click animation to role cards
             const roleCards = document.querySelectorAll('.role-card');
             roleCards.forEach(card => {
-                card.addEventListener('click', function() {
-                    this.style.transform = 'scale(0.95)';
-                    setTimeout(() => {
-                        this.style.transform = '';
-                    }, 150);
+                card.addEventListener('click', function(e) {
+                    if (!this.getAttribute('data-clicked')) {
+                        this.style.transform = 'scale(0.98)';
+                        this.style.borderColor = '#333333';
+                        this.setAttribute('data-clicked', 'true');
+                        
+                        setTimeout(() => {
+                            this.style.transform = '';
+                            this.style.borderColor = '';
+                            this.removeAttribute('data-clicked');
+                        }, 300);
+                    }
                 });
             });
+
+            // Add subtle animation to form inputs on focus
+            const formInputs = document.querySelectorAll('.form-group input');
+            formInputs.forEach(input => {
+                input.addEventListener('focus', function() {
+                    this.parentElement.style.transform = 'translateY(-2px)';
+                });
+                
+                input.addEventListener('blur', function() {
+                    this.parentElement.style.transform = 'translateY(0)';
+                });
+            });
+
+            // Smooth scroll to join form
+            function scrollToJoinForm() {
+                const joinForm = document.getElementById('joinForm');
+                if (joinForm) {
+                    joinForm.style.opacity = '0.9';
+                    joinForm.style.transform = 'translateY(-5px)';
+                    
+                    joinForm.scrollIntoView({ 
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                    
+                    setTimeout(() => {
+                        joinForm.style.opacity = '1';
+                        joinForm.style.transform = 'translateY(0)';
+                    }, 500);
+                }
+            }
+
+            // Initialize with reduced motion preference check
+            const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+            if (prefersReducedMotion.matches) {
+                document.documentElement.style.scrollBehavior = 'auto';
+                document.querySelectorAll('*').forEach(el => {
+                    el.style.animation = 'none !important';
+                    el.style.transition = 'none !important';
+                });
+            }
         });
+
+        function handleRoleCardClick(role) {
+            if (role === 'teacher') {
+                // Gentle animation before navigation
+                const card = document.querySelector('.role-card.teacher');
+                card.style.opacity = '0.8';
+                
+                setTimeout(() => {
+                    window.location.href = '/live_meeting/teacher';
+                }, 300);
+            } else if (role === 'student') {
+                const card = document.querySelector('.role-card.student');
+                card.style.opacity = '0.8';
+                
+                setTimeout(() => {
+                    const joinForm = document.getElementById('joinForm');
+                    if (joinForm) {
+                        joinForm.style.opacity = '0.9';
+                        joinForm.style.transform = 'translateY(-5px)';
+                        
+                        joinForm.scrollIntoView({ 
+                            behavior: 'smooth',
+                            block: 'start'
+                        });
+                        
+                        setTimeout(() => {
+                            joinForm.style.opacity = '1';
+                            joinForm.style.transform = 'translateY(0)';
+                            card.style.opacity = '1';
+                            
+                            // Focus on meeting ID input after scrolling
+                            const roomIdInput = document.getElementById('room_id');
+                            if (roomIdInput) {
+                                setTimeout(() => {
+                                    roomIdInput.focus();
+                                    roomIdInput.style.transform = 'translateY(-2px)';
+                                    setTimeout(() => {
+                                        roomIdInput.style.transform = 'translateY(0)';
+                                    }, 200);
+                                }, 400);
+                            }
+                        }, 500);
+                    }
+                }, 300);
+            }
+        }
     </script>
 </body>
 </html>
