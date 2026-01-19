@@ -22,7 +22,6 @@ from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
 from sqlalchemy import inspect, text
 from hashlib import sha256
-from memory.pdf_handler import PDFMemory
 from functools import wraps
 import uuid
 import requests
@@ -32,11 +31,11 @@ from difflib import get_close_matches
 from bs4 import BeautifulSoup
 import traceback
 
-# Memory system imports
-from memory.pdf_handler import PDFMemory
-from memory.chat_context import ChatContext
-from memory.memory_router import MemoryRouter
-from memory.layers import MemoryLayer as MemoryLayers
+# MEMORY SYSTEM REMOVED: All memory imports commented out
+# from memory.pdf_handler import PDFMemory
+# from memory.chat_context import ChatContext
+# from memory.memory_router import MemoryRouter
+# from memory.layers import MemoryLayer as MemoryLayers
 
 # Load environment variables
 load_dotenv()
@@ -53,15 +52,31 @@ app.config['SECRET_KEY'] = os.getenv('MY_SECRET', 'fallback_secret_for_dev')
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max file size
 
 # ============================================
-# Memory System Initialization
+# MEMORY SYSTEM NEUTRALIZED: PDF Memory removed
 # ============================================
 
-# Create separate directory for PDF memory storage
-PDF_MEMORY_DIR = 'pdf_memory'
-os.makedirs(PDF_MEMORY_DIR, exist_ok=True)
+# Create GLOBAL PDF memory instance - REPLACED WITH DUMMY
+# pdf_memory = PDFMemory(PDF_MEMORY_DIR)
 
-# Create GLOBAL PDF memory instance
-pdf_memory = PDFMemory(PDF_MEMORY_DIR)
+class DummyPDFMemory:
+    """Dummy class to replace PDFMemory functionality"""
+    def extract_and_store(self, *args, **kwargs):
+        return True
+    
+    def clear_user_cache(self, *args, **kwargs):
+        return True
+    
+    def clear_file_cache(self, *args, **kwargs):
+        return True
+    
+    def get_cache_stats(self):
+        return {"files": 0, "chunks": 0, "users": 0}
+    
+    def health_check(self):
+        return True
+
+# Initialize dummy memory
+pdf_memory = DummyPDFMemory()
 
 # Configure upload folder
 UPLOAD_FOLDER = 'uploads'
@@ -234,6 +249,8 @@ def create_database_if_not_exists():
             db_name = parts[-1]  # The database name
             
             # Connect to default postgres database to create our database
+            import psycopg2
+            from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
             conn = psycopg2.connect(base_url + '/postgres')
             conn.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
             cursor = conn.cursor()
@@ -415,7 +432,7 @@ def is_academic_book(title, topic, department):
     return False
 
 # ============================================
-# Memory System Helper Functions
+# MEMORY SYSTEM HELPER FUNCTIONS NEUTRALIZED
 # ============================================
 
 def validate_chat_history(history_data):
@@ -451,10 +468,9 @@ def validate_chat_history(history_data):
 
 def build_prompt_with_context(context: str, memory_layer: str) -> str:
     """
-    Build Nelavista system prompt based on memory context.
-    Enforces Nelavista analytical expert behavior.
+    Build Nelavista system prompt WITHOUT memory system dependencies.
+    Simplified for deployment stability.
     """
-
     base_prompt = (
         "You are Nelavista, an advanced AI tutor created by Afeez Adewale Tella "
         "for Nigerian university students (100–400 level).\n\n"
@@ -466,15 +482,14 @@ def build_prompt_with_context(context: str, memory_layer: str) -> str:
         "Follow these rules strictly.\n\n"
 
         "GLOBAL RULES:\n"
-"- Always respond in clean HTML using <p>, <ul>, <li>, <strong>, "
-"<h2>, <h3>, and <table> when appropriate.\n"
-"- Respond naturally to greetings when the user greets you, but do not add greetings unnecessarily.\n"
-"- Do not use labels like Step 1, Step 2, Intro, or Final Answer.\n"
-"- No emojis in academic explanations.\n"
-"- Use clear, calm, and friendly academic language.\n"
-"- Explain ideas patiently, like a lecturer guiding students through the topic.\n"
-"- Avoid hype, exaggeration, or unnecessary filler.\n\n"
-
+        "- Always respond in clean HTML using <p>, <ul>, <li>, <strong>, "
+        "<h2>, <h3>, and <table> when appropriate.\n"
+        "- Respond naturally to greetings when the user greets you, but do not add greetings unnecessarily.\n"
+        "- Do not use labels like Step 1, Step 2, Intro, or Final Answer.\n"
+        "- No emojis in academic explanations.\n"
+        "- Use clear, calm, and friendly academic language.\n"
+        "- Explain ideas patiently, like a lecturer guiding students through the topic.\n"
+        "- Avoid hype, exaggeration, or unnecessary filler.\n\n"
 
         "STRUCTURE REQUIREMENTS:\n"
         "- Begin with a brief <strong>Key Idea</strong> statement introducing the core conclusion.\n"
@@ -489,53 +504,7 @@ def build_prompt_with_context(context: str, memory_layer: str) -> str:
         "DATA & ACCURACY:\n"
         "- Include formulas, definitions, metrics, or comparisons when relevant.\n"
         "- Do not speculate or invent facts.\n\n"
-    )
 
-    if memory_layer == MemoryLayers.PDF:
-        return (
-            f"{base_prompt}"
-            "DOCUMENT CONTEXT:\n"
-            f"{context[:1500]}\n\n"
-            "DOCUMENT-SPECIFIC INSTRUCTIONS:\n"
-            "- Rely primarily on the document content.\n"
-            "- Reference specific sections or pages when possible.\n"
-            "- State clearly if the document lacks the answer.\n"
-            "- Do not hallucinate or invent content.\n"
-            "- Quote directly when appropriate.\n\n"
-            "ENDING:\n"
-            "- End naturally after the explanation. Do not add summaries beyond the TL;DR."
-        )
-
-    if memory_layer == MemoryLayers.HISTORY:
-        return (
-            f"{base_prompt}"
-            "CONVERSATION HISTORY:\n"
-            f"{context}\n\n"
-            "HISTORY-SPECIFIC INSTRUCTIONS:\n"
-            "- Build logically on prior explanations.\n"
-            "- Maintain consistency with earlier answers.\n"
-            "- Correct any previous errors when necessary.\n"
-            "- Reference relevant earlier points when useful.\n\n"
-            "ENDING:\n"
-            "- End naturally after the explanation. Do not add summaries beyond the TL;DR."
-        )
-
-    if memory_layer == MemoryLayers.PROFILE:
-        return (
-            f"{base_prompt}"
-            "STUDENT PROFILE:\n"
-            f"{context}\n\n"
-            "PROFILE-SPECIFIC INSTRUCTIONS:\n"
-            "- Adapt explanation depth to the student’s academic level.\n"
-            "- Use examples relevant to the student’s field or department.\n"
-            "- Keep explanations academically grounded and precise.\n\n"
-            "ENDING:\n"
-            "- End naturally after the explanation. Do not add summaries beyond the TL;DR."
-        )
-
-    # GENERAL (no special context)
-    return (
-        f"{base_prompt}"
         "GENERAL INSTRUCTIONS:\n"
         "- Provide accurate, structured academic explanations.\n"
         "- Use relevant examples only when they add clarity.\n"
@@ -543,6 +512,9 @@ def build_prompt_with_context(context: str, memory_layer: str) -> str:
         "ENDING:\n"
         "- End naturally after the explanation. Do not add summaries beyond the TL;DR."
     )
+
+    # MEMORY SYSTEM REMOVED: No special context handling, just return base prompt
+    return base_prompt
 
 def optimize_history_fetch(question: str, has_pdf_context: bool) -> bool:
     """
@@ -1078,6 +1050,7 @@ def ask_with_files():
     SINGLE ENTRY POINT for AI requests.
     ALWAYS returns JSON with non-empty "answer" field.
     Follows strict fallback requirements.
+    MEMORY SYSTEM COMPLETELY REMOVED - Simplified for deployment.
     """
     # Fallback message to use in case of any failure
     GRACEFUL_FALLBACK = "I'm having a little trouble answering right now, but please try again."
@@ -1085,7 +1058,6 @@ def ask_with_files():
     try:
         # Get user info
         username = session['user']['username']
-        user_id = session.get('user_id')
         
         # Get message (always present)
         message = request.form.get('message', '').strip()
@@ -1162,45 +1134,13 @@ def ask_with_files():
         
         user_content = "\n\n".join(user_content_parts) if user_content_parts else "Please analyze the uploaded image(s)."
         
-        # Check if we should answer from PDF context or general knowledge
-        answer_from_pdf = False
+        # MEMORY SYSTEM REMOVED: No PDF context routing, just basic text extraction
         pdf_context = ""
-        
         if has_pdfs and file_texts:
-            # Extract and clean PDF context
             pdf_context = "\n\n".join(file_texts)
-            
-            # Simple keyword check - could be enhanced with embeddings
-            # For now, we'll assume PDF contains relevant info if it has content
-            if pdf_context and len(pdf_context) > 50:
-                answer_from_pdf = True
-            else:
-                answer_from_pdf = False
         
-        # Prepare context for memory system
-        memory_context = ""
-        history_context = ""
-        profile_context = ""
-        memory_layer = MemoryLayers.GENERAL
-        
-        try:
-            # Get profile context if available
-            with app.app_context():
-                profile = UserProfile.query.filter_by(username=username).first()
-                if profile:
-                    profile_context = ChatContext.get_profile_context(profile.to_dict())
-                
-                # Route to appropriate memory layer
-                router = MemoryRouter(pdf_context, history_context, profile_context)
-                context, memory_layer = router.route()
-                memory_context = context
-        except Exception:
-            # Memory system failed, use basic context
-            memory_context = pdf_context if answer_from_pdf else ""
-            memory_layer = MemoryLayers.GENERAL
-        
-        # Build system prompt with memory context
-        system_prompt = build_prompt_with_context(memory_context, memory_layer)
+        # Build system prompt WITHOUT memory layer dependencies
+        system_prompt = build_prompt_with_context(pdf_context, "GENERAL")
         
         # Prepare messages array
         messages = [{"role": "system", "content": system_prompt}]
@@ -1293,7 +1233,7 @@ def ask_with_files():
                     username=username,
                     question=message[:500] if message else "[File analysis]",
                     answer=ai_response[:1000],
-                    memory_layer=memory_layer
+                    memory_layer="GENERAL"  # MEMORY SYSTEM REMOVED: Hardcoded value
                 )
                 db.session.add(new_q)
                 db.session.commit()
@@ -1422,11 +1362,8 @@ def login():
                         'username': user.username,
                         'email': user.email,
                         'joined_on': user.joined_on.strftime('%Y-%m-%d'),
-                        'last_login': user.last_login.strftime('%Y-%m-%d %H:%M:%S')
+                        'last_login': user.last_login.strftime('%Y-%m-d %H:%M:%S')
                     }
-                    
-                    # ✅ CRITICAL: Store user_id in session for memory system
-                    session['user_id'] = user.id
                     
                     print(f"🎉 Login successful for user: {user.username}")
                     flash('Logged in successfully!')
@@ -1455,12 +1392,7 @@ def login():
 @app.route('/logout')
 def logout():
     """Handle user logout and clear session."""
-    # Clear PDF memory for this user
-    username = session.get('user', {}).get('username')
-    user_id = session.get('user_id')
-    if username:
-        pdf_memory.clear_user_cache(username, user_id)
-    
+    # MEMORY SYSTEM REMOVED: No PDF memory cleanup needed
     session.clear()
     flash('You have been logged out.')
     return redirect(url_for('login'))
@@ -1484,7 +1416,7 @@ def talk_to_nelavista():
 @app.route('/upload', methods=['POST'])
 @login_required
 def upload_file():
-    """Handle file upload with memory system integration."""
+    """Handle file upload WITHOUT memory system integration."""
     if 'file' not in request.files:
         return jsonify({"success": False, "error": "No file provided"}), 400
     
@@ -1493,7 +1425,6 @@ def upload_file():
         return jsonify({"success": False, "error": "No file selected"}), 400
     
     username = session['user']['username']
-    user_id = session.get('user_id')
     
     # Delete the previous uploaded file if it exists
     old_file_path = session.get('last_file_path')
@@ -1530,8 +1461,7 @@ def upload_file():
             # Generate unique file ID
             file_id = str(uuid.uuid4())
             
-            # Store in PDF memory
-            pdf_memory.extract_and_store(file_data, username, file_id, user_id)
+            # MEMORY SYSTEM REMOVED: No PDF memory storage
             
             # Store references in session
             session['last_file_id'] = file_id
@@ -1539,23 +1469,22 @@ def upload_file():
             session['last_file_name'] = filename
             session['last_upload_time'] = time.time()
             
-            # Get preview from memory
-            user_key = pdf_memory._get_user_key(username, user_id)
-            chunks = pdf_memory._load_chunks(user_key, file_id)
-            preview = "\n".join(chunks)[:300] + "..." if chunks else "PDF processed successfully"
+            # Extract text for preview (simplified)
+            file.seek(0)
+            text = extract_text_from_pdf(file)
+            preview = text[:300] + "..." if text else "PDF uploaded successfully"
             
-            debug_print(f"📄 PDF stored in memory: {filename}, Size: {file_size} bytes")
+            debug_print(f"📄 PDF uploaded: {filename}, Size: {file_size} bytes")
             
             return jsonify({
                 "success": True,
-                "message": "PDF uploaded and processed",
+                "message": "PDF uploaded",
                 "preview": preview,
                 "type": "pdf",
                 "filename": file.filename,
                 "size_kb": round(file_size / 1024, 1),
-                "has_text": bool(chunks),
-                "file_id": file_id,
-                "cache_stats": pdf_memory.get_cache_stats()
+                "has_text": bool(text),
+                "file_id": file_id
             })
             
         elif filename.endswith(('.png', '.jpg', '.jpeg', '.gif')):
@@ -1646,38 +1575,25 @@ def ask():
         })
 
 # ============================================
-# Memory Management Endpoints
+# MEMORY MANAGEMENT ENDPOINTS NEUTRALIZED
 # ============================================
 @app.route('/memory/stats', methods=['GET'])
 @login_required
 def get_memory_stats():
-    """Get memory system statistics."""
+    """Get memory system statistics - DUMMY VERSION."""
     try:
         username = session['user']['username']
-        user_id = session.get('user_id')
-        user_key = pdf_memory._get_user_key(username, user_id)
-        
-        user_files = []
-        if user_key in pdf_memory.cache:
-            for file_id in pdf_memory.cache[user_key]:
-                chunks = pdf_memory.cache[user_key][file_id]
-                user_files.append({
-                    'file_id': file_id,
-                    'chunk_count': len(chunks),
-                    'total_chars': sum(len(chunk) for chunk in chunks)
-                })
         
         return jsonify({
             "success": True,
             "user_stats": {
                 "username": username,
-                "user_id": user_id,
-                "file_count": len(user_files),
-                "files": user_files
+                "file_count": 0,
+                "files": []
             },
-            "system_stats": pdf_memory.get_cache_stats(),
-            "health": pdf_memory.health_check(),
-            "memory_layers": MemoryLayers.get_all_metadata()
+            "system_stats": {"files": 0, "chunks": 0, "users": 0},
+            "health": "Memory system disabled for deployment",
+            "memory_layers": ["GENERAL"]
         })
     except Exception as e:
         debug_print(f"❌ Error getting memory stats: {e}")
@@ -1686,20 +1602,9 @@ def get_memory_stats():
 @app.route('/memory/clear', methods=['POST'])
 @login_required
 def clear_memory():
-    """Clear user's memory cache."""
+    """Clear user's memory cache - DUMMY VERSION."""
     try:
         username = session['user']['username']
-        user_id = session.get('user_id')
-        
-        # Clear specific file or all files
-        file_id = request.json.get('file_id') if request.is_json else None
-        
-        if file_id:
-            pdf_memory.clear_file_cache(username, file_id, user_id)
-            message = f"Cleared file cache: {file_id}"
-        else:
-            pdf_memory.clear_user_cache(username, user_id)
-            message = "Cleared all memory cache"
         
         # Clear session references
         session.pop('last_file_id', None)
@@ -1709,8 +1614,8 @@ def clear_memory():
         
         return jsonify({
             "success": True,
-            "message": message,
-            "cache_stats": pdf_memory.get_cache_stats()
+            "message": "Memory system disabled",
+            "cache_stats": {"files": 0, "chunks": 0, "users": 0}
         })
     except Exception as e:
         debug_print(f"❌ Error clearing memory: {e}")
@@ -1744,14 +1649,6 @@ def cleanup_attachments():
 def clear_context():
     """Clear uploaded file context from session and delete the file from disk."""
     try:
-        username = session['user']['username']
-        user_id = session.get('user_id')
-        
-        # Clear from memory system if it's a PDF
-        file_id = session.get('last_file_id')
-        if file_id and session.get('last_file_type') == 'pdf':
-            pdf_memory.clear_file_cache(username, file_id, user_id)
-        
         # Delete the file from disk if it exists
         file_path = session.get('last_file_path')
         if file_path and os.path.exists(file_path):
@@ -2197,21 +2094,18 @@ def debug_rooms():
     return json.dumps(debug_info, indent=2, default=str)
 
 # ============================================
-# Memory System Debug Route
+# MEMORY SYSTEM DEBUG ROUTE NEUTRALIZED
 # ============================================
 @app.route('/debug/memory')
 @login_required
 def debug_memory():
-    """Debug endpoint for memory system."""
+    """Debug endpoint for memory system - DUMMY VERSION."""
     username = session['user']['username']
-    user_id = session.get('user_id')
-    user_key = pdf_memory._get_user_key(username, user_id)
     
     debug_info = {
         'user': {
             'username': username,
-            'user_id': user_id,
-            'user_key': user_key
+            'user_key': 'MEMORY_SYSTEM_DISABLED'
         },
         'session': {
             'last_file_id': session.get('last_file_id'),
@@ -2219,15 +2113,15 @@ def debug_memory():
             'last_upload_time': session.get('last_upload_time')
         },
         'pdf_memory': {
-            'cache_stats': pdf_memory.get_cache_stats(),
-            'health_check': pdf_memory.health_check(),
-            'user_in_cache': user_key in pdf_memory.cache,
-            'user_file_count': len(pdf_memory.cache.get(user_key, {})),
-            'user_files': list(pdf_memory.cache.get(user_key, {}).keys()) if user_key in pdf_memory.cache else []
+            'cache_stats': {"files": 0, "chunks": 0, "users": 0},
+            'health_check': True,
+            'user_in_cache': False,
+            'user_file_count': 0,
+            'user_files': []
         },
-        'memory_layers': MemoryLayers.get_all_metadata(),
-        'chat_context': ChatContext.get_context_stats(),
-        'memory_router': MemoryRouter.get_default_config()
+        'memory_layers': ["GENERAL"],
+        'chat_context': "Memory system disabled for deployment",
+        'memory_router': "Memory system disabled for deployment"
     }
     
     return json.dumps(debug_info, indent=2, default=str)
@@ -2243,16 +2137,12 @@ create_default_user()
 if __name__ == '__main__':
     print(f"\n{'='*60}")
     print("🚀 NELAVISTA LIVE + Tellavista Platform")
-    print("🌟 Complete Educational Platform with Memory System")
-    print("🧠 INTEGRATED MEMORY SYSTEM:")
-    print("   - PDF Memory: Document extraction and storage")
-    print("   - Chat Context: History relevance scoring")
-    print("   - Memory Router: Intelligent context selection")
-    print("   - Profile Context: Personalized responses")
+    print("🌟 Complete Educational Platform")
+    print("⚠️  MEMORY SYSTEM DISABLED for deployment stability")
     print(f"{'='*60}")
     print("✅ Educational Platform Features:")
-    print("   - User Authentication with Memory Integration")
-    print("   - AI Tutor (Nelavista) with Multi-Context Memory")
+    print("   - User Authentication")
+    print("   - AI Tutor (Nelavista)")
     print("   - PDF & Image Processing (OCR, Vision AI)")
     print("   - Study Materials & PDFs")
     print("   - Course Reels & Videos")
@@ -2263,7 +2153,6 @@ if __name__ == '__main__':
     print("   - Real-time Collaboration")
     print(f"{'='*60}")
     print("\n📡 Connection test: http://localhost:5000/test-connection")
-    print("🧠 Memory debug: http://localhost:5000/debug/memory")
     print("👨‍🏫 Teacher test: http://localhost:5000/live_meeting/teacher")
     print("👨‍🎓 Student test: http://localhost:5000/live_meeting")
     print("🎓 Platform login: http://localhost:5000/login (test/test123)")
@@ -2272,14 +2161,5 @@ if __name__ == '__main__':
     print("   pip install PyPDF2 pdfplumber Pillow pytesseract openai")
     print(f"{'='*60}\n")
     
-    # Print memory system status
-    print("🧠 Memory System Initialization:")
-    print(f"   PDF Memory Directory: {PDF_MEMORY_DIR}")
-    print(f"   Upload Directory: {UPLOAD_FOLDER}")
-    print(f"   Memory Layers: {', '.join(MemoryLayers.get_primary_layers())}")
-    print(f"   Cache Stats: {pdf_memory.get_cache_stats()}")
-    print(f"{'='*60}\n")
-    
     port = int(os.environ.get('PORT', 5000))
     socketio.run(app, host='0.0.0.0', port=port, debug=DEBUG_MODE)
-
