@@ -1589,7 +1589,6 @@ def ask():
         
         if response.status_code != 200:
             debug_print(f"❌ OpenRouter API error: {response.status_code} - {response.text}")
-            # Return graceful fallback
             return jsonify({
                 "success": True,
                 "answer": GRACEFUL_FALLBACK
@@ -1599,7 +1598,13 @@ def ask():
         response_json = response.json()
         ai_response = response_json.get("choices", [{}])[0].get("message", {}).get("content", "")
         
-        if not ai_response or not ai_response.strip():
+        # 🔹 CLEANUP: remove HTML tags and normalize spacing
+        if ai_response:
+            import re
+            ai_response = re.sub(r'<[^>]+>', '', ai_response)
+            ai_response = ai_response.replace('\n', ' ').strip()
+        
+        if not ai_response:
             ai_response = GRACEFUL_FALLBACK
         
         # Save to database (optional)
@@ -1615,7 +1620,6 @@ def ask():
                 db.session.commit()
         except Exception as db_error:
             debug_print(f"⚠️ Database save error: {db_error}")
-            # Don't fail the response
         
         # Return response in the format frontend expects
         return jsonify({
@@ -1626,7 +1630,6 @@ def ask():
     except Exception as e:
         debug_print(f"❌ Unhandled error in /ask: {e}")
         traceback.print_exc()
-        # Return graceful fallback
         return jsonify({
             "success": True,
             "answer": GRACEFUL_FALLBACK
@@ -2221,4 +2224,5 @@ if __name__ == '__main__':
     
     port = int(os.environ.get('PORT', 5000))
     socketio.run(app, host='0.0.0.0', port=port, debug=DEBUG_MODE)
+
 
