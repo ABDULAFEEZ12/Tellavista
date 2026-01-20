@@ -1544,7 +1544,9 @@ def upload_file():
 @app.route('/ask', methods=['POST'])
 @login_required
 def ask():
-    """Legacy endpoint that redirects to /ask_with_files for compatibility."""
+    """Handle AI requests without uploaded files."""
+    GRACEFUL_FALLBACK = "I'm having a little trouble answering right now, but please try again."
+    
     try:
         # Get data from request
         data = request.get_json() or {}
@@ -1553,25 +1555,81 @@ def ask():
         if not message:
             return jsonify({'error': 'No question provided'}), 400
         
-        # Create form data for /ask_with_files
-        from werkzeug.datastructures import ImmutableMultiDict
+        # Get user info for database saving
+        username = session['user']['username']
         
-        # Prepare request for /ask_with_files
-        with app.test_request_context('/ask_with_files', method='POST'):
-            # Create form data
-            form_data = ImmutableMultiDict([
-                ('message', message),
-                ('history', json.dumps([]))  # Empty history for compatibility
-            ])
-            
-            # Call the main handler
-            return ask_with_files()
-            
-    except Exception as e:
-        debug_print(f"❌ Error in /ask: {e}")
+        # Build system prompt (same as ask_with_files but without PDF context)
+        system_prompt = build_prompt_with_context("", "GENERAL")
+        
+        # Prepare messages array
+        messages = [{"role": "system", "content": system_prompt}]
+        messages.append({"role": "user", "content": message})
+        
+        # Call OpenRouter API
+        headers = {
+            "Authorization": f"Bearer {os.getenv('OPENROUTER_API_KEY')}",
+            "Content-Type": "application/json",
+            "HTTP-Referer": "https://nelavista.com",
+            "X-Title": "Nelavista AI Tutor"
+        }
+        
+        payload = {
+            "model": "openai/gpt-4o-mini",
+            "messages": messages,
+            "temperature": 0.6,
+            "max_tokens": 1500
+        }
+        
+        response = requests.post(
+            "https://openrouter.ai/api/v1/chat/completions",
+            headers=headers,
+            json=payload,
+            timeout=30
+        )
+        
+        if response.status_code != 200:
+            debug_print(f"❌ OpenRouter API error: {response.status_code} - {response.text}")
+            # Return graceful fallback
+            return jsonify({
+                "success": True,
+                "answer": GRACEFUL_FALLBACK
+            })
+        
+        # Extract response
+        response_json = response.json()
+        ai_response = response_json.get("choices", [{}])[0].get("message", {}).get("content", "")
+        
+        if not ai_response or not ai_response.strip():
+            ai_response = GRACEFUL_FALLBACK
+        
+        # Save to database (optional)
+        try:
+            with app.app_context():
+                new_q = UserQuestions(
+                    username=username,
+                    question=message[:500],
+                    answer=ai_response[:1000],
+                    memory_layer="GENERAL"
+                )
+                db.session.add(new_q)
+                db.session.commit()
+        except Exception as db_error:
+            debug_print(f"⚠️ Database save error: {db_error}")
+            # Don't fail the response
+        
+        # Return response in the format frontend expects
         return jsonify({
             "success": True,
-            "answer": "Sorry, an error occurred. Please use the /ask_with_files endpoint."
+            "answer": ai_response
+        })
+        
+    except Exception as e:
+        debug_print(f"❌ Unhandled error in /ask: {e}")
+        traceback.print_exc()
+        # Return graceful fallback
+        return jsonify({
+            "success": True,
+            "answer": GRACEFUL_FALLBACK
         })
 
 # ============================================
@@ -2163,3 +2221,4 @@ if __name__ == '__main__':
     
     port = int(os.environ.get('PORT', 5000))
     socketio.run(app, host='0.0.0.0', port=port, debug=DEBUG_MODE)
+
