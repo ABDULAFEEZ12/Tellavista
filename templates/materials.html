@@ -6,7 +6,7 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
   <meta http-equiv="Pragma" content="no-cache" />
   <meta http-equiv="Expires" content="0" />
-  <title>📚 Study Materials - Nelavista</title>
+  <title>📚 Study Materials</title>
   
   <style>
     /* ===== CSS VARIABLES & RESET ===== */
@@ -558,6 +558,41 @@
       border: none;
     }
 
+    /* ===== VIDEO EMBED STYLES ===== */
+    .video-embed-container {
+      position: relative;
+      width: 100%;
+      padding-bottom: 56.25%; /* 16:9 Aspect Ratio */
+      height: 0;
+      margin: 1rem 0;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    .video-embed-container iframe,
+    .video-embed-container video {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
+
+    .video-info {
+      margin: 1rem 0;
+      font-size: 0.9rem;
+      color: #a0a0a0;
+    }
+
+    .video-duration {
+      background: rgba(0, 0, 0, 0.7);
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 0.8rem;
+      margin-left: 8px;
+    }
+
     /* ===== CATEGORY SECTION ===== */
     .category-section {
       margin-bottom: 2rem;
@@ -761,7 +796,7 @@
     <!-- HEADER -->
     <div class="header-section">
       <h1 class="header-title">📚 Study Materials</h1>
-      <p class="header-subtitle">Access comprehensive learning resources for your courses</p>
+      <p class="header-subtitle">Select Course and Level</p>
     </div>
 
     <!-- SEARCH SECTION -->
@@ -871,7 +906,7 @@
           Search Topic
         </label>
         <div class="input-wrapper">
-          <input type="text" id="topicInput" class="search-input" placeholder="Enter topic or keyword..." />
+          <input type="text" id="topicInput" class="search-input" placeholder="Enter topic (e.g., statistics, algebra, calculus)" />
         </div>
       </div>
 
@@ -888,25 +923,25 @@
         <div class="results-count" id="resultsCount">0 materials</div>
       </div>
 
-      <!-- PDF Materials -->
-      <div class="category-section" id="pdfSection">
+      <!-- Course Materials (LASU Content) -->
+      <div class="category-section" id="courseMaterialSection">
         <div class="category-title">
           <span>📘</span>
-          PDF Materials
+          Course Material
         </div>
-        <div class="materials-grid" id="pdfMaterials">
-          <!-- PDF materials will be inserted here -->
+        <div class="materials-grid" id="courseMaterials">
+          <!-- LASU course materials will be inserted here -->
         </div>
       </div>
 
-      <!-- Online Resources -->
-      <div class="category-section" id="onlineSection">
+      <!-- Further Reading (External Resources) -->
+      <div class="category-section" id="furtherReadingSection">
         <div class="category-title">
-          <span>🌐</span>
-          Online Resources
+          <span>📖</span>
+          Further Reading
         </div>
-        <div class="materials-grid" id="onlineMaterials">
-          <!-- Online materials will be inserted here -->
+        <div class="materials-grid" id="furtherReadingMaterials">
+          <!-- External resources will be inserted here -->
         </div>
       </div>
 
@@ -917,7 +952,7 @@
           Video Resources
         </div>
         <div class="materials-grid" id="videoMaterials">
-          <!-- Video materials will be inserted here -->
+          <!-- Embedded video materials will be inserted here -->
         </div>
       </div>
     </div>
@@ -969,6 +1004,87 @@
         type: "pdf",
         course: "Accounting"
       },
+      {
+  title: "DBMS II – Transaction Processing (Unit 6: Transaction Management)",
+  author: "Prof. Firoz Sherasiya",
+  license: "LASU Academic Material",
+  link: "static/materials/lasu/dbms2/DBMS-II-Unit-6-Transaction-Management.pdf",
+  type: "pdf",
+  course: "Database Management Systems II"
+},
+{
+  title: "Binomial Expansion",
+  author: "Dr. Olaniyan Adegoke",
+  license: "LASU Academic Material",
+  link: "static/materials/lasu/mathematics/Binomial-Expansion.pdf",
+  type: "pdf",
+  course: "Mathematics"
+},
+{
+  title: "Trigonometry",
+  author: "Dr. Olaniyan",
+  license: "LASU Academic Material",
+  link: "static/materials/lasu/mathematics/Trigonometry.pdf",
+  type: "pdf",
+  course: "Mathematics"
+},
+{
+  title: "Indices, Surds and Logarithms",
+  author: "Department of Mathematics",
+  license: "LASU Academic Material",
+  link: "static/materials/lasu/mathematics/Indices-Surds-and-Logarithms.pdf",
+  type: "pdf",
+  course: "Mathematics"
+},
+{
+  title: "Inequalities",
+  author: "Dr. Olaniyan Adegoke",
+  license: "LASU Academic Material",
+  link: "static/materials/lasu/mathematics/Inequalities.pdf",
+  type: "pdf",
+  course: "Mathematics"
+},
+{
+  title: "MAT 101 – Elementary Mathematics I (Lecture 3: Indices and Logarithms)",
+  author: "Dr. Akinwale Lewis Olutimo",
+  license: "LASU Academic Material",
+  link: "static/materials/lasu/mathematics/MAT-101-Lecture-3-Indices-and-Logarithms.pdf",
+  type: "pdf",
+  course: "Elementary Mathematics I"
+},
+{
+  title: "MAT 101 – Elementary Mathematics I (Lecture 2: Theory of Quadratic Equations)",
+  author: "Dr. Akinwale Lewis Olutimo",
+  license: "LASU Academic Material",
+  link: "static/materials/lasu/mathematics/MAT-101-Lecture-2-Theory-of-Quadratic-Equations.pdf",
+  type: "pdf",
+  course: "Elementary Mathematics I"
+},
+{
+  title: "Theory of Quadratic Equation",
+  author: "Dr. Olaniyan Adegoke",
+  license: "LASU Academic Material",
+  link: "static/materials/lasu/mathematics/Theory-of-Quadratic-Equation.pdf",
+  type: "pdf",
+  course: "Mathematics"
+},
+{
+  title: "Sequence and Series",
+  author: "Department of Mathematics, Lagos State University",
+  license: "LASU Academic Material",
+  link: "static/materials/lasu/mathematics/Sequence-and-Series.pdf",
+  type: "pdf",
+  course: "Mathematics"
+},
+{
+  title: "MAT 101 – Elementary Mathematics I (Lecture 1: Elementary Set Theory)",
+  author: "Dr. Akinwale Lewis Olutimo",
+  license: "LASU Academic Material",
+  link: "static/materials/lasu/mathematics/1768303502_online_aspect_mat101_lesson_1.pdf",
+  type: "pdf",
+  course: "Elementary Mathematics I"
+},
+
       {
         title: "Principles Of Accounting Vol 1",
         author: "Open Educational Resource",
@@ -1304,8 +1420,114 @@
         link: "static/materials/math/College-Algebra-2e-WEB.pdf",
         type: "pdf",
         course: "Mathematics"
+      },
+      {
+        title: "MAT 161 – Descriptive Statistics (Lecture 1: The Meaning of Statistics)",
+        author: "Dr. Akinwale Lewis Olutimo",
+        license: "LASU Academic Material",
+        link: "static/materials/lasu/mat161/MAT-161-Descriptive-Statistics-Lecture-1.pdf",
+        type: "pdf",
+        course: "Mathematics"
       }
     ];
+
+    // ===== VIDEO DATA WITH EMBEDDED LINKS =====
+    const videoMaterials = {
+      "Mathematics": [
+        {
+          title: "Introduction to Statistics - Full Course",
+          author: "freeCodeCamp.org",
+          description: "Learn the basics of statistics, including descriptive statistics, probability, and inferential statistics",
+          embedUrl: "https://www.youtube.com/embed/xxpc-HPKN28",
+          originalUrl: "https://www.youtube.com/watch?v=xxpc-HPKN28",
+          duration: "8:15:28",
+          channel: "freeCodeCamp.org"
+        },
+        {
+          title: "Descriptive Statistics - Mean, Median, Mode",
+          author: "The Organic Chemistry Tutor",
+          description: "Complete guide to descriptive statistics for beginners",
+          embedUrl: "https://www.youtube.com/embed/4wrsbCRD9SA",
+          originalUrl: "https://www.youtube.com/watch?v=4wrsbCRD9SA",
+          duration: "12:36",
+          channel: "The Organic Chemistry Tutor"
+        },
+        {
+          title: "Calculus 1 - Full College Course",
+          author: "freeCodeCamp.org",
+          description: "Complete calculus course covering limits, derivatives, and integrals",
+          embedUrl: "https://www.youtube.com/embed/fcOWn1Yh9lI",
+          originalUrl: "https://www.youtube.com/watch?v=fcOWn1Yh9lI",
+          duration: "11:05:44",
+          channel: "freeCodeCamp.org"
+        }
+      ],
+      "Computer Science": [
+        {
+          title: "Introduction to Programming",
+          author: "CS50",
+          description: "Harvard's CS50 introduction to computer science and programming",
+          embedUrl: "https://www.youtube.com/embed/yo9OBcVOFw0",
+          originalUrl: "https://www.youtube.com/watch?v=yo9OBcVOFw0",
+          duration: "2:25:45",
+          channel: "CS50"
+        },
+        {
+          title: "Python for Beginners",
+          author: "Programming with Mosh",
+          description: "Full Python programming course for absolute beginners",
+          embedUrl: "https://www.youtube.com/embed/kqtD5dpn9C8",
+          originalUrl: "https://www.youtube.com/watch?v=kqtD5dpn9C8",
+          duration: "6:14:07",
+          channel: "Programming with Mosh"
+        }
+      ],
+      "Business Administration": [
+        {
+          title: "Business Fundamentals",
+          author: "GaryVee",
+          description: "Essential business concepts for entrepreneurs",
+          embedUrl: "https://www.youtube.com/embed/lL4tVhTfqM0",
+          originalUrl: "https://www.youtube.com/watch?v=lL4tVhTfqM0",
+          duration: "15:22",
+          channel: "GaryVee"
+        }
+      ],
+      "default": [
+        {
+          title: "How to Study Effectively",
+          author: "Ali Abdaal",
+          description: "Evidence-based study techniques for better learning",
+          embedUrl: "https://www.youtube.com/embed/ukLnPbIffxE",
+          originalUrl: "https://www.youtube.com/watch?v=ukLnPbIffxE",
+          duration: "12:47",
+          channel: "Ali Abdaal"
+        }
+      ]
+    };
+
+    // ===== UTILITY FUNCTIONS =====
+    function isYouTubeUrl(url) {
+      return url.includes("youtube.com") || url.includes("youtu.be");
+    }
+
+    function getYouTubeEmbedUrl(url) {
+      const match = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([\w-]+)/);
+      const videoId = match ? match[1] : null;
+      return videoId ? `https://www.youtube.com/embed/${videoId}` : null;
+    }
+
+    function formatDuration(seconds) {
+      if (!seconds) return "";
+      const hours = Math.floor(seconds / 3600);
+      const minutes = Math.floor((seconds % 3600) / 60);
+      const secs = seconds % 60;
+      
+      if (hours > 0) {
+        return `${hours}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+      }
+      return `${minutes}:${secs.toString().padStart(2, '0')}`;
+    }
 
     // ===== STATE MANAGEMENT =====
     const materialsState = {
@@ -1314,8 +1536,8 @@
       topic: '',
       searchInProgress: false,
       searchResults: {
-        pdf: [],
-        online: [],
+        courseMaterials: [],
+        furtherReading: [],
         videos: []
       }
     };
@@ -1390,126 +1612,156 @@
       document.getElementById('resultsSection').classList.add('active');
       document.getElementById('noResults').classList.add('hidden');
       
-      // Search local PDFs
-      searchLocalPDFs();
+      // Search local PDFs (Course Materials)
+      searchCourseMaterials();
       
-      // Fetch online materials (simulated delay for demo)
-      setTimeout(() => {
-        searchOnlineMaterials();
-        
-        // Reset button
-        searchBtn.classList.remove('loading');
-        searchBtn.disabled = false;
-        materialsState.searchInProgress = false;
-        
-        // Show total results
-        updateResultsCount();
-      }, 1500);
+      // Search further reading
+      searchFurtherReading();
+      
+      // Search video materials
+      searchVideoMaterials();
+      
+      // Reset button
+      searchBtn.classList.remove('loading');
+      searchBtn.disabled = false;
+      materialsState.searchInProgress = false;
+      
+      // Show total results
+      updateResultsCount();
     }
 
-    function searchLocalPDFs() {
+    function searchCourseMaterials() {
       const topic = materialsState.topic.toLowerCase();
       const course = materialsState.course;
       
       // Filter PDFs by topic and course
-      const filteredPDFs = uploadedMaterials.filter(pdf => {
+      const filteredCourseMaterials = uploadedMaterials.filter(pdf => {
         const matchesTopic = pdf.title.toLowerCase().includes(topic) || 
-                            pdf.author.toLowerCase().includes(topic) ||
+                            (pdf.author && pdf.author.toLowerCase().includes(topic)) ||
                             pdf.course.toLowerCase().includes(topic);
         const matchesCourse = pdf.course === course;
         return matchesTopic && matchesCourse;
       });
       
-      materialsState.searchResults.pdf = filteredPDFs;
-      displayPDFResults(filteredPDFs);
+      // Sort LASU materials first
+      filteredCourseMaterials.sort((a, b) => {
+        const aIsLasu = a.license.includes("LASU");
+        const bIsLasu = b.license.includes("LASU");
+        if (aIsLasu && !bIsLasu) return -1;
+        if (!aIsLasu && bIsLasu) return 1;
+        return 0;
+      });
+      
+      materialsState.searchResults.courseMaterials = filteredCourseMaterials;
+      displayCourseMaterials(filteredCourseMaterials);
     }
 
-    async function searchOnlineMaterials() {
-      try {
-        // For demo purposes, we'll use simulated results
-        showSimulatedOnlineResults();
-        
-      } catch (error) {
-        console.error('Error fetching online materials:', error);
-        // Show simulated results for demo
-        showSimulatedOnlineResults();
-      }
-    }
-
-    function showSimulatedOnlineResults() {
+    function searchFurtherReading() {
+      // For demo purposes, we'll use simulated results
+      const topic = materialsState.topic;
+      const course = materialsState.course;
+      
       const simulatedBooks = [
         {
-          title: "Advanced " + materialsState.course + " - " + materialsState.level + " Level",
-          author: "Various Authors",
-          license: "Open Access",
-          link: "https://openstax.org/subjects/" + materialsState.course.toLowerCase().replace(/\s+/g, '-'),
-          type: "online"
+          title: "Elementary Statistics: A Step by Step Approach",
+          author: "Allan G. Bluman",
+          license: "Publisher",
+          link: "https://openlibrary.org/search?q=Elementary+Statistics+Allan+Bluman",
+          type: "online",
+          details: "Comprehensive statistics textbook"
         },
         {
-          title: "Principles of " + materialsState.course,
-          author: "Academic Press",
-          license: "Educational Use",
-          link: "https://libretexts.org/books/" + materialsState.course.toLowerCase().replace(/\s+/g, '-'),
-          type: "online"
+          title: "Business Statistics: For Contemporary Decision Making",
+          author: "Ken Black",
+          license: "Commercial / Publisher",
+          link: "https://openlibrary.org/search?q=Business+Statistics+Ken+Black",
+          type: "online",
+          details: "832 pages, focuses on business analytics"
+        },
+        {
+          title: "Engineering Mechanics: Statics",
+          author: "R. C. Hibbeler",
+          license: "Publisher",
+          link: "https://openlibrary.org/search?q=Engineering+Mechanics+Statics+Hibbeler",
+          type: "online",
+          details: "Standard engineering textbook"
+        },
+        {
+          title: "Economics: An Introductory Analysis",
+          author: "Paul Anthony Samuelson, William D. Nordhaus",
+          license: "Publisher",
+          link: "https://openlibrary.org/search?q=Economics+Samuelson+Nordhaus",
+          type: "online",
+          details: "Classic economics textbook"
         }
       ];
       
-      const simulatedVideos = [
-        {
-          title: "Introduction to " + materialsState.topic + " - " + materialsState.course,
-          link: "https://www.youtube.com/results?search_query=" + encodeURIComponent(materialsState.course + " " + materialsState.topic + " tutorial"),
-          type: "video"
-        },
-        {
-          title: "Advanced Concepts in " + materialsState.topic,
-          link: "https://www.khanacademy.org/search?page_search_query=" + encodeURIComponent(materialsState.course + " " + materialsState.topic),
-          type: "video"
-        }
-      ];
+      // Filter based on topic
+      const filteredBooks = simulatedBooks.filter(book => 
+        book.title.toLowerCase().includes(topic.toLowerCase()) || 
+        book.details.toLowerCase().includes(topic.toLowerCase())
+      );
       
-      materialsState.searchResults.online = simulatedBooks;
-      materialsState.searchResults.videos = simulatedVideos;
+      materialsState.searchResults.furtherReading = filteredBooks;
+      displayFurtherReading(filteredBooks);
+    }
+
+    function searchVideoMaterials() {
+      const course = materialsState.course;
+      const topic = materialsState.topic.toLowerCase();
       
-      displayOnlineResults(simulatedBooks);
-      displayVideoResults(simulatedVideos);
+      // Get videos for the selected course
+      let videos = videoMaterials[course] || videoMaterials.default;
+      
+      // Filter videos by topic if search topic exists
+      if (topic) {
+        videos = videos.filter(video => 
+          video.title.toLowerCase().includes(topic) ||
+          video.description.toLowerCase().includes(topic) ||
+          video.author.toLowerCase().includes(topic)
+        );
+      }
+      
+      materialsState.searchResults.videos = videos;
+      displayVideoMaterials(videos);
     }
 
     // ===== DISPLAY FUNCTIONS =====
-    function displayPDFResults(pdfs) {
-      const container = document.getElementById('pdfMaterials');
+    function displayCourseMaterials(materials) {
+      const container = document.getElementById('courseMaterials');
       container.innerHTML = '';
       
-      if (pdfs.length === 0) {
-        document.getElementById('pdfSection').style.display = 'none';
+      if (materials.length === 0) {
+        document.getElementById('courseMaterialSection').style.display = 'none';
         return;
       }
       
-      document.getElementById('pdfSection').style.display = 'block';
+      document.getElementById('courseMaterialSection').style.display = 'block';
       
-      pdfs.forEach((pdf, index) => {
-        const card = createMaterialCard(pdf, index, 'pdf');
+      materials.forEach((material, index) => {
+        const card = createMaterialCard(material, index, 'course');
         container.appendChild(card);
       });
     }
 
-    function displayOnlineResults(books) {
-      const container = document.getElementById('onlineMaterials');
+    function displayFurtherReading(books) {
+      const container = document.getElementById('furtherReadingMaterials');
       container.innerHTML = '';
       
       if (!books || books.length === 0) {
-        document.getElementById('onlineSection').style.display = 'none';
+        document.getElementById('furtherReadingSection').style.display = 'none';
         return;
       }
       
-      document.getElementById('onlineSection').style.display = 'block';
+      document.getElementById('furtherReadingSection').style.display = 'block';
       
       books.forEach((book, index) => {
-        const card = createMaterialCard(book, index, 'online');
+        const card = createMaterialCard(book, index, 'further');
         container.appendChild(card);
       });
     }
 
-    function displayVideoResults(videos) {
+    function displayVideoMaterials(videos) {
       const container = document.getElementById('videoMaterials');
       container.innerHTML = '';
       
@@ -1521,7 +1773,7 @@
       document.getElementById('videoSection').style.display = 'block';
       
       videos.forEach((video, index) => {
-        const card = createMaterialCard(video, index, 'video');
+        const card = createVideoCard(video, index);
         container.appendChild(card);
       });
     }
@@ -1532,23 +1784,31 @@
       card.style.animationDelay = `${index * 0.1}s`;
       
       const typeIcon = {
-        'pdf': '📘',
-        'online': '🌐',
+        'course': '📘',
+        'further': '📖',
         'video': '🎥'
       }[type];
       
-      const buttons = {
-        'pdf': `
+      const isLasuMaterial = material.license && material.license.includes("LASU");
+      const materialTypeLabel = isLasuMaterial ? "LASU Lecture Notes" : 
+                               type === 'course' ? "Course Material" : 
+                               type === 'further' ? "External Resource" : "Video";
+      
+      let buttons = '';
+      
+      if (type === 'course') {
+        buttons = `
           <button class="material-btn primary" onclick="openMaterial('${material.link}', '${material.title}')">
             <span>📖</span>
-            Read PDF
+            ${isLasuMaterial ? 'View Lecture' : 'Read PDF'}
           </button>
           <button class="material-btn" onclick="downloadMaterial('${material.link}', '${material.title}')">
             <span>⬇️</span>
             Download
           </button>
-        `,
-        'online': `
+        `;
+      } else if (type === 'further') {
+        buttons = `
           <a href="${material.link}" target="_blank" class="material-btn primary">
             <span>🌐</span>
             Read Online
@@ -1557,24 +1817,18 @@
             <span>↗️</span>
             Share
           </button>
-        `,
-        'video': `
-          <a href="${material.link}" target="_blank" class="material-btn primary">
-            <span>▶️</span>
-            Watch Video
-          </a>
-          <button class="material-btn" onclick="shareMaterial('${material.title}', '${material.link}')">
-            <span>↗️</span>
-            Share
-          </button>
-        `
-      }[type];
+        `;
+      }
+      
+      // Add details if available
+      const detailsHtml = material.details ? `<div class="material-details" style="font-size: 0.85rem; color: #888; margin-top: 0.5rem;">${material.details}</div>` : '';
       
       card.innerHTML = `
         <div class="material-type">${typeIcon}</div>
         <div class="material-title">${material.title}</div>
         ${material.author ? `<div class="material-author">👤 ${material.author}</div>` : ''}
-        ${material.license ? `<div class="material-license">${material.license}</div>` : ''}
+        <div class="material-license">${material.license} • ${materialTypeLabel}</div>
+        ${detailsHtml}
         <div class="material-actions">
           ${buttons}
         </div>
@@ -1583,21 +1837,59 @@
       return card;
     }
 
-    function clearResults() {
-      materialsState.searchResults = { pdf: [], online: [], videos: [] };
+    function createVideoCard(video, index) {
+      const card = document.createElement('div');
+      card.className = 'material-card';
+      card.style.animationDelay = `${index * 0.1}s`;
       
-      document.getElementById('pdfMaterials').innerHTML = '';
-      document.getElementById('onlineMaterials').innerHTML = '';
+      card.innerHTML = `
+        <div class="material-type">🎥</div>
+        <div class="material-title">${video.title}</div>
+        ${video.author ? `<div class="material-author">👤 ${video.author} • ${video.channel}</div>` : ''}
+        ${video.description ? `<div class="material-license" style="margin-bottom: 0.5rem;">${video.description}</div>` : ''}
+        ${video.duration ? `<div class="material-license">Duration: <span class="video-duration">${video.duration}</span></div>` : ''}
+        
+        <!-- Embedded Video -->
+        <div class="video-embed-container">
+          <iframe 
+            src="${video.embedUrl}" 
+            title="${video.title}" 
+            frameborder="0" 
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+            allowfullscreen>
+          </iframe>
+        </div>
+        
+        <div class="material-actions">
+          <a href="${video.originalUrl}" target="_blank" class="material-btn">
+            <span>🌐</span>
+            Open on YouTube
+          </a>
+          <button class="material-btn" onclick="shareMaterial('${video.title}', '${video.originalUrl}')">
+            <span>↗️</span>
+            Share Video
+          </button>
+        </div>
+      `;
+      
+      return card;
+    }
+
+    function clearResults() {
+      materialsState.searchResults = { courseMaterials: [], furtherReading: [], videos: [] };
+      
+      document.getElementById('courseMaterials').innerHTML = '';
+      document.getElementById('furtherReadingMaterials').innerHTML = '';
       document.getElementById('videoMaterials').innerHTML = '';
       
-      document.getElementById('pdfSection').style.display = 'none';
-      document.getElementById('onlineSection').style.display = 'none';
+      document.getElementById('courseMaterialSection').style.display = 'none';
+      document.getElementById('furtherReadingSection').style.display = 'none';
       document.getElementById('videoSection').style.display = 'none';
     }
 
     function updateResultsCount() {
-      const total = materialsState.searchResults.pdf.length + 
-                    materialsState.searchResults.online.length + 
+      const total = materialsState.searchResults.courseMaterials.length + 
+                    materialsState.searchResults.furtherReading.length + 
                     materialsState.searchResults.videos.length;
       
       document.getElementById('resultsCount').textContent = `${total} materials`;
