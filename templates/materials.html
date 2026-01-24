@@ -1,2046 +1,1822 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
-  <meta http-equiv="Pragma" content="no-cache" />
-  <meta http-equiv="Expires" content="0" />
-  <title>📚 Study Materials</title>
-  
-  <style>
-    /* ===== CSS VARIABLES & RESET ===== */
-    :root {
-      --primary-color: #000000;
-      --primary-dark: #333333;
-      --light-bg: #ffffff;
-      --dark-bg: #000000;
-      --card-light: #ffffff;
-      --card-dark: #0a0a0a;
-      --text-light: #000000;
-      --text-dark: #ffffff;
-      --input-bg: #1a1a1a;
-      --border-light: rgba(0, 0, 0, 0.1);
-      --border-dark: rgba(255, 255, 255, 0.2);
-      --gradient-start: #ffffff;
-      --gradient-end: #888888;
-      --accent-color: #1a1a1a;
-      --material-color: rgba(255, 255, 255, 0.15);
-    }
-
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-      -webkit-tap-highlight-color: transparent;
-    }
-
-    body {
-      background: var(--dark-bg);
-      color: var(--text-dark);
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      overflow-x: hidden;
-      padding: 0 20px;
-      opacity: 0;
-      animation: fadeIn 0.6s ease-out forwards;
-      animation-delay: 0.1s;
-    }
-
-    /* ===== TOP BAR ===== */
-    #top-bar {
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      height: 60px;
-      background: rgba(0, 0, 0, 0.95);
-      backdrop-filter: blur(10px);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 0 16px;
-      z-index: 1002;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-      opacity: 0;
-      animation: fadeInDown 0.5s ease-out 0.2s forwards;
-    }
-
-    #back-btn {
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      font-size: 20px;
-      background: rgba(255, 255, 255, 0.1);
-      border: none;
-      color: white;
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-
-    #back-btn:hover {
-      background: rgba(255, 255, 255, 0.2);
-      transform: translateX(-2px);
-    }
-
-    #top-bar-title {
-      font-weight: 600;
-      font-size: 1.1rem;
-      background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-    }
-
-    /* ===== ANIMATIONS ===== */
-    @keyframes fadeIn {
-      from {
-        opacity: 0;
-      }
-      to {
-        opacity: 1;
-      }
-    }
-
-    @keyframes fadeInUp {
-      from {
-        opacity: 0;
-        transform: translateY(15px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-
-    @keyframes fadeInDown {
-      from {
-        opacity: 0;
-        transform: translateY(-10px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-
-    @keyframes slideIn {
-      from {
-        opacity: 0;
-        transform: translateX(-20px);
-      }
-      to {
-        opacity: 1;
-        transform: translateX(0);
-      }
-    }
-
-    @keyframes slideUp {
-      from {
-        opacity: 0;
-        transform: translateY(30px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-
-    @keyframes materialHover {
-      0%, 100% {
-        transform: translateY(0);
-      }
-      50% {
-        transform: translateY(-5px);
-      }
-    }
-
-    @keyframes shimmer {
-      0% {
-        background-position: -200% center;
-      }
-      100% {
-        background-position: 200% center;
-      }
-    }
-
-    /* ===== MAIN CONTAINER ===== */
-    .materials-container {
-      width: 100%;
-      max-width: 800px;
-      margin-top: 80px;
-      opacity: 0;
-      animation: fadeInUp 0.7s ease-out 0.3s forwards;
-    }
-
-    /* ===== HEADER SECTION ===== */
-    .header-section {
-      text-align: center;
-      margin-bottom: 2rem;
-    }
-
-    .header-title {
-      font-size: 2rem;
-      font-weight: 700;
-      background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-      margin-bottom: 0.5rem;
-      opacity: 0;
-      animation: fadeInUp 0.7s ease-out 0.4s forwards;
-    }
-
-    .header-subtitle {
-      color: #a0a0a0;
-      font-size: 1rem;
-      line-height: 1.5;
-      max-width: 500px;
-      margin: 0 auto;
-      opacity: 0;
-      animation: fadeInUp 0.7s ease-out 0.5s forwards;
-    }
-
-    /* ===== SEARCH SECTION ===== */
-    .search-section {
-      background: var(--card-dark);
-      border: 1px solid var(--border-dark);
-      border-radius: 16px;
-      padding: 2rem;
-      margin-bottom: 2rem;
-      opacity: 0;
-      animation: fadeInUp 0.7s ease-out 0.6s forwards;
-    }
-
-    .input-group {
-      margin-bottom: 1.8rem;
-      opacity: 0;
-      animation: slideIn 0.6s ease-out forwards;
-    }
-
-    .input-group:nth-child(1) {
-      animation-delay: 0.6s;
-    }
-
-    .input-group:nth-child(2) {
-      animation-delay: 0.7s;
-    }
-
-    .input-group:nth-child(3) {
-      animation-delay: 0.8s;
-    }
-
-    .input-label {
-      display: block;
-      margin-bottom: 0.7rem;
-      font-size: 0.95rem;
-      font-weight: 500;
-      color: #e0e0e0;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .input-wrapper {
-      position: relative;
-      background: var(--input-bg);
-      border-radius: 12px;
-      border: 1px solid var(--border-dark);
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-
-    .input-wrapper:focus-within {
-      border-color: rgba(255, 255, 255, 0.4);
-      transform: translateY(-2px);
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-    }
-
-    /* ===== FIXED DROPDOWN STYLES ===== */
-    .styled-select {
-      width: 100%;
-      padding: 1rem 1.2rem;
-      background: var(--input-bg);
-      border: none;
-      outline: none;
-      font-size: 1rem;
-      color: #ffffff !important;
-      appearance: none;
-      -webkit-appearance: none;
-      cursor: pointer;
-      border-radius: 12px;
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23ffffff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
-      background-repeat: no-repeat;
-      background-position: right 1rem center;
-      background-size: 16px;
-    }
-
-    /* Style for dropdown options */
-    .styled-select option {
-      background-color: #1a1a1a !important;
-      color: #ffffff !important;
-      font-size: 1rem;
-      padding: 12px;
-      border: none;
-    }
-
-    /* For Firefox */
-    @-moz-document url-prefix() {
-      .styled-select {
-        text-indent: 0.01px;
-        text-overflow: '';
-        color: #ffffff !important;
-      }
-      .styled-select option {
-        background-color: #1a1a1a;
-        color: #ffffff;
-      }
-    }
-
-    /* For Internet Explorer */
-    .styled-select::-ms-expand {
-      display: none;
-    }
-
-    .search-input {
-      width: 100%;
-      padding: 1rem 1.2rem;
-      background: var(--input-bg);
-      border: none;
-      outline: none;
-      font-size: 1rem;
-      color: #ffffff;
-      border-radius: 12px;
-    }
-
-    .search-input::placeholder {
-      color: #888;
-    }
-
-    .search-btn {
-      width: 100%;
-      padding: 1rem;
-      background: var(--primary-color);
-      color: white;
-      border: none;
-      border-radius: 12px;
-      font-size: 1rem;
-      font-weight: 500;
-      cursor: pointer;
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-      margin-top: 0.5rem;
-      opacity: 0;
-      animation: fadeInUp 0.6s ease-out 0.9s forwards;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      will-change: transform, opacity;
-    }
-
-    .search-btn:hover:not(:disabled) {
-      background: #333333;
-      transform: translateY(-2px);
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-    }
-
-    .search-btn:active:not(:disabled) {
-      transform: translateY(0);
-    }
-
-    .search-btn:disabled {
-      opacity: 0.3;
-      cursor: not-allowed;
-      background: #666666;
-    }
-
-    .loading {
-      position: relative;
-      pointer-events: none;
-    }
-
-    .loading::after {
-      content: '';
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      width: 20px;
-      height: 20px;
-      margin: -10px 0 0 -10px;
-      border: 2px solid transparent;
-      border-top-color: white;
-      border-radius: 50%;
-      animation: spin 0.8s linear infinite;
-    }
-
-    @keyframes spin {
-      to {
-        transform: rotate(360deg);
-      }
-    }
-
-    /* ===== COURSE SEARCH ===== */
-    .course-search {
-      position: relative;
-    }
-
-    .search-icon {
-      position: absolute;
-      left: 1rem;
-      top: 50%;
-      transform: translateY(-50%);
-      color: #888;
-      pointer-events: none;
-    }
-
-    /* ===== RESULTS SECTION ===== */
-    .results-section {
-      display: none;
-      opacity: 0;
-    }
-
-    .results-section.active {
-      display: block;
-      animation: slideUp 0.6s ease-out forwards;
-    }
-
-    .results-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 1.5rem;
-      padding-bottom: 1rem;
-      border-bottom: 1px solid var(--border-dark);
-    }
-
-    .results-title {
-      font-size: 1.2rem;
-      font-weight: 600;
-      color: #ffffff;
-    }
-
-    .results-count {
-      font-size: 0.9rem;
-      color: #a0a0a0;
-      background: var(--accent-color);
-      padding: 4px 12px;
-      border-radius: 20px;
-    }
-
-    /* ===== MATERIAL CARDS ===== */
-    .materials-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-      gap: 1.5rem;
-      margin-bottom: 3rem;
-    }
-
-    @media (max-width: 768px) {
-      .materials-grid {
-        grid-template-columns: 1fr;
-      }
-    }
-
-    .material-card {
-      background: var(--card-dark);
-      border: 1px solid var(--border-dark);
-      border-radius: 12px;
-      padding: 1.5rem;
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-      position: relative;
-      overflow: hidden;
-      opacity: 0;
-      transform: translateY(10px);
-      animation: fadeInUp 0.6s ease-out forwards;
-    }
-
-    .material-card::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      height: 2px;
-      background: linear-gradient(90deg, var(--gradient-start), var(--gradient-end));
-      transform: scaleX(0);
-      transform-origin: left;
-      transition: transform 0.3s ease;
-    }
-
-    .material-card:hover {
-      border-color: rgba(255, 255, 255, 0.3);
-      transform: translateY(-5px);
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
-    }
-
-    .material-card:hover::before {
-      transform: scaleX(1);
-    }
-
-    .material-type {
-      position: absolute;
-      top: 1rem;
-      right: 1rem;
-      width: 40px;
-      height: 40px;
-      background: var(--material-color);
-      border-radius: 10px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.2rem;
-    }
-
-    .material-title {
-      font-size: 1.1rem;
-      font-weight: 600;
-      color: #ffffff;
-      margin-bottom: 0.8rem;
-      line-height: 1.4;
-      padding-right: 50px;
-    }
-
-    .material-author {
-      font-size: 0.9rem;
-      color: #a0a0a0;
-      margin-bottom: 0.5rem;
-      display: flex;
-      align-items: center;
-      gap: 5px;
-    }
-
-    .material-license {
-      font-size: 0.8rem;
-      color: #888;
-      margin-bottom: 1.2rem;
-      padding: 4px 8px;
-      background: rgba(255, 255, 255, 0.05);
-      border-radius: 6px;
-      display: inline-block;
-    }
-
-    .material-actions {
-      display: flex;
-      gap: 0.8rem;
-      margin-top: 1rem;
-    }
-
-    .material-btn {
-      flex: 1;
-      padding: 0.6rem 1rem;
-      background: var(--accent-color);
-      border: 1px solid var(--border-dark);
-      color: white;
-      border-radius: 8px;
-      font-size: 0.85rem;
-      font-weight: 500;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 6px;
-      text-decoration: none;
-    }
-
-    .material-btn:hover {
-      border-color: rgba(255, 255, 255, 0.3);
-      transform: translateY(-2px);
-    }
-
-    .material-btn.primary {
-      background: var(--primary-color);
-      border: none;
-    }
-
-    /* ===== VIDEO EMBED STYLES ===== */
-    .video-embed-container {
-      position: relative;
-      width: 100%;
-      padding-bottom: 56.25%; /* 16:9 Aspect Ratio */
-      height: 0;
-      margin: 1rem 0;
-      border-radius: 8px;
-      overflow: hidden;
-    }
-
-    .video-embed-container iframe,
-    .video-embed-container video {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      border: none;
-    }
-
-    .video-info {
-      margin: 1rem 0;
-      font-size: 0.9rem;
-      color: #a0a0a0;
-    }
-
-    .video-duration {
-      background: rgba(0, 0, 0, 0.7);
-      padding: 2px 8px;
-      border-radius: 4px;
-      font-size: 0.8rem;
-      margin-left: 8px;
-    }
-
-    /* ===== CATEGORY SECTION ===== */
-    .category-section {
-      margin-bottom: 2rem;
-      opacity: 0;
-      animation: fadeInUp 0.6s ease-out 1s forwards;
-    }
-
-    .category-title {
-      font-size: 1.1rem;
-      font-weight: 600;
-      color: #ffffff;
-      margin-bottom: 1rem;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    /* ===== AI SECTION ===== */
-    .ai-section {
-      background: var(--card-dark);
-      border: 1px solid var(--border-dark);
-      border-radius: 16px;
-      padding: 2rem;
-      text-align: center;
-      margin-bottom: 2rem;
-      opacity: 0;
-      animation: fadeInUp 0.6s ease-out 1.1s forwards;
-    }
-
-    .ai-title {
-      font-size: 1.3rem;
-      font-weight: 600;
-      background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-      margin-bottom: 0.5rem;
-    }
-
-    .ai-subtitle {
-      color: #a0a0a0;
-      font-size: 0.95rem;
-      margin-bottom: 1.5rem;
-      line-height: 1.5;
-    }
-
-    .ai-btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 0.8rem 1.5rem;
-      background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
-      color: var(--dark-bg);
-      border: none;
-      border-radius: 12px;
-      font-size: 0.95rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-      text-decoration: none;
-    }
-
-    .ai-btn:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 4px 16px rgba(255, 255, 255, 0.2);
-    }
-
-    .ai-btn:active {
-      transform: translateY(0);
-    }
-
-    /* ===== NO RESULTS ===== */
-    .no-results {
-      text-align: center;
-      padding: 3rem 2rem;
-      opacity: 0;
-      animation: fadeInUp 0.6s ease-out forwards;
-    }
-
-    .no-results-icon {
-      font-size: 3rem;
-      margin-bottom: 1rem;
-      opacity: 0.5;
-    }
-
-    .no-results-title {
-      font-size: 1.3rem;
-      font-weight: 600;
-      color: #ffffff;
-      margin-bottom: 0.5rem;
-    }
-
-    .no-results-subtitle {
-      color: #a0a0a0;
-      font-size: 0.95rem;
-      line-height: 1.5;
-      margin-bottom: 1.5rem;
-    }
-
-    /* ===== SCROLLBAR ===== */
-    ::-webkit-scrollbar {
-      width: 6px;
-    }
-
-    ::-webkit-scrollbar-track {
-      background: transparent;
-    }
-
-    ::-webkit-scrollbar-thumb {
-      background: rgba(255, 255, 255, 0.1);
-      border-radius: 3px;
-      transition: background 0.3s ease;
-    }
-
-    ::-webkit-scrollbar-thumb:hover {
-      background: rgba(255, 255, 255, 0.2);
-    }
-
-    /* ===== RESPONSIVE DESIGN ===== */
-    @media (max-width: 768px) {
-      body {
-        padding: 0 16px;
-        padding-top: 70px;
-      }
-
-      .materials-container {
-        margin-top: 70px;
-      }
-
-      .header-title {
-        font-size: 1.6rem;
-      }
-
-      .header-subtitle {
-        font-size: 0.95rem;
-      }
-
-      .search-section {
-        padding: 1.5rem;
-        border-radius: 12px;
-      }
-
-      .material-card {
-        padding: 1.2rem;
-      }
-
-      .material-title {
-        font-size: 1rem;
-      }
-
-      .material-actions {
-        flex-direction: column;
-      }
-
-      .ai-section {
-        padding: 1.5rem;
-        border-radius: 12px;
-      }
-    }
-
-    @media (max-width: 480px) {
-      .header-title {
-        font-size: 1.4rem;
-      }
-
-      .search-section {
-        padding: 1.2rem;
-        border-radius: 10px;
-      }
-
-      .material-card {
-        padding: 1rem;
-      }
-
-      .ai-btn {
-        width: 100%;
-        justify-content: center;
-      }
-    }
-
-    /* ===== UTILITY CLASSES ===== */
-    .hidden {
-      display: none !important;
-    }
-
-    .show {
-      display: block !important;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>CBT Platform - Study Materials</title>
+    
+    <style>
+        /* ===== CSS VARIABLES & RESET ===== */
+        :root {
+            --primary-color: #000000;
+            --primary-dark: #333333;
+            --light-bg: #ffffff;
+            --dark-bg: #000000;
+            --card-light: #ffffff;
+            --card-dark: #0a0a0a;
+            --text-light: #000000;
+            --text-dark: #ffffff;
+            --input-bg: #0a0a0a;
+            --border-light: rgba(0, 0, 0, 0.1);
+            --border-dark: rgba(255, 255, 255, 0.1);
+            --gradient-start: #ffffff;
+            --gradient-end: #888888;
+            --accent-color: #1a1a1a;
+            --correct-color: #4caf50;
+            --incorrect-color: #f44336;
+            --selected-color: rgba(255, 255, 255, 0.15);
+            --review-correct: rgba(76, 175, 80, 0.2);
+            --review-incorrect: rgba(244, 67, 54, 0.2);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background: var(--dark-bg);
+            color: var(--text-dark);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            overflow-x: hidden;
+            padding: 0 20px;
+            opacity: 0;
+            animation: fadeIn 0.6s ease-out forwards;
+            animation-delay: 0.1s;
+        }
+
+        /* ===== TOP BAR ===== */
+        #top-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 60px;
+            background: rgba(0, 0, 0, 0.95);
+            backdrop-filter: blur(10px);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 16px;
+            z-index: 1002;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            opacity: 0;
+            animation: fadeInDown 0.5s ease-out 0.2s forwards;
+        }
+
+        #back-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            color: white;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        #back-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateX(-2px);
+        }
+
+        #top-bar-title {
+            font-weight: 600;
+            font-size: 1.1rem;
+            background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* ===== ANIMATIONS ===== */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(15px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+            50% {
+                transform: scale(1.02);
+                opacity: 0.9;
+            }
+        }
+
+        @keyframes checkmark {
+            0% {
+                opacity: 0;
+                transform: scale(0) rotate(-45deg);
+            }
+            50% {
+                opacity: 1;
+                transform: scale(1.2) rotate(-45deg);
+            }
+            100% {
+                opacity: 1;
+                transform: scale(1) rotate(-45deg);
+            }
+        }
+
+        /* ===== MAIN CONTAINER ===== */
+        .cbt-container {
+            width: 100%;
+            max-width: 700px;
+            margin-top: 80px;
+            opacity: 0;
+            animation: fadeInUp 0.7s ease-out 0.3s forwards;
+        }
+
+        /* ===== HEADER SECTION ===== */
+        .header-section {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .header-title {
+            font-size: 2rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 0.5rem;
+            opacity: 0;
+            animation: fadeInUp 0.7s ease-out 0.4s forwards;
+        }
+
+        .header-subtitle {
+            color: #a0a0a0;
+            font-size: 1rem;
+            line-height: 1.5;
+            max-width: 500px;
+            margin: 0 auto;
+            opacity: 0;
+            animation: fadeInUp 0.7s ease-out 0.5s forwards;
+        }
+
+        /* ===== SELECTION SECTION ===== */
+        .selection-section {
+            background: var(--card-dark);
+            border: 1px solid var(--border-dark);
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            opacity: 0;
+            animation: fadeInUp 0.7s ease-out 0.6s forwards;
+        }
+
+        .input-group {
+            margin-bottom: 1.8rem;
+            opacity: 0;
+            animation: slideIn 0.6s ease-out forwards;
+        }
+
+        .input-group:nth-child(1) {
+            animation-delay: 0.6s;
+        }
+
+        .input-group:nth-child(2) {
+            animation-delay: 0.7s;
+        }
+
+        .input-group:nth-child(3) {
+            animation-delay: 0.8s;
+        }
+
+        .input-label {
+            display: block;
+            margin-bottom: 0.7rem;
+            font-size: 0.95rem;
+            font-weight: 500;
+            color: #e0e0e0;
+        }
+
+        .input-wrapper {
+            position: relative;
+            background: var(--input-bg);
+            border-radius: 12px;
+            border: 1px solid var(--border-dark);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .input-wrapper:focus-within {
+            border-color: rgba(255, 255, 255, 0.3);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .styled-select {
+            width: 100%;
+            padding: 1rem 1.2rem;
+            background: var(--input-bg);
+            border: none;
+            outline: none;
+            font-size: 1rem;
+            color: #ffffff;
+            appearance: none;
+            -webkit-appearance: none;
+            cursor: pointer;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23ffffff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 1rem center;
+            background-size: 16px;
+        }
+
+        .styled-select:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23888888' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+        }
+
+        .styled-select option {
+            background-color: #1a1a1a;
+            color: #ffffff;
+            padding: 12px;
+            font-size: 1rem;
+        }
+
+        @-moz-document url-prefix() {
+            .styled-select {
+                text-overflow: '';
+                color: #ffffff;
+            }
+            .styled-select option {
+                background-color: #1a1a1a;
+                color: #ffffff;
+            }
+        }
+
+        .start-btn {
+            width: 100%;
+            padding: 1rem;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            margin-top: 0.5rem;
+            opacity: 0;
+            animation: fadeInUp 0.6s ease-out 0.9s forwards;
+        }
+
+        .start-btn:hover:not(:disabled) {
+            opacity: 0.9;
+            transform: translateY(-2px);
+        }
+
+        .start-btn:active:not(:disabled) {
+            transform: translateY(0);
+        }
+
+        .start-btn:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        /* ===== MATERIALS SECTION ===== */
+        .materials-section {
+            background: var(--card-dark);
+            border: 1px solid var(--border-dark);
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            display: none;
+            opacity: 0;
+        }
+
+        .materials-section.active {
+            display: block;
+            animation: slideUp 0.6s ease-out forwards;
+        }
+
+        .materials-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border-dark);
+        }
+
+        .materials-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .materials-count {
+            font-size: 0.9rem;
+            color: #a0a0a0;
+            background: var(--accent-color);
+            padding: 4px 12px;
+            border-radius: 20px;
+        }
+
+        .materials-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1.2rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .material-card {
+            background: var(--accent-color);
+            border: 1px solid var(--border-dark);
+            border-radius: 12px;
+            padding: 1.5rem;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .material-card:hover {
+            border-color: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+        }
+
+        .material-type {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            width: 40px;
+            height: 40px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+        }
+
+        .material-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #ffffff;
+            margin-bottom: 0.8rem;
+            line-height: 1.4;
+            padding-right: 50px;
+        }
+
+        .material-author {
+            font-size: 0.9rem;
+            color: #a0a0a0;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .material-license {
+            font-size: 0.85rem;
+            color: #888;
+            margin-bottom: 1.2rem;
+            padding: 4px 8px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 6px;
+            display: inline-block;
+        }
+
+        .material-actions {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.8rem;
+            margin-top: 1rem;
+        }
+
+        .material-btn {
+            padding: 0.8rem 1rem;
+            background: var(--input-bg);
+            border: 1px solid var(--border-dark);
+            color: white;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            text-decoration: none;
+        }
+
+        .material-btn:hover {
+            border-color: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .material-btn.primary {
+            background: var(--primary-color);
+            border: none;
+        }
+
+        /* ===== NO MATERIALS ===== */
+        .no-materials {
+            text-align: center;
+            padding: 3rem 2rem;
+            opacity: 0;
+            animation: fadeInUp 0.6s ease-out forwards;
+        }
+
+        .no-materials-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+
+        .no-materials-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: #ffffff;
+            margin-bottom: 0.5rem;
+        }
+
+        .no-materials-subtitle {
+            color: #a0a0a0;
+            font-size: 0.95rem;
+            line-height: 1.5;
+            margin-bottom: 1.5rem;
+        }
+
+        /* ===== SCROLLBAR ===== */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+            transition: background 0.3s ease;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        /* ===== RESPONSIVE DESIGN ===== */
+        @media (max-width: 768px) {
+            body {
+                padding: 0 16px;
+                padding-top: 70px;
+            }
+
+            .cbt-container {
+                margin-top: 70px;
+            }
+
+            .header-title {
+                font-size: 1.6rem;
+            }
+
+            .header-subtitle {
+                font-size: 0.95rem;
+            }
+
+            .selection-section,
+            .materials-section {
+                padding: 1.5rem;
+                border-radius: 12px;
+            }
+
+            .material-card {
+                padding: 1.2rem;
+            }
+
+            .material-title {
+                font-size: 1rem;
+            }
+
+            .material-actions {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .header-title {
+                font-size: 1.4rem;
+            }
+
+            .selection-section,
+            .materials-section {
+                padding: 1.2rem;
+                border-radius: 10px;
+            }
+
+            .material-card {
+                padding: 1rem;
+            }
+        }
+
+        /* ===== UTILITY CLASSES ===== */
+        .hidden {
+            display: none !important;
+        }
+
+        .show {
+            display: block !important;
+        }
+
+        .flex-show {
+            display: flex !important;
+        }
+    </style>
 </head>
 <body>
-  <!-- TOP BAR -->
-  <div id="top-bar">
-    <button id="back-btn" onclick="goBack()">←</button>
-    <div id="top-bar-title">Study Materials</div>
-    <div style="width: 40px;"></div> <!-- Spacer for symmetry -->
-  </div>
-
-  <!-- MAIN CONTAINER -->
-  <div class="materials-container">
-    <!-- HEADER -->
-    <div class="header-section">
-      <h1 class="header-title">📚 Study Materials</h1>
-      <p class="header-subtitle">Select Course and Level</p>
+    <div id="top-bar">
+        <button id="back-btn" onclick="goBack()">←</button>
+        <div id="top-bar-title">CBT Platform - Study Materials</div>
+        <div style="width: 40px;"></div>
     </div>
 
-    <!-- SEARCH SECTION -->
-    <div class="search-section" id="searchSection">
-      <div class="input-group">
-        <label class="input-label">
-          <span>🎓</span>
-          Select Course
-        </label>
-        <div class="input-wrapper">
-          <select id="courseSelect" class="styled-select">
-            <option value="">-- Select Course --</option>
-            <option value="Accountancy">Accountancy</option>
-            <option value="Accounting">Accounting</option>
-            <option value="Agriculture">Agriculture</option>
-            <option value="Arabic Studies">Arabic Studies</option>
-            <option value="Banking and Finance">Banking and Finance</option>
-            <option value="Biochemistry">Biochemistry</option>
-            <option value="Botany">Botany</option>
-            <option value="Business Administration">Business Administration</option>
-            <option value="Chemical and Polymer Engineering">Chemical and Polymer Engineering</option>
-            <option value="Chemistry">Chemistry</option>
-            <option value="Christian Religious Studies">Christian Religious Studies</option>
-            <option value="Computer Science">Computer Science</option>
-            <option value="Dentistry and Dental Surgery">Dentistry and Dental Surgery</option>
-            <option value="Drama / Dramatic / Performing Arts">Drama / Dramatic / Performing Arts</option>
-            <option value="Early Childhood Education">Early Childhood Education</option>
-            <option value="Economics">Economics</option>
-            <option value="Education and Accounting">Education and Accounting</option>
-            <option value="Education and Biology">Education and Biology</option>
-            <option value="Education and Chemistry">Education and Chemistry</option>
-            <option value="Education and Christian Religious Studies">Education and Christian Religious Studies</option>
-            <option value="Education and Computer Science">Education and Computer Science</option>
-            <option value="Education and Economics">Education and Economics</option>
-            <option value="Education and English Language">Education and English Language</option>
-            <option value="Education and French">Education and French</option>
-            <option value="Education and Geography">Education and Geography</option>
-            <option value="Education and History">Education and History</option>
-            <option value="Education and Islamic Studies">Education and Islamic Studies</option>
-            <option value="Education and Mathematics">Education and Mathematics</option>
-            <option value="Education and Physics">Education and Physics</option>
-            <option value="Education and Political Science">Education and Political Science</option>
-            <option value="Education and Yoruba">Education and Yoruba</option>
-            <option value="Educational Management">Educational Management</option>
-            <option value="Electronics and Computer Engineering">Electronics and Computer Engineering</option>
-            <option value="English Language">English Language</option>
-            <option value="Fine and Applied Arts">Fine and Applied Arts</option>
-            <option value="Fisheries">Fisheries</option>
-            <option value="French">French</option>
-            <option value="Geography and Planning">Geography and Planning</option>
-            <option value="Guidance and Counseling">Guidance and Counseling</option>
-            <option value="Health Education">Health Education</option>
-            <option value="History and International Studies">History and International Studies</option>
-            <option value="Industrial Relations and Personnel Management">Industrial Relations and Personnel Management</option>
-            <option value="Insurance">Insurance</option>
-            <option value="Islamic Studies">Islamic Studies</option>
-            <option value="Law">Law</option>
-            <option value="Library and Information Science">Library and Information Science</option>
-            <option value="Local Government and Development Studies">Local Government and Development Studies</option>
-            <option value="Marketing">Marketing</option>
-            <option value="Mass Communication">Mass Communication</option>
-            <option value="Mathematics">Mathematics</option>
-            <option value="Mechanical Engineering">Mechanical Engineering</option>
-            <option value="Medicine and Surgery">Medicine and Surgery</option>
-            <option value="Microbiology">Microbiology</option>
-            <option value="Music">Music</option>
-            <option value="Nursing / Nursing Science">Nursing / Nursing Science</option>
-            <option value="Pharmacology">Pharmacology</option>
-            <option value="Philosophy">Philosophy</option>
-            <option value="Physical and Health Education">Physical and Health Education</option>
-            <option value="Physics">Physics</option>
-            <option value="Physiology">Physiology</option>
-            <option value="Political Science">Political Science</option>
-            <option value="Portuguese / English">Portuguese / English</option>
-            <option value="Psychology">Psychology</option>
-            <option value="Public Administration">Public Administration</option>
-            <option value="Sociology">Sociology</option>
-            <option value="Teacher Education Science">Teacher Education Science</option>
-            <option value="Technology and Vocational Education">Technology and Vocational Education</option>
-            <option value="Theatre Arts">Theatre Arts</option>
-            <option value="Transport Management Technology">Transport Management Technology</option>
-            <option value="Yoruba">Yoruba</option>
-            <option value="Zoology">Zoology</option>
-          </select>
+    <div class="cbt-container">
+        <div class="header-section">
+            <h1 class="header-title">Study Materials</h1>
+            <p class="header-subtitle">Select course, level, and semester to view all materials</p>
         </div>
-      </div>
 
-      <div class="input-group">
-        <label class="input-label">
-          <span>📊</span>
-          Select Level
-        </label>
-        <div class="input-wrapper">
-          <select id="levelSelect" class="styled-select">
-            <option value="">-- Select Level --</option>
-            <option value="100">100 Level</option>
-            <option value="200">200 Level</option>
-            <option value="300">300 Level</option>
-            <option value="400">400 Level</option>
-          </select>
+        <div class="selection-section" id="selectionSection">
+            <div class="input-group">
+                <label class="input-label">Select Course</label>
+                <div class="input-wrapper">
+                    <select id="courseSelect" class="styled-select">
+                        <option value="">-- Select Course --</option>
+                        <option value="Biochemistry">Biochemistry</option>
+                        <option value="Mathematics">Mathematics</option>
+                        <option value="Computer Science">Computer Science</option>
+                        <option value="Biology">Biology</option>
+                        <option value="Chemistry">Chemistry</option>
+                        <option value="Physics">Physics</option>
+                        <option value="Accounting">Accounting</option>
+                        <option value="Agriculture">Agriculture</option>
+                        <option value="Business Administration">Business Administration</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="input-group">
+                <label class="input-label">Select Level</label>
+                <div class="input-wrapper">
+                    <select id="levelSelect" class="styled-select">
+                        <option value="">-- Select Level --</option>
+                        <option value="100">100 Level</option>
+                        <option value="200">200 Level</option>
+                        <option value="300">300 Level</option>
+                        <option value="400">400 Level</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="input-group">
+                <label class="input-label">Select Semester</label>
+                <div class="input-wrapper">
+                    <select id="semesterSelect" class="styled-select" disabled>
+                        <option value="">-- First select Course and Level --</option>
+                    </select>
+                </div>
+            </div>
+
+            <button class="start-btn" id="openMaterialsBtn" onclick="openMaterials()" disabled>Open Materials</button>
         </div>
-      </div>
 
-      <div class="input-group">
-        <label class="input-label">
-          <span>🔍</span>
-          Search Topic
-        </label>
-        <div class="input-wrapper">
-          <input type="text" id="topicInput" class="search-input" placeholder="Enter topic (e.g., statistics, algebra, calculus)" />
+        <div class="materials-section" id="materialsSection">
+            <div class="materials-header">
+                <div class="materials-title" id="materialsTitle">Materials</div>
+                <div class="materials-count" id="materialsCount">0 materials</div>
+            </div>
+
+            <div class="materials-grid" id="materialsGrid">
+                <!-- Materials will be dynamically inserted here -->
+            </div>
+
+            <div class="material-actions">
+                <button class="material-btn" onclick="goBackToSelection()">
+                    <span>←</span>
+                    Back to Selection
+                </button>
+                <button class="material-btn primary" onclick="downloadAllMaterials()">
+                    <span>⬇️</span>
+                    Download All
+                </button>
+            </div>
         </div>
-      </div>
 
-      <button class="search-btn" id="searchBtn" onclick="searchMaterials()">
-        <span>🔍</span>
-        Search Materials
-      </button>
+        <div class="no-materials hidden" id="noMaterials">
+            <div class="no-materials-icon">📚</div>
+            <div class="no-materials-title">No Materials Found</div>
+            <div class="no-materials-subtitle">
+                No study materials available for the selected semester.<br>
+                Please try another course, level, or semester combination.
+            </div>
+            <button class="start-btn" onclick="goBackToSelection()">Select Another Semester</button>
+        </div>
     </div>
 
-    <!-- RESULTS SECTION -->
-    <div class="results-section" id="resultsSection">
-      <div class="results-header">
-        <div class="results-title">Search Results</div>
-        <div class="results-count" id="resultsCount">0 materials</div>
-      </div>
+    <script>
+        // ===== STATE MANAGEMENT =====
+        const materialsState = {
+            course: '',
+            level: '',
+            semester: '',
+            materials: []
+        };
 
-      <!-- Course Materials (LASU Content) -->
-      <div class="category-section" id="courseMaterialSection">
-        <div class="category-title">
-          <span>📘</span>
-          Course Material
-        </div>
-        <div class="materials-grid" id="courseMaterials">
-          <!-- LASU course materials will be inserted here -->
-        </div>
-      </div>
+        // ===== SEMESTER STRUCTURE =====
+        const semesterStructure = {
+            "Biochemistry": {
+                "100": ["First Semester", "Second Semester"],
+                "200": ["First Semester", "Second Semester"],
+                "300": ["First Semester", "Second Semester"],
+                "400": ["First Semester", "Second Semester"]
+            },
+            "Mathematics": {
+                "100": ["First Semester", "Second Semester"],
+                "200": ["First Semester", "Second Semester"],
+                "300": ["First Semester", "Second Semester"],
+                "400": ["First Semester", "Second Semester"]
+            },
+            "Computer Science": {
+                "100": ["First Semester", "Second Semester"],
+                "200": ["First Semester", "Second Semester"],
+                "300": ["First Semester", "Second Semester"],
+                "400": ["First Semester", "Second Semester"]
+            },
+            "Biology": {
+                "100": ["First Semester", "Second Semester"],
+                "200": ["First Semester", "Second Semester"],
+                "300": ["First Semester", "Second Semester"],
+                "400": ["First Semester", "Second Semester"]
+            },
+            "Chemistry": {
+                "100": ["First Semester", "Second Semester"],
+                "200": ["First Semester", "Second Semester"],
+                "300": ["First Semester", "Second Semester"],
+                "400": ["First Semester", "Second Semester"]
+            },
+            "Physics": {
+                "100": ["First Semester", "Second Semester"],
+                "200": ["First Semester", "Second Semester"],
+                "300": ["First Semester", "Second Semester"],
+                "400": ["First Semester", "Second Semester"]
+            },
+            "Accounting": {
+                "100": ["First Semester", "Second Semester"],
+                "200": ["First Semester", "Second Semester"],
+                "300": ["First Semester", "Second Semester"],
+                "400": ["First Semester", "Second Semester"]
+            },
+            "Agriculture": {
+                "100": ["First Semester", "Second Semester"],
+                "200": ["First Semester", "Second Semester"],
+                "300": ["First Semester", "Second Semester"],
+                "400": ["First Semester", "Second Semester"]
+            },
+            "Business Administration": {
+                "100": ["First Semester", "Second Semester"],
+                "200": ["First Semester", "Second Semester"],
+                "300": ["First Semester", "Second Semester"],
+                "400": ["First Semester", "Second Semester"]
+            }
+        };
 
-      <!-- Further Reading (External Resources) -->
-      <div class="category-section" id="furtherReadingSection">
-        <div class="category-title">
-          <span>📖</span>
-          Further Reading
-        </div>
-        <div class="materials-grid" id="furtherReadingMaterials">
-          <!-- External resources will be inserted here -->
-        </div>
-      </div>
-
-      <!-- Videos -->
-      <div class="category-section" id="videoSection">
-        <div class="category-title">
-          <span>🎥</span>
-          Video Resources
-        </div>
-        <div class="materials-grid" id="videoMaterials">
-          <!-- Embedded video materials will be inserted here -->
-        </div>
-      </div>
-    </div>
-
-    <!-- NO RESULTS -->
-    <div class="no-results hidden" id="noResults">
-      <div class="no-results-icon">📚</div>
-      <div class="no-results-title">No Materials Found</div>
-      <div class="no-results-subtitle">
-        Try searching with different keywords or browse our AI learning assistant
-      </div>
-    </div>
-
-    <!-- AI SECTION -->
-    <div class="ai-section">
-      <div class="ai-title">🤖 Need Personalized Help?</div>
-      <div class="ai-subtitle">Get AI-powered explanations and summaries for any topic</div>
-      <a href="/teach-me-ai" class="ai-btn">
-        <span>🤖</span>
-        Teach Me with AI
-      </a>
-    </div>
-  </div>
-
-  <script>
-    // ===== MATERIALS DATA =====
-    const uploadedMaterials = [
-      {
-        title: "Financial Accounting (OpenStax)",
-        author: "OpenStax",
-        license: "CC BY 4.0",
-        link: "static/materials/accounting/Financial-Accounting.pdf",
-        type: "pdf",
-        course: "Accountancy"
-      },
-      {
-        title: "Principles of Accounting",
-        author: "Open Educational Resource",
-        license: "CC BY 4.0",
-        link: "static/materials/accounting/Principles-of-Financial-Accounting.pdf",
-        type: "pdf",
-        course: "Accountancy"
-      },
-      {
-        title: "A Business Perspective (Managerial Accounting)",
-        author: "Open Educational Resource",
-        license: "CC BY 4.0",
-        link: "static/materials/account/A-Business-Perspective-(Managerial-Accounting).pdf",
-        type: "pdf",
-        course: "Accounting"
-      },
-      {
-  title: "DBMS II – Transaction Processing (Unit 6: Transaction Management)",
-  author: "Prof. Firoz Sherasiya",
-  license: "LASU Academic Material",
-  link: "static/materials/lasu/dbms2/DBMS-II-Unit-6-Transaction-Management.pdf",
+        // ===== MATERIALS DATABASE =====
+        const materialsDatabase = [
+            {
+                title: "BCH 101 - Lipids of Biological Importance",
+                author: "Unknown",
+                license: "Educational Use",
+                link: "static/materials/Lipids-of-Biological-Importance.pdf",
+                type: "pdf",
+                course: "Biochemistry",
+                level: "100",
+                semester: "First Semester",
+                courseCode: "BCH101"
+            },
+            {
+                title: "BCH 101 – Carbohydrates",
+                author: "ADEYEMO, ADESEGUN GIDEON",
+                license: "Educational Use",
+                link: "static/materials/BCH-101-Carbohydrate.pdf",
+                type: "pdf",
+                course: "Biochemistry",
+                level: "100",
+                semester: "First Semester",
+                courseCode: "BCH101"
+            },
+            {
+                title: "BCH 101 – Amino Acids and Proteins",
+                author: "Adeyemo, Adesegun Gideon",
+                license: "Educational Use",
+                link: "static/materials/BCH-101-Amino-Acids-and-Proteins.pdf",
+                type: "pdf",
+                course: "Biochemistry",
+                level: "100",
+                semester: "First Semester",
+                courseCode: "BCH101"
+            },
+            {
+                title: "BCH 101 – Macromolecules",
+                author: "Unknown",
+                license: "Educational Use",
+                link: "static/materials/BCH-101-Macromolecules.pdf",
+                type: "pdf",
+                course: "Biochemistry",
+                level: "100",
+                semester: "First Semester",
+                courseCode: "BCH101"
+            },
+            {
+                title: "BCH 101 OER – Past Questions",
+                author: "Open Educational Resource",
+                license: "OER",
+                link: "static/materials/BCH-101-OER-Past-Questions.pdf",
+                type: "pdf",
+                course: "Biochemistry",
+                level: "100",
+                semester: "First Semester",
+                courseCode: "BCH101"
+            },
+            {
+                title: "BCH 101 – Brief History of Biochemistry",
+                author: "Hikmet Geckil",
+                license: "Educational Use",
+                link: "static/materials/BCH-101-Brief-History-of-Biochemistry.pdf",
+                type: "pdf",
+                course: "Biochemistry",
+                level: "100",
+                semester: "First Semester",
+                courseCode: "BCH101"
+            },
+            {
+                title: "BCH 101 – Multiple Choice Questions",
+                author: "RSM",
+                license: "Educational Use",
+                link: "static/materials/BCH-101-Multiple-Choice-Questions.pdf",
+                type: "pdf",
+                course: "Biochemistry",
+                level: "100",
+                semester: "First Semester",
+                courseCode: "BCH101"
+            },
+            {
+                title: "History of Biochemistry",
+                author: "Unknown",
+                license: "Educational Use",
+                link: "static/materials/History-of-Biochemistry.pdf",
+                type: "pdf",
+                course: "Biochemistry",
+                level: "100",
+                semester: "First Semester",
+                courseCode: "BCH101"
+            },
+            {
+                title: "MAT 101 OER – Likely Exam Questions",
+                author: "Sir Temi",
+                license: "OER",
+                link: "static/materials/MAT-101-OER.pdf",
+                type: "pdf",
+                course: "Mathematics",
+                level: "100",
+                semester: "First Semester",
+                courseCode: "MAT101"
+            },
+            {
+                title: "MAT 101 – Questions (DML & Adebanjo)",
+                author: "DML & Adebanjo",
+                license: "Educational Use",
+                link: "static/materials/MAT-101-Questions-DML-and-Adebanjo-2.pdf",
+                type: "pdf",
+                course: "Mathematics",
+                level: "100",
+                semester: "First Semester",
+                courseCode: "MAT101"
+            },
+            {
+                title: "MAT 101 – Elementary Mathematics I (Lecture 1: Elementary Set Theory)",
+                author: "Dr. Akinwale Lewis Olutimo",
+                license: "LASU Academic Material",
+                link: "static/materials/lasu/mathematics/1768303502_online_aspect_mat101_lesson_1.pdf",
+                type: "pdf",
+                course: "Mathematics",
+                level: "100",
+                semester: "First Semester",
+                courseCode: "MAT101"
+            },
+            {
+                title: "MAT 101 – Elementary Mathematics I (Lecture 2: Theory of Quadratic Equations)",
+                author: "Dr. Akinwale Lewis Olutimo",
+                license: "LASU Academic Material",
+                link: "static/materials/lasu/mathematics/MAT-101-Lecture-2-Theory-of-Quadratic-Equations.pdf",
+                type: "pdf",
+                course: "Mathematics",
+                level: "100",
+                semester: "First Semester",
+                courseCode: "MAT101"
+            },
+            {
+                title: "MAT 101 – Elementary Mathematics I (Lecture 3: Indices and Logarithms)",
+                author: "Dr. Akinwale Lewis Olutimo",
+                license: "LASU Academic Material",
+                link: "static/materials/lasu/mathematics/MAT-101-Lecture-3-Indices-and-Logarithms.pdf",
+                type: "pdf",
+                course: "Mathematics",
+                level: "100",
+                semester: "First Semester",
+                courseCode: "MAT101"
+            },
+            {
+                title: "CSC 102 – Introduction to Computing Concepts",
+                author: "Prof. Aribisala & Dr. Zubair Adam",
+                license: "Educational Use",
+                link: "static/materials/CSC-102-Introduction-to-Computing-Concepts.pdf",
+                type: "pdf",
+                course: "Computer Science",
+                level: "100",
+                semester: "Second Semester",
+                courseCode: "CSC102"
+            },
+            {
+                title: "Types of Documents and Their Structures in LaTeX",
+                author: "Dr. Idowu G. A.",
+                license: "Educational Use",
+                link: "static/materials/Types-of-Documents-and-Their-Structures-in-LaTeX.pdf",
+                type: "pdf",
+                course: "Computer Science",
+                level: "100",
+                semester: "Second Semester",
+                courseCode: "CSC102"
+            },
+            {
+                title: "BIO 101 – Levels of Biological Organization and Classification of Living Things",
+                author: "Alafia, A. O.",
+                license: "Educational Use",
+                link: "static/materials/BIO-101-Levels-of-Biological-Organization-and-Classification.pdf",
+                type: "pdf",
+                course: "Biology",
+                level: "100",
+                semester: "First Semester",
+                courseCode: "BIO101"
+            },
+            {
+                title: "BIO 101 – Meiosis, Gametogenesis, Inheritance and Variation",
+                author: "Unknown",
+                license: "Educational Use",
+                link: "static/materials/BIO-101-Meiosis-Gametogenesis-Inheritance-and-Variation.pdf",
+                type: "pdf",
+                course: "Biology",
+                level: "100",
+                semester: "First Semester",
+                courseCode: "BIO101"
+            },
+            {
+                title: "BIO 101 – Biomolecules: Carbohydrates and Lipids",
+                author: "Adu, Oluwatosin B.",
+                license: "Educational Use",
+                link: "static/materials/BIO-101-Biomolecules-Carbohydrates-and-Lipids.pdf",
+                type: "pdf",
+                course: "Biology",
+                level: "100",
+                semester: "First Semester",
+                courseCode: "BIO101"
+            },
+            {
+                title: "BIO 101 – Biomolecules: Proteins and Nucleic Acids",
+                author: "Adu, Oluwatosin B.",
+                license: "Educational Use",
+                link: "static/materials/BIO-101-Biomolecules-Proteins-and-Nucleic-Acids.pdf",
+                type: "pdf",
+                course: "Biology",
+                level: "100",
+                semester: "First Semester",
+                courseCode: "BIO101"
+            },
+            {
+                title: "BIO 101 – Gametogenesis",
+                author: "Osinaike, T. S.",
+                license: "Educational Use",
+                link: "static/materials/BIO-101-Gametogenesis.pdf",
+                type: "pdf",
+                course: "Biology",
+                level: "100",
+                semester: "First Semester",
+                courseCode: "BIO101"
+            },
+            {
+                title: "BIO 101 – Basic Principles of Reproduction and Growth",
+                author: "Unknown",
+                license: "Educational Use",
+                link: "static/materials/BIO-101-Basic-Principles-of-Reproduction-and-Growth.pdf",
+                type: "pdf",
+                course: "Biology",
+                level: "100",
+                semester: "First Semester",
+                courseCode: "BIO101"
+            },
+            {
+                title: "BIO 101 – Proteins and Nucleic Acids",
+                author: "Adu, Oluwatosin B.",
+                license: "Educational Use",
+                link: "static/materials/BIO-101-Proteins-and-Nucleic-Acids.pdf",
+                type: "pdf",
+                course: "Biology",
+                level: "100",
+                semester: "First Semester",
+                courseCode: "BIO101"
+            },
+            {
+                title: "BIO 101 – Evolutionary Trends",
+                author: "Alafia, A. O. (Ph.D)",
+                license: "Educational Use",
+                link: "static/materials/BIO-101-Evolutionary-Trends.pdf",
+                type: "pdf",
+                course: "Biology",
+                level: "100",
+                semester: "First Semester",
+                courseCode: "BIO101"
+            },
+            {
+                title: "BIO 101 – Diversity of Animals",
+                author: "Alafia, A. O.",
+                license: "Educational Use",
+                link: "static/materials/BIO-101-Diversity-of-Animals.pdf",
+                type: "pdf",
+                course: "Biology",
+                level: "100",
+                semester: "First Semester",
+                courseCode: "BIO101"
+            },
+            {
+                title: "BIO 101 – Diversity, Classification and Characteristics of Animals",
+                author: "Unknown",
+                license: "Educational Use",
+                link: "static/materials/BIO-101-Diversity-Classification-and-Characteristics-of-Animals.pdf",
+                type: "pdf",
+                course: "Biology",
+                level: "100",
+                semester: "First Semester",
+                courseCode: "BIO101"
+            },
+            {
+                title: "BIO 101 – Microscopy",
+                author: "Dr. Bola Oyefolu",
+                license: "Educational Use",
+                link: "static/materials/BIO-101-Microscopy.pdf",
+                type: "pdf",
+                course: "Biology",
+                level: "100",
+                semester: "First Semester",
+                courseCode: "BIO101"
+            },
+            {
+                title: "BIO 101 – Cell Structure and Function of Organelles",
+                author: "Unknown",
+                license: "Educational Use",
+                link: "static/materials/BIO-101-Cell-Structure-and-Function-of-Organelles.pdf",
+                type: "pdf",
+                course: "Biology",
+                level: "100",
+                semester: "First Semester",
+                courseCode: "BIO101"
+            },
+            {
+                title: "CHM 102 – Homework Practice Questions",
+                author: "Unknown",
+                license: "Educational Use",
+                link: "static/materials/CHM-102-Homework-Practice-Questions.pdf",
+                type: "pdf",
+                course: "Chemistry",
+                level: "100",
+                semester: "Second Semester",
+                courseCode: "CHM102"
+            },
+            {
+                title: "CHM 101 – Oxidation and Reduction",
+                author: "Unknown",
+                license: "Educational Use",
+                link: "static/materials/CHM-101-Oxidation-and-Reduction.pdf",
+                type: "pdf",
+                course: "Chemistry",
+                level: "100",
+                semester: "First Semester",
+                courseCode: "CHM101"
+            },
+            {
+                title: "CHM 101 – Acids and Bases",
+                author: "Unknown",
+                license: "Educational Use",
+                link: "static/materials/CHM-101-Acids-and-Bases-Chapter-15.pdf",
+                type: "pdf",
+                course: "Chemistry",
+                level: "100",
+                semester: "First Semester",
+                courseCode: "CHM101"
+            },
+            {
+                title: "CHM 101 – Acids and Bases",
+                author: "Onwordi, C. T. (Ph.D)",
+                license: "Educational Use",
+                link: "static/materials/CHM-101-Acids-and-Bases.pdf",
+                type: "pdf",
+                course: "Chemistry",
+                level: "100",
+                semester: "First Semester",
+                courseCode: "CHM101"
+            },
+            {
+                title: "CHM 101 – Atomic Theory Timeline",
+                author: "Unknown",
+                license: "Educational Use",
+                link: "static/materials/CHM-101-Atomic-Theory-Timeline.pdf",
+                type: "pdf",
+                course: "Chemistry",
+                level: "100",
+                semester: "First Semester",
+                courseCode: "CHM101"
+            },
+            {
+                title: "CHM 101 – Redox Reactions and Introduction to Electrochemistry",
+                author: "Prof. Olowu R. A.",
+                license: "Educational Use",
+                link: "static/materials/CHM-101-Redox-Reactions-and-Introduction-to-Electrochemistry.pdf",
+                type: "pdf",
+                course: "Chemistry",
+                level: "100",
+                semester: "First Semester",
+                courseCode: "CHM101"
+            },
+            {
+                title: "CHM 101 – Periodicity",
+                author: "Unknown",
+                license: "Educational Use",
+                link: "static/materials/CHM-101-Periodicity.pdf",
+                type: "pdf",
+                course: "Chemistry",
+                level: "100",
+                semester: "First Semester",
+                courseCode: "CHM101"
+            },
+            {
+                title: "CHM 101 – Periodic Table and Periodicity",
+                author: "Prof. Adeniyi",
+                license: "Educational Use",
+                link: "static/materials/CHM-101-Periodic-Table-and-Periodicity.pdf",
+                type: "pdf",
+                course: "Chemistry",
+                level: "100",
+                semester: "First Semester",
+                courseCode: "CHM101"
+            },
+            {
+                title: "CHM 101 – Rates of Reactions and Equilibrium",
+                author: "Unknown",
+                license: "Educational Use",
+                link: "static/materials/CHM-101-Rates-of-Reactions-and-Equilibrium.pdf",
+                type: "pdf",
+                course: "Chemistry",
+                level: "100",
+                semester: "First Semester",
+                courseCode: "CHM101"
+            },
+            {
+                title: "CHM 101 – Modern Electronic Theory of Atoms",
+                author: "Prof. A. A. Adeniyi",
+                license: "Educational Use",
+                link: "static/materials/CHM-101-Modern-Electronic-Theory-of-Atoms.pdf",
+                type: "pdf",
+                course: "Chemistry",
+                level: "100",
+                semester: "First Semester",
+                courseCode: "CHM101"
+            },
+            {
+                title: "CHM 101 – Atomic and Molecular Structure",
+                author: "Unknown",
+                license: "Educational Use",
+                link: "static/materials/CHM-101-Atomic-and-Molecular-Structure.pdf",
+                type: "pdf",
+                course: "Chemistry",
+                level: "100",
+                semester: "First Semester",
+                courseCode: "CHM101"
+            },
+            {
+                title: "CHM 101 – Hybridization and Shapes of Molecules",
+                author: "Dr. Olubunmi A. Adewusi",
+                license: "Educational Use",
+                link: "static/materials/CHM-101-Hybridization-and-Shapes-of-Molecules.pdf",
+                type: "pdf",
+                course: "Chemistry",
+                level: "100",
+                semester: "First Semester",
+                courseCode: "CHM101"
+            },
+            {
+                title: "BIO 101 OER",
+                author: "Sola Royal",
+                license: "OER",
+                link: "static/materials/BIO-101-OER-Sola-Royal.pdf",
+                type: "pdf",
+                course: "Biology",
+                level: "100",
+                semester: "First Semester",
+                courseCode: "BIO101"
+            },
+            {
+                title: "BIO 101 OER",
+                author: "Honorer",
+                license: "OER",
+                link: "static/materials/BIO-101-OER.pdf",
+                type: "pdf",
+                course: "Biology",
+                level: "100",
+                semester: "First Semester",
+                courseCode: "BIO101"
+            },
+            {
+                title: "Sure A in CHM 101 – Past Questions & Answers",
+                author: "Unknown",
+                license: "Educational Use",
+                link: "static/materials/Sure-A-in-CHM-101-Past-Questions-and-Answers.pdf",
+                type: "pdf",
+                course: "Chemistry",
+                level: "100",
+                semester: "First Semester",
+                courseCode: "CHM101"
+            },
+            {
+                title: "PHY 104 – Electricity and Magnetism",
+                author: "University of Abuja",
+                license: "Educational Use",
+                link: "static/materials/PHY-104-Electricity-and-Magnetism.pdf",
+                type: "pdf",
+                course: "Physics",
+                level: "100",
+                semester: "Second Semester",
+                courseCode: "PHY104"
+            },
+            {
+                title: "PHY 104 – Oscillation",
+                author: "Unknown",
+                license: "Educational Use",
+                link: "static/materials/PHY-104-Oscillation.pdf",
+                type: "pdf",
+                course: "Physics",
+                level: "100",
+                semester: "Second Semester",
+                courseCode: "PHY104"
+            },
+            {
+                title: "Trigonometry",
+                author: "Dr. Olaniyan",
+                license: "LASU Academic Material",
+                link: "static/materials/lasu/mathematics/Trigonometry.pdf",
+                type: "pdf",
+                course: "Mathematics",
+                level: "100",
+                semester: "First Semester",
+                courseCode: "MAT101"
+            },
+            {
+                title: "Indices, Surds and Logarithms",
+                author: "Department of Mathematics",
+                license: "LASU Academic Material",
+                link: "static/materials/lasu/mathematics/Indices-Surds-and-Logarithms.pdf",
+                type: "pdf",
+                course: "Mathematics",
+                level: "100",
+                semester: "First Semester",
+                courseCode: "MAT101"
+            },
+            {
+                title: "Inequalities",
+                author: "Dr. Olaniyan Adegoke",
+                license: "LASU Academic Material",
+                link: "static/materials/lasu/mathematics/Inequalities.pdf",
+                type: "pdf",
+                course: "Mathematics",
+                level: "100",
+                semester: "First Semester",
+                courseCode: "MAT101"
+            },
+            {
+                title: "Theory of Quadratic Equation",
+                author: "Dr. Olaniyan Adegoke",
+                license: "LASU Academic Material",
+                link: "static/materials/lasu/mathematics/Theory-of-Quadratic-Equation.pdf",
+                type: "pdf",
+                course: "Mathematics",
+                level: "100",
+                semester: "First Semester",
+                courseCode: "MAT101"
+            },
+            {
+                title: "Sequence and Series",
+                author: "Department of Mathematics, Lagos State University",
+                license: "LASU Academic Material",
+                link: "static/materials/lasu/mathematics/Sequence-and-Series.pdf",
+                type: "pdf",
+                course: "Mathematics",
+                level: "100",
+                semester: "First Semester",
+                courseCode: "MAT101"
+            },
+            {
+                title: "Binomial Expansion",
+                author: "Dr. Olaniyan Adegoke",
+                license: "LASU Academic Material",
+                link: "static/materials/lasu/mathematics/Binomial-Expansion.pdf",
+                type: "pdf",
+                course: "Mathematics",
+                level: "100",
+                semester: "First Semester",
+                courseCode: "MAT101"
+            },
+            {
+                title: "MAT 161 – Descriptive Statistics (Lecture 1: The Meaning of Statistics)",
+                author: "Dr. Akinwale Lewis Olutimo",
+                license: "LASU Academic Material",
+                link: "static/materials/lasu/mat161/MAT-161-Descriptive-Statistics-Lecture-1.pdf",
+                type: "pdf",
+                course: "Mathematics",
+                level: "100",
+                semester: "First Semester",
+                courseCode: "MAT101"
+            },
+            {
+                title: "Financial Accounting",
+                author: "OpenStax",
+                license: "CC BY 4.0",
+                link: "static/materials/accounting/Financial-Accounting.pdf",
+                type: "pdf",
+                course: "Accounting",
+                level: "100",
+                semester: "First Semester",
+                courseCode: "ACC101"
+            },
+            {
+                title: "A Business Perspective (Managerial Accounting)",
+                author: "Open Educational Resource",
+                license: "CC BY 4.0",
+                link: "static/materials/account/A-Business-Perspective-(Managerial-Accounting).pdf",
+                type: "pdf",
+                course: "Accounting",
+                level: "100",
+                semester: "First Semester",
+                courseCode: "ACC101"
+            },
+            {
+                title: "Principles Of Accounting Vol 1",
+                author: "Open Educational Resource",
+                license: "CC BY 4.0",
+                link: "static/materials/account/Principles-Of-Accounting-Vol-1.pdf",
+                type: "pdf",
+                course: "Accounting",
+                level: "100",
+                semester: "First Semester",
+                courseCode: "ACC101"
+            },
+            {
+                title: "Principles of Accounting Vol 2",
+                author: "Open Educational Resource",
+                license: "CC BY 4.0",
+                link: "static/materials/account/Principles-Of-Accounting-Vol-2.pdf",
+                type: "pdf",
+                course: "Accounting",
+                level: "100",
+                semester: "Second Semester",
+                courseCode: "ACC102"
+            },
+            {
+  title: "CHM 101 – Gases",
+  author: "Unknown",
+  license: "Educational Use",
+  link: "static/materials/CHM-101-Gases.pdf",
   type: "pdf",
-  course: "Database Management Systems II"
+  course: "Chemistry",
+  level: "100",
+  courseCode: "CHM101"
 },
 {
-  title: "Binomial Expansion",
-  author: "Dr. Olaniyan Adegoke",
-  license: "LASU Academic Material",
-  link: "static/materials/lasu/mathematics/Binomial-Expansion.pdf",
+  title: "CHM 102 – Thermochemistry: Nature and Types of Energy",
+  author: "Unknown",
+  license: "Educational Use",
+  link: "static/materials/CHM-102-Thermochemistry-Nature-and-Types-of-Energy.pdf",
   type: "pdf",
-  course: "Mathematics"
+  course: "Chemistry",
+  level: "100",
+  courseCode: "CHM102"
 },
+
 {
-  title: "Trigonometry",
-  author: "Dr. Olaniyan",
-  license: "LASU Academic Material",
-  link: "static/materials/lasu/mathematics/Trigonometry.pdf",
+  title: "CHM 101 – Rates of Reactions",
+  author: "Unknown",
+  license: "Educational Use",
+  link: "static/materials/CHM-101-Rates-of-Reactions.pdf",
   type: "pdf",
-  course: "Mathematics"
+  course: "Chemistry",
+  level: "100",
+  courseCode: "CHM101"
 },
+
 {
-  title: "Indices, Surds and Logarithms",
-  author: "Department of Mathematics",
-  license: "LASU Academic Material",
-  link: "static/materials/lasu/mathematics/Indices-Surds-and-Logarithms.pdf",
+  title: "CHM 101 – Quantum Numbers, Atomic Orbitals and Electron Configurations",
+  author: "Unknown",
+  license: "Educational Use",
+  link: "static/materials/CHM-101-Quantum-Numbers-Atomic-Orbitals-and-Electron-Configurations.pdf",
   type: "pdf",
-  course: "Mathematics"
+  course: "Chemistry",
+  level: "100",
+  courseCode: "CHM101"
 },
+
 {
-  title: "Inequalities",
-  author: "Dr. Olaniyan Adegoke",
-  license: "LASU Academic Material",
-  link: "static/materials/lasu/mathematics/Inequalities.pdf",
+  title: "CHM 101 – Radioactivity",
+  author: "Unknown",
+  license: "Educational Use",
+  link: "static/materials/CHM-101-Radioactivity.pdf",
   type: "pdf",
-  course: "Mathematics"
-},
-{
-  title: "MAT 101 – Elementary Mathematics I (Lecture 3: Indices and Logarithms)",
-  author: "Dr. Akinwale Lewis Olutimo",
-  license: "LASU Academic Material",
-  link: "static/materials/lasu/mathematics/MAT-101-Lecture-3-Indices-and-Logarithms.pdf",
-  type: "pdf",
-  course: "Elementary Mathematics I"
-},
-{
-  title: "MAT 101 – Elementary Mathematics I (Lecture 2: Theory of Quadratic Equations)",
-  author: "Dr. Akinwale Lewis Olutimo",
-  license: "LASU Academic Material",
-  link: "static/materials/lasu/mathematics/MAT-101-Lecture-2-Theory-of-Quadratic-Equations.pdf",
-  type: "pdf",
-  course: "Elementary Mathematics I"
-},
-{
-  title: "Theory of Quadratic Equation",
-  author: "Dr. Olaniyan Adegoke",
-  license: "LASU Academic Material",
-  link: "static/materials/lasu/mathematics/Theory-of-Quadratic-Equation.pdf",
-  type: "pdf",
-  course: "Mathematics"
-},
-{
-  title: "Sequence and Series",
-  author: "Department of Mathematics, Lagos State University",
-  license: "LASU Academic Material",
-  link: "static/materials/lasu/mathematics/Sequence-and-Series.pdf",
-  type: "pdf",
-  course: "Mathematics"
-},
-{
-  title: "MAT 101 – Elementary Mathematics I (Lecture 1: Elementary Set Theory)",
-  author: "Dr. Akinwale Lewis Olutimo",
-  license: "LASU Academic Material",
-  link: "static/materials/lasu/mathematics/1768303502_online_aspect_mat101_lesson_1.pdf",
-  type: "pdf",
-  course: "Elementary Mathematics I"
+  course: "Chemistry",
+  level: "100",
+  courseCode: "CHM101"
 },
 
-      {
-        title: "Principles Of Accounting Vol 1",
-        author: "Open Educational Resource",
-        license: "CC BY 4.0",
-        link: "static/materials/account/Principles-Of-Accounting-Vol-1.pdf",
-        type: "pdf",
-        course: "Accounting"
-      },
-      {
-        title: "Principles of Accounting Vol 2",
-        author: "Open Educational Resource",
-        license: "CC BY 4.0",
-        link: "static/materials/account/Principles-Of-Accounting-Vol-2.pdf",
-        type: "pdf",
-        course: "Accounting"
-      },
-      {
-        title: "Principles of Financial Accounting",
-        author: "Open Educational Resource",
-        license: "CC BY 4.0",
-        link: "static/materials/account/Principles-of-Financial-Accounting.pdf",
-        type: "pdf",
-        course: "Accounting"
-      },
-      {
-        title: "Training Manual for ORGANIC AGRICULTURE",
-        author: "FAO",
-        license: "FAO PDF for small‑holder farmers",
-        link: "static/materials/agriculture/Compilation_techniques_organic_agriculture_rev.pdf",
-        type: "pdf",
-        course: "Agriculture"
-      },
-      {
-        title: "Introduction to Soil Science",
-        author: "Amber Anderson",
-        license: "CC BY 4.0",
-        link: "static/materials/agriculture/Introduction-to-Soil-Science-1722446382.pdf",
-        type: "pdf",
-        course: "Agriculture"
-      },
-      {
-        title: "Genetics, Agriculture, and Biotechnology",
-        author: "Walter Suza and Donald Lee",
-        license: "CC BY-NC-SA 4.0",
-        link: "static/materials/agriculture/Genetics-Agriculture-and-Biotechnology-1646343300.pdf",
-        type: "pdf",
-        course: "Agriculture"
-      },
-      {
-        title: "Plant Breeding Methods",
-        author: "Walter R. Fehr and Walter P. Suza",
-        license: "CC BY-NC 4.0",
-        link: "static/materials/agriculture/Plant-Breeding-Methods-1724939423.pdf",
-        type: "pdf",
-        course: "Agriculture"
-      },
-      {
-        title: "Crop Genetics",
-        author: "William Beavis, Arden Campbell, Jode Edwards, Shui-Zhang Fei, Thomas Lübberstedt, Laura Merrick, Deborah Muenchrath, Walter Suza",
-        license: "CC BY-NC-SA 4.0",
-        link: "static/materials/agriculture/Crop-Genetics-1696858550.pdf",
-        type: "pdf",
-        course: "Agriculture"
-      },
-      {
-        title: "Quantitative Methods for Plant Breeding",
-        author: "Ken Moore, M. L. Harbur, Ron Mowers, Laura Merrick, Dennis Todey, Kendra Meade, William Beavis, Reka Howard, Ursula Frei, Anthony Assibi Mahama, Walter Suza",
-        license: "CC BY-NC-SA 4.0",
-        link: "static/materials/agriculture/Quantitative-Methods-for-Plant-Breeding-1696860463.pdf",
-        type: "pdf",
-        course: "Agriculture"
-      },
-      {
-        title: "Molecular Plant Breeding",
-        author: "Walter Suza, Kendall Lamkey, Thomas Lübberstedt, William Beavis, Madan Bhattacharyya, Laura Merrick, Ursula Frei",
-        license: "CC BY-NC-SA 4.0",
-        link: "static/materials/agriculture/Molecular-Plant-Breeding-1696858563.pdf",
-        type: "pdf",
-        course: "Agriculture"
-      },
-      {
-        title: "Quantitative Genetics for Plant Breeding",
-        author: "William Beavis, Katherine Espinosa, Mark Newell, Anthony Assibi Mahama, Walter Suza",
-        license: "CC BY-NC-SA 4.0",
-        link: "static/materials/agriculture/Quantitative-Genetics-for-Plant-Breeding-1697468159.pdf",
-        type: "pdf",
-        course: "Agriculture"
-      },
-      {
-        title: "Botany (Ha, Morrow, and Algiers)",
-        author: "Melissa Ha, Maria Morrow, Kammy Algiers",
-        license: "CC BY-NC 4.0",
-        link: "static/materials/biology/Botany-LibreCommons.pdf",
-        type: "pdf",
-        course: "Botany"
-      },
-      {
-        title: "Botany Lab Manual (Morrow)",
-        author: "Maria Morrow",
-        license: "CC BY-NC 4.0",
-        link: "static/materials/biology/Botany-Lab-Manual-Morrow.pdf",
-        type: "pdf",
-        course: "Botany"
-      },
-      {
-        title: "A Photographic Atlas for Botany (Morrow)",
-        author: "Maria Morrow",
-        license: "CC BY-NC 4.0",
-        link: "static/materials/biology/A-Photographic-Atlas-for-Botany-Morrow.pdf",
-        type: "pdf",
-        course: "Botany"
-      },
-      {
-        title: "History and Science of Cultivated Plants (Naithani)",
-        author: "Sushma Naithani",
-        license: "CC BY-NC 4.0",
-        link: "static/materials/botany/History-and-Science-of-Cultivated-Plants-Naithani.pdf",
-        type: "pdf",
-        course: "Botany"
-      },
-      {
-        title: "Inanimate Life (Briggs)",
-        author: "George M. Briggs",
-        license: "CC BY-SA 4.0",
-        link: "static/materials/botany/Inanimate-Life-1669056520.pdf",
-        type: "pdf",
-        course: "Botany"
-      },
-      {
-        title: "First-Year Arabic",
-        author: "Ragy Mikhaeel",
-        license: "CC BY-NC-SA 4.0",
-        link: "static/materials/arabic/First-Year-Arabic-1753121858.pdf",
-        type: "pdf",
-        course: "Arabic Studies"
-      },
-      {
-        title: "Elementary Arabic I",
-        author: "Sadam Issa and Ayman Mohamed",
-        license: "CC BY-NC 4.0",
-        link: "static/materials/arabic/Elementary-Arabic-I-Sadam-Issa-Ayman-Mohamed.pdf",
-        type: "pdf",
-        course: "Arabic Studies"
-      },
-      {
-        title: "Money and Banking",
-        author: "Robert E. Wright",
-        license: "CC BY-NC-SA",
-        link: "static/materials/bankingandfinance/Money and Banking.pdf",
-        type: "pdf",
-        course: "Banking and Finance"
-      },
-      {
-        title: "Finance, Banking, and Money",
-        author: "LibreTexts",
-        license: "CC BY",
-        link: "static/materials/bankingandfinance/Full (4).pdf",
-        type: "pdf",
-        course: "Banking and Finance"
-      },
-      {
-        title: "Principles of Finance",
-        author: "OpenStax",
-        license: "CC BY 4.0",
-        link: "static/materials/bankingandfinance/PrinciplesofFinance-WEB.pdf",
-        type: "pdf",
-        course: "Banking and Finance"
-      },
-      {
-        title: "Introduction to Business Administration",
-        author: "Amit Shah; Bethann Talsma; Carl McDaniel; Lawrence J. Gitman; Linda Koffel; Monique Reece",
-        license: "CC BY 4.0",
-        link: "static/materials/businessadministation/Introduction-to-Business-Administration-1735836334.pdf",
-        type: "pdf",
-        course: "Business Administration"
-      },
-      {
-        title: "Business Fundamentals – 1st Edition",
-        author: "Kerri Shields",
-        license: "CC BY-NC-SA 4.0",
-        link: "static/materials/businessadministation/Business-Fundamentals-1st-Edition-1760797243.pdf",
-        type: "pdf",
-        course: "Business Administration"
-      },
-      {
-        title: "Chemistry 2e",
-        author: "OpenStax",
-        license: "CC BY 4.0",
-        link: "static/materials/chemicalpolynomerengineer/Chemistry-LR.pdf",
-        type: "pdf",
-        course: "Chemical and Polymer Engineering"
-      },
-      {
-        title: "Introduction to Polymer Science and Technology",
-        author: "Mustafa Akay",
-        license: "CC BY",
-        link: "static/materials/chemicalpolynomerengineer/Introduction to Polymer Science and Technology.pdf",
-        type: "pdf",
-        course: "Chemical and Polymer Engineering"
-      },
-      {
-        title: "Chemistry 2e",
-        author: "Paul Flowers; Klaus Theopold; Richard Langley; William R. Robinson",
-        license: "CC BY 4.0",
-        link: "static/materials/chemistry/chemistry-2e.pdf",
-        type: "pdf",
-        course: "Chemistry"
-      },
-      {
-        title: "Chemistry: Atoms First 2e",
-        author: "OpenStax & University of Connecticut",
-        license: "CC BY 4.0",
-        link: "static/materials/chemistry/ChemistryAtomsFirst2e-WEB.pdf",
-        type: "pdf",
-        course: "Chemistry"
-      },
-      {
-        title: "World Religions: The Spirit Searching",
-        author: "Jody Ondich",
-        license: "CC BY-NC-SA 4.0",
-        link: "static/materials/christianreligiousstudy/World-Religions-the-Spirit-Searching-1681823908.pdf",
-        type: "pdf",
-        course: "Christian Religious Studies"
-      },
-      {
-        title: "Workplace Software and Skills",
-        author: "Tammie Bolling; Angela Mitchell; Tanya Scott; Nyrobi Wheeler",
-        license: "CC BY",
-        link: "static/materials/computerscience/Workplace_Software_and_Skills_-_WEB_IlfJtcP.pdf",
-        type: "pdf",
-        course: "Computer Science"
-      },
-      {
-        title: "Introduction to Computer Science",
-        author: "Dr. Jean‑Claude Franchitti",
-        license: "CC BY 4.0",
-        link: "static/materials/computerscience/Introduction_To_Computer_Science_-_WEB.pdf",
-        type: "pdf",
-        course: "Computer Science"
-      },
-      {
-        title: "Foundations of Information Systems",
-        author: "Dr. Mahesh S. Raisinghani",
-        license: "CC BY-NC-SA 4.0",
-        link: "static/materials/computerscience/Foundations_of_Information_Systems_-_WEB_oNlbGYl.pdf",
-        type: "pdf",
-        course: "Computer Science"
-      },
-      {
-        title: "Principles of Data Science",
-        author: "Dr. Shaun V. Ault; Dr. Soohyun Nam Liao; Larry Musolino",
-        license: "CC BY-NC-SA 4.0",
-        link: "static/materials/computerscience/Principles-of-Data-Science-WEB.pdf",
-        type: "pdf",
-        course: "Computer Science"
-      },
-      {
-        title: "Introduction to Python Programming",
-        author: "Udayan Das; Aubrey Lawson; Chris Mayfield; Narges Norouzi",
-        license: "CC BY 4.0",
-        link: "static/materials/computerscience/Introduction_to_Python_Programming_-_WEB.pdf",
-        type: "pdf",
-        course: "Computer Science"
-      },
-      {
-        title: "Oral and Maxillofacial Surgery for the Clinician",
-        author: "Krishnamurthy Bonanthaya; Elavenil Panneerselvam; Suvy Manuel; Vinay V. Kumar; Anshul Rai",
-        license: "CC BY 4.0",
-        link: "static/materials/dentistryanddentalsurgery/978-981-15-1346-6.pdf",
-        type: "pdf",
-        course: "Dentistry and Dental Surgery"
-      },
-      {
-        title: "Exploring the Arts: A Brief Introduction to Art, Theatre, Music, and Dance",
-        author: "Doris Hall; Kimberly Berkeley; Nubia Nurain Khan",
-        license: "CC BY 4.0",
-        link: "static/materials/dramaperformingarts/Exploring-the-Arts-1735836622.pdf",
-        type: "pdf",
-        course: "Drama / Dramatic / Performing Arts"
-      },
-      {
-        title: "Storytelling on Screen: An Online Playback Theatre Archive and Guidebook",
-        author: "Jordan Rosin; Heidi Winters Vogel; Sammy Lebron",
-        license: "CC BY-NC-SA 4.0",
-        link: "static/materials/dramaperformingarts/Storytelling_on_Screen_An_Online_Playback_Theatre_Archive_and_Guidebook.pdf",
-        type: "pdf",
-        course: "Drama / Dramatic / Performing Arts"
-      },
-      {
-        title: "Safety, Health, and Nutrition in Early Childhood Education",
-        author: "Jennifer Paris",
-        license: "CC BY 4.0",
-        link: "static/materials/earlychildhoodeducation/Health, Safety, and Nutrition OER Textbook.pdf",
-        type: "pdf",
-        course: "Early Childhood Education"
-      },
-      {
-        title: "Algebra and Trigonometry 2e",
-        author: "Jay Abramson (et al.)",
-        license: "CC BY 4.0",
-        link: "static/materials/math/Algebra-and-Trigonometry-2e-WEB.pdf",
-        type: "pdf",
-        course: "Mathematics"
-      },
-      {
-        title: "Calculus Volume 1",
-        author: "Gilbert Strang; Edwin 'Jed' Herman",
-        license: "CC BY-NC-SA 4.0",
-        link: "static/materials/math/Calculus_Volume_1_-_WEB_68M1Z5W.pdf",
-        type: "pdf",
-        course: "Mathematics"
-      },
-      {
-        title: "Calculus Volume 2",
-        author: "Gilbert Strang; Edwin 'Jed' Herman",
-        license: "CC BY-NC-SA 4.0",
-        link: "static/materials/math/Calculus_Volume_2_-_WEB.pdf",
-        type: "pdf",
-        course: "Mathematics"
-      },
-      {
-        title: "Calculus Volume 3",
-        author: "Gilbert Strang; Edwin 'Jed' Herman",
-        license: "CC BY-NC-SA 4.0",
-        link: "static/materials/math/Calculus_Volume_3_-_WEB.pdf",
-        type: "pdf",
-        course: "Mathematics"
-      },
-      {
-        title: "College Algebra 2e",
-        author: "Jay Abramson; Valeree Falduto; Rachael Gross; David Lippman; Melonie Rasmussen; Rick Norwood; Nicholas Belloit; Jean-Marie Magnier; Harold Whipple",
-        license: "CC BY 4.0",
-        link: "static/materials/math/College-Algebra-2e-WEB.pdf",
-        type: "pdf",
-        course: "Mathematics"
-      },
-      {
-        title: "MAT 161 – Descriptive Statistics (Lecture 1: The Meaning of Statistics)",
-        author: "Dr. Akinwale Lewis Olutimo",
-        license: "LASU Academic Material",
-        link: "static/materials/lasu/mat161/MAT-161-Descriptive-Statistics-Lecture-1.pdf",
-        type: "pdf",
-        course: "Mathematics"
-      }
-    ];
+            {
+                title: "Principles of Financial Accounting",
+                author: "Open Educational Resource",
+                license: "CC BY 4.0",
+                link: "static/materials/account/Principles-of-Financial-Accounting.pdf",
+                type: "pdf",
+                course: "Accounting",
+                level: "100",
+                semester: "First Semester",
+                courseCode: "ACC101"
+            },
+            {
+                title: "Training Manual for ORGANIC AGRICULTURE",
+                author: "FAO",
+                license: "FAO PDF for small‑holder farmers",
+                link: "static/materials/agriculture/Compilation_techniques_organic_agriculture_rev.pdf",
+                type: "pdf",
+                course: "Agriculture",
+                level: "100",
+                semester: "First Semester",
+                courseCode: "AGR101"
+            },
+            {
+                title: "Introduction to Soil Science",
+                author: "Amber Anderson",
+                license: "CC BY 4.0",
+                link: "static/materials/agriculture/Introduction-to-Soil-Science-1722446382.pdf",
+                type: "pdf",
+                course: "Agriculture",
+                level: "100",
+                semester: "First Semester",
+                courseCode: "AGR101"
+            },
+            {
+                title: "Genetics, Agriculture, and Biotechnology",
+                author: "Walter Suza and Donald Lee",
+                license: "CC BY-NC-SA 4.0",
+                link: "static/materials/agriculture/Genetics-Agriculture-and-Biotechnology-1646343300.pdf",
+                type: "pdf",
+                course: "Agriculture",
+                level: "100",
+                semester: "First Semester",
+                courseCode: "AGR101"
+            },
+            {
+                title: "Plant Breeding Methods",
+                author: "Walter R. Fehr and Walter P. Suza",
+                license: "CC BY-NC 4.0",
+                link: "static/materials/agriculture/Plant-Breeding-Methods-1724939423.pdf",
+                type: "pdf",
+                course: "Agriculture",
+                level: "100",
+                semester: "First Semester",
+                courseCode: "AGR101"
+            },
+            {
+                title: "Crop Genetics",
+                author: "William Beavis, Arden Campbell, Jode Edwards, Shui-Zhang Fei, Thomas Lübberstedt, Laura Merrick, Deborah Muenchrath, Walter Suza",
+                license: "CC BY-NC-SA 4.0",
+                link: "static/materials/agriculture/Crop-Genetics-1696858550.pdf",
+                type: "pdf",
+                course: "Agriculture",
+                level: "100",
+                semester: "First Semester",
+                courseCode: "AGR101"
+            },
+            {
+                title: "Quantitative Methods for Plant Breeding",
+                author: "Ken Moore, M. L. Harbur, Ron Mowers, Laura Merrick, Dennis Todey, Kendra Meade, William Beavis, Reka Howard, Ursula Frei, Anthony Assibi Mahama, Walter Suza",
+                license: "CC BY-NC-SA 4.0",
+                link: "static/materials/agriculture/Quantitative-Methods-for-Plant-Breeding-1696860463.pdf",
+                type: "pdf",
+                course: "Agriculture",
+                level: "100",
+                semester: "First Semester",
+                courseCode: "AGR101"
+            },
+            {
+                title: "Molecular Plant Breeding",
+                author: "Walter Suza, Kendall Lamkey, Thomas Lübberstedt, William Beavis, Madan Bhattacharyya, Laura Merrick, Ursula Frei",
+                license: "CC BY-NC-SA 4.0",
+                link: "static/materials/agriculture/Molecular-Plant-Breeding-1696858563.pdf",
+                type: "pdf",
+                course: "Agriculture",
+                level: "100",
+                semester: "First Semester",
+                courseCode: "AGR101"
+            },
+            {
+                title: "Quantitative Genetics for Plant Breeding",
+                author: "William Beavis, Katherine Espinosa, Mark Newell, Anthony Assibi Mahama, Walter Suza",
+                license: "CC BY-NC-SA 4.0",
+                link: "static/materials/agriculture/Quantitative-Genetics-for-Plant-Breeding-1697468159.pdf",
+                type: "pdf",
+                course: "Agriculture",
+                level: "100",
+                semester: "First Semester",
+                courseCode: "AGR101"
+            },
+            {
+                title: "Introduction to Business Administration",
+                author: "Amit Shah; Bethann Talsma; Carl McDaniel; Lawrence J. Gitman; Linda Koffel; Monique Reece",
+                license: "CC BY 4.0",
+                link: "static/materials/businessadministation/Introduction-to-Business-Administration-1735836334.pdf",
+                type: "pdf",
+                course: "Business Administration",
+                level: "100",
+                semester: "First Semester",
+                courseCode: "BUS101"
+            },
+            {
+                title: "Business Fundamentals – 1st Edition",
+                author: "Kerri Shields",
+                license: "CC BY-NC-SA 4.0",
+                link: "static/materials/businessadministation/Business-Fundamentals-1st-Edition-1760797243.pdf",
+                type: "pdf",
+                course: "Business Administration",
+                level: "100",
+                semester: "First Semester",
+                courseCode: "BUS101"
+            },
+            {
+                title: "100 Level Second Semester Course Outline",
+                author: "Bunday",
+                license: "Educational Use",
+                link: "static/materials/100-Level-Second-Semester-Course-Outline.pdf",
+                type: "pdf",
+                course: "General",
+                level: "100",
+                semester: "Second Semester",
+                courseCode: "GEN102"
+            },
+            {
+                title: "Probability & Statistics for Engineers & Scientists (9th Edition)",
+                author: "Ronald E. Walpole, Raymond H. Myers, Sharon L. Myers, Keying Ye",
+                license: "Copyrighted",
+                link: "static/materials/Probability-and-Statistics-for-Engineers-and-Scientists-9th-Edition.pdf",
+                type: "pdf",
+                course: "Mathematics",
+                level: "100",
+                semester: "First Semester",
+                courseCode: "MAT101"
+            },
+            {
+                title: "Macmillan Mathematical Guides – Introduction to Algebra",
+                author: "Carol Whitehead",
+                license: "Copyrighted",
+                link: "static/materials/Macmillan-Mathematical-Guides-Introduction-to-Algebra.pdf",
+                type: "pdf",
+                course: "Mathematics",
+                level: "100",
+                semester: "First Semester",
+                courseCode: "MAT101"
+            },
+            {
+                title: "Magnetic Field – Unconfirmed Source",
+                author: "Unknown",
+                license: "Unverified",
+                link: "static/materials/Magnetic-Field.pdf",
+                type: "pdf",
+                course: "Physics",
+                level: "100",
+                semester: "First Semester",
+                courseCode: "PHY101"
+            },
+            {
+                title: "DBMS II – Transaction Processing (Unit 6: Transaction Management)",
+                author: "Prof. Firoz Sherasiya",
+                license: "LASU Academic Material",
+                link: "static/materials/lasu/dbms2/DBMS-II-Unit-6-Transaction-Management.pdf",
+                type: "pdf",
+                course: "Computer Science",
+                level: "200",
+                semester: "First Semester",
+                courseCode: "CSC201"
+            }
+        ];
 
-    // ===== VIDEO DATA WITH EMBEDDED LINKS =====
-    const videoMaterials = {
-      "Mathematics": [
-        {
-          title: "Introduction to Statistics - Full Course",
-          author: "freeCodeCamp.org",
-          description: "Learn the basics of statistics, including descriptive statistics, probability, and inferential statistics",
-          embedUrl: "https://www.youtube.com/embed/xxpc-HPKN28",
-          originalUrl: "https://www.youtube.com/watch?v=xxpc-HPKN28",
-          duration: "8:15:28",
-          channel: "freeCodeCamp.org"
-        },
-        {
-          title: "Descriptive Statistics - Mean, Median, Mode",
-          author: "The Organic Chemistry Tutor",
-          description: "Complete guide to descriptive statistics for beginners",
-          embedUrl: "https://www.youtube.com/embed/4wrsbCRD9SA",
-          originalUrl: "https://www.youtube.com/watch?v=4wrsbCRD9SA",
-          duration: "12:36",
-          channel: "The Organic Chemistry Tutor"
-        },
-        {
-          title: "Calculus 1 - Full College Course",
-          author: "freeCodeCamp.org",
-          description: "Complete calculus course covering limits, derivatives, and integrals",
-          embedUrl: "https://www.youtube.com/embed/fcOWn1Yh9lI",
-          originalUrl: "https://www.youtube.com/watch?v=fcOWn1Yh9lI",
-          duration: "11:05:44",
-          channel: "freeCodeCamp.org"
-        }
-      ],
-      "Computer Science": [
-        {
-          title: "Introduction to Programming",
-          author: "CS50",
-          description: "Harvard's CS50 introduction to computer science and programming",
-          embedUrl: "https://www.youtube.com/embed/yo9OBcVOFw0",
-          originalUrl: "https://www.youtube.com/watch?v=yo9OBcVOFw0",
-          duration: "2:25:45",
-          channel: "CS50"
-        },
-        {
-          title: "Python for Beginners",
-          author: "Programming with Mosh",
-          description: "Full Python programming course for absolute beginners",
-          embedUrl: "https://www.youtube.com/embed/kqtD5dpn9C8",
-          originalUrl: "https://www.youtube.com/watch?v=kqtD5dpn9C8",
-          duration: "6:14:07",
-          channel: "Programming with Mosh"
-        }
-      ],
-      "Business Administration": [
-        {
-          title: "Business Fundamentals",
-          author: "GaryVee",
-          description: "Essential business concepts for entrepreneurs",
-          embedUrl: "https://www.youtube.com/embed/lL4tVhTfqM0",
-          originalUrl: "https://www.youtube.com/watch?v=lL4tVhTfqM0",
-          duration: "15:22",
-          channel: "GaryVee"
-        }
-      ],
-      "default": [
-        {
-          title: "How to Study Effectively",
-          author: "Ali Abdaal",
-          description: "Evidence-based study techniques for better learning",
-          embedUrl: "https://www.youtube.com/embed/ukLnPbIffxE",
-          originalUrl: "https://www.youtube.com/watch?v=ukLnPbIffxE",
-          duration: "12:47",
-          channel: "Ali Abdaal"
-        }
-      ]
-    };
-
-    // ===== UTILITY FUNCTIONS =====
-    function isYouTubeUrl(url) {
-      return url.includes("youtube.com") || url.includes("youtu.be");
-    }
-
-    function getYouTubeEmbedUrl(url) {
-      const match = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([\w-]+)/);
-      const videoId = match ? match[1] : null;
-      return videoId ? `https://www.youtube.com/embed/${videoId}` : null;
-    }
-
-    function formatDuration(seconds) {
-      if (!seconds) return "";
-      const hours = Math.floor(seconds / 3600);
-      const minutes = Math.floor((seconds % 3600) / 60);
-      const secs = seconds % 60;
-      
-      if (hours > 0) {
-        return `${hours}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-      }
-      return `${minutes}:${secs.toString().padStart(2, '0')}`;
-    }
-
-    // ===== STATE MANAGEMENT =====
-    const materialsState = {
-      course: '',
-      level: '',
-      topic: '',
-      searchInProgress: false,
-      searchResults: {
-        courseMaterials: [],
-        furtherReading: [],
-        videos: []
-      }
-    };
-
-    // ===== INITIALIZATION =====
-    document.addEventListener('DOMContentLoaded', () => {
-      setupEventListeners();
-      updateSearchButton();
-      
-      // Auto-focus course select
-      setTimeout(() => {
-        document.getElementById('courseSelect').focus();
-      }, 800);
-    });
-
-    function setupEventListeners() {
-      const courseSelect = document.getElementById('courseSelect');
-      const levelSelect = document.getElementById('levelSelect');
-      const topicInput = document.getElementById('topicInput');
-      
-      courseSelect.addEventListener('change', () => {
-        materialsState.course = courseSelect.value;
-        updateSearchButton();
-      });
-      
-      levelSelect.addEventListener('change', () => {
-        materialsState.level = levelSelect.value;
-        updateSearchButton();
-      });
-      
-      topicInput.addEventListener('input', () => {
-        materialsState.topic = topicInput.value.trim();
-        updateSearchButton();
-      });
-      
-      topicInput.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') {
-          searchMaterials();
-        }
-      });
-      
-      // Handle Android WebView specific behavior
-      if (/Android/.test(navigator.userAgent)) {
-        document.body.style.webkitOverflowScrolling = 'touch';
-      }
-    }
-
-    function updateSearchButton() {
-      const searchBtn = document.getElementById('searchBtn');
-      searchBtn.disabled = !(materialsState.course && materialsState.level && materialsState.topic);
-    }
-
-    // ===== SEARCH FUNCTIONS =====
-    async function searchMaterials() {
-      if (!materialsState.course || !materialsState.level || !materialsState.topic) {
-        showNotification('Please select course, level, and enter a topic.', 'warning');
-        return;
-      }
-      
-      // Update state
-      materialsState.searchInProgress = true;
-      
-      // Update UI
-      const searchBtn = document.getElementById('searchBtn');
-      searchBtn.classList.add('loading');
-      searchBtn.disabled = true;
-      
-      // Clear previous results
-      clearResults();
-      
-      // Show results section
-      document.getElementById('resultsSection').classList.add('active');
-      document.getElementById('noResults').classList.add('hidden');
-      
-      // Search local PDFs (Course Materials)
-      searchCourseMaterials();
-      
-      // Search further reading
-      searchFurtherReading();
-      
-      // Search video materials
-      searchVideoMaterials();
-      
-      // Reset button
-      searchBtn.classList.remove('loading');
-      searchBtn.disabled = false;
-      materialsState.searchInProgress = false;
-      
-      // Show total results
-      updateResultsCount();
-    }
-
-    function searchCourseMaterials() {
-      const topic = materialsState.topic.toLowerCase();
-      const course = materialsState.course;
-      
-      // Filter PDFs by topic and course
-      const filteredCourseMaterials = uploadedMaterials.filter(pdf => {
-        const matchesTopic = pdf.title.toLowerCase().includes(topic) || 
-                            (pdf.author && pdf.author.toLowerCase().includes(topic)) ||
-                            pdf.course.toLowerCase().includes(topic);
-        const matchesCourse = pdf.course === course;
-        return matchesTopic && matchesCourse;
-      });
-      
-      // Sort LASU materials first
-      filteredCourseMaterials.sort((a, b) => {
-        const aIsLasu = a.license.includes("LASU");
-        const bIsLasu = b.license.includes("LASU");
-        if (aIsLasu && !bIsLasu) return -1;
-        if (!aIsLasu && bIsLasu) return 1;
-        return 0;
-      });
-      
-      materialsState.searchResults.courseMaterials = filteredCourseMaterials;
-      displayCourseMaterials(filteredCourseMaterials);
-    }
-
-    function searchFurtherReading() {
-      // For demo purposes, we'll use simulated results
-      const topic = materialsState.topic;
-      const course = materialsState.course;
-      
-      const simulatedBooks = [
-        {
-          title: "Elementary Statistics: A Step by Step Approach",
-          author: "Allan G. Bluman",
-          license: "Publisher",
-          link: "https://openlibrary.org/search?q=Elementary+Statistics+Allan+Bluman",
-          type: "online",
-          details: "Comprehensive statistics textbook"
-        },
-        {
-          title: "Business Statistics: For Contemporary Decision Making",
-          author: "Ken Black",
-          license: "Commercial / Publisher",
-          link: "https://openlibrary.org/search?q=Business+Statistics+Ken+Black",
-          type: "online",
-          details: "832 pages, focuses on business analytics"
-        },
-        {
-          title: "Engineering Mechanics: Statics",
-          author: "R. C. Hibbeler",
-          license: "Publisher",
-          link: "https://openlibrary.org/search?q=Engineering+Mechanics+Statics+Hibbeler",
-          type: "online",
-          details: "Standard engineering textbook"
-        },
-        {
-          title: "Economics: An Introductory Analysis",
-          author: "Paul Anthony Samuelson, William D. Nordhaus",
-          license: "Publisher",
-          link: "https://openlibrary.org/search?q=Economics+Samuelson+Nordhaus",
-          type: "online",
-          details: "Classic economics textbook"
-        }
-      ];
-      
-      // Filter based on topic
-      const filteredBooks = simulatedBooks.filter(book => 
-        book.title.toLowerCase().includes(topic.toLowerCase()) || 
-        book.details.toLowerCase().includes(topic.toLowerCase())
-      );
-      
-      materialsState.searchResults.furtherReading = filteredBooks;
-      displayFurtherReading(filteredBooks);
-    }
-
-    function searchVideoMaterials() {
-      const course = materialsState.course;
-      const topic = materialsState.topic.toLowerCase();
-      
-      // Get videos for the selected course
-      let videos = videoMaterials[course] || videoMaterials.default;
-      
-      // Filter videos by topic if search topic exists
-      if (topic) {
-        videos = videos.filter(video => 
-          video.title.toLowerCase().includes(topic) ||
-          video.description.toLowerCase().includes(topic) ||
-          video.author.toLowerCase().includes(topic)
-        );
-      }
-      
-      materialsState.searchResults.videos = videos;
-      displayVideoMaterials(videos);
-    }
-
-    // ===== DISPLAY FUNCTIONS =====
-    function displayCourseMaterials(materials) {
-      const container = document.getElementById('courseMaterials');
-      container.innerHTML = '';
-      
-      if (materials.length === 0) {
-        document.getElementById('courseMaterialSection').style.display = 'none';
-        return;
-      }
-      
-      document.getElementById('courseMaterialSection').style.display = 'block';
-      
-      materials.forEach((material, index) => {
-        const card = createMaterialCard(material, index, 'course');
-        container.appendChild(card);
-      });
-    }
-
-    function displayFurtherReading(books) {
-      const container = document.getElementById('furtherReadingMaterials');
-      container.innerHTML = '';
-      
-      if (!books || books.length === 0) {
-        document.getElementById('furtherReadingSection').style.display = 'none';
-        return;
-      }
-      
-      document.getElementById('furtherReadingSection').style.display = 'block';
-      
-      books.forEach((book, index) => {
-        const card = createMaterialCard(book, index, 'further');
-        container.appendChild(card);
-      });
-    }
-
-    function displayVideoMaterials(videos) {
-      const container = document.getElementById('videoMaterials');
-      container.innerHTML = '';
-      
-      if (!videos || videos.length === 0) {
-        document.getElementById('videoSection').style.display = 'none';
-        return;
-      }
-      
-      document.getElementById('videoSection').style.display = 'block';
-      
-      videos.forEach((video, index) => {
-        const card = createVideoCard(video, index);
-        container.appendChild(card);
-      });
-    }
-
-    function createMaterialCard(material, index, type) {
-      const card = document.createElement('div');
-      card.className = 'material-card';
-      card.style.animationDelay = `${index * 0.1}s`;
-      
-      const typeIcon = {
-        'course': '📘',
-        'further': '📖',
-        'video': '🎥'
-      }[type];
-      
-      const isLasuMaterial = material.license && material.license.includes("LASU");
-      const materialTypeLabel = isLasuMaterial ? "LASU Lecture Notes" : 
-                               type === 'course' ? "Course Material" : 
-                               type === 'further' ? "External Resource" : "Video";
-      
-      let buttons = '';
-      
-      if (type === 'course') {
-        buttons = `
-          <button class="material-btn primary" onclick="openMaterial('${material.link}', '${material.title}')">
-            <span>📖</span>
-            ${isLasuMaterial ? 'View Lecture' : 'Read PDF'}
-          </button>
-          <button class="material-btn" onclick="downloadMaterial('${material.link}', '${material.title}')">
-            <span>⬇️</span>
-            Download
-          </button>
-        `;
-      } else if (type === 'further') {
-        buttons = `
-          <a href="${material.link}" target="_blank" class="material-btn primary">
-            <span>🌐</span>
-            Read Online
-          </a>
-          <button class="material-btn" onclick="shareMaterial('${material.title}', '${material.link}')">
-            <span>↗️</span>
-            Share
-          </button>
-        `;
-      }
-      
-      // Add details if available
-      const detailsHtml = material.details ? `<div class="material-details" style="font-size: 0.85rem; color: #888; margin-top: 0.5rem;">${material.details}</div>` : '';
-      
-      card.innerHTML = `
-        <div class="material-type">${typeIcon}</div>
-        <div class="material-title">${material.title}</div>
-        ${material.author ? `<div class="material-author">👤 ${material.author}</div>` : ''}
-        <div class="material-license">${material.license} • ${materialTypeLabel}</div>
-        ${detailsHtml}
-        <div class="material-actions">
-          ${buttons}
-        </div>
-      `;
-      
-      return card;
-    }
-
-    function createVideoCard(video, index) {
-      const card = document.createElement('div');
-      card.className = 'material-card';
-      card.style.animationDelay = `${index * 0.1}s`;
-      
-      card.innerHTML = `
-        <div class="material-type">🎥</div>
-        <div class="material-title">${video.title}</div>
-        ${video.author ? `<div class="material-author">👤 ${video.author} • ${video.channel}</div>` : ''}
-        ${video.description ? `<div class="material-license" style="margin-bottom: 0.5rem;">${video.description}</div>` : ''}
-        ${video.duration ? `<div class="material-license">Duration: <span class="video-duration">${video.duration}</span></div>` : ''}
-        
-        <!-- Embedded Video -->
-        <div class="video-embed-container">
-          <iframe 
-            src="${video.embedUrl}" 
-            title="${video.title}" 
-            frameborder="0" 
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-            allowfullscreen>
-          </iframe>
-        </div>
-        
-        <div class="material-actions">
-          <a href="${video.originalUrl}" target="_blank" class="material-btn">
-            <span>🌐</span>
-            Open on YouTube
-          </a>
-          <button class="material-btn" onclick="shareMaterial('${video.title}', '${video.originalUrl}')">
-            <span>↗️</span>
-            Share Video
-          </button>
-        </div>
-      `;
-      
-      return card;
-    }
-
-    function clearResults() {
-      materialsState.searchResults = { courseMaterials: [], furtherReading: [], videos: [] };
-      
-      document.getElementById('courseMaterials').innerHTML = '';
-      document.getElementById('furtherReadingMaterials').innerHTML = '';
-      document.getElementById('videoMaterials').innerHTML = '';
-      
-      document.getElementById('courseMaterialSection').style.display = 'none';
-      document.getElementById('furtherReadingSection').style.display = 'none';
-      document.getElementById('videoSection').style.display = 'none';
-    }
-
-    function updateResultsCount() {
-      const total = materialsState.searchResults.courseMaterials.length + 
-                    materialsState.searchResults.furtherReading.length + 
-                    materialsState.searchResults.videos.length;
-      
-      document.getElementById('resultsCount').textContent = `${total} materials`;
-      
-      if (total === 0) {
-        document.getElementById('resultsSection').classList.remove('active');
-        document.getElementById('noResults').classList.remove('hidden');
-      }
-    }
-
-    // ===== MATERIAL ACTIONS =====
-    function openMaterial(link, title) {
-      window.open(link, '_blank');
-      
-      // Track material view
-      trackMaterialView(title);
-    }
-
-    function downloadMaterial(link, title) {
-      const a = document.createElement('a');
-      a.href = link;
-      a.download = title.replace(/\s+/g, '_') + '.pdf';
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      
-      // Track download
-      trackMaterialDownload(title);
-    }
-
-    function shareMaterial(title, link) {
-      if (navigator.share) {
-        navigator.share({
-          title: title,
-          text: `Check out this study material: ${title}`,
-          url: link
-        }).catch(console.error);
-      } else {
-        // Fallback: copy to clipboard
-        navigator.clipboard.writeText(`${title}: ${link}`).then(() => {
-          showNotification('Link copied to clipboard!', 'success');
-        }).catch(() => {
-          prompt('Copy this link:', link);
+        // ===== INITIALIZATION =====
+        document.addEventListener('DOMContentLoaded', () => {
+            setupEventListeners();
+            updateOpenMaterialsButton();
         });
-      }
-    }
 
-    function trackMaterialView(title) {
-      const history = JSON.parse(localStorage.getItem('materialHistory')) || [];
-      history.push({
-        title: title,
-        type: 'view',
-        timestamp: new Date().toISOString(),
-        course: materialsState.course,
-        topic: materialsState.topic
-      });
-      
-      // Keep only last 50 items
-      if (history.length > 50) {
-        history.shift();
-      }
-      
-      localStorage.setItem('materialHistory', JSON.stringify(history));
-    }
+        // ===== EVENT HANDLERS =====
+        function setupEventListeners() {
+            const courseSelect = document.getElementById('courseSelect');
+            const levelSelect = document.getElementById('levelSelect');
+            const semesterSelect = document.getElementById('semesterSelect');
 
-    function trackMaterialDownload(title) {
-      const history = JSON.parse(localStorage.getItem('materialHistory')) || [];
-      history.push({
-        title: title,
-        type: 'download',
-        timestamp: new Date().toISOString(),
-        course: materialsState.course,
-        topic: materialsState.topic
-      });
-      
-      // Keep only last 50 items
-      if (history.length > 50) {
-        history.shift();
-      }
-      
-      localStorage.setItem('materialHistory', JSON.stringify(history));
-    }
+            courseSelect.addEventListener('change', function() {
+                materialsState.course = this.value;
+                updateSemesterDropdown();
+                updateOpenMaterialsButton();
+            });
 
-    // ===== UTILITY FUNCTIONS =====
-    function goBack() {
-      // Smooth page transition
-      document.body.style.opacity = '0';
-      document.body.style.transform = 'translateX(20px)';
-      document.body.style.transition = 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)';
-      
-      setTimeout(() => {
-        window.history.back();
-      }, 300);
-    }
+            levelSelect.addEventListener('change', function() {
+                materialsState.level = this.value;
+                updateSemesterDropdown();
+                updateOpenMaterialsButton();
+            });
 
-    function showNotification(message, type = 'info') {
-      const notification = document.createElement('div');
-      notification.className = `notification ${type}`;
-      notification.textContent = message;
-      notification.style.cssText = `
-        position: fixed;
-        top: 80px;
-        left: 50%;
-        transform: translateX(-50%) translateY(-20px);
-        background: var(--card-dark);
-        border: 1px solid var(--border-dark);
-        color: white;
-        padding: 1rem 1.5rem;
-        border-radius: 12px;
-        z-index: 10000;
-        opacity: 0;
-        transition: all 0.3s ease;
-      `;
-      
-      document.body.appendChild(notification);
-      
-      setTimeout(() => {
-        notification.style.opacity = '1';
-        notification.style.transform = 'translateX(-50%) translateY(0)';
-      }, 10);
-      
-      setTimeout(() => {
-        notification.style.opacity = '0';
-        notification.style.transform = 'translateX(-50%) translateY(-20px)';
-        setTimeout(() => {
-          document.body.removeChild(notification);
-        }, 300);
-      }, 3000);
-    }
+            semesterSelect.addEventListener('change', function() {
+                materialsState.semester = this.value;
+                updateOpenMaterialsButton();
+            });
+        }
 
-    // Handle page visibility for better Android experience
-    document.addEventListener('visibilitychange', function() {
-      if (!document.hidden) {
-        // Page became visible again, refresh animations
-        document.body.style.animation = 'none';
-        setTimeout(() => {
-          document.body.style.animation = 'fadeIn 0.6s ease-out forwards';
-        }, 10);
-      }
-    });
+        // ===== DROPDOWN MANAGEMENT =====
+        function updateSemesterDropdown() {
+            const semesterSelect = document.getElementById('semesterSelect');
+            const course = materialsState.course;
+            const level = materialsState.level;
 
-    // Keyboard navigation
-    document.addEventListener('keydown', function(e) {
-      if (e.key === 'Escape') {
-        goBack();
-      }
-      
-      if (e.key === 'Enter' && e.ctrlKey) {
-        searchMaterials();
-      }
-    });
-  </script>
+            semesterSelect.innerHTML = '<option value="">-- Select Semester --</option>';
+
+            if (course && level) {
+                semesterSelect.disabled = false;
+                const semesters = semesterStructure[course]?.[level];
+
+                if (semesters) {
+                    semesters.forEach(semester => {
+                        const option = document.createElement('option');
+                        option.value = semester;
+                        option.textContent = semester;
+                        semesterSelect.appendChild(option);
+                    });
+                }
+            } else {
+                semesterSelect.disabled = true;
+                semesterSelect.innerHTML = '<option value="">-- First select Course and Level --</option>';
+            }
+
+            materialsState.semester = '';
+        }
+
+        function updateOpenMaterialsButton() {
+            const openBtn = document.getElementById('openMaterialsBtn');
+            openBtn.disabled = !(materialsState.course && materialsState.level && materialsState.semester);
+        }
+
+        // ===== MATERIALS DISPLAY =====
+        function openMaterials() {
+            const course = materialsState.course;
+            const level = materialsState.level;
+            const semester = materialsState.semester;
+
+            if (!course || !level || !semester) {
+                alert('Please select course, level, and semester.');
+                return;
+            }
+
+            const filteredMaterials = materialsDatabase.filter(material =>
+                material.course === course &&
+                material.level === level &&
+                material.semester === semester
+            );
+
+            materialsState.materials = filteredMaterials;
+
+            document.getElementById('selectionSection').style.display = 'none';
+            document.getElementById('materialsSection').classList.add('active');
+            document.getElementById('noMaterials').classList.add('hidden');
+
+            document.getElementById('materialsTitle').textContent = `${course} – ${level} Level – ${semester}`;
+            document.getElementById('materialsCount').textContent = `${filteredMaterials.length} materials`;
+
+            displayMaterials(filteredMaterials);
+
+            if (filteredMaterials.length === 0) {
+                document.getElementById('materialsSection').classList.remove('active');
+                document.getElementById('noMaterials').classList.remove('hidden');
+            }
+        }
+
+        function displayMaterials(materials) {
+            const grid = document.getElementById('materialsGrid');
+            grid.innerHTML = '';
+
+            materials.forEach((material, index) => {
+                const card = document.createElement('div');
+                card.className = 'material-card';
+                card.style.animationDelay = `${index * 0.1}s`;
+
+                const typeIcon = material.type === 'pdf' ? '📘' : '📄';
+                const isLasuMaterial = material.license.includes("LASU");
+                const materialTypeLabel = isLasuMaterial ? "LASU Lecture Notes" : "Course Material";
+
+                card.innerHTML = `
+                    <div class="material-type">${typeIcon}</div>
+                    <div class="material-title">${material.title}</div>
+                    ${material.author ? `<div class="material-author">👤 ${material.author}</div>` : ''}
+                    <div class="material-license">${material.license} • ${materialTypeLabel}</div>
+                    <div class="material-actions">
+                        <button class="material-btn primary" onclick="openMaterial('${material.link}', '${material.title}')">
+                            <span>📖</span>
+                            ${isLasuMaterial ? 'View Lecture' : 'Read PDF'}
+                        </button>
+                        <button class="material-btn" onclick="downloadMaterial('${material.link}', '${material.title}')">
+                            <span>⬇️</span>
+                            Download
+                        </button>
+                    </div>
+                `;
+
+                grid.appendChild(card);
+            });
+        }
+
+        // ===== MATERIAL ACTIONS =====
+        function openMaterial(link, title) {
+            window.open(link, '_blank');
+            trackMaterialView(title);
+        }
+
+        function downloadMaterial(link, title) {
+            const a = document.createElement('a');
+            a.href = link;
+            a.download = title.replace(/\s+/g, '_') + '.pdf';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            trackMaterialDownload(title);
+        }
+
+        function downloadAllMaterials() {
+            materialsState.materials.forEach(material => {
+                downloadMaterial(material.link, material.title);
+            });
+        }
+
+        function goBackToSelection() {
+            document.getElementById('materialsSection').classList.remove('active');
+            document.getElementById('noMaterials').classList.add('hidden');
+            document.getElementById('selectionSection').style.display = 'block';
+        }
+
+        // ===== TRACKING =====
+        function trackMaterialView(title) {
+            const history = JSON.parse(localStorage.getItem('materialHistory')) || [];
+            history.push({
+                title: title,
+                type: 'view',
+                timestamp: new Date().toISOString(),
+                course: materialsState.course,
+                level: materialsState.level,
+                semester: materialsState.semester
+            });
+
+            if (history.length > 50) {
+                history.shift();
+            }
+
+            localStorage.setItem('materialHistory', JSON.stringify(history));
+        }
+
+        function trackMaterialDownload(title) {
+            const history = JSON.parse(localStorage.getItem('materialHistory')) || [];
+            history.push({
+                title: title,
+                type: 'download',
+                timestamp: new Date().toISOString(),
+                course: materialsState.course,
+                level: materialsState.level,
+                semester: materialsState.semester
+            });
+
+            if (history.length > 50) {
+                history.shift();
+            }
+
+            localStorage.setItem('materialHistory', JSON.stringify(history));
+        }
+
+        // ===== NAVIGATION =====
+        function goBack() {
+            if (document.getElementById('materialsSection').classList.contains('active') ||
+                document.getElementById('noMaterials').classList.contains('show')) {
+                goBackToSelection();
+                return;
+            }
+
+            document.body.style.opacity = '0';
+            document.body.style.transform = 'translateX(20px)';
+            document.body.style.transition = 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)';
+
+            setTimeout(() => {
+                window.history.back();
+            }, 300);
+        }
+
+        // ===== EVENT LISTENERS =====
+        document.addEventListener('visibilitychange', function() {
+            if (!document.hidden) {
+                document.body.style.animation = 'none';
+                setTimeout(() => {
+                    document.body.style.animation = 'fadeIn 0.6s ease-out forwards';
+                }, 10);
+            }
+        });
+
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                goBack();
+            }
+        });
+    </script>
 </body>
 </html>
