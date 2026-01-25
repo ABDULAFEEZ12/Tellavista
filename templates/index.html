@@ -152,6 +152,7 @@ body.light-mode #theme-toggle:hover {
 #side-menu a[href*="profile"]::before { content: '👤'; }
 #side-menu a[href*="talk"]::before { content: '🤖'; }
 #side-menu a[href*="live"]::before { content: '📡'; }
+#side-menu a[href*="campus-map"]::before { content: '📡'; }
 #side-menu a[href*="materials"]::before { content: '📚'; }
 #side-menu a[href*="reels"]::before { content: '🎬'; }
 #side-menu a[href*="CBT"]::before { content: '📝'; }
@@ -736,6 +737,7 @@ body.light-mode ::-webkit-scrollbar-thumb:hover {
 <!-- SIDEBAR -->
 <div id="side-menu">
   <ul>
+    <li><a href="/campus-map">Lasu Map</a></li>
     <li><a href="/profile">Profile</a></li>
     <li><a href="/talk-to-nelavista">Talk to Nelavista</a></li>
     <li><a href="/live-meeting">Live Meeting</a></li>
@@ -761,7 +763,7 @@ body.light-mode ::-webkit-scrollbar-thumb:hover {
     <div class="chip" onclick="handleChipClick('ai')">Study with AI</div>
     <div class="chip" onclick="handleChipClick('materials')">Materials</div>
     <div class="chip" onclick="handleChipClick('cbt')">Practice CBT</div>
-    <div class="chip" onclick="handleChipClick('live')">Live Sessions</div>
+    <div class="chip" onclick="handleChipClick('/campus-map')">Lasu Map</div>
     <div class="chip" onclick="handleChipClick('reels')">Reels</div>
   </div>
 </div>
@@ -915,6 +917,12 @@ function closeMenu() {
 
 // ===== CHIP CLICK HANDLER =====
 function handleChipClick(type) {
+  // Special case for Campus Map - perform full page navigation
+  if (type === '/campus-map') {
+    window.location.href = '/campus-map';
+    return;
+  }
+  
   const chipActions = {
     'ai': () => {
       enterChatMode();
@@ -1071,11 +1079,10 @@ async function sendToBackend(message, attachments = []) {
     // Show typing indicator
     showTypingIndicator();
     
-    // 🔥 FIX: Add credentials for session cookies
+    // Send to backend endpoint
     const response = await fetch('/ask_with_files', {
       method: 'POST',
-      body: formData,
-      credentials: 'include'  // CRITICAL FOR RENDER
+      body: formData
     });
     
     if (!response.ok) {
@@ -1084,17 +1091,7 @@ async function sendToBackend(message, attachments = []) {
     
     const data = await response.json();
     
-    // 🔥 DEBUG: Remove after fixing
-    console.log('🔍 API Response:', {
-      status: response.status,
-      ok: response.ok,
-      data: data,
-      answerExists: !!data.answer,
-      answerType: typeof data.answer,
-      answerLength: data.answer ? data.answer.length : 0
-    });
-    
-    // Remove typing indicator
+    // Remove typing indicator with fade out
     const messagesDiv = document.getElementById('messages');
     const typingIndicator = messagesDiv.querySelector('.typing-indicator');
     if (typingIndicator) {
@@ -1108,17 +1105,10 @@ async function sendToBackend(message, attachments = []) {
     
     state.isLoading = false;
     
-    // 🔥 FIX: Strict validation for answer
-    if (data && typeof data.answer === 'string') {
-      const trimmedAnswer = data.answer.trim();
-      if (trimmedAnswer !== '') {
-        addMessage(trimmedAnswer, 'ai');
-      } else {
-        // Empty string from backend - use graceful fallback
-        addMessage("I'm having a little trouble answering right now, but please try again.", 'ai');
-      }
+    // Add AI response to chat
+    if (data.answer) {
+      addMessage(data.answer, 'ai');
     } else {
-      // No answer field or wrong type
       addMessage("I received your message but couldn't generate a response. Please try again.", 'ai');
     }
     
@@ -1430,4 +1420,3 @@ if (window.location.hash === '#chat') {
 </script>
 </body>
 </html>
-
