@@ -1959,7 +1959,7 @@ def get_reels():
     """API endpoint to fetch educational reels."""
     course = request.args.get("course")
 
-all_reels = [
+    all_reels = [
     {"course": "Accountancy", "caption": "Introduction to Accounting", "video_url": "https://youtu.be/Gua2Bo_G-J0?si=lDEAsxKN8lh8gf5Y"},
     {"course": "Accountancy", "caption": "Financial Statements Basics", "video_url": "https://youtu.be/eorpdJUWfTA?si=SoT4Zin87uu1I9hU"},
     {"course": "Accountancy", "caption": "Management Accounting Overview", "video_url": "https://youtu.be/MTXDi0nDeI0?si=DAHvD6mtvXm8MnoI"},
@@ -2338,7 +2338,6 @@ all_reels = [
     {"course": "Yoruba & Communication Arts", "caption": "Yoruba Media and Communication", "video_url": "https://youtu.be/lwW-ZUvDZok?si=kS17_tsJq0d0CTYs"},
     {"course": "Yoruba & Communication Arts", "caption": "Contemporary Yoruba Culture", "video_url": "https://youtu.be/9bfh1CS-vGc?si=G8r7a2rMBJ7L9ng2"},
 ]
-
 
     matching = [r for r in all_reels if r["course"] == course] if course else all_reels
     return jsonify({"reels": matching})
