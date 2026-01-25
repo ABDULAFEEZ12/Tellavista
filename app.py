@@ -1744,6 +1744,11 @@ def about():
     """Render about page."""
     return render_template('about.html')
 
+@app.route('/campus-map')
+def campus_map():
+    """Render LASU campus map page."""
+    return render_template('campus-map.html')
+
 @app.route('/privacy-policy')
 def privacy_policy():
     """Render privacy policy page."""
@@ -2594,6 +2599,7 @@ if __name__ == '__main__':
     
     port = int(os.environ.get('PORT', 5000))
     socketio.run(app, host='0.0.0.0', port=port, debug=DEBUG_MODE)
+
 
 
 
