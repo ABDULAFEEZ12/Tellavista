@@ -1,0 +1,965 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nelavista LASU Campus Map</title>
+  
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+    }
+
+    body {
+      background-color: #fafafa;
+      color: #333;
+      line-height: 1.6;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    .header {
+      background-color: #fff;
+      border-bottom: 1px solid #e0e0e0;
+      padding: 1.2rem 1.5rem;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03);
+    }
+
+    .header h1 {
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: #222;
+      margin-bottom: 0.3rem;
+    }
+
+    .header p {
+      font-size: 0.95rem;
+      color: #666;
+      max-width: 600px;
+    }
+
+    .header .lasu-badge {
+      display: inline-block;
+      background-color: #111;
+      color: white;
+      font-size: 0.75rem;
+      font-weight: 600;
+      padding: 0.2rem 0.6rem;
+      border-radius: 3px;
+      margin-top: 0.5rem;
+      letter-spacing: 0.5px;
+    }
+
+    .container {
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+    }
+
+    @media (min-width: 768px) {
+      .container {
+        flex-direction: row;
+      }
+    }
+
+    #map {
+      flex: 1;
+      min-height: 70vh;
+      background-color: #e9e9e9;
+      width: 100%;
+    }
+
+    @media (min-width: 768px) {
+      #map {
+        min-height: calc(100vh - 120px);
+      }
+    }
+
+    .sidebar {
+      width: 100%;
+      background-color: #fff;
+      border-top: 1px solid #e0e0e0;
+      padding: 1.5rem;
+      overflow-y: auto;
+      max-height: 50vh;
+    }
+
+    @media (min-width: 768px) {
+      .sidebar {
+        width: 320px;
+        max-width: 100%;
+        border-top: none;
+        border-left: 1px solid #e0e0e0;
+        max-height: calc(100vh - 120px);
+      }
+    }
+
+    .sidebar h2 {
+      font-size: 1.2rem;
+      font-weight: 600;
+      margin-bottom: 1.2rem;
+      color: #222;
+      padding-bottom: 0.5rem;
+      border-bottom: 2px solid #111;
+    }
+
+    .controls {
+      margin-bottom: 1.8rem;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background-color: #111;
+      color: white;
+      border: none;
+      padding: 0.7rem 1.2rem;
+      font-size: 0.9rem;
+      font-weight: 500;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      width: 100%;
+      margin-bottom: 0.8rem;
+    }
+
+    .btn:hover {
+      background-color: #333;
+    }
+
+    .btn:active {
+      transform: scale(0.98);
+    }
+
+    .btn i {
+      margin-right: 0.5rem;
+      font-weight: bold;
+    }
+
+    .coords-box {
+      font-size: 0.85rem;
+      padding: 0.7rem;
+      border-radius: 4px;
+      margin-bottom: 1.2rem;
+      background-color: #f8f8f8;
+      color: #333;
+      border-left: 3px solid #111;
+      min-height: 50px;
+      display: flex;
+      align-items: center;
+    }
+
+    .info-panel {
+      margin-top: 2rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid #eee;
+    }
+
+    .info-panel p {
+      font-size: 0.8rem;
+      color: #777;
+      margin-bottom: 0.5rem;
+    }
+
+    .locations-list h3 {
+      font-size: 1rem;
+      font-weight: 600;
+      margin-bottom: 0.8rem;
+      color: #444;
+    }
+
+    .locations-list ul {
+      list-style-type: none;
+      max-height: 300px;
+      overflow-y: auto;
+    }
+
+    .locations-list li {
+      padding: 0.8rem 0;
+      border-bottom: 1px solid #f0f0f0;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      transition: background-color 0.2s;
+    }
+
+    .locations-list li:hover {
+      background-color: #f9f9f9;
+    }
+
+    .locations-list li:last-child {
+      border-bottom: none;
+    }
+
+    .location-marker {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      margin-right: 0.8rem;
+      flex-shrink: 0;
+      background-color: #111;
+    }
+
+    .location-name {
+      font-weight: 500;
+      font-size: 0.95rem;
+    }
+
+    .footer {
+      background-color: #111;
+      color: #aaa;
+      text-align: center;
+      padding: 1.2rem;
+      font-size: 0.8rem;
+      border-top: 1px solid #333;
+    }
+
+    .footer a {
+      color: #fff;
+      text-decoration: underline;
+    }
+
+    .leaflet-container {
+      font: inherit;
+    }
+
+    .leaflet-control-attribution {
+      background-color: rgba(255, 255, 255, 0.9) !important;
+      color: #333 !important;
+      font-size: 0.7rem !important;
+      padding: 2px 5px !important;
+    }
+
+    .leaflet-control-zoom a {
+      background-color: #fff;
+      color: #333;
+      border-color: #ddd;
+    }
+
+    .leaflet-control-zoom a:hover {
+      background-color: #f5f5f5;
+    }
+
+    .leaflet-pulsing-icon {
+      border-radius: 100%;
+      box-shadow: 0 0 0 5px rgba(0, 102, 204, 0.4);
+    }
+
+    .leaflet-pulsing-icon::before {
+      content: "";
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 12px;
+      height: 12px;
+      background-color: #0066cc;
+      border-radius: 100%;
+    }
+
+    .key-hint {
+      font-size: 0.75rem;
+      color: #666;
+      margin-top: 1rem;
+      padding: 0.5rem;
+      background: #f5f5f5;
+      border-radius: 4px;
+    }
+
+    .leaflet-control-layers-toggle {
+      background-image: url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTEyIDJMMiA3TDEyIDEyTDIyIDdMMTIgMloiIHN0cm9rZT0iIzMzMyIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiLz4KPHBhdGggZD0iTTIgMTdMMTIgMjJMMjIgMTciIHN0cm9rZT0iIzMzMyIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiLz4KPHBhdGggZD0iTTIgMTJMMTIgMTdMMjIgMTIiIHN0cm9rZT0iIzMzMyIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiLz4KPC9zdmc+Cg==') !important;
+    }
+
+    .search-container {
+      margin-bottom: 1rem;
+    }
+
+    .search-input {
+      width: 100%;
+      padding: 0.7rem;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-size: 0.9rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .search-input:focus {
+      outline: none;
+      border-color: #111;
+    }
+
+    .nav-btn {
+      background-color: #0066cc;
+      color: white;
+      border: none;
+      padding: 0.3rem 0.6rem;
+      border-radius: 3px;
+      cursor: pointer;
+      font-size: 0.8rem;
+      margin-top: 0.5rem;
+      display: inline-block;
+    }
+
+    .nav-btn:hover {
+      background-color: #0055aa;
+    }
+
+    .nav-line {
+      stroke: #0066cc;
+      stroke-width: 3;
+      stroke-dasharray: 10, 5;
+      fill: none;
+    }
+  </style>
+</head>
+<body>
+  <header class="header">
+    <h1>Nelavista LASU Campus Map</h1>
+    <p>Interactive map of Lagos State University (LASU). Drag landmarks to adjust positions. Arrow keys move selected markers.</p>
+    <span class="lasu-badge">STUDENT NAVIGATION TOOL</span>
+  </header>
+
+  <div class="container">
+    <div id="map"></div>
+
+    <aside class="sidebar">
+      <h2><i class="fas fa-map-pin"></i> Campus Navigator</h2>
+
+      <div class="controls">
+        <button class="btn" onclick="locateUser()">
+          <i class="fas fa-location-crosshairs"></i> Show My Location
+        </button>
+        
+        <div class="coords-box" id="coordsBox">
+          Drag landmarks. Positions auto-save.
+        </div>
+
+        <div class="search-container">
+          <input type="text" class="search-input" id="searchInput" placeholder="Search for a building...">
+        </div>
+        
+        <div class="key-hint">
+          <i class="fas fa-keyboard"></i> <strong>Keyboard:</strong> Click a marker, then use arrow keys to move.
+        </div>
+      </div>
+
+      <div class="locations-list">
+        <h3><i class="fas fa-building"></i> Campus Locations</h3>
+        <ul id="locationsList">
+          <!-- List will be generated dynamically -->
+        </ul>
+      </div>
+
+      <div class="info-panel">
+        <p><i class="fas fa-info-circle"></i> <strong>Tip:</strong> Drag markers to adjust positions. Changes auto-save.</p>
+        <p><i class="fas fa-database"></i> <strong>Storage:</strong> Positions saved in your browser.</p>
+      </div>
+    </aside>
+  </div>
+
+  <footer class="footer">
+    <p>Nelavista Campus Map &copy; 2026 | Lagos State University (LASU) | 
+       <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a> contributors | 
+       Powered by <a href="https://leafletjs.com/" target="_blank">Leaflet</a>
+    </p>
+    <p style="margin-top:0.3rem; font-size:0.75rem;">Student navigation tool. Coordinates are adjustable and persist in your browser.</p>
+  </footer>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+  <script>
+    const locations = [
+            { id: "admin_block_2", name: "Admin Block 2", coords: [6.475243, 3.199060] },
+      { id: "africa_centre_of_excellence", name: "Africa Centre of Excellence", coords: [6.475243, 3.199060] },
+      { id: "agriculture_society_building", name: "Agriculture Society Building", coords: [6.475243, 3.199060] },
+      { id: "anico_ventures", name: "ANICO Ventures (Book Store)", coords: [6.475243, 3.199060] },
+      { id: "arcade", name: "Arcade", coords: [6.465718, 3.203115] },
+      { id: "arts", name: "Faculty of Arts", coords: [6.464550, 3.201790] },
+      { id: "auditorium", name: "Main Auditorium", coords: [6.473108, 3.201887] },
+      { id: "automedics_limited", name: "AutoMedics Limited", coords: [6.475243, 3.199060] },
+      { id: "bank", name: "Bank Arena", coords: [6.464388, 3.204019] },
+      { id: "basketball_court", name: "Basketball Court", coords: [6.469750, 3.202550] },
+      { id: "biological_lab_extension", name: "Biological Lab Extension", coords: [6.466275, 3.200283] },
+      { id: "blossom_computer_centre", name: "Blossom Computer Centre", coords: [6.475243, 3.199060] },
+      { id: "catering_unit", name: "Catering Unit", coords: [6.475243, 3.199060] },
+      { id: "cbt_center", name: "CBT Center", coords: [6.475192, 3.201302] },
+      { id: "cbt_centre_lasu", name: "CBT Centre LASU", coords: [6.475192, 3.201302] },
+      { id: "central_mosque_ojo", name: "Central Mosque, Ojo", coords: [6.465425, 3.200015] },
+      { id: "communication", name: "School of Communication", coords: [6.472277, 3.200154] },
+      { id: "computer_science_lab", name: "Computer Science Lab", coords: [6.468753, 3.201230] },
+      { id: "crcc", name: "CRCC", coords: [6.475243, 3.199060] },
+      { id: "demab_friend_concept", name: "DEMAB & FRIEND CONCEPT", coords: [6.475243, 3.199060] },
+      { id: "department_of_fisheries", name: "Department of Fisheries, Lagos State University", coords: [6.475243, 3.199060] },
+      { id: "department_of_fishery", name: "Department Of fishery", coords: [6.475243, 3.199060] },
+      { id: "department_of_islamic_law", name: "Department of Islamic Law", coords: [6.475243, 3.199060] },
+      { id: "department_of_philosophy", name: "Department of Philosophy", coords: [6.475243, 3.199060] },
+      { id: "department_of_theatre_art", name: "Department Of Theatre Arts", coords: [6.475243, 3.199060] },
+      { id: "education", name: "Faculty of Education", coords: [6.472996, 3.199889] },
+      { id: "education_road", name: "Education Road", coords: [6.472996, 3.199889] },
+      { id: "e_elegant_fashion", name: "E Elegant Fashion", coords: [6.475243, 3.199060] },
+      { id: "eisas_treats", name: "Eisa's Treats – Banana Bread, Cakes & More", coords: [6.475243, 3.199060] },
+      { id: "empire", name: "Empire", coords: [6.475243, 3.199060] },
+      { id: "ent_building", name: "ENT Building", coords: [6.473340, 3.198304] },
+      { id: "epe_liaison_lasu_com_liaison_office", name: "Epe Liaison LASU Com Liaison Office", coords: [6.475243, 3.199060] },
+      { id: "espanyol_city_salon", name: "Espanyol City Salon", coords: [6.475243, 3.199060] },
+      { id: "faculty_of_law_building", name: "Faculty Of Law Building", coords: [6.475243, 3.199060] },
+      { id: "faculty_of_science_shops", name: "Faculty of Science Shops", coords: [6.466275, 3.200283] },
+      { id: "fishery_and_hatchery", name: "Fishery and Hatchery", coords: [6.475243, 3.199060] },
+      { id: "fms_path_way", name: "FMS Path Way", coords: [6.475661, 3.199942] },
+      { id: "fms_toilet", name: "FMS Toilet", coords: [6.475661, 3.199942] },
+      { id: "gbolahan_elias_hall", name: "Gbolahan Elias Hall", coords: [6.475243, 3.199060] },
+      { id: "havilah_perfume_n_scents", name: "Havilah Perfume n Scents", coords: [6.475243, 3.199060] },
+      { id: "health", name: "Health Center", coords: [6.465443, 3.202018] },
+      { id: "iba_gate", name: "Iba Gate", coords: [6.4686, 3.1969] },
+      { id: "ict", name: "ICT Building", coords: [6.468753, 3.201230] },
+      { id: "isalu_ijanikin_animosun_road", name: "Isalu–Ijanikin–Animosun Road", coords: [6.475243, 3.199060] },
+      { id: "lagos_badagry_expressway", name: "Lagos–Badagry Expressway", coords: [6.475243, 3.199060] },
+      { id: "lagos_state_university_administrations_block_2", name: "Lagos State University Administrations Block 2", coords: [6.475243, 3.199060] },
+      { id: "lagos_state_university_road", name: "Lagos State University Road", coords: [6.475243, 3.199060] },
+      { id: "lasu_cbt_18_limited", name: "LASU CBT 18 Limited (Eighteen IT)", coords: [6.475192, 3.201302] },
+      { id: "lasu_main_road", name: "LASU Main Road", coords: [6.475243, 3.199060] },
+      { id: "lasu_post_office", name: "LASU Post Office, Lagos State University Ojo", coords: [6.475243, 3.199060] },
+      { id: "lasu_radio", name: "LASU Radio", coords: [6.475243, 3.199060] },
+      { id: "lasu_shuttle_park", name: "LASU Shuttle Park", coords: [6.475243, 3.199060] },
+      { id: "lasu_works", name: "LASU Works", coords: [6.475243, 3.199060] },
+      { id: "law", name: "Faculty of Law", coords: [6.467085, 3.202029] },
+      { id: "law_library", name: "Law Library (LASU Law Library)", coords: [6.467085, 3.202029] },
+      { id: "library", name: "School Library", coords: [6.464838, 3.200659] },
+      { id: "lh_building", name: "LH Building", coords: [6.475243, 3.199060] },
+      { id: "management_sciences", name: "Faculty of Management Sciences", coords: [6.475661, 3.199942] },
+      { id: "mass_communication_lecture_hall", name: "Mass Communication Lecture Hall", coords: [6.472277, 3.200154] },
+      { id: "mirays_eden_company", name: "Miray's Eden Company", coords: [6.475243, 3.199060] },
+      { id: "new_fms_annex", name: "New FMS Annex", coords: [6.475661, 3.199942] },
+      { id: "non_academic_staff_commercial_complex", name: "Non Academic Staff Commercial Complex", coords: [6.475243, 3.199060] },
+      { id: "ojo_gate", name: "Ojo Gate", coords: [6.473966, 3.202204] },
+      { id: "okoko_ppl", name: "Okoko PPL", coords: [6.475243, 3.199060] },
+      { id: "onome_empire", name: "ONOME EMPIRE", coords: [6.475243, 3.199060] },
+      { id: "pharmacy_medical_laboratory_unit", name: "Pharmacy Medical Laboratory Unit", coords: [6.465443, 3.202018] },
+      { id: "philosophy_classrooms", name: "Philosophy Classrooms", coords: [6.475243, 3.199060] },
+      { id: "physics_lab1", name: "Physics Lab 1", coords: [6.475243, 3.199060] },
+      { id: "physics_lab2", name: "Physics Lab 2", coords: [6.475243, 3.199060] },
+      { id: "phyloso", name: "", coords: [6.475243, 3.199060] },
+      { id: "pleasant_fashion_institute", name: "Pleasant Fashion Institute", coords: [6.475243, 3.199060] },
+      { id: "post_graduate_school", name: "Post Graduate School, Lagos State University", coords: [6.475243, 3.199060] },
+      { id: "radiology_department", name: "Radiology Department", coords: [6.465443, 3.202018] },
+      { id: "science_library", name: "Science Library", coords: [6.464838, 3.200659] },
+      { id: "science_shops", name: "Science Shops", coords: [6.466275, 3.200283] },
+      { id: "sciences", name: "Faculty of Sciences", coords: [6.466275, 3.200283] },
+      { id: "sciences_laboratory", name: "Sciences Laboratory", coords: [6.466275, 3.200283] },
+      { id: "senate", name: "Senate Building", coords: [6.471245, 3.199849] },
+      { id: "senate_chambers", name: "Senate Chambers", coords: [6.471245, 3.199849] },
+      { id: "smaat_errands_logistics_services", name: "Smaat Errands & Logistics Services", coords: [6.475243, 3.199060] },
+      { id: "social_sciences", name: "Faculty of Social Sciences", coords: [6.475243, 3.199060] },
+      { id: "solomon_close", name: "Solomon Close", coords: [6.475243, 3.199060] },
+      { id: "sport_complex_road", name: "Sport Complex Road", coords: [6.469750, 3.202550] },
+      { id: "sports", name: "Sports Center", coords: [6.469750, 3.202550] },
+      { id: "ssanu_cooperative_supermart", name: "SSANU Cooperative Supermart", coords: [6.475243, 3.199060] },
+      { id: "sterling_bank_lasu", name: "Sterling Bank LASU", coords: [6.464388, 3.204019] },
+      { id: "student_affairs_complex", name: "Student Affairs Complex", coords: [6.475243, 3.199060] },
+      { id: "school_of_transport_and_logistics", name: "School of Transport and Logistics", coords: [6.474193, 3.198038] },
+      { id: "transport", name: "School of Transport", coords: [6.474193, 3.198038] },
+      { id: "unisex_uniform_store", name: "Unisex Uniform Store", coords: [6.475243, 3.199060] },
+      { id: "united_bank_for_africa", name: "United Bank for Africa (UBA)", coords: [6.464388, 3.204019] },
+      { id: "vickys_health", name: "Vicky's Health", coords: [6.475243, 3.199060] },
+      { id: "walk_path", name: "Walk Path", coords: [6.475243, 3.199060] },
+      { id: "water_corporation_reservoir_tank", name: "Water Corporation Reservoir Tank", coords: [6.475243, 3.199060] },
+      { id: "worship", name: "Lasu Mosque Centra Mosque, Ojo", coords: [6.465425, 3.200015] },
+      { id: "zenit_ict_centre", name: "Zenit ICT Centre", coords: [6.468753, 3.201230] },
+      { id: "economics_hall", name: "Economics Hall", coords: [6.475243, 3.199060] },
+    ];
+
+    const lasuCenter = [6.4700, 3.2000];
+    const map = L.map("map", {
+      maxZoom: 21,
+      zoomControl: true
+    }).setView(lasuCenter, 15);
+
+    const streetLayer = L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+      attribution: '© OpenStreetMap contributors | © <a href="https://www.esri.com/">Esri</a>',
+      maxZoom: 19
+    });
+
+    const satelliteLayer = L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}", {
+      attribution: '© OpenStreetMap contributors | Tiles © Esri &mdash; Source: Esri, Maxar, Earthstar Geographics, and the GIS User Community',
+      maxZoom: 20
+    });
+
+    const terrainLayer = L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}", {
+      attribution: '© OpenStreetMap contributors | Tiles © Esri &mdash; Esri, DeLorme, NAVTEQ',
+      maxZoom: 19
+    });
+
+    const hybridLayer = L.layerGroup([
+      L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}", {
+        attribution: '© OpenStreetMap contributors | Tiles © Esri &mdash; Source: Esri, Maxar, Earthstar Geographics, and the GIS User Community',
+        maxZoom: 20
+      }),
+      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        opacity: 0.3,
+        attribution: '© OpenStreetMap contributors',
+        maxZoom: 19
+      })
+    ]);
+
+    streetLayer.maxAvailableZoom = 19;
+    satelliteLayer.maxAvailableZoom = 19;
+    terrainLayer.maxAvailableZoom = 19;
+    hybridLayer.maxAvailableZoom = 20;
+
+    const baseLayers = {
+      "Street": streetLayer,
+      "Satellite": satelliteLayer,
+      "Terrain": terrainLayer,
+      "Hybrid": hybridLayer
+    };
+
+    streetLayer.addTo(map);
+
+    const layerControl = L.control.layers(baseLayers, null, {
+      position: 'topright',
+      collapsed: true
+    }).addTo(map);
+
+    let userManualSelection = false;
+    let currentBaseLayer = streetLayer;
+    const USER_PREFERENCE_KEY = 'lasu_map_base_layer';
+
+    function getCurrentLayerMaxZoom() {
+      return currentBaseLayer.maxAvailableZoom || 19;
+    }
+
+    function updateMapZoomLimits() {
+      const maxZoom = getCurrentLayerMaxZoom();
+      const currentZoom = map.getZoom();
+      
+      if (currentZoom > maxZoom) {
+        map.setZoom(maxZoom);
+      }
+      
+      map.options.maxZoom = maxZoom;
+      
+      if (map.zoomControl) {
+        map.zoomControl._updateDisabled();
+      }
+    }
+
+    function clampZoomToLayer() {
+      const maxZoom = getCurrentLayerMaxZoom();
+      const currentZoom = map.getZoom();
+      
+      if (currentZoom > maxZoom) {
+        map.setZoom(maxZoom);
+      }
+    }
+
+    function saveUserPreference(layerName) {
+      localStorage.setItem(USER_PREFERENCE_KEY, layerName);
+      userManualSelection = true;
+      updateMapZoomLimits();
+    }
+
+    function restoreUserPreference() {
+      const savedLayer = localStorage.getItem(USER_PREFERENCE_KEY);
+      if (savedLayer && baseLayers[savedLayer]) {
+        map.removeLayer(currentBaseLayer);
+        baseLayers[savedLayer].addTo(map);
+        currentBaseLayer = baseLayers[savedLayer];
+        userManualSelection = true;
+        updateMapZoomLimits();
+        return true;
+      }
+      return false;
+    }
+
+    function autoSwitchLayerByZoom() {
+      if (userManualSelection) return;
+      
+      const zoom = map.getZoom();
+      let targetLayer;
+      
+      if (zoom < 16) {
+        targetLayer = streetLayer;
+      } else if (zoom >= 16 && zoom < 18) {
+        targetLayer = terrainLayer;
+      } else {
+        targetLayer = satelliteLayer;
+      }
+      
+      if (targetLayer !== currentBaseLayer) {
+        map.removeLayer(currentBaseLayer);
+        targetLayer.addTo(map);
+        currentBaseLayer = targetLayer;
+        updateMapZoomLimits();
+      }
+    }
+
+    const hasRestored = restoreUserPreference();
+
+    map.on('zoomend', function() {
+      clampZoomToLayer();
+      
+      if (!userManualSelection) {
+        autoSwitchLayerByZoom();
+      }
+    });
+
+    map.on('baselayerchange', function(event) {
+      const layerName = Object.keys(baseLayers).find(key => baseLayers[key] === event.layer);
+      if (layerName) {
+        saveUserPreference(layerName);
+        currentBaseLayer = event.layer;
+        updateMapZoomLimits();
+      }
+    });
+
+    if (!hasRestored) {
+      updateMapZoomLimits();
+      autoSwitchLayerByZoom();
+    }
+
+    const coordsBox = document.getElementById("coordsBox");
+    const locationsList = document.getElementById("locationsList");
+    let activeMarker = null;
+    const markers = {};
+    let userLocationMarker = null;
+    let userLatLng = null;
+    let navigationLine = null;
+    let lastNearestMarker = null;
+
+    function getDistanceInMeters(latLng1, latLng2) {
+      return latLng1.distanceTo(latLng2);
+    }
+
+    function getMarkerColor(category) {
+      switch(category) {
+        case 'gate': return '#e74c3c';
+        case 'faculty': return '#3498db';
+        case 'department': return '#9b59b6';
+        case 'lecture': return '#1abc9c';
+        case 'administrative': return '#f39c12';
+        case 'healthcare': return '#e74c3c';
+        case 'religious': return '#2c3e50';
+        case 'ict': return '#16a085';
+        case 'hostel': return '#d35400';
+        case 'bank': return '#27ae60';
+        case 'sports': return '#c0392b';
+        case 'commercial': return '#8e44ad';
+        case 'utility': return '#7f8c8d';
+        case 'road': return '#34495e';
+        default: return '#2ecc71';
+      }
+    }
+
+    function getCategoryFromLocation(location) {
+      const name = location.name.toLowerCase();
+      const id = location.id.toLowerCase();
+      
+      if (name.includes('gate') || id.includes('gate')) return 'gate';
+      if (name.includes('road') || name.includes('path') || name.includes('expressway') || name.includes('close') || name.includes('way')) return 'road';
+      if (name.includes('mosque')) return 'religious';
+      if (name.includes('bank')) return 'bank';
+      if (name.includes('sport') || name.includes('court')) return 'sports';
+      if (name.includes('shop') || name.includes('commercial') || name.includes('supermart') || name.includes('ventures') || name.includes('treats') || name.includes('errands') || name.includes('empire') || name.includes('perfume') || name.includes('fashion') || name.includes('salon') || name.includes('store') || name.includes('mart') || name.includes('concept') || name.includes('company') || name.includes('institute') || name.includes('ppl')) return 'commercial';
+      if (name.includes('post office') || name.includes('water') || name.includes('toilet') || name.includes('shuttle') || name.includes('tank')) return 'utility';
+      if (name.includes('hostel') || name.includes('hall') && (name.includes('gbolahan') || name.includes('elias'))) return 'hostel';
+      if (name.includes('ict') || name.includes('cbt') || name.includes('computer') || name.includes('radio') || name.includes('9mobile') || name.includes('sim') || name.includes('registration') || name.includes('it') || name.includes('zenit') || name.includes('blossom')) return 'ict';
+      if (name.includes('medical') || name.includes('health') || name.includes('pharmacy') || name.includes('radiology') || name.includes('automedics') || name.includes('vicky')) return 'healthcare';
+      if (name.includes('senate') || name.includes('admin') || name.includes('affairs') || name.includes('works') || name.includes('catering') || name.includes('liaison') || name.includes('chambers')) return 'administrative';
+      if (name.includes('faculty') || name.includes('school') || name.includes('college') || name.includes('centre of excellence') || name.includes('crcc') || name.includes('post graduate')) return 'faculty';
+      if (name.includes('department') || name.includes('lab') || name.includes('library') || name.includes('fishery') || name.includes('philosophy') || name.includes('islamic') || name.includes('theatre') || name.includes('society') || name.includes('extension') || name.includes('laboratory')) return 'department';
+      if (name.includes('lecture') || name.includes('hall') && !name.includes('bank') && !name.includes('sport') || name.includes('classroom') || name.includes('lh building') || name.includes('annex')) return 'lecture';
+      return 'general';
+    }
+
+    function populateSidebar() {
+      locationsList.innerHTML = '';
+      locations.forEach(location => {
+        const li = document.createElement('li');
+        li.setAttribute('data-location-id', location.id);
+        li.innerHTML = `
+          <div class="location-marker" style="background-color: ${getMarkerColor(getCategoryFromLocation(location))}"></div>
+          <div class="location-name">${location.name}</div>
+        `;
+        li.onclick = () => focusOnMarker(location.id);
+        locationsList.appendChild(li);
+      });
+    }
+
+    function getSavedCoords(locationId, fallback) {
+      const saved = localStorage.getItem(`lasu_${locationId}`);
+      return saved ? JSON.parse(saved) : fallback;
+    }
+
+    function saveCoords(locationId, latlng) {
+      localStorage.setItem(
+        `lasu_${locationId}`,
+        JSON.stringify([latlng.lat, latlng.lng])
+      );
+    }
+
+    function findLocationById(id) {
+      return locations.find(loc => loc.id === id);
+    }
+
+    function createNavigationLine(fromLatLng, toLatLng) {
+      if (navigationLine) {
+        map.removeLayer(navigationLine);
+      }
+      
+      navigationLine = L.polyline([fromLatLng, toLatLng], {
+        color: '#0066cc',
+        weight: 3,
+        opacity: 0.7,
+        dashArray: '10, 5',
+        className: 'nav-line'
+      }).addTo(map);
+      
+      const distance = getDistanceInMeters(fromLatLng, toLatLng);
+      navigationLine.bindTooltip(`Distance: ${Math.round(distance)} meters`, {
+        permanent: false,
+        direction: 'top'
+      });
+      
+      return navigationLine;
+    }
+
+    function initializeMarkers() {
+      locations.forEach(location => {
+        const startCoords = getSavedCoords(location.id, location.coords);
+        const category = getCategoryFromLocation(location);
+        
+        const marker = L.marker(startCoords, { 
+          draggable: true,
+          title: location.name,
+          icon: L.divIcon({
+            className: 'custom-marker',
+            html: `<div style="background-color: ${getMarkerColor(category)}; width: 12px; height: 12px; border-radius: 50%; border: 2px solid white; box-shadow: 0 0 5px rgba(0,0,0,0.5);"></div>`,
+            iconSize: [16, 16],
+            iconAnchor: [8, 8]
+          })
+        }).addTo(map);
+        
+        const popupContent = `<strong>${location.name}</strong><br><button class="nav-btn" onclick="navigateToMarker('${location.id}')">Navigate from my location</button>`;
+        marker.bindPopup(popupContent);
+        
+        marker.locationData = location;
+        
+        marker.on("click", () => {
+          activeMarker = marker;
+          coordsBox.textContent = `${location.name} selected`;
+          saveState('marker', location.id);
+        });
+
+        marker.on("drag", e => {
+          const { lat, lng } = e.target.getLatLng();
+          coordsBox.textContent =
+            `${location.name}: ${lat.toFixed(6)}, ${lng.toFixed(6)}`;
+        });
+
+        marker.on("dragend", e => {
+          const latlng = e.target.getLatLng();
+          saveCoords(location.id, latlng);
+          console.log(
+            `${location.name}: [${latlng.lat.toFixed(6)}, ${latlng.lng.toFixed(6)}]`
+          );
+        });
+
+        markers[location.id] = marker;
+      });
+    }
+
+    function focusOnMarker(locationId) {
+      const marker = markers[locationId];
+      const location = findLocationById(locationId);
+      
+      if (marker && location) {
+        map.setView(marker.getLatLng(), Math.min(17, getCurrentLayerMaxZoom()));
+        marker.openPopup();
+        activeMarker = marker;
+        coordsBox.textContent = `${location.name} selected`;
+        saveState('marker', locationId);
+      } else {
+        console.error(`Marker not found for ID: ${locationId}`);
+        coordsBox.textContent = `Location data not available.`;
+      }
+    }
+
+    function findNearestBuilding(userLatLng) {
+      let nearestDistance = Infinity;
+      let nearestLocation = null;
+      
+      locations.forEach(location => {
+        const marker = markers[location.id];
+        if (marker) {
+          const markerLatLng = marker.getLatLng();
+          const distance = getDistanceInMeters(userLatLng, markerLatLng);
+          
+          if (distance < nearestDistance) {
+            nearestDistance = distance;
+            nearestLocation = location;
+          }
+        }
+      });
+      
+      return { location: nearestLocation, distance: nearestDistance };
+    }
+
+    function navigateToMarker(locationId) {
+      if (!userLatLng) {
+        alert("Please enable location services and click 'Show My Location' first.");
+        return;
+      }
+      
+      const marker = markers[locationId];
+      if (marker) {
+        const markerLatLng = marker.getLatLng();
+        createNavigationLine(userLatLng, markerLatLng);
+        marker.openPopup();
+      }
+    }
+
+    function saveState(type, value) {
+      if (type === 'marker') {
+        localStorage.setItem('lasu_last_marker', value);
+      } else if (type === 'view') {
+        const center = map.getCenter();
+        const zoom = map.getZoom();
+        localStorage.setItem('lasu_map_view', JSON.stringify({
+          center: [center.lat, center.lng],
+          zoom: zoom
+        }));
+      }
+    }
+
+    function restoreState() {
+      const lastMarker = localStorage.getItem('lasu_last_marker');
+      if (lastMarker && markers[lastMarker]) {
+        focusOnMarker(lastMarker);
+        return;
+      }
+      
+      const savedView = localStorage.getItem('lasu_map_view');
+      if (savedView) {
+        try {
+          const { center, zoom } = JSON.parse(savedView);
+          map.setView(center, zoom);
+        } catch(e) {
+          console.log("Could not restore map view");
+        }
+      }
+    }
+
+    document.addEventListener("keydown", e => {
+      if (!activeMarker) return;
+
+      const step = 0.00005;
+      const pos = activeMarker.getLatLng();
+      const locationName = activeMarker.locationData?.name || 'Selected marker';
+
+      if (e.key === "ArrowUp") pos.lat += step;
+      if (e.key === "ArrowDown") pos.lat -= step;
+      if (e.key === "ArrowLeft") pos.lng -= step;
+      if (e.key === "ArrowRight") pos.lng += step;
+
+      activeMarker.setLatLng(pos);
+      coordsBox.textContent =
+        `${locationName}: ${pos.lat.toFixed(6)}, ${pos.lng.toFixed(6)}`;
+      
+      if (activeMarker.locationData) {
+        saveCoords(activeMarker.locationData.id, pos);
+      }
+    });
+
+    function locateUser() {
+      navigator.geolocation.getCurrentPosition(position => {
+        const userCoords = [
+          position.coords.latitude,
+          position.coords.longitude
+        ];
+        
+        userLatLng = L.latLng(userCoords[0], userCoords[1]);
+        const lasuCenterLatLng = L.latLng(lasuCenter[0], lasuCenter[1]);
+        const distanceFromCampus = getDistanceInMeters(userLatLng, lasuCenterLatLng);
+        
+        if (distanceFromCampus > 2000) {
+          coordsBox.textContent = "You are outside LASU campus. Showing campus instead.";
+          map.setView(lasuCenter, Math.min(17, getCurrentLayerMaxZoom()));
+          return;
+        }
+
+        if (userLocationMarker) {
+          map.removeLayer(userLocationMarker);
+        }
+
+        const blueDotIcon = L.divIcon({
+          className: 'leaflet-pulsing-icon',
+          iconSize: [20, 20],
+          iconAnchor: [10, 10]
+        });
+
+        userLocationMarker = L.marker(userCoords, { icon: blueDotIcon })
+          .addTo(map)
+          .bindPopup("You are here")
+          .openPopup();
+
+        map.setView(userCoords, Math.min(17, getCurrentLayerMaxZoom()));
+        
+        const nearest = findNearestBuilding(userLatLng);
+        if (nearest.location) {
+          coordsBox.textContent = `Nearest building: ${nearest.location.name} – ${Math.round(nearest.distance)} meters away`;
+          if (lastNearestMarker) {
+            lastNearestMarker.closePopup();
+          }
+          markers[nearest.location.id].openPopup();
+          lastNearestMarker = markers[nearest.location.id];
+        }
+        
+        saveState('view', null);
+      }, () => {
+        coordsBox.textContent = "Location access denied or unavailable";
+      });
+    }
+
+    function searchLocations() {
+      const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+      const listItems = document.querySelectorAll('#locationsList li');
+      let firstMatch = null;
+      
+      listItems.forEach(item => {
+        const locationId = item.getAttribute('data-location-id');
+        const location = findLocationById(locationId);
+        const name = location.name.toLowerCase();
+        
+        if (name.includes(searchTerm)) {
+          item.style.display = 'flex';
+          if (!firstMatch) firstMatch = locationId;
+        } else {
+          item.style.display = 'none';
+        }
+      });
+      
+      if (firstMatch && searchTerm.length > 0) {
+        focusOnMarker(firstMatch);
+      }
+    }
+
+    document.getElementById('searchInput').addEventListener('input', searchLocations);
+    
+    map.on('moveend', function() {
+      saveState('view', null);
+    });
+
+    populateSidebar();
+    initializeMarkers();
+    restoreState();
+  </script>
+</body>
+</html>
