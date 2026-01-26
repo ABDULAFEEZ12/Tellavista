@@ -2,11 +2,8 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8" />
-    <title>Sign Up - Nelavista</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
-    <meta http-equiv="Pragma" content="no-cache" />
-    <meta http-equiv="Expires" content="0" />
+    <title>Sign Up</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     
     <style>
     /* ===== CSS VARIABLES & RESET ===== */
@@ -89,32 +86,6 @@
       }
       50% {
         opacity: 0.9;
-      }
-    }
-
-    @keyframes checkmarkAppear {
-      0% {
-        opacity: 0;
-        transform: scale(0.5) rotate(-45deg);
-      }
-      50% {
-        opacity: 1;
-        transform: scale(1.1) rotate(-45deg);
-      }
-      100% {
-        opacity: 1;
-        transform: scale(1) rotate(-45deg);
-      }
-    }
-
-    @keyframes requirementCheck {
-      0% {
-        opacity: 0;
-        transform: translateX(-10px);
-      }
-      100% {
-        opacity: 1;
-        transform: translateX(0);
       }
     }
 
@@ -226,14 +197,6 @@
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
     }
 
-    .input-wrapper.valid {
-      border-color: rgba(255, 255, 255, 0.5);
-    }
-
-    .input-wrapper.invalid {
-      border-color: rgba(255, 100, 100, 0.5);
-    }
-
     input[type="text"],
     input[type="email"],
     input[type="password"] {
@@ -252,56 +215,12 @@
       transition: opacity 0.3s ease;
     }
 
-    /* ===== PASSWORD REQUIREMENTS ===== */
-    .password-requirements {
-      margin-top: 1rem;
-      padding: 1rem;
-      background: rgba(255, 255, 255, 0.05);
-      border-radius: 10px;
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      opacity: 0;
-      max-height: 0;
-      overflow: hidden;
-      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-
-    .password-requirements.show {
-      opacity: 1;
-      max-height: 300px;
-      margin-top: 1rem;
-    }
-
-    .requirement-item {
-      display: flex;
-      align-items: center;
-      margin-bottom: 0.5rem;
-      font-size: 0.85rem;
+    /* ===== PASSWORD HINT ===== */
+    .password-hint {
       color: #a0a0a0;
-      transition: all 0.3s ease;
-      opacity: 0;
-      transform: translateX(-10px);
-    }
-
-    .requirement-item.show {
-      opacity: 1;
-      transform: translateX(0);
-    }
-
-    .requirement-item.valid {
-      color: #e0e0e0;
-    }
-
-    .requirement-item::before {
-      content: '✗';
-      margin-right: 8px;
-      font-size: 0.9rem;
-      transition: all 0.3s ease;
-    }
-
-    .requirement-item.valid::before {
-      content: '✓';
-      color: #ffffff;
-      animation: checkmarkAppear 0.3s ease-out forwards;
+      font-size: 0.85rem;
+      margin-top: 0.5rem;
+      padding-left: 0.5rem;
     }
 
     /* ===== BUTTON STYLES ===== */
@@ -322,18 +241,13 @@
       will-change: transform, opacity;
     }
 
-    .submit-btn:hover:not(:disabled) {
+    .submit-btn:hover {
       opacity: 0.9;
       transform: translateY(-1px);
     }
 
-    .submit-btn:active:not(:disabled) {
+    .submit-btn:active {
       transform: translateY(0);
-    }
-
-    .submit-btn:disabled {
-      opacity: 0.3;
-      cursor: not-allowed;
     }
 
     /* ===== LINK STYLES ===== */
@@ -373,78 +287,6 @@
 
     .link-section a:hover::after {
       width: 100%;
-    }
-
-    /* ===== FLASH MESSAGES ===== */
-    .flashes {
-      list-style: none;
-      padding: 0;
-      margin-bottom: 1.5rem;
-      opacity: 0;
-      animation: fadeInUp 0.6s ease-out forwards;
-    }
-
-    .flashes li {
-      background: var(--success-color);
-      color: white;
-      padding: 1rem 1.2rem;
-      margin-bottom: 0.8rem;
-      border-radius: 12px;
-      font-size: 0.95rem;
-      font-weight: 500;
-      text-align: center;
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      animation: subtlePulse 2s ease-in-out infinite;
-    }
-
-    .flashes li.error {
-      background: var(--error-color);
-      border-color: rgba(255, 100, 100, 0.3);
-    }
-
-    /* ===== LOADING STATE ===== */
-    .loading {
-      position: relative;
-      pointer-events: none;
-    }
-
-    .loading::after {
-      content: '';
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      width: 20px;
-      height: 20px;
-      margin: -10px 0 0 -10px;
-      border: 2px solid transparent;
-      border-top-color: white;
-      border-radius: 50%;
-      animation: spin 0.8s linear infinite;
-    }
-
-    @keyframes spin {
-      to {
-        transform: rotate(360deg);
-      }
-    }
-
-    /* ===== SCROLLBAR ===== */
-    ::-webkit-scrollbar {
-      width: 6px;
-    }
-
-    ::-webkit-scrollbar-track {
-      background: transparent;
-    }
-
-    ::-webkit-scrollbar-thumb {
-      background: rgba(255, 255, 255, 0.1);
-      border-radius: 3px;
-      transition: background 0.3s ease;
-    }
-
-    ::-webkit-scrollbar-thumb:hover {
-      background: rgba(255, 255, 255, 0.2);
     }
 
     /* ===== RESPONSIVE DESIGN ===== */
@@ -491,10 +333,6 @@
         padding: 0.9rem;
         border-radius: 10px;
       }
-
-      .password-requirements {
-        padding: 0.8rem;
-      }
     }
 
     @media (max-width: 480px) {
@@ -510,10 +348,6 @@
       .signup-container h1 {
         font-size: 1.6rem;
       }
-
-      .requirement-item {
-        font-size: 0.8rem;
-      }
     }
     </style>
 </head>
@@ -524,73 +358,55 @@
     </div>
 
     <div class="signup-container">
-        {% with messages = get_flashed_messages() %}
-          {% if messages %}
-            <ul class="flashes">
-              {% for message in messages %}
-                <li class="{{ 'error' if 'error' in message|lower or 'invalid' in message|lower or 'failed' in message|lower else '' }}">{{ message }}</li>
-              {% endfor %}
-            </ul>
-          {% endif %}
-        {% endwith %}
-        
         <h1>Create Your Account</h1>
         <p class="subtitle">Join our community of learners</p>
         
-        <form method="POST" action="/signup" autocomplete="off" id="signupForm">
+        <form method="POST" action="{{ url_for('signup') }}" autocomplete="off">
             <div class="form-group">
                 <label for="username">Username</label>
-                <div class="input-wrapper" id="usernameWrapper">
+                <div class="input-wrapper">
                     <input 
                         type="text" 
                         id="username" 
                         name="username" 
                         required 
-                        autocomplete="username"
                         placeholder="Choose a username"
                         autocapitalize="none"
                         maxlength="30"
                     />
                 </div>
             </div>
+            
             <div class="form-group">
                 <label for="email">Email</label>
-                <div class="input-wrapper" id="emailWrapper">
+                <div class="input-wrapper">
                     <input 
                         type="email" 
                         id="email" 
                         name="email" 
                         required 
-                        autocomplete="email"
                         placeholder="Enter your email"
                         autocapitalize="none"
                     />
                 </div>
             </div>
+            
             <div class="form-group">
                 <label for="password">Password</label>
-                <div class="input-wrapper" id="passwordWrapper">
+                <div class="input-wrapper">
                     <input 
                         type="password" 
                         id="password" 
                         name="password" 
                         required 
-                        autocomplete="new-password"
-                        placeholder="Create a secure password"
                         minlength="8"
+                        placeholder="Create a secure password"
                     />
                 </div>
-                
-                <div class="password-requirements" id="passwordRequirements">
-                    <div class="requirement-item" id="reqLength">At least 8 characters</div>
-                    <div class="requirement-item" id="reqUppercase">One uppercase letter</div>
-                    <div class="requirement-item" id="reqLowercase">One lowercase letter</div>
-                    <div class="requirement-item" id="reqDigit">One digit (0-9)</div>
-                    <div class="requirement-item" id="reqSymbol">One symbol (!@#$%^&*)</div>
-                </div>
+                <div class="password-hint">At least 8 characters</div>
             </div>
-            
-            <button type="submit" class="submit-btn" id="submitBtn">Create Account</button>
+
+            <button type="submit" class="submit-btn">Create Account</button>
         </form>
         
         <div class="link-section">
@@ -599,134 +415,9 @@
     </div>
 
     <script>
+    // Only for UI animations - NO validation logic
     document.addEventListener('DOMContentLoaded', function() {
-        // Elements
-        const form = document.getElementById('signupForm');
-        const submitBtn = document.getElementById('submitBtn');
-        const passwordInput = document.getElementById('password');
-        const passwordRequirements = document.getElementById('passwordRequirements');
-        const requirementItems = {
-            length: document.getElementById('reqLength'),
-            uppercase: document.getElementById('reqUppercase'),
-            lowercase: document.getElementById('reqLowercase'),
-            digit: document.getElementById('reqDigit'),
-            symbol: document.getElementById('reqSymbol')
-        };
-        const inputWrappers = {
-            username: document.getElementById('usernameWrapper'),
-            email: document.getElementById('emailWrapper'),
-            password: document.getElementById('passwordWrapper')
-        };
-
-        // Show password requirements on focus
-        passwordInput.addEventListener('focus', function() {
-            passwordRequirements.classList.add('show');
-            // Animate requirement items one by one
-            Object.values(requirementItems).forEach((item, index) => {
-                setTimeout(() => {
-                    item.classList.add('show');
-                }, index * 100);
-            });
-        });
-
-        // Hide password requirements on blur if empty
-        passwordInput.addEventListener('blur', function() {
-            if (!this.value) {
-                setTimeout(() => {
-                    if (document.activeElement !== passwordInput) {
-                        passwordRequirements.classList.remove('show');
-                        Object.values(requirementItems).forEach(item => {
-                            item.classList.remove('show');
-                        });
-                    }
-                }, 200);
-            }
-        });
-
-        // Real-time password validation
-        passwordInput.addEventListener('input', function() {
-            const password = this.value;
-            
-            // Check requirements
-            const hasLength = password.length >= 8;
-            const hasUppercase = /[A-Z]/.test(password);
-            const hasLowercase = /[a-z]/.test(password);
-            const hasDigit = /\d/.test(password);
-            const hasSymbol = /[!@#$%^&*]/.test(password);
-            
-            // Update requirement items
-            updateRequirement(requirementItems.length, hasLength);
-            updateRequirement(requirementItems.uppercase, hasUppercase);
-            updateRequirement(requirementItems.lowercase, hasLowercase);
-            updateRequirement(requirementItems.digit, hasDigit);
-            updateRequirement(requirementItems.symbol, hasSymbol);
-            
-            // Update input wrapper style
-            const isValid = hasLength && hasUppercase && hasLowercase && hasDigit && hasSymbol;
-            inputWrappers.password.classList.toggle('valid', isValid);
-            inputWrappers.password.classList.toggle('invalid', !isValid && password.length > 0);
-            
-            // Update submit button
-            validateForm();
-        });
-
-        function updateRequirement(element, isValid) {
-            if (element) {
-                element.classList.toggle('valid', isValid);
-            }
-        }
-
-        // Form validation
-        function validateForm() {
-            const username = document.getElementById('username').value.trim();
-            const email = document.getElementById('email').value.trim();
-            const password = document.getElementById('password').value;
-            
-            const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-            const passwordValid = password.length >= 8 &&
-                                /[A-Z]/.test(password) &&
-                                /[a-z]/.test(password) &&
-                                /\d/.test(password) &&
-                                /[!@#$%^&*]/.test(password);
-            
-            // Update input styles
-            inputWrappers.username.classList.toggle('valid', username.length >= 3);
-            inputWrappers.username.classList.toggle('invalid', username.length > 0 && username.length < 3);
-            
-            inputWrappers.email.classList.toggle('valid', emailValid);
-            inputWrappers.email.classList.toggle('invalid', email.length > 0 && !emailValid);
-            
-            // Enable/disable submit button
-            submitBtn.disabled = !(username.length >= 3 && emailValid && passwordValid);
-        }
-
-        // Input validation on change
-        document.getElementById('username').addEventListener('input', validateForm);
-        document.getElementById('email').addEventListener('input', validateForm);
-
-        // Form submission
-        form.addEventListener('submit', function(e) {
-            if (submitBtn.disabled) {
-                e.preventDefault();
-                // Add gentle shake animation to invalid fields
-                Object.values(inputWrappers).forEach(wrapper => {
-                    if (wrapper.classList.contains('invalid')) {
-                        wrapper.style.animation = 'none';
-                        setTimeout(() => {
-                            wrapper.style.animation = 'slideIn 0.6s ease-out, shake 0.5s ease-in-out';
-                        }, 10);
-                    }
-                });
-                return;
-            }
-            
-            // Add loading state
-            submitBtn.classList.add('loading');
-            submitBtn.innerHTML = '';
-            submitBtn.disabled = true;
-        });
-
-        // Input focus effects
+        // Simple input focus effect
         const inputs = document.querySelectorAll('input');
         inputs.forEach(input => {
             input.addEventListener('focus', function() {
@@ -739,46 +430,12 @@
             
             input.addEventListener('blur', function() {
                 const wrapper = this.closest('.input-wrapper');
-                if (wrapper && !wrapper.classList.contains('valid') && !wrapper.classList.contains('invalid')) {
+                if (wrapper) {
                     wrapper.style.borderColor = 'rgba(255, 255, 255, 0.1)';
                     wrapper.style.transform = 'translateY(0)';
                 }
             });
         });
-
-        // Add shake animation for validation
-        const style = document.createElement('style');
-        style.textContent = `
-            @keyframes shake {
-                0%, 100% { transform: translateX(0); }
-                10%, 30%, 50%, 70%, 90% { transform: translateX(-3px); }
-                20%, 40%, 60%, 80% { transform: translateX(3px); }
-            }
-        `;
-        document.head.appendChild(style);
-
-        // Auto-focus first input on load
-        setTimeout(() => {
-            const firstInput = document.getElementById('username');
-            if (firstInput) {
-                firstInput.focus();
-            }
-        }, 800);
-
-        // Handle Android WebView specific behavior
-        if (/Android/.test(navigator.userAgent)) {
-            document.body.style.webkitOverflowScrolling = 'touch';
-        }
-    });
-
-    // Handle page visibility for better Android experience
-    document.addEventListener('visibilitychange', function() {
-        if (!document.hidden) {
-            document.body.style.animation = 'none';
-            setTimeout(() => {
-                document.body.style.animation = 'fadeIn 0.6s ease-out forwards';
-            }, 10);
-        }
     });
     </script>
 </body>
