@@ -19,5 +19,8 @@ Pillow
 beautifulsoup4
 lxml
 sqlalchemy
+docling>=1.0.0
+python-docx>=1.1.0
+pillow>=10.0.0
 
 
