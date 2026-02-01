@@ -4,6 +4,22 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Nelavista - AI Educational Companion</title>
+
+<!-- MathJax for LaTeX rendering in chat -->
+<script>
+  window.MathJax = {
+    tex: {
+      inlineMath: [['$', '$'], ['\\(', '\\)']],
+      displayMath: [['$$', '$$'], ['\\[', '\\]']]
+    },
+    options: {
+      skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre']
+    },
+    svg: { fontCache: 'global' }
+  };
+</script>
+<script id="MathJax-script" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+
 <style>
 /* ===== CSS VARIABLES & RESET ===== */
 :root {
@@ -152,11 +168,12 @@ body.light-mode #theme-toggle:hover {
 #side-menu a[href*="profile"]::before { content: '👤'; }
 #side-menu a[href*="talk"]::before { content: '🤖'; }
 #side-menu a[href*="live"]::before { content: '📡'; }
+#side-menu a[href*="campus-map"]::before { content: '🗺️'; }
 #side-menu a[href*="materials"]::before { content: '📚'; }
+#side-menu a[href*="analyze"]::before { content: '📊'; }
 #side-menu a[href*="reels"]::before { content: '🎬'; }
 #side-menu a[href*="CBT"]::before { content: '📝'; }
 #side-menu a[href*="about"]::before { content: 'ℹ️'; }
-#side-menu a[href*="campus-map"]::before { content: '📡'; }
 #side-menu a[href*="settings"]::before { content: '⚙️'; }
 #side-menu a[href*="privacy"]::before { content: '🔒'; }
 #side-menu a[href*="logout"]::before { content: '🚪'; }
@@ -265,11 +282,6 @@ body.light-mode .chip:hover {
 .chip::before {
   margin-right: 8px;
 }
-
-.chip:nth-child(1)::before { content: '🤖'; }
-.chip:nth-child(2)::before { content: '📚'; }
-.chip:nth-child(3)::before { content: '🧠'; }
-.chip:nth-child(5)::before { content: '🎥'; }
 
 /* ===== CHAT CONTAINER ===== */
 .chat-container {
@@ -738,6 +750,7 @@ body.light-mode ::-webkit-scrollbar-thumb:hover {
   <ul>
     <li><a href="/profile">Profile</a></li>
     <li><a href="/talk-to-nelavista">Talk to Nelavista</a></li>
+    <li><a href="/analyze">Analyze Materials</a></li>
     <li><a href="/live-meeting">Live Meeting</a></li>
     <li><a href="/materials">Study Materials</a></li>
     <li><a href="/reels">Reels</a></li>
@@ -762,6 +775,9 @@ body.light-mode ::-webkit-scrollbar-thumb:hover {
     <div class="chip" onclick="handleChipClick('ai')">Study with AI</div>
     <div class="chip" onclick="handleChipClick('materials')">Materials</div>
     <div class="chip" onclick="handleChipClick('cbt')">Practice CBT</div>
+    <div class="chip" onclick="handleChipClick('/campus-map')">Lasu Map</div>
+    <div class="chip" onclick="window.location.href='/analyze'">Analyze Materials</div>
+    <div class="chip" onclick="handleChipClick('reels')">Reels</div>
   </div>
 </div>
 
@@ -1019,6 +1035,23 @@ function addMessage(text, sender = 'user') {
       behavior: 'smooth'
     });
   }, 50);
+  
+  // Render LaTeX in the new message
+  renderMathInElement(messageDiv);
+}
+
+// ===== MathJax LaTeX RENDERING =====
+function renderMathInElement(element) {
+  if (window.MathJax && MathJax.typesetPromise) {
+    MathJax.typesetPromise([element]).catch(err => console.error('MathJax typeset error:', err));
+  } else {
+    // If MathJax isn't loaded, wait and try again
+    setTimeout(() => {
+      if (window.MathJax && MathJax.typesetPromise) {
+        MathJax.typesetPromise([element]).catch(err => console.error('MathJax typeset error:', err));
+      }
+    }, 100);
+  }
 }
 
 function showTypingIndicator() {
@@ -1417,5 +1450,3 @@ if (window.location.hash === '#chat') {
 </script>
 </body>
 </html>
-
-
