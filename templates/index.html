@@ -208,7 +208,7 @@ body.light-mode #theme-toggle:hover {
   align-items: center;
   justify-content: center;
   padding: 80px 20px 100px;
-  transition: opacity 0.5s ease, transform 0.5s ease;
+  transition: opacity 0.3s ease, transform 0.3s ease;
   z-index: 1;
 }
 
@@ -775,7 +775,7 @@ body.light-mode ::-webkit-scrollbar-thumb:hover {
     <div class="chip" onclick="handleChipClick('ai')">Study with AI</div>
     <div class="chip" onclick="window.location.href='/analyze'">Analyze Materials</div>
     <div class="chip" onclick="handleChipClick('materials')">Materials</div>
-    <div class="chip" onclick="handleChipClick('cbt')">Practice CBT</div
+    <div class="chip" onclick="handleChipClick('cbt')">Practice CBT</div>
   </div>
 </div>
 
@@ -861,6 +861,14 @@ function addWelcomeMessage() {
 
 function setupEventListeners() {
   const chatInput = document.getElementById('chatInput');
+  
+  // Add focus listener for chat input
+  chatInput.addEventListener('focus', () => {
+    if (!state.isChatMode) {
+      enterChatMode();
+    }
+  });
+  
   chatInput.addEventListener('input', updateSendButton);
   
   chatInput.addEventListener('keydown', (e) => {
@@ -936,6 +944,7 @@ function handleChipClick(type) {
   
   const chipActions = {
     'ai': () => {
+      // Enter chat mode first, then set placeholder
       enterChatMode();
       const suggestions = [
         "Explain quantum physics in simple terms",
@@ -975,17 +984,24 @@ function enterChatMode() {
   if (!state.isChatMode) {
     state.isChatMode = true;
     
-    document.getElementById('logoSection').classList.add('hidden');
-    document.getElementById('chatContainer').classList.add('active');
+    // Immediately hide the landing section
+    const logoSection = document.getElementById('logoSection');
+    logoSection.style.opacity = '0';
+    logoSection.style.pointerEvents = 'none';
+    logoSection.style.transform = 'translateY(-20px)';
     
+    // Show chat container
+    const chatContainer = document.getElementById('chatContainer');
+    chatContainer.classList.add('active');
+    
+    // Scroll to bottom and focus input
     setTimeout(() => {
       const messagesDiv = document.getElementById('messages');
-      messagesDiv.scrollTop = messagesDiv.scrollHeight;
-    }, 100);
-    
-    setTimeout(() => {
+      if (messagesDiv) {
+        messagesDiv.scrollTop = messagesDiv.scrollHeight;
+      }
       document.getElementById('chatInput').focus();
-    }, 500); // Longer delay for smoother transition
+    }, 50);
     
     // Smooth scroll to bottom on mobile
     if (window.innerWidth <= 768) {
@@ -993,6 +1009,11 @@ function enterChatMode() {
         window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
       }, 300);
     }
+    
+    // Prevent logo section from being visible again
+    setTimeout(() => {
+      logoSection.style.display = 'none';
+    }, 500);
   }
 }
 
@@ -1448,4 +1469,3 @@ if (window.location.hash === '#chat') {
 </script>
 </body>
 </html>
-
