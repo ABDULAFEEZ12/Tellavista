@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Nelavista LASU Campus Map</title>
+  <title>LASU Campus Map - Student Navigation Tool</title>
   
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
@@ -13,49 +13,52 @@
       margin: 0;
       padding: 0;
       box-sizing: border-box;
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
     }
 
     body {
-      background-color: #fafafa;
+      background-color: #f8f9fa;
       color: #333;
       line-height: 1.6;
       display: flex;
       flex-direction: column;
       min-height: 100vh;
       overflow-x: hidden;
+      -webkit-tap-highlight-color: transparent;
     }
 
     .header {
-      background-color: #fff;
-      border-bottom: 1px solid #e0e0e0;
-      padding: 1rem 1.2rem;
-      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03);
+      background: linear-gradient(135deg, #1a237e 0%, #283593 100%);
+      color: white;
+      padding: 1.2rem 1.5rem;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      position: relative;
+      z-index: 1000;
     }
 
     .header h1 {
-      font-size: 1.4rem;
+      font-size: 1.5rem;
       font-weight: 700;
-      color: #222;
-      margin-bottom: 0.3rem;
+      margin-bottom: 0.5rem;
+      letter-spacing: -0.3px;
     }
 
     .header p {
-      font-size: 0.85rem;
-      color: #666;
+      font-size: 0.9rem;
+      opacity: 0.9;
       max-width: 600px;
+      margin-bottom: 0.8rem;
     }
 
     .header .lasu-badge {
       display: inline-block;
-      background-color: #111;
+      background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
       color: white;
-      font-size: 0.7rem;
+      font-size: 0.75rem;
       font-weight: 600;
-      padding: 0.2rem 0.5rem;
-      border-radius: 3px;
-      margin-top: 0.4rem;
-      letter-spacing: 0.5px;
+      padding: 0.3rem 0.8rem;
+      border-radius: 20px;
+      box-shadow: 0 2px 8px rgba(238, 90, 36, 0.3);
     }
 
     .container {
@@ -74,7 +77,7 @@
     #map {
       flex: 1;
       min-height: 50vh;
-      background-color: #e9e9e9;
+      background-color: #e9ecef;
       width: 100%;
       z-index: 1;
     }
@@ -89,124 +92,169 @@
       width: 100%;
       background-color: #fff;
       border-top: 1px solid #e0e0e0;
-      padding: 1.2rem;
+      padding: 1.5rem;
       overflow-y: auto;
       max-height: 50vh;
       z-index: 1000;
+      box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.05);
     }
 
     @media (min-width: 768px) {
       .sidebar {
-        width: 320px;
+        width: 360px;
         max-width: 100%;
         border-top: none;
         border-left: 1px solid #e0e0e0;
         max-height: calc(100vh - 120px);
+        box-shadow: none;
       }
     }
 
     .sidebar h2 {
-      font-size: 1.1rem;
-      font-weight: 600;
-      margin-bottom: 1rem;
-      color: #222;
-      padding-bottom: 0.5rem;
-      border-bottom: 2px solid #111;
+      font-size: 1.3rem;
+      font-weight: 700;
+      margin-bottom: 1.2rem;
+      color: #1a237e;
+      padding-bottom: 0.8rem;
+      border-bottom: 2px solid #1a237e;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .sidebar h2 i {
+      color: #ee5a24;
     }
 
     .controls {
-      margin-bottom: 1.5rem;
+      margin-bottom: 1.8rem;
     }
 
     .btn {
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      background-color: #111;
+      background: linear-gradient(135deg, #1a237e 0%, #283593 100%);
       color: white;
       border: none;
-      padding: 0.9rem 1.2rem;
-      font-size: 0.95rem;
-      font-weight: 500;
-      border-radius: 6px;
+      padding: 1rem 1.5rem;
+      font-size: 1rem;
+      font-weight: 600;
+      border-radius: 10px;
       cursor: pointer;
-      transition: all 0.2s ease;
+      transition: all 0.3s ease;
       width: 100%;
-      margin-bottom: 0.8rem;
-      touch-action: manipulation;
+      margin-bottom: 1rem;
+      box-shadow: 0 4px 12px rgba(26, 35, 126, 0.2);
     }
 
     .btn:hover, .btn:active {
-      background-color: #333;
+      background: linear-gradient(135deg, #283593 0%, #3949ab 100%);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(26, 35, 126, 0.3);
     }
 
     .btn:active {
-      transform: scale(0.98);
+      transform: translateY(0);
     }
 
     .btn i {
-      margin-right: 0.5rem;
-      font-weight: bold;
+      margin-right: 0.8rem;
+      font-size: 1.1rem;
     }
 
-    .coords-box {
-      font-size: 0.85rem;
-      padding: 0.8rem;
-      border-radius: 6px;
-      margin-bottom: 1.2rem;
-      background-color: #f8f8f8;
-      color: #333;
-      border-left: 3px solid #111;
-      min-height: 50px;
+    .status-box {
+      font-size: 0.9rem;
+      padding: 1rem;
+      border-radius: 10px;
+      margin-bottom: 1.5rem;
+      background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+      color: #495057;
+      border-left: 4px solid #1a237e;
+      min-height: 60px;
       display: flex;
       align-items: center;
-      word-break: break-all;
+      box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
     }
 
-    .info-panel {
-      margin-top: 1.5rem;
-      padding-top: 1.2rem;
-      border-top: 1px solid #eee;
+    .search-container {
+      margin-bottom: 1.5rem;
+      position: relative;
     }
 
-    .info-panel p {
-      font-size: 0.8rem;
-      color: #777;
-      margin-bottom: 0.5rem;
-      line-height: 1.4;
+    .search-input {
+      width: 100%;
+      padding: 1rem 1rem 1rem 3rem;
+      border: 2px solid #e0e0e0;
+      border-radius: 10px;
+      font-size: 1rem;
+      background-color: #fff;
+      transition: all 0.3s ease;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    }
+
+    .search-input:focus {
+      outline: none;
+      border-color: #1a237e;
+      box-shadow: 0 4px 12px rgba(26, 35, 126, 0.15);
+    }
+
+    .search-icon {
+      position: absolute;
+      left: 1rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #6c757d;
+      font-size: 1.1rem;
     }
 
     .locations-list h3 {
-      font-size: 1rem;
-      font-weight: 600;
-      margin-bottom: 0.8rem;
-      color: #444;
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin-bottom: 1rem;
+      color: #495057;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .locations-list h3 i {
+      color: #1a237e;
     }
 
     .locations-list ul {
       list-style-type: none;
-      max-height: 200px;
+      max-height: 220px;
       overflow-y: auto;
+      border-radius: 10px;
+      border: 1px solid #e0e0e0;
+      background-color: #fff;
     }
 
     @media (min-width: 768px) {
       .locations-list ul {
-        max-height: 300px;
+        max-height: 320px;
       }
     }
 
     .locations-list li {
-      padding: 0.9rem 0;
+      padding: 1rem 1.2rem;
       border-bottom: 1px solid #f0f0f0;
       cursor: pointer;
       display: flex;
       align-items: center;
-      transition: background-color 0.2s;
-      touch-action: manipulation;
+      transition: all 0.2s ease;
+      -webkit-tap-highlight-color: transparent;
     }
 
-    .locations-list li:hover, .locations-list li:active {
-      background-color: #f9f9f9;
+    .locations-list li:hover {
+      background-color: #f8f9fa;
+      transform: translateX(4px);
+    }
+
+    .locations-list li:active {
+      background-color: #e9ecef;
+      transform: translateX(2px);
     }
 
     .locations-list li:last-child {
@@ -214,29 +262,36 @@
     }
 
     .location-marker {
-      width: 12px;
-      height: 12px;
+      width: 14px;
+      height: 14px;
       border-radius: 50%;
-      margin-right: 0.8rem;
+      margin-right: 1rem;
       flex-shrink: 0;
-      background-color: #111;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
     }
 
     .location-name {
       font-weight: 500;
-      font-size: 0.95rem;
+      font-size: 1rem;
+      color: #333;
     }
 
     .footer {
-      background-color: #111;
-      color: #aaa;
+      background-color: #1a237e;
+      color: rgba(255, 255, 255, 0.85);
       text-align: center;
-      padding: 1rem;
-      font-size: 0.75rem;
-      border-top: 1px solid #333;
+      padding: 1.2rem;
+      font-size: 0.8rem;
+      border-top: 1px solid #3949ab;
     }
 
     .footer a {
+      color: #ffd54f;
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+
+    .footer a:hover {
       color: #fff;
       text-decoration: underline;
     }
@@ -246,29 +301,48 @@
     }
 
     .leaflet-control-attribution {
-      background-color: rgba(255, 255, 255, 0.9) !important;
-      color: #333 !important;
+      background-color: rgba(255, 255, 255, 0.95) !important;
+      color: #495057 !important;
       font-size: 0.7rem !important;
-      padding: 2px 5px !important;
+      padding: 4px 8px !important;
+      border-radius: 4px !important;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
     }
 
     .leaflet-control-zoom a {
       background-color: #fff;
-      color: #333;
-      border-color: #ddd;
-      width: 40px !important;
-      height: 40px !important;
-      line-height: 40px !important;
-      font-size: 1.2rem !important;
+      color: #495057;
+      border: 1px solid #dee2e6;
+      width: 44px !important;
+      height: 44px !important;
+      line-height: 44px !important;
+      font-size: 1.3rem !important;
+      font-weight: bold;
+      transition: all 0.2s ease;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
     }
 
     .leaflet-control-zoom a:hover {
-      background-color: #f5f5f5;
+      background-color: #f8f9fa;
+      color: #1a237e;
     }
 
     .leaflet-pulsing-icon {
       border-radius: 100%;
-      box-shadow: 0 0 0 5px rgba(0, 102, 204, 0.4);
+      box-shadow: 0 0 0 8px rgba(26, 35, 126, 0.3);
+      animation: pulse 1.5s infinite;
+    }
+
+    @keyframes pulse {
+      0% {
+        box-shadow: 0 0 0 0 rgba(26, 35, 126, 0.4);
+      }
+      70% {
+        box-shadow: 0 0 0 10px rgba(26, 35, 126, 0);
+      }
+      100% {
+        box-shadow: 0 0 0 0 rgba(26, 35, 126, 0);
+      }
     }
 
     .leaflet-pulsing-icon::before {
@@ -277,87 +351,75 @@
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
-      width: 12px;
-      height: 12px;
-      background-color: #0066cc;
+      width: 16px;
+      height: 16px;
+      background-color: #1a237e;
       border-radius: 100%;
     }
 
-    .key-hint {
-      font-size: 0.75rem;
-      color: #666;
-      margin-top: 1rem;
-      padding: 0.7rem;
-      background: #f5f5f5;
-      border-radius: 6px;
-      line-height: 1.4;
-    }
-
     .leaflet-control-layers-toggle {
-      background-image: url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTEyIDJMMiA3TDEyIDEyTDIyIDdMMTIgMloiIHN0cm9rZT0iIzMzMyIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiLz4KPHBhdGggZD0iTTIgMTdMMTIgMjJMMjIgMTciIHN0cm9rZT0iIzMzMyIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiLz4KPHBhdGggZD0iTTIgMTJMMTIgMTdMMjIgMTIiIHN0cm9rZT0iIzMzMyIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiLz4KPC9zdmc+Cg==') !important;
-      width: 40px !important;
-      height: 40px !important;
-    }
-
-    .search-container {
-      margin-bottom: 1rem;
-    }
-
-    .search-input {
-      width: 100%;
-      padding: 0.9rem;
-      border: 1px solid #ddd;
-      border-radius: 6px;
-      font-size: 0.95rem;
-      margin-bottom: 0.5rem;
-      touch-action: manipulation;
-    }
-
-    .search-input:focus {
-      outline: none;
-      border-color: #111;
+      background-image: url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTEyIDJMMiA3TDEyIDEyTDIyIDdMMTIgMloiIHN0cm9rZT0iIzAwMCIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiLz4KPHBhdGggZD0iTTIgMTdMMTIgMjJMMjIgMTciIHN0cm9rZT0iIzAwMCIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiLz4KPHBhdGggZD0iTTIgMTJMMTIgMTdMMjIgMTIiIHN0cm9rZT0iIzAwMCIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiLz4KPC9zdmc+Cg==') !important;
+      width: 44px !important;
+      height: 44px !important;
+      background-color: #fff !important;
+      border: 1px solid #dee2e6 !important;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
     }
 
     .nav-btn {
-      background-color: #0066cc;
+      background: linear-gradient(135deg, #ee5a24 0%, #ff6b6b 100%);
       color: white;
       border: none;
-      padding: 0.6rem 0.9rem;
-      border-radius: 4px;
+      padding: 0.7rem 1.2rem;
+      border-radius: 8px;
       cursor: pointer;
-      font-size: 0.85rem;
-      margin-top: 0.5rem;
+      font-size: 0.9rem;
+      font-weight: 600;
+      margin-top: 0.8rem;
       display: inline-block;
-      touch-action: manipulation;
+      transition: all 0.3s ease;
+      box-shadow: 0 3px 10px rgba(238, 90, 36, 0.3);
     }
 
     .nav-btn:hover, .nav-btn:active {
-      background-color: #0055aa;
+      background: linear-gradient(135deg, #d64511 0%, #ff5252 100%);
+      transform: translateY(-1px);
+      box-shadow: 0 5px 14px rgba(238, 90, 36, 0.4);
     }
 
     .nav-line {
-      stroke: #0066cc;
-      stroke-width: 3;
+      stroke: #1a237e;
+      stroke-width: 4;
       stroke-dasharray: 10, 5;
       fill: none;
+      opacity: 0.8;
     }
 
     .mobile-nav-toggle {
       display: none;
       position: fixed;
-      bottom: 20px;
-      right: 20px;
-      width: 60px;
-      height: 60px;
-      background-color: #111;
+      bottom: 25px;
+      right: 25px;
+      width: 64px;
+      height: 64px;
+      background: linear-gradient(135deg, #1a237e 0%, #283593 100%);
       color: white;
       border-radius: 50%;
       border: none;
-      font-size: 1.5rem;
+      font-size: 1.8rem;
       z-index: 1001;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+      box-shadow: 0 6px 20px rgba(26, 35, 126, 0.4);
       cursor: pointer;
-      touch-action: manipulation;
+      transition: all 0.3s ease;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .mobile-nav-toggle:hover {
+      transform: scale(1.1);
+    }
+
+    .mobile-nav-toggle:active {
+      transform: scale(0.95);
     }
 
     @media (max-width: 767px) {
@@ -372,12 +434,27 @@
         bottom: 0;
         left: 0;
         right: 0;
-        max-height: 70vh;
+        max-height: 75vh;
         transform: translateY(100%);
-        transition: transform 0.3s ease-in-out;
-        border-top: 2px solid #111;
-        box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.15);
-        padding-bottom: 80px;
+        transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        border-top: 3px solid #1a237e;
+        box-shadow: 0 -8px 30px rgba(0, 0, 0, 0.2);
+        padding-bottom: 90px;
+        padding-top: 1.8rem;
+        border-radius: 24px 24px 0 0;
+        overflow: hidden;
+      }
+      
+      .sidebar::before {
+        content: '';
+        position: absolute;
+        top: 12px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 40px;
+        height: 4px;
+        background-color: #e0e0e0;
+        border-radius: 2px;
       }
       
       .sidebar.active {
@@ -390,9 +467,47 @@
       }
       
       .header {
-        padding: 0.8rem 1rem;
+        padding: 1rem 1.2rem;
       }
       
+      .header h1 {
+        font-size: 1.3rem;
+      }
+      
+      .header p {
+        font-size: 0.85rem;
+      }
+      
+      .btn {
+        padding: 1.1rem;
+        font-size: 1.05rem;
+        border-radius: 12px;
+      }
+      
+      .leaflet-control-zoom {
+        margin-bottom: 80px !important;
+      }
+      
+      .locations-list ul {
+        max-height: 180px;
+      }
+      
+      .sidebar h2 {
+        font-size: 1.2rem;
+      }
+      
+      .sidebar {
+        padding-left: 1.2rem;
+        padding-right: 1.2rem;
+      }
+      
+      .status-box {
+        padding: 1rem;
+        font-size: 0.9rem;
+      }
+    }
+
+    @media (max-width: 480px) {
       .header h1 {
         font-size: 1.2rem;
       }
@@ -406,69 +521,123 @@
         font-size: 1rem;
       }
       
-      .leaflet-control-zoom {
-        margin-bottom: 70px !important;
-      }
-      
-      .locations-list ul {
-        max-height: 150px;
-      }
-    }
-
-    @media (max-width: 480px) {
-      .header h1 {
+      .sidebar h2 {
         font-size: 1.1rem;
       }
       
-      .header p {
-        font-size: 0.75rem;
-      }
-      
-      .btn {
-        padding: 0.9rem;
+      .location-name {
         font-size: 0.95rem;
       }
       
-      .sidebar h2 {
-        font-size: 1rem;
+      .status-box {
+        font-size: 0.85rem;
+        padding: 0.9rem;
       }
       
-      .location-name {
-        font-size: 0.9rem;
+      .mobile-nav-toggle {
+        width: 60px;
+        height: 60px;
+        font-size: 1.6rem;
+        bottom: 20px;
+        right: 20px;
       }
       
-      .coords-box {
-        font-size: 0.8rem;
-        padding: 0.7rem;
+      .locations-list ul {
+        max-height: 160px;
       }
     }
 
     .leaflet-control-layers {
-      border-radius: 6px !important;
+      border-radius: 10px !important;
       overflow: hidden;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
+      border: 1px solid #dee2e6 !important;
     }
 
     .leaflet-control-layers-list {
-      padding: 0.5rem !important;
+      padding: 0.8rem !important;
     }
 
     .leaflet-control-layers label {
-      padding: 0.5rem !important;
+      padding: 0.6rem 0.8rem !important;
       margin: 0 !important;
       cursor: pointer;
       display: flex;
       align-items: center;
+      font-size: 0.95rem;
+      transition: background-color 0.2s;
+      border-radius: 6px;
+    }
+
+    .leaflet-control-layers label:hover {
+      background-color: #f8f9fa;
     }
 
     .leaflet-control-layers input {
-      margin-right: 0.5rem !important;
+      margin-right: 0.8rem !important;
+      accent-color: #1a237e;
+    }
+
+    .leaflet-popup-content {
+      font-size: 0.95rem !important;
+      padding: 0.8rem !important;
+    }
+
+    .leaflet-popup-content strong {
+      color: #1a237e;
+      margin-bottom: 0.5rem;
+      display: block;
+    }
+
+    .custom-marker {
+      filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+    }
+
+    .info-panel {
+      margin-top: 2rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid #e9ecef;
+    }
+
+    .info-panel p {
+      font-size: 0.85rem;
+      color: #6c757d;
+      margin-bottom: 0.8rem;
+      line-height: 1.5;
+      display: flex;
+      align-items: flex-start;
+      gap: 0.5rem;
+    }
+
+    .info-panel i {
+      color: #1a237e;
+      margin-top: 0.2rem;
+      flex-shrink: 0;
+    }
+
+    .backdrop {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: rgba(0, 0, 0, 0.5);
+      z-index: 999;
+      backdrop-filter: blur(2px);
+    }
+
+    @media (max-width: 767px) {
+      .backdrop.active {
+        display: block;
+      }
     }
   </style>
 </head>
 <body>
   <header class="header">
-    <h1>Nelavista LASU Campus Map</h1>
-    <p>Interactive map of Lagos State University (LASU). Drag landmarks to adjust positions. Arrow keys move selected markers.</p>
+    <h1>LASU Campus Navigation Map</h1>
+    <p>Interactive map of Lagos State University. Find key locations, navigate between buildings, and explore campus facilities.</p>
     <span class="lasu-badge">STUDENT NAVIGATION TOOL</span>
   </header>
 
@@ -476,23 +645,20 @@
     <div id="map"></div>
 
     <aside class="sidebar" id="sidebar">
-      <h2><i class="fas fa-map-pin"></i> Campus Navigator</h2>
+      <h2><i class="fas fa-map-marker-alt"></i> Campus Navigator</h2>
 
       <div class="controls">
         <button class="btn" onclick="locateUser()">
           <i class="fas fa-location-crosshairs"></i> Show My Location
         </button>
         
-        <div class="coords-box" id="coordsBox">
-          Drag landmarks. Positions auto-save.
+        <div class="status-box" id="statusBox">
+          Tap any location to view details and get navigation directions.
         </div>
 
         <div class="search-container">
-          <input type="text" class="search-input" id="searchInput" placeholder="Search for a building..." onfocus="onSearchFocus()">
-        </div>
-        
-        <div class="key-hint">
-          <i class="fas fa-keyboard"></i> <strong>Keyboard:</strong> Click a marker, then use arrow keys to move.
+          <i class="fas fa-search search-icon"></i>
+          <input type="text" class="search-input" id="searchInput" placeholder="Search for buildings, halls, or facilities..." onfocus="onSearchFocus()">
         </div>
       </div>
 
@@ -504,126 +670,73 @@
       </div>
 
       <div class="info-panel">
-        <p><i class="fas fa-info-circle"></i> <strong>Tip:</strong> Drag markers to adjust positions. Changes auto-save.</p>
-        <p><i class="fas fa-database"></i> <strong>Storage:</strong> Positions saved in your browser.</p>
-        <p><i class="fas fa-mobile-alt"></i> <strong>Mobile:</strong> Tap locations to navigate. Tap and drag markers.</p>
+        <p><i class="fas fa-info-circle"></i> <strong>Tip:</strong> Tap any location marker on the map or in the list to view details.</p>
+        <p><i class="fas fa-map-signs"></i> <strong>Navigation:</strong> Use "Show My Location" then tap "Navigate" in any location popup.</p>
+        <p><i class="fas fa-mobile-alt"></i> <strong>Mobile:</strong> Swipe up from bottom to open this panel anytime.</p>
       </div>
     </aside>
   </div>
 
+  <div class="backdrop" id="backdrop" onclick="toggleSidebar()"></div>
+
   <button class="mobile-nav-toggle" id="mobileToggle" aria-label="Toggle navigation panel">
-    <i class="fas fa-bars" id="toggleIcon"></i>
+    <i class="fas fa-map" id="toggleIcon"></i>
   </button>
 
   <footer class="footer">
-    <p>Nelavista Campus Map &copy; 2026 | Lagos State University (LASU) | 
+    <p>LASU Campus Navigation Map &copy; 2024 | Lagos State University | 
        <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a> contributors | 
        Powered by <a href="https://leafletjs.com/" target="_blank">Leaflet</a>
     </p>
-    <p style="margin-top:0.3rem; font-size:0.7rem;">Student navigation tool. Coordinates are adjustable and persist in your browser.</p>
+    <p style="margin-top:0.5rem; font-size:0.75rem; opacity:0.7;">Student navigation tool for Lagos State University campus exploration.</p>
   </footer>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
   <script>
+    // Campus locations with corrected coordinates
     const locations = [
-      { id: "admin_block_2", name: "Admin Block 2", coords: [6.475243, 3.199060] },
-      { id: "africa_centre_of_excellence", name: "Africa Centre of Excellence", coords: [6.475243, 3.199060] },
-      { id: "agriculture_society_building", name: "Agriculture Society Building", coords: [6.475243, 3.199060] },
-      { id: "anico_ventures", name: "ANICO Ventures (Book Store)", coords: [6.475243, 3.199060] },
-      { id: "arcade", name: "Arcade", coords: [6.465718, 3.203115] },
-      { id: "arts", name: "Faculty of Arts", coords: [6.464550, 3.201790] },
-      { id: "auditorium", name: "Main Auditorium", coords: [6.473108, 3.201887] },
-      { id: "automedics_limited", name: "AutoMedics Limited", coords: [6.475243, 3.199060] },
-      { id: "bank", name: "Bank Arena", coords: [6.464388, 3.204019] },
-      { id: "basketball_court", name: "Basketball Court", coords: [6.469750, 3.202550] },
-      { id: "biological_lab_extension", name: "Biological Lab Extension", coords: [6.466275, 3.200283] },
-      { id: "blossom_computer_centre", name: "Blossom Computer Centre", coords: [6.475243, 3.199060] },
-      { id: "catering_unit", name: "Catering Unit", coords: [6.475243, 3.199060] },
-      { id: "cbt_center", name: "CBT Center", coords: [6.475192, 3.201302] },
-      { id: "cbt_centre_lasu", name: "CBT Centre LASU", coords: [6.475192, 3.201302] },
-      { id: "central_mosque_ojo", name: "Central Mosque, Ojo", coords: [6.465425, 3.200015] },
-      { id: "communication", name: "School of Communication", coords: [6.472277, 3.200154] },
-      { id: "computer_science_lab", name: "Computer Science Lab", coords: [6.468753, 3.201230] },
-      { id: "crcc", name: "CRCC", coords: [6.475243, 3.199060] },
-      { id: "demab_friend_concept", name: "DEMAB & FRIEND CONCEPT", coords: [6.475243, 3.199060] },
-      { id: "department_of_fisheries", name: "Department of Fisheries, Lagos State University", coords: [6.475243, 3.199060] },
-      { id: "department_of_fishery", name: "Department Of fishery", coords: [6.475243, 3.199060] },
-      { id: "department_of_islamic_law", name: "Department of Islamic Law", coords: [6.475243, 3.199060] },
-      { id: "department_of_philosophy", name: "Department of Philosophy", coords: [6.475243, 3.199060] },
-      { id: "department_of_theatre_art", name: "Department Of Theatre Arts", coords: [6.475243, 3.199060] },
-      { id: "education", name: "Faculty of Education", coords: [6.472996, 3.199889] },
-      { id: "education_road", name: "Education Road", coords: [6.472996, 3.199889] },
-      { id: "e_elegant_fashion", name: "E Elegant Fashion", coords: [6.475243, 3.199060] },
-      { id: "eisas_treats", name: "Eisa's Treats – Banana Bread, Cakes & More", coords: [6.475243, 3.199060] },
-      { id: "empire", name: "Empire", coords: [6.475243, 3.199060] },
-      { id: "ent_building", name: "ENT Building", coords: [6.473340, 3.198304] },
-      { id: "epe_liaison_lasu_com_liaison_office", name: "Epe Liaison LASU Com Liaison Office", coords: [6.475243, 3.199060] },
-      { id: "espanyol_city_salon", name: "Espanyol City Salon", coords: [6.475243, 3.199060] },
-      { id: "faculty_of_law_building", name: "Faculty Of Law Building", coords: [6.475243, 3.199060] },
-      { id: "faculty_of_science_shops", name: "Faculty of Science Shops", coords: [6.466275, 3.200283] },
-      { id: "fishery_and_hatchery", name: "Fishery and Hatchery", coords: [6.475243, 3.199060] },
-      { id: "fms_path_way", name: "FMS Path Way", coords: [6.475661, 3.199942] },
-      { id: "fms_toilet", name: "FMS Toilet", coords: [6.475661, 3.199942] },
-      { id: "gbolahan_elias_hall", name: "Gbolahan Elias Hall", coords: [6.475243, 3.199060] },
-      { id: "havilah_perfume_n_scents", name: "Havilah Perfume n Scents", coords: [6.475243, 3.199060] },
-      { id: "health", name: "Health Center", coords: [6.465443, 3.202018] },
-      { id: "iba_gate", name: "Iba Gate", coords: [6.4686, 3.1969] },
+      // Commercial/Student Hub
+      { id: "arcade", name: "Arcade (Student Commercial Hub)", coords: [6.465718, 3.203115] },
+
+      // Lecture Halls and Auditoriums
+      { id: "main_auditorium", name: "Main Auditorium", coords: [6.473108, 3.201887] },
+      { id: "mass_comm_hall", name: "Mass Communication Hall", coords: [6.472277, 3.200154] },
+      { id: "economics_hall", name: "Economics Lecture Hall", coords: [6.475243, 3.199060] },
+
+      // Libraries (Essential for students)
+      { id: "library", name: "Main Library", coords: [6.464857, 3.200701] },
+      { id: "science_library", name: "Science Library", coords: [6.464526, 3.199186] },
+      { id: "law_library", name: "Law Library", coords: [6.464095, 3.200192] },
+
+      // ICT and Exam Centers
+      { id: "cbt_center", name: "CBT Center (Exam Hall)", coords: [6.475192, 3.201302] },
       { id: "ict", name: "ICT Building", coords: [6.468753, 3.201230] },
-      { id: "isalu_ijanikin_animosun_road", name: "Isalu–Ijanikin–Animosun Road", coords: [6.475243, 3.199060] },
-      { id: "lagos_badagry_expressway", name: "Lagos–Badagry Expressway", coords: [6.475243, 3.199060] },
-      { id: "lagos_state_university_administrations_block_2", name: "Lagos State University Administrations Block 2", coords: [6.475243, 3.199060] },
-      { id: "lagos_state_university_road", name: "Lagos State University Road", coords: [6.475243, 3.199060] },
-      { id: "lasu_cbt_18_limited", name: "LASU CBT 18 Limited (Eighteen IT)", coords: [6.475192, 3.201302] },
-      { id: "lasu_main_road", name: "LASU Main Road", coords: [6.475243, 3.199060] },
-      { id: "lasu_post_office", name: "LASU Post Office, Lagos State University Ojo", coords: [6.475243, 3.199060] },
-      { id: "lasu_radio", name: "LASU Radio", coords: [6.475243, 3.199060] },
-      { id: "lasu_shuttle_park", name: "LASU Shuttle Park", coords: [6.475243, 3.199060] },
-      { id: "lasu_works", name: "LASU Works", coords: [6.475243, 3.199060] },
-      { id: "law", name: "Faculty of Law", coords: [6.467085, 3.202029] },
-      { id: "law_library", name: "Law Library (LASU Law Library)", coords: [6.467085, 3.202029] },
-      { id: "library", name: "School Library", coords: [6.464838, 3.200659] },
-      { id: "lh_building", name: "LH Building", coords: [6.475243, 3.199060] },
-      { id: "management_sciences", name: "Faculty of Management Sciences", coords: [6.475661, 3.199942] },
-      { id: "mass_communication_lecture_hall", name: "Mass Communication Lecture Hall", coords: [6.472277, 3.200154] },
-      { id: "mirays_eden_company", name: "Miray's Eden Company", coords: [6.475243, 3.199060] },
-      { id: "new_fms_annex", name: "New FMS Annex", coords: [6.475661, 3.199942] },
-      { id: "non_academic_staff_commercial_complex", name: "Non Academic Staff Commercial Complex", coords: [6.475243, 3.199060] },
-      { id: "ojo_gate", name: "Ojo Gate", coords: [6.473966, 3.202204] },
-      { id: "okoko_ppl", name: "Okoko PPL", coords: [6.475243, 3.199060] },
-      { id: "onome_empire", name: "ONOME EMPIRE", coords: [6.475243, 3.199060] },
-      { id: "pharmacy_medical_laboratory_unit", name: "Pharmacy Medical Laboratory Unit", coords: [6.465443, 3.202018] },
-      { id: "philosophy_classrooms", name: "Philosophy Classrooms", coords: [6.475243, 3.199060] },
-      { id: "physics_lab1", name: "Physics Lab 1", coords: [6.475243, 3.199060] },
-      { id: "physics_lab2", name: "Physics Lab 2", coords: [6.475243, 3.199060] },
-      { id: "phyloso", name: "", coords: [6.475243, 3.199060] },
-      { id: "pleasant_fashion_institute", name: "Pleasant Fashion Institute", coords: [6.475243, 3.199060] },
-      { id: "post_graduate_school", name: "Post Graduate School, Lagos State University", coords: [6.475243, 3.199060] },
-      { id: "radiology_department", name: "Radiology Department", coords: [6.465443, 3.202018] },
-      { id: "science_library", name: "Science Library", coords: [6.464838, 3.200659] },
-      { id: "science_shops", name: "Science Shops", coords: [6.466275, 3.200283] },
-      { id: "sciences", name: "Faculty of Sciences", coords: [6.466275, 3.200283] },
-      { id: "sciences_laboratory", name: "Sciences Laboratory", coords: [6.466275, 3.200283] },
-      { id: "senate", name: "Senate Building", coords: [6.471245, 3.199849] },
-      { id: "senate_chambers", name: "Senate Chambers", coords: [6.471245, 3.199849] },
-      { id: "smaat_errands_logistics_services", name: "Smaat Errands & Logistics Services", coords: [6.475243, 3.199060] },
-      { id: "social_sciences", name: "Faculty of Social Sciences", coords: [6.475243, 3.199060] },
-      { id: "solomon_close", name: "Solomon Close", coords: [6.475243, 3.199060] },
-      { id: "sport_complex_road", name: "Sport Complex Road", coords: [6.469750, 3.202550] },
+
+      // Student Services
+      { id: "health", name: "Health Center", coords: [6.465443, 3.202018] },
       { id: "sports", name: "Sports Center", coords: [6.469750, 3.202550] },
-      { id: "ssanu_cooperative_supermart", name: "SSANU Cooperative Supermart", coords: [6.475243, 3.199060] },
-      { id: "sterling_bank_lasu", name: "Sterling Bank LASU", coords: [6.464388, 3.204019] },
-      { id: "student_affairs_complex", name: "Student Affairs Complex", coords: [6.475243, 3.199060] },
-      { id: "school_of_transport_and_logistics", name: "School of Transport and Logistics", coords: [6.474193, 3.198038] },
-      { id: "transport", name: "School of Transport", coords: [6.474193, 3.198038] },
-      { id: "unisex_uniform_store", name: "Unisex Uniform Store", coords: [6.475243, 3.199060] },
-      { id: "united_bank_for_africa", name: "United Bank for Africa (UBA)", coords: [6.464388, 3.204019] },
-      { id: "vickys_health", name: "Vicky's Health", coords: [6.475243, 3.199060] },
-      { id: "walk_path", name: "Walk Path", coords: [6.475243, 3.199060] },
-      { id: "water_corporation_reservoir_tank", name: "Water Corporation Reservoir Tank", coords: [6.475243, 3.199060] },
-      { id: "worship", name: "Lasu Mosque Centra Mosque, Ojo", coords: [6.465425, 3.200015] },
-      { id: "zenit_ict_centre", name: "Zenit ICT Centre", coords: [6.468753, 3.201230] },
-      { id: "economics_hall", name: "Economics Hall", coords: [6.475243, 3.199060] },
+
+      // Faculty Buildings (Departmental Halls)
+      { id: "education", name: "Faculty of Education", coords: [6.472996, 3.199889] },
+      { id: "arts", name: "Faculty of Arts", coords: [6.464550, 3.201790] },
+      { id: "law", name: "Faculty of Law", coords: [6.467085, 3.202029] },
+      { id: "management_sciences", name: "Faculty of Management Sciences", coords: [6.475661, 3.199942] },
+      { id: "sciences", name: "Faculty of Sciences", coords: [6.466275, 3.200283] },
+      { id: "social_sciences", name: "Faculty of Social Sciences", coords: [6.475243, 3.199060] },
+
+      // Specialized Schools
+      { id: "school_of_transport", name: "School of Transport & Logistics", coords: [6.474193, 3.198038] },
+      { id: "post_graduate_school", name: "Post Graduate School", coords: [6.468391, 3.201227] },
+
+      // Banking (Essential for students)
+      { id: "bank_arena", name: "Bank Arena", coords: [6.464388, 3.204019] },
+
+      // Religious (Frequently visited)
+      { id: "mosque", name: "LASU Central Mosque", coords: [6.465425, 3.200015] },
+
+      // Transportation
+      { id: "lasu_shuttle_park", name: "LASU Shuttle Park", coords: [6.475243, 3.199060] }
     ];
 
     const lasuCenter = [6.4700, 3.2000];
@@ -633,172 +746,63 @@
       tap: true,
       touchZoom: true,
       dragging: true,
-      scrollWheelZoom: true
-    }).setView(lasuCenter, 15);
+      scrollWheelZoom: true,
+      zoomSnap: 0.5,
+      zoomDelta: 0.5
+    }).setView(lasuCenter, 15.5);
 
+    // Map layers
     const streetLayer = L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-      attribution: '© OpenStreetMap contributors | © <a href="https://www.esri.com/">Esri</a>',
+      attribution: '© OpenStreetMap contributors',
       maxZoom: 19
     });
 
     const satelliteLayer = L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}", {
-      attribution: '© OpenStreetMap contributors | Tiles © Esri &mdash; Source: Esri, Maxar, Earthstar Geographics, and the GIS User Community',
+      attribution: '© Esri, Maxar, Earthstar Geographics',
       maxZoom: 20
     });
 
     const terrainLayer = L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}", {
-      attribution: '© OpenStreetMap contributors | Tiles © Esri &mdash; Esri, DeLorme, NAVTEQ',
+      attribution: '© Esri, DeLorme, NAVTEQ',
       maxZoom: 19
     });
 
-    const hybridLayer = L.layerGroup([
-      L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}", {
-        attribution: '© OpenStreetMap contributors | Tiles © Esri &mdash; Source: Esri, Maxar, Earthstar Geographics, and the GIS User Community',
-        maxZoom: 20
-      }),
-      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-        opacity: 0.3,
-        attribution: '© OpenStreetMap contributors',
-        maxZoom: 19
-      })
-    ]);
-
-    streetLayer.maxAvailableZoom = 19;
-    satelliteLayer.maxAvailableZoom = 19;
-    terrainLayer.maxAvailableZoom = 19;
-    hybridLayer.maxAvailableZoom = 20;
-
     const baseLayers = {
-      "Street": streetLayer,
-      "Satellite": satelliteLayer,
-      "Terrain": terrainLayer,
-      "Hybrid": hybridLayer
+      "Satellite View": satelliteLayer,
+      "Street Map": streetLayer,
+      "Terrain Map": terrainLayer
     };
 
     satelliteLayer.addTo(map);
 
-    const layerControl = L.control.layers(baseLayers, null, {
+    L.control.layers(baseLayers, null, {
       position: 'topright',
       collapsed: true
     }).addTo(map);
 
-    let userManualSelection = false;
-    let currentBaseLayer = satelliteLayer;
-    const USER_PREFERENCE_KEY = 'lasu_map_base_layer';
-
-    function getCurrentLayerMaxZoom() {
-      return currentBaseLayer.maxAvailableZoom || 19;
-    }
-
-    function updateMapZoomLimits() {
-      const maxZoom = getCurrentLayerMaxZoom();
-      const currentZoom = map.getZoom();
-      
-      if (currentZoom > maxZoom) {
-        map.setZoom(maxZoom);
-      }
-      
-      map.options.maxZoom = maxZoom;
-      
-      if (map.zoomControl) {
-        map.zoomControl._updateDisabled();
-      }
-    }
-
-    function clampZoomToLayer() {
-      const maxZoom = getCurrentLayerMaxZoom();
-      const currentZoom = map.getZoom();
-      
-      if (currentZoom > maxZoom) {
-        map.setZoom(maxZoom);
-      }
-    }
-
-    function saveUserPreference(layerName) {
-      localStorage.setItem(USER_PREFERENCE_KEY, layerName);
-      userManualSelection = true;
-      updateMapZoomLimits();
-    }
-
-    function restoreUserPreference() {
-      const savedLayer = localStorage.getItem(USER_PREFERENCE_KEY);
-      if (savedLayer && baseLayers[savedLayer]) {
-        map.removeLayer(currentBaseLayer);
-        baseLayers[savedLayer].addTo(map);
-        currentBaseLayer = baseLayers[savedLayer];
-        userManualSelection = true;
-        updateMapZoomLimits();
-        return true;
-      }
-      return false;
-    }
-
-    function autoSwitchLayerByZoom() {
-      if (userManualSelection) return;
-      
-      const zoom = map.getZoom();
-      let targetLayer;
-      
-      if (zoom < 16) {
-        targetLayer = streetLayer;
-      } else if (zoom >= 16 && zoom < 18) {
-        targetLayer = terrainLayer;
-      } else {
-        targetLayer = satelliteLayer;
-      }
-      
-      if (targetLayer !== currentBaseLayer) {
-        map.removeLayer(currentBaseLayer);
-        targetLayer.addTo(map);
-        currentBaseLayer = targetLayer;
-        updateMapZoomLimits();
-      }
-    }
-
-    const hasRestored = restoreUserPreference();
-
-    map.on('zoomend', function() {
-      clampZoomToLayer();
-      
-      if (!userManualSelection) {
-        autoSwitchLayerByZoom();
-      }
-    });
-
-    map.on('baselayerchange', function(event) {
-      const layerName = Object.keys(baseLayers).find(key => baseLayers[key] === event.layer);
-      if (layerName) {
-        saveUserPreference(layerName);
-        currentBaseLayer = event.layer;
-        updateMapZoomLimits();
-      }
-    });
-
-    if (!hasRestored) {
-      updateMapZoomLimits();
-      autoSwitchLayerByZoom();
-    }
-
-    const coordsBox = document.getElementById("coordsBox");
+    // UI Elements
+    const statusBox = document.getElementById("statusBox");
     const locationsList = document.getElementById("locationsList");
-    let activeMarker = null;
     const markers = {};
     let userLocationMarker = null;
     let userLatLng = null;
     let navigationLine = null;
-    let lastNearestMarker = null;
     const sidebar = document.getElementById('sidebar');
     const mobileToggle = document.getElementById('mobileToggle');
     const toggleIcon = document.getElementById('toggleIcon');
+    const backdrop = document.getElementById('backdrop');
 
+    // Toggle sidebar for mobile
     function toggleSidebar() {
       sidebar.classList.toggle('active');
+      backdrop.classList.toggle('active');
+      
       if (sidebar.classList.contains('active')) {
         toggleIcon.className = 'fas fa-times';
-        mobileToggle.style.backgroundColor = '#e74c3c';
+        mobileToggle.style.background = 'linear-gradient(135deg, #ee5a24 0%, #ff6b6b 100%)';
       } else {
-        toggleIcon.className = 'fas fa-bars';
-        mobileToggle.style.backgroundColor = '#111';
+        toggleIcon.className = 'fas fa-map';
+        mobileToggle.style.background = 'linear-gradient(135deg, #1a237e 0%, #283593 100%)';
       }
     }
 
@@ -810,59 +814,57 @@
 
     function onSearchFocus() {
       if (window.innerWidth < 768) {
-        sidebar.classList.add('active');
-        toggleIcon.className = 'fas fa-times';
-        mobileToggle.style.backgroundColor = '#e74c3c';
+        if (!sidebar.classList.contains('active')) {
+          toggleSidebar();
+        }
       }
     }
 
     mobileToggle.addEventListener('click', toggleSidebar);
+    backdrop.addEventListener('click', toggleSidebar);
 
+    // Calculate distance between two points
     function getDistanceInMeters(latLng1, latLng2) {
       return latLng1.distanceTo(latLng2);
     }
 
+    // Get marker color based on category
     function getMarkerColor(category) {
-      switch(category) {
-        case 'gate': return '#e74c3c';
-        case 'faculty': return '#3498db';
-        case 'department': return '#9b59b6';
-        case 'lecture': return '#1abc9c';
-        case 'administrative': return '#f39c12';
-        case 'healthcare': return '#e74c3c';
-        case 'religious': return '#2c3e50';
-        case 'ict': return '#16a085';
-        case 'hostel': return '#d35400';
-        case 'bank': return '#27ae60';
-        case 'sports': return '#c0392b';
-        case 'commercial': return '#8e44ad';
-        case 'utility': return '#7f8c8d';
-        case 'road': return '#34495e';
-        default: return '#2ecc71';
-      }
+      const colors = {
+        'faculty': '#3498db',
+        'department': '#9b59b6',
+        'lecture': '#1abc9c',
+        'administrative': '#f39c12',
+        'healthcare': '#e74c3c',
+        'religious': '#2c3e50',
+        'ict': '#16a085',
+        'bank': '#27ae60',
+        'sports': '#c0392b',
+        'commercial': '#8e44ad',
+        'utility': '#7f8c8d',
+        'general': '#2ecc71'
+      };
+      return colors[category] || colors.general;
     }
 
+    // Categorize locations
     function getCategoryFromLocation(location) {
       const name = location.name.toLowerCase();
-      const id = location.id.toLowerCase();
       
-      if (name.includes('gate') || id.includes('gate')) return 'gate';
-      if (name.includes('road') || name.includes('path') || name.includes('expressway') || name.includes('close') || name.includes('way')) return 'road';
+      if (name.includes('arcade') || name.includes('commercial')) return 'commercial';
       if (name.includes('mosque')) return 'religious';
       if (name.includes('bank')) return 'bank';
-      if (name.includes('sport') || name.includes('court')) return 'sports';
-      if (name.includes('shop') || name.includes('commercial') || name.includes('supermart') || name.includes('ventures') || name.includes('treats') || name.includes('errands') || name.includes('empire') || name.includes('perfume') || name.includes('fashion') || name.includes('salon') || name.includes('store') || name.includes('mart') || name.includes('concept') || name.includes('company') || name.includes('institute') || name.includes('ppl')) return 'commercial';
-      if (name.includes('post office') || name.includes('water') || name.includes('toilet') || name.includes('shuttle') || name.includes('tank')) return 'utility';
-      if (name.includes('hostel') || name.includes('hall') && (name.includes('gbolahan') || name.includes('elias'))) return 'hostel';
-      if (name.includes('ict') || name.includes('cbt') || name.includes('computer') || name.includes('radio') || name.includes('9mobile') || name.includes('sim') || name.includes('registration') || name.includes('it') || name.includes('zenit') || name.includes('blossom')) return 'ict';
-      if (name.includes('medical') || name.includes('health') || name.includes('pharmacy') || name.includes('radiology') || name.includes('automedics') || name.includes('vicky')) return 'healthcare';
-      if (name.includes('senate') || name.includes('admin') || name.includes('affairs') || name.includes('works') || name.includes('catering') || name.includes('liaison') || name.includes('chambers')) return 'administrative';
-      if (name.includes('faculty') || name.includes('school') || name.includes('college') || name.includes('centre of excellence') || name.includes('crcc') || name.includes('post graduate')) return 'faculty';
-      if (name.includes('department') || name.includes('lab') || name.includes('library') || name.includes('fishery') || name.includes('philosophy') || name.includes('islamic') || name.includes('theatre') || name.includes('society') || name.includes('extension') || name.includes('laboratory')) return 'department';
-      if (name.includes('lecture') || name.includes('hall') && !name.includes('bank') && !name.includes('sport') || name.includes('classroom') || name.includes('lh building') || name.includes('annex')) return 'lecture';
+      if (name.includes('sport')) return 'sports';
+      if (name.includes('shuttle')) return 'utility';
+      if (name.includes('ict') || name.includes('cbt') || name.includes('computer')) return 'ict';
+      if (name.includes('medical') || name.includes('health')) return 'healthcare';
+      if (name.includes('faculty') || name.includes('school')) return 'faculty';
+      if (name.includes('library') || name.includes('lab')) return 'department';
+      if (name.includes('lecture') || name.includes('hall') || name.includes('auditorium')) return 'lecture';
       return 'general';
     }
 
+    // Populate sidebar with locations
     function populateSidebar() {
       locationsList.innerHTML = '';
       locations.forEach(location => {
@@ -880,31 +882,16 @@
       });
     }
 
-    function getSavedCoords(locationId, fallback) {
-      const saved = localStorage.getItem(`lasu_${locationId}`);
-      return saved ? JSON.parse(saved) : fallback;
-    }
-
-    function saveCoords(locationId, latlng) {
-      localStorage.setItem(
-        `lasu_${locationId}`,
-        JSON.stringify([latlng.lat, latlng.lng])
-      );
-    }
-
-    function findLocationById(id) {
-      return locations.find(loc => loc.id === id);
-    }
-
+    // Create navigation line between two points
     function createNavigationLine(fromLatLng, toLatLng) {
       if (navigationLine) {
         map.removeLayer(navigationLine);
       }
       
       navigationLine = L.polyline([fromLatLng, toLatLng], {
-        color: '#0066cc',
-        weight: 3,
-        opacity: 0.7,
+        color: '#1a237e',
+        weight: 4,
+        opacity: 0.8,
         dashArray: '10, 5',
         className: 'nav-line'
       }).addTo(map);
@@ -912,74 +899,93 @@
       const distance = getDistanceInMeters(fromLatLng, toLatLng);
       navigationLine.bindTooltip(`Distance: ${Math.round(distance)} meters`, {
         permanent: false,
-        direction: 'top'
+        direction: 'top',
+        className: 'nav-tooltip'
       });
       
       return navigationLine;
     }
 
+    // Initialize markers on the map
     function initializeMarkers() {
       locations.forEach(location => {
-        const startCoords = getSavedCoords(location.id, location.coords);
         const category = getCategoryFromLocation(location);
+        const markerColor = getMarkerColor(category);
         
-        const marker = L.marker(startCoords, { 
-          draggable: true,
+        // Create custom marker icon
+        const markerIcon = L.divIcon({
+          className: 'custom-marker',
+          html: `
+            <div style="
+              background-color: ${markerColor};
+              width: 20px;
+              height: 20px;
+              border-radius: 50%;
+              border: 3px solid white;
+              box-shadow: 0 3px 10px rgba(0,0,0,0.3);
+              position: relative;
+            ">
+              <div style="
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                width: 8px;
+                height: 8px;
+                background-color: white;
+                border-radius: 50%;
+              "></div>
+            </div>`,
+          iconSize: [26, 26],
+          iconAnchor: [13, 13]
+        });
+        
+        // Create non-draggable marker
+        const marker = L.marker(location.coords, { 
+          draggable: false, // Disabled dragging
           title: location.name,
-          icon: L.divIcon({
-            className: 'custom-marker',
-            html: `<div style="background-color: ${getMarkerColor(category)}; width: 14px; height: 14px; border-radius: 50%; border: 2px solid white; box-shadow: 0 0 5px rgba(0,0,0,0.5);"></div>`,
-            iconSize: [18, 18],
-            iconAnchor: [9, 9]
-          })
+          icon: markerIcon
         }).addTo(map);
         
-        const popupContent = `<strong>${location.name}</strong><br><button class="nav-btn" onclick="navigateToMarker('${location.id}'); closeSidebarOnMobile();">Navigate from my location</button>`;
-        marker.bindPopup(popupContent);
+        // Create popup content
+        const popupContent = `
+          <div style="padding: 0.5rem;">
+            <strong style="color: #1a237e; font-size: 1.1rem; display: block; margin-bottom: 0.8rem;">${location.name}</strong>
+            <div style="display: flex; align-items: center; margin-bottom: 0.5rem;">
+              <div style="width: 12px; height: 12px; background-color: ${markerColor}; border-radius: 50%; margin-right: 0.5rem;"></div>
+              <span style="color: #666; font-size: 0.9rem;">${category.charAt(0).toUpperCase() + category.slice(1)}</span>
+            </div>
+            <button class="nav-btn" onclick="navigateToMarker('${location.id}');" style="width: 100%; text-align: center; padding: 0.8rem; margin-top: 0.8rem;">
+              <i class="fas fa-directions" style="margin-right: 0.5rem;"></i>Navigate from my location
+            </button>
+          </div>`;
         
+        marker.bindPopup(popupContent);
         marker.locationData = location;
         
+        // Marker click event
         marker.on("click", () => {
-          activeMarker = marker;
-          coordsBox.textContent = `${location.name} selected`;
-          saveState('marker', location.id);
+          statusBox.textContent = `${location.name} selected`;
           closeSidebarOnMobile();
-        });
-
-        marker.on("drag", e => {
-          const { lat, lng } = e.target.getLatLng();
-          coordsBox.textContent =
-            `${location.name}: ${lat.toFixed(6)}, ${lng.toFixed(6)}`;
-        });
-
-        marker.on("dragend", e => {
-          const latlng = e.target.getLatLng();
-          saveCoords(location.id, latlng);
-          console.log(
-            `${location.name}: [${latlng.lat.toFixed(6)}, ${latlng.lng.toFixed(6)}]`
-          );
         });
 
         markers[location.id] = marker;
       });
     }
 
+    // Focus on a specific marker
     function focusOnMarker(locationId) {
       const marker = markers[locationId];
-      const location = findLocationById(locationId);
+      const location = locations.find(loc => loc.id === locationId);
       
       if (marker && location) {
-        map.setView(marker.getLatLng(), Math.min(17, getCurrentLayerMaxZoom()));
+        map.setView(marker.getLatLng(), 17);
         marker.openPopup();
-        activeMarker = marker;
-        coordsBox.textContent = `${location.name} selected`;
-        saveState('marker', locationId);
-      } else {
-        console.error(`Marker not found for ID: ${locationId}`);
-        coordsBox.textContent = `Location data not available.`;
+        statusBox.textContent = `Viewing: ${location.name}`;
       }
     }
 
+    // Find nearest building to user
     function findNearestBuilding(userLatLng) {
       let nearestDistance = Infinity;
       let nearestLocation = null;
@@ -1000,6 +1006,7 @@
       return { location: nearestLocation, distance: nearestDistance };
     }
 
+    // Navigate to a marker from user's location
     function navigateToMarker(locationId) {
       if (!userLatLng) {
         alert("Please enable location services and click 'Show My Location' first.");
@@ -1011,160 +1018,122 @@
         const markerLatLng = marker.getLatLng();
         createNavigationLine(userLatLng, markerLatLng);
         marker.openPopup();
+        statusBox.textContent = `Navigating to ${marker.locationData.name}`;
       }
     }
 
-    function saveState(type, value) {
-      if (type === 'marker') {
-        localStorage.setItem('lasu_last_marker', value);
-      } else if (type === 'view') {
-        const center = map.getCenter();
-        const zoom = map.getZoom();
-        localStorage.setItem('lasu_map_view', JSON.stringify({
-          center: [center.lat, center.lng],
-          zoom: zoom
-        }));
-      }
-    }
-
-    function restoreState() {
-      const lastMarker = localStorage.getItem('lasu_last_marker');
-      if (lastMarker && markers[lastMarker]) {
-        focusOnMarker(lastMarker);
-        return;
-      }
-      
-      const savedView = localStorage.getItem('lasu_map_view');
-      if (savedView) {
-        try {
-          const { center, zoom } = JSON.parse(savedView);
-          map.setView(center, zoom);
-        } catch(e) {
-          console.log("Could not restore map view");
-        }
-      }
-    }
-
-    document.addEventListener("keydown", e => {
-      if (!activeMarker) return;
-
-      const step = 0.00005;
-      const pos = activeMarker.getLatLng();
-      const locationName = activeMarker.locationData?.name || 'Selected marker';
-
-      if (e.key === "ArrowUp") pos.lat += step;
-      if (e.key === "ArrowDown") pos.lat -= step;
-      if (e.key === "ArrowLeft") pos.lng -= step;
-      if (e.key === "ArrowRight") pos.lng += step;
-
-      activeMarker.setLatLng(pos);
-      coordsBox.textContent =
-        `${locationName}: ${pos.lat.toFixed(6)}, ${pos.lng.toFixed(6)}`;
-      
-      if (activeMarker.locationData) {
-        saveCoords(activeMarker.locationData.id, pos);
-      }
-    });
-
+    // Locate user
     function locateUser() {
       if (!navigator.geolocation) {
-        coordsBox.textContent = "Geolocation is not supported by your browser";
+        statusBox.textContent = "Geolocation is not supported by your browser";
         return;
       }
       
-      coordsBox.textContent = "Locating...";
+      statusBox.textContent = "Locating your position...";
       
-      navigator.geolocation.getCurrentPosition(position => {
-        const userCoords = [
-          position.coords.latitude,
-          position.coords.longitude
-        ];
-        
-        userLatLng = L.latLng(userCoords[0], userCoords[1]);
-        const lasuCenterLatLng = L.latLng(lasuCenter[0], lasuCenter[1]);
-        const distanceFromCampus = getDistanceInMeters(userLatLng, lasuCenterLatLng);
-        
-        if (distanceFromCampus > 2000) {
-          coordsBox.textContent = "You are outside LASU campus. Showing campus instead.";
-          map.setView(lasuCenter, Math.min(17, getCurrentLayerMaxZoom()));
-          return;
-        }
-
-        if (userLocationMarker) {
-          map.removeLayer(userLocationMarker);
-        }
-
-        const blueDotIcon = L.divIcon({
-          className: 'leaflet-pulsing-icon',
-          iconSize: [24, 24],
-          iconAnchor: [12, 12]
-        });
-
-        userLocationMarker = L.marker(userCoords, { icon: blueDotIcon })
-          .addTo(map)
-          .bindPopup("You are here")
-          .openPopup();
-
-        map.setView(userCoords, Math.min(17, getCurrentLayerMaxZoom()));
-        
-        const nearest = findNearestBuilding(userLatLng);
-        if (nearest.location) {
-          coordsBox.textContent = `Nearest building: ${nearest.location.name} – ${Math.round(nearest.distance)} meters away`;
-          if (lastNearestMarker) {
-            lastNearestMarker.closePopup();
+      navigator.geolocation.getCurrentPosition(
+        position => {
+          const userCoords = [
+            position.coords.latitude,
+            position.coords.longitude
+          ];
+          
+          userLatLng = L.latLng(userCoords[0], userCoords[1]);
+          const lasuCenterLatLng = L.latLng(lasuCenter[0], lasuCenter[1]);
+          const distanceFromCampus = getDistanceInMeters(userLatLng, lasuCenterLatLng);
+          
+          if (distanceFromCampus > 2000) {
+            statusBox.textContent = "You appear to be outside LASU campus. Showing campus center.";
+            map.setView(lasuCenter, 15.5);
+            return;
           }
-          markers[nearest.location.id].openPopup();
-          lastNearestMarker = markers[nearest.location.id];
+
+          // Remove existing user marker
+          if (userLocationMarker) {
+            map.removeLayer(userLocationMarker);
+          }
+
+          // Create pulsing user location marker
+          userLocationMarker = L.marker(userCoords, { 
+            icon: L.divIcon({
+              className: 'leaflet-pulsing-icon',
+              iconSize: [32, 32],
+              iconAnchor: [16, 16]
+            })
+          })
+            .addTo(map)
+            .bindPopup("You are here")
+            .openPopup();
+
+          // Center map on user
+          map.setView(userCoords, 17);
+          
+          // Find nearest building
+          const nearest = findNearestBuilding(userLatLng);
+          if (nearest.location) {
+            statusBox.textContent = `You're near ${nearest.location.name} (${Math.round(nearest.distance)}m away)`;
+            markers[nearest.location.id].openPopup();
+          }
+          
+          closeSidebarOnMobile();
+        }, 
+        error => {
+          statusBox.textContent = "Location access denied or unavailable. Please enable location services.";
+        }, 
+        {
+          enableHighAccuracy: true,
+          timeout: 15000,
+          maximumAge: 0
         }
-        
-        saveState('view', null);
-        closeSidebarOnMobile();
-      }, () => {
-        coordsBox.textContent = "Location access denied or unavailable";
-      }, {
-        enableHighAccuracy: true,
-        timeout: 10000,
-        maximumAge: 0
-      });
+      );
     }
 
+    // Search locations
     function searchLocations() {
-      const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+      const searchTerm = document.getElementById('searchInput').value.toLowerCase().trim();
       const listItems = document.querySelectorAll('#locationsList li');
       let firstMatch = null;
+      let matchCount = 0;
       
       listItems.forEach(item => {
         const locationId = item.getAttribute('data-location-id');
-        const location = findLocationById(locationId);
+        const location = locations.find(loc => loc.id === locationId);
         const name = location.name.toLowerCase();
         
-        if (name.includes(searchTerm)) {
+        if (searchTerm === '' || name.includes(searchTerm)) {
           item.style.display = 'flex';
+          matchCount++;
           if (!firstMatch) firstMatch = locationId;
         } else {
           item.style.display = 'none';
         }
       });
       
-      if (firstMatch && searchTerm.length > 0) {
-        focusOnMarker(firstMatch);
+      if (searchTerm.length > 0) {
+        if (firstMatch) {
+          focusOnMarker(firstMatch);
+          statusBox.textContent = `Found ${matchCount} location(s) matching "${searchTerm}"`;
+        } else {
+          statusBox.textContent = `No locations found matching "${searchTerm}"`;
+        }
+      } else {
+        statusBox.textContent = "Tap any location to view details and get navigation directions.";
       }
     }
 
+    // Initialize everything
     document.getElementById('searchInput').addEventListener('input', searchLocations);
     
-    map.on('moveend', function() {
-      saveState('view', null);
-    });
-
+    // Close sidebar when clicking on map
     map.on('click', function() {
       closeSidebarOnMobile();
     });
 
+    // Initialize
     populateSidebar();
     initializeMarkers();
-    restoreState();
 
+    // Mobile responsiveness
     if (window.innerWidth < 768) {
       sidebar.classList.remove('active');
       mobileToggle.style.display = 'flex';
@@ -1173,13 +1142,21 @@
     window.addEventListener('resize', function() {
       if (window.innerWidth >= 768) {
         sidebar.classList.remove('active');
+        backdrop.classList.remove('active');
         mobileToggle.style.display = 'none';
-        toggleIcon.className = 'fas fa-bars';
-        mobileToggle.style.backgroundColor = '#111';
+        toggleIcon.className = 'fas fa-map';
+        mobileToggle.style.background = 'linear-gradient(135deg, #1a237e 0%, #283593 100%)';
       } else {
         mobileToggle.style.display = 'flex';
       }
     });
+
+    // Add smooth scroll behavior for mobile
+    document.addEventListener('touchmove', function(e) {
+      if (sidebar.classList.contains('active')) {
+        e.stopPropagation();
+      }
+    }, { passive: false });
   </script>
 </body>
 </html>
