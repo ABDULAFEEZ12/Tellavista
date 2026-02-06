@@ -704,7 +704,7 @@
                             Classroom ID
                         </label>
                         <input type="text" id="room_id" name="room_id" 
-                               placeholder="Enter 8-character classroom ID (e.g., C5451D8E)" 
+                               placeholder="Enter 8-character classroom ID (e.g., F06CBAE8)" 
                                required pattern="[A-Za-z0-9]{8}"
                                title="Enter an 8-character classroom ID">
                         <div class="error-message" id="roomIdError">Classroom ID must be 8 characters</div>
@@ -847,7 +847,7 @@
                 // Real-time validation
                 roomIdInput.addEventListener('input', function() {
                     const value = this.value.trim();
-                    // Changed from 6 to 8 characters
+                    // Fixed: Changed from 6 to 8 characters
                     if (value.length !== 8 && value.length > 0) {
                         this.classList.add('error');
                         roomIdError.style.display = 'block';
@@ -878,7 +878,7 @@
                     
                     let isValid = true;
                     
-                    // Validate room ID - Changed from 6 to 8 characters
+                    // Validate room ID - Fixed: Changed from 6 to 8 characters
                     if (roomId.length !== 8) {
                         roomIdInput.classList.add('error');
                         roomIdError.style.display = 'block';
@@ -904,7 +904,7 @@
                         joinButton.innerHTML = '<i class="fas fa-spinner"></i> Joining Classroom...';
                         joinButton.disabled = true;
                         
-                        // Capitalize room ID
+                        // Capitalize room ID for consistency
                         roomIdInput.value = roomId;
                         
                         // Submit the form
