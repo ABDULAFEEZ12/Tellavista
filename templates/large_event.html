@@ -2,516 +2,364 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Nelavista Smart Classroom</title>
-    <script src="https://cdn.socket.io/4.5.0/socket.io.min.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Large Classroom Broadcast - Nelavista</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
+
     <style>
-        /* [Keep ALL your existing CSS styles - they're good] */
-        /* Only adding critical WebRTC debugging styles below */
-        
-        .webrtc-debug {
-            position: fixed;
-            top: 10px;
-            left: 10px;
-            background: rgba(0, 0, 0, 0.8);
-            color: #0f0;
-            padding: 10px;
-            border-radius: 5px;
-            font-family: monospace;
-            font-size: 12px;
-            z-index: 9999;
-            max-width: 300px;
-            max-height: 200px;
-            overflow: auto;
-            display: none;
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
-        
-        .webrtc-debug.active {
-            display: block;
-        }
-        
-        .debug-toggle {
-            position: fixed;
-            bottom: 10px;
-            right: 10px;
+
+        body {
+            font-family: 'Poppins', sans-serif;
             background: #000;
-            color: white;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 16px;
+        }
+
+        .container {
+            background: #fff;
+            border-radius: 14px;
+            padding: 24px;
+            max-width: 1000px;
+            width: 100%;
+            border: 1px solid #e0e0e0;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header-icon {
+            font-size: 48px;
+            margin-bottom: 10px;
+            color: #5a67d8;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            color: #000;
+            margin-bottom: 8px;
+        }
+
+        .header p {
+            font-size: 15px;
+            color: #555;
+            max-width: 700px;
+            margin: 0 auto 10px;
+        }
+
+        .scale-badge {
+            display: inline-block;
+            background: #111;
+            color: #fff;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .main-cards {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            margin-top: 30px;
+        }
+
+        .card {
+            border-radius: 14px;
+            padding: 24px;
+            color: #fff;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .card.student {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+        }
+
+        .card.teacher {
+            background: linear-gradient(135deg, #f093fb, #f5576c);
+        }
+
+        .card-icon {
+            font-size: 36px;
+            margin-bottom: 12px;
+        }
+
+        .card h3 {
+            font-size: 22px;
+            margin-bottom: 10px;
+        }
+
+        .card p {
+            font-size: 14px;
+            line-height: 1.5;
+            margin-bottom: 20px;
+            opacity: 0.95;
+        }
+
+        .form-group {
+            margin-bottom: 14px;
+            text-align: left;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 13px;
+            margin-bottom: 6px;
+            color: #fff;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px 14px;
+            border-radius: 8px;
+            border: 1px solid rgba(255,255,255,0.5);
+            font-size: 15px;
+            background: rgba(255,255,255,0.15);
+            color: #fff;
+        }
+
+        .form-group input::placeholder {
+            color: rgba(255,255,255,0.7);
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #fff;
+            background: rgba(255,255,255,0.2);
+        }
+
+        .btn {
+            display: inline-block;
+            width: 100%;
+            padding: 12px 16px;
+            border-radius: 8px;
             border: none;
-            padding: 8px 12px;
-            border-radius: 5px;
-            z-index: 10000;
+            background: #000;
+            color: #fff;
+            font-size: 15px;
+            font-weight: 600;
             cursor: pointer;
+            text-align: center;
+            text-decoration: none;
+        }
+
+        .btn:hover {
+            background: #222;
+        }
+
+        .features {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 14px;
+            margin-top: 40px;
+        }
+
+        .feature {
+            border: 1px solid #e0e0e0;
+            border-radius: 12px;
+            padding: 16px;
+            text-align: center;
+            background: #fafafa;
+        }
+
+        .feature-icon {
+            font-size: 26px;
+            margin-bottom: 8px;
+            color: #000;
+        }
+
+        .feature h4 {
+            font-size: 14px;
+            margin-bottom: 6px;
+            color: #000;
+        }
+
+        .feature p {
+            font-size: 12px;
+            color: #666;
+        }
+
+        .instructions {
+            margin-top: 30px;
+            background: #f5f5f5;
+            padding: 20px;
+            border-radius: 12px;
+        }
+
+        .instructions h4 {
+            font-size: 16px;
+            margin-bottom: 10px;
+            color: #000;
+        }
+
+        .instructions ul {
+            list-style: none;
+        }
+
+        .instructions li {
+            font-size: 13px;
+            color: #555;
+            margin-bottom: 8px;
+            display: flex;
+            gap: 8px;
+        }
+
+        .back-link {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .back-link a {
+            font-size: 13px;
+            color: #555;
+            text-decoration: none;
+        }
+
+        .back-link a:hover {
+            color: #000;
+        }
+
+        .flash-message {
+            background: #f0f0f0;
+            color: #333;
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 13px;
+            border-left: 4px solid #333;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        @media (max-width: 768px) {
+            .main-cards {
+                grid-template-columns: 1fr;
+            }
+
+            .features {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .header h1 {
+                font-size: 24px;
+            }
         }
     </style>
 </head>
 <body>
-    <!-- [Keep ALL your existing HTML structure] -->
-    
-    <!-- Add WebRTC Debug Panel -->
-    <div class="webrtc-debug" id="webrtcDebug">
-        <div><strong>WebRTC Debug</strong></div>
-        <div id="debugLog"></div>
-    </div>
-    <button class="debug-toggle" onclick="toggleDebug()">Debug</button>
+    <div class="container">
 
-    <script>
-        // ============================================
-        // WebRTC DEBUG FUNCTIONS
-        // ============================================
-        function logDebug(message) {
-            const debugLog = document.getElementById('debugLog');
-            const timestamp = new Date().toLocaleTimeString();
-            debugLog.innerHTML = `[${timestamp}] ${message}<br>` + debugLog.innerHTML;
-            console.log(`[DEBUG] ${message}`);
-            
-            // Keep only last 20 messages
-            const lines = debugLog.innerHTML.split('<br>');
-            if (lines.length > 20) {
-                debugLog.innerHTML = lines.slice(0, 20).join('<br>');
-            }
-        }
-        
-        function toggleDebug() {
-            document.getElementById('webrtcDebug').classList.toggle('active');
-        }
-        
-        // ============================================
-        // Updated WebRTC Configuration for Render.com
-        // ============================================
-        const config = {
-            roomId: '{{ room_id }}',
-            username: '{{ username }}',
-            role: '{{ role }}',
-            // Enhanced WebRTC config for production
-            rtcConfig: {
-                iceServers: [
-                    { urls: 'stun:stun.l.google.com:19302' },
-                    { urls: 'stun:stun1.l.google.com:19302' },
-                    { urls: 'stun:stun2.l.google.com:19302' },
-                    { urls: 'stun:stun3.l.google.com:19302' },
-                    { urls: 'stun:stun4.l.google.com:19302' }
-                    // Note: For production, add TURN servers here
-                    // { urls: 'turn:your-turn-server.com:3478', username: 'user', credential: 'pass' }
-                ],
-                iceTransportPolicy: 'all',
-                bundlePolicy: 'max-bundle',
-                rtcpMuxPolicy: 'require',
-                iceCandidatePoolSize: 10
-            }
-        };
-        
-        // ============================================
-        // CRITICAL FIX: Student WebRTC Offer Handling
-        // ============================================
-        async function acceptTeacherOffer(data) {
-            logDebug(`Student: Received offer from ${data.from_sid}`);
-            
-            try {
-                // CRITICAL: Verify this is from our teacher
-                if (!state.teacherSid) {
-                    logDebug(`Student: No teacher SID set yet`);
-                    // Set it from the offer
-                    state.teacherSid = data.from_sid;
-                    logDebug(`Student: Setting teacher SID to ${data.from_sid}`);
-                }
-                
-                if (data.from_sid !== state.teacherSid) {
-                    logDebug(`Student: Ignoring offer from non-teacher ${data.from_sid}`);
-                    return;
-                }
-                
-                logDebug(`Student: Creating RTCPeerConnection for teacher ${data.from_sid}`);
-                
-                // Create peer connection with better error handling
-                const pc = new RTCPeerConnection(config.rtcConfig);
-                
-                // Handle incoming stream from teacher
-                pc.ontrack = (event) => {
-                    logDebug(`Student: Received ${event.track.kind} track from teacher`);
-                    
-                    if (event.streams && event.streams[0]) {
-                        logDebug(`Student: Setting teacher video stream (${event.streams[0].id})`);
-                        
-                        const teacherVideo = document.getElementById('teacherVideo');
-                        teacherVideo.srcObject = event.streams[0];
-                        
-                        const noStream = document.getElementById('noStream');
-                        if (noStream) noStream.style.display = 'none';
-                        
-                        // Try to play the video
-                        teacherVideo.play().catch(e => {
-                            logDebug(`Student: Auto-play blocked: ${e.message}`);
-                            // Show play button overlay
-                            showToast('info', 'Video Ready', 'Click the video to start playback');
-                        });
-                    }
-                };
-                
-                // Handle ICE candidates
-                pc.onicecandidate = (event) => {
-                    if (event.candidate) {
-                        logDebug(`Student: Sending ICE candidate to teacher`);
-                        state.socket.emit('webrtc-ice-candidate', {
-                            room: state.roomId,
-                            target_sid: data.from_sid,
-                            candidate: event.candidate
-                        });
-                    } else {
-                        logDebug(`Student: ICE gathering complete`);
-                    }
-                };
-                
-                // Monitor connection state
-                pc.onconnectionstatechange = () => {
-                    logDebug(`Student: Connection state: ${pc.connectionState}`);
-                    
-                    if (pc.connectionState === 'connected') {
-                        logDebug(`Student: SUCCESS - Connected to teacher!`);
-                        showToast('success', 'Connected', 'Teacher video stream is now live');
-                    }
-                    
-                    if (pc.connectionState === 'failed') {
-                        logDebug(`Student: Connection failed, trying to reconnect...`);
-                        // Try to reconnect after 2 seconds
-                        setTimeout(() => {
-                            if (pc.connectionState === 'failed') {
-                                acceptTeacherOffer(data);
-                            }
-                        }, 2000);
-                    }
-                };
-                
-                // Set the remote description (teacher's offer)
-                logDebug(`Student: Setting remote description`);
-                await pc.setRemoteDescription(new RTCSessionDescription(data.offer));
-                
-                // Create answer
-                logDebug(`Student: Creating answer`);
-                const answer = await pc.createAnswer({
-                    offerToReceiveAudio: true,
-                    offerToReceiveVideo: true
-                });
-                
-                logDebug(`Student: Setting local description`);
-                await pc.setLocalDescription(answer);
-                
-                // Send answer back to teacher
-                logDebug(`Student: Sending answer to teacher`);
-                state.socket.emit('webrtc-answer', {
-                    room: state.roomId,
-                    target_sid: data.from_sid,
-                    answer: pc.localDescription
-                });
-                
-                // Store the connection
-                state.peerConnections.set(data.from_sid, pc);
-                logDebug(`Student: Offer accepted successfully`);
-                
-            } catch (error) {
-                logDebug(`Student: ERROR accepting offer: ${error.message}`);
-                console.error('Student WebRTC error:', error);
-                showToast('error', 'Connection Error', `Failed to connect: ${error.message}`);
-            }
-        }
-        
-        // ============================================
-        // CRITICAL FIX: Teacher WebRTC Setup
-        // ============================================
-        async function startTeacherBroadcast() {
-            logDebug(`Teacher: Starting broadcast...`);
-            showLoading('Starting broadcast...');
-            
-            try {
-                // Get teacher's camera and microphone
-                const constraints = {
-                    video: {
-                        width: { ideal: 640, max: 1280 },  // Lower for better performance
-                        height: { ideal: 480, max: 720 },
-                        frameRate: { ideal: 20, max: 24 },
-                        facingMode: 'user'
-                    },
-                    audio: {
-                        echoCancellation: true,
-                        noiseSuppression: true,
-                        autoGainControl: true
-                    }
-                };
-                
-                logDebug(`Teacher: Requesting media with constraints`);
-                state.teacherStream = await navigator.mediaDevices.getUserMedia(constraints);
-                logDebug(`Teacher: Got media stream with ${state.teacherStream.getTracks().length} tracks`);
-                
-                // Show teacher their own video IMMEDIATELY
-                const teacherVideo = document.getElementById('teacherVideo');
-                teacherVideo.srcObject = state.teacherStream;
-                
-                const noStream = document.getElementById('noStream');
-                if (noStream) noStream.style.display = 'none';
-                
-                // Play the video
-                teacherVideo.play().catch(e => {
-                    logDebug(`Teacher: Auto-play blocked: ${e.message}`);
-                });
-                
-                // Create connections for all existing students
-                const studentSids = Array.from(state.participants.entries())
-                    .filter(([sid, data]) => data.role === 'student')
-                    .map(([sid, data]) => sid);
-                
-                logDebug(`Teacher: Creating connections for ${studentSids.length} students`);
-                
-                for (const studentSid of studentSids) {
-                    await createTeacherToStudentConnection(studentSid);
-                }
-                
-                // Update UI
-                state.isBroadcasting = true;
-                const liveBadge = document.getElementById('liveBadge');
-                if (liveBadge) liveBadge.classList.add('active');
-                
-                const startBtn = document.getElementById('startBroadcastBtn');
-                if (startBtn) {
-                    startBtn.disabled = true;
-                    startBtn.innerHTML = '<i class="fas fa-broadcast-tower"></i><span>Broadcasting</span>';
-                }
-                
-                logDebug(`Teacher: Broadcast started successfully`);
-                hideLoading();
-                showToast('success', 'Broadcast Started', 'Students can now see your video');
-                
-            } catch (error) {
-                logDebug(`Teacher: ERROR starting broadcast: ${error.message}`);
-                console.error('Teacher broadcast error:', error);
-                showToast('error', 'Camera Error', `Please allow camera access: ${error.message}`);
-                hideLoading();
-            }
-        }
-        
-        async function createTeacherToStudentConnection(studentSid) {
-            logDebug(`Teacher: Creating connection for student ${studentSid}`);
-            
-            try {
-                // Don't create duplicate connections
-                if (state.peerConnections.has(studentSid)) {
-                    logDebug(`Teacher: Already have connection for ${studentSid}`);
-                    return;
-                }
-                
-                // Create peer connection
-                const pc = new RTCPeerConnection(config.rtcConfig);
-                
-                // Add teacher's tracks to the connection
-                if (state.teacherStream) {
-                    state.teacherStream.getTracks().forEach(track => {
-                        pc.addTrack(track, state.teacherStream);
-                    });
-                    logDebug(`Teacher: Added ${state.teacherStream.getTracks().length} tracks to connection`);
-                }
-                
-                // Handle ICE candidates
-                pc.onicecandidate = (event) => {
-                    if (event.candidate) {
-                        logDebug(`Teacher: Sending ICE candidate to student ${studentSid}`);
-                        state.socket.emit('webrtc-ice-candidate', {
-                            room: state.roomId,
-                            target_sid: studentSid,
-                            candidate: event.candidate
-                        });
-                    }
-                };
-                
-                // Listen for answer from student
-                pc.oniceconnectionstatechange = () => {
-                    logDebug(`Teacher: ICE connection state for ${studentSid}: ${pc.iceConnectionState}`);
-                };
-                
-                // Create and send offer
-                logDebug(`Teacher: Creating offer for student ${studentSid}`);
-                const offer = await pc.createOffer({
-                    offerToReceiveAudio: false,
-                    offerToReceiveVideo: false
-                });
-                
-                logDebug(`Teacher: Setting local description`);
-                await pc.setLocalDescription(offer);
-                
-                logDebug(`Teacher: Sending offer to student ${studentSid}`);
-                state.socket.emit('webrtc-offer', {
-                    room: state.roomId,
-                    target_sid: studentSid,
-                    offer: pc.localDescription
-                });
-                
-                // Store connection
-                state.peerConnections.set(studentSid, pc);
-                logDebug(`Teacher: Connection created for student ${studentSid}`);
-                
-            } catch (error) {
-                logDebug(`Teacher: ERROR creating connection for ${studentSid}: ${error.message}`);
-                console.error('Teacher connection error:', error);
-            }
-        }
-        
-        // ============================================
-        // CRITICAL FIX: Handle WebRTC Answers (Teacher side)
-        // ============================================
-        function handleWebRTCAnswer(data) {
-            logDebug(`Teacher: Received answer from ${data.from_sid}`);
-            
-            const pc = state.peerConnections.get(data.from_sid);
-            if (pc && pc.signalingState !== 'closed') {
-                pc.setRemoteDescription(new RTCSessionDescription(data.answer))
-                    .then(() => {
-                        logDebug(`Teacher: Successfully set remote description from ${data.from_sid}`);
-                    })
-                    .catch(err => {
-                        logDebug(`Teacher: ERROR setting remote description: ${err.message}`);
-                    });
-            } else {
-                logDebug(`Teacher: No active connection for ${data.from_sid}`);
-            }
-        }
-        
-        // ============================================
-        // Socket.IO Event Listeners - UPDATED
-        // ============================================
-        function initializeSocket() {
-            logDebug('Initializing Socket.IO connection...');
-            
-            state.socket = io({
-                reconnection: true,
-                reconnectionAttempts: 10,
-                reconnectionDelay: 1000,
-                transports: ['websocket', 'polling'],
-                timeout: 20000
-            });
-            
-            // BASIC CONNECTION EVENTS
-            state.socket.on('connect', () => {
-                logDebug(`Connected! Socket ID: ${state.socket.id}`);
-                state.sid = state.socket.id;
-                joinRoom();
-            });
-            
-            state.socket.on('disconnect', (reason) => {
-                logDebug(`Disconnected: ${reason}`);
-            });
-            
-            // ROOM EVENTS
-            state.socket.on('room-joined', (data) => {
-                logDebug(`Joined room ${data.room} as ${data.role}`);
-                state.teacherSid = data.teacher_sid;
-                if (data.role === 'student' && data.teacher_sid) {
-                    logDebug(`Teacher is in room: ${data.teacher_sid}`);
-                    showToast('info', 'Teacher Connected', 'Waiting for video stream...');
-                }
-            });
-            
-            state.socket.on('teacher-joined', (data) => {
-                logDebug(`Teacher joined: ${data.teacher_name} (${data.teacher_sid})`);
-                state.teacherSid = data.teacher_sid;
-            });
-            
-            state.socket.on('teacher-disconnected', () => {
-                logDebug('Teacher disconnected');
-                state.teacherSid = null;
-                const teacherVideo = document.getElementById('teacherVideo');
-                if (teacherVideo) teacherVideo.srcObject = null;
-            });
-            
-            // CRITICAL: WebRTC Events
-            state.socket.on('webrtc-offer', (data) => {
-                logDebug(`Received WebRTC offer from ${data.from_sid}`);
-                if (state.role === 'student') {
-                    acceptTeacherOffer(data);
-                }
-            });
-            
-            state.socket.on('webrtc-answer', (data) => {
-                logDebug(`Received WebRTC answer from ${data.from_sid}`);
-                if (state.role === 'teacher') {
-                    handleWebRTCAnswer(data);
-                }
-            });
-            
-            state.socket.on('webrtc-ice-candidate', (data) => {
-                logDebug(`Received ICE candidate from ${data.from_sid}`);
-                const pc = state.peerConnections.get(data.from_sid);
-                if (pc && pc.remoteDescription && data.candidate) {
-                    pc.addIceCandidate(new RTCIceCandidate(data.candidate))
-                        .catch(err => logDebug(`ERROR adding ICE candidate: ${err.message}`));
-                }
-            });
-            
-            // Broadcast event
-            state.socket.on('start-broadcast', () => {
-                logDebug('Teacher started broadcast');
-                if (state.role === 'student') {
-                    showToast('info', 'Teacher is Broadcasting', 'Video stream should start soon...');
-                }
-            });
-        }
-        
-        // ============================================
-        // Initialize the app
-        // ============================================
-        document.addEventListener('DOMContentLoaded', () => {
-            logDebug('Page loaded, initializing...');
-            
-            // Auto-enable debug on mobile
-            if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
-                document.getElementById('webrtcDebug').classList.add('active');
-                logDebug('Mobile device detected');
-            }
-            
-            // Force username (from your requirement)
-            if (!config.username || config.username.trim() === '') {
-                alert('Please enter your name to join the classroom');
-                window.location.href = '/large_event/join?room=' + encodeURIComponent(config.roomId);
-                return;
-            }
-            
-            // Initialize Socket.IO
-            initializeSocket();
-        });
-        
-        // ============================================
-        // Make functions globally available
-        // ============================================
-        window.startBroadcast = startTeacherBroadcast;
-        window.toggleDebug = toggleDebug;
-        window.acceptTeacherOffer = acceptTeacherOffer;
-        
-        // Toast function (simplified)
-        function showToast(type, title, message) {
-            console.log(`[TOAST] ${title}: ${message}`);
-            // Your existing toast implementation
-        }
-        
-        function showLoading(message) {
-            console.log(`[LOADING] ${message}`);
-            // Your existing loading implementation
-        }
-        
-        function hideLoading() {
-            // Your existing hide loading implementation
-        }
-        
-        // ============================================
-        // Global state object
-        // ============================================
-        const state = {
-            socket: null,
-            roomId: config.roomId,
-            username: config.username,
-            role: config.role,
-            sid: null,
-            teacherSid: null,
-            isBroadcasting: false,
-            peerConnections: new Map(),
-            teacherStream: null,
-            participants: new Map()
-        };
-    </script>
+        <div class="header">
+            <div class="header-icon">
+                <i class="fas fa-broadcast-tower"></i>
+            </div>
+            <h1>Large Classroom Broadcast</h1>
+            <p>Teach 1000+ students with broadcast mode, Q&A, raised hands, and full teacher control.</p>
+            <div class="scale-badge">For 1000+ Students</div>
+        </div>
+
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                <div class="flash-message">
+                    <i class="fas fa-exclamation-circle"></i> {{ messages[0] }}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        <div class="main-cards">
+
+            <!-- Student -->
+            <div class="card student">
+                <div class="card-icon">
+                    <i class="fas fa-sign-in-alt"></i>
+                </div>
+                <h3>Join as Student</h3>
+                <p>Enter the classroom ID and your name to join the session.</p>
+
+                <form action="/large_event/join" method="POST">
+                    <div class="form-group">
+                        <label for="room_id">Classroom ID</label>
+                        <input type="text" id="room_id" name="room_id" placeholder="e.g. 5a3b8c" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="username">Your Name</label>
+                        <input type="text" id="username" name="username" placeholder="Enter your full name" required>
+                    </div>
+
+                    <button type="submit" class="btn">
+                        <i class="fas fa-video"></i> Join Classroom
+                    </button>
+                </form>
+            </div>
+
+            <!-- Teacher -->
+            <div class="card teacher">
+                <div class="card-icon">
+                    <i class="fas fa-chalkboard-teacher"></i>
+                </div>
+                <h3>Start as Teacher</h3>
+                <p>Create a new large classroom and start broadcasting instantly.</p>
+
+                <a href="/large_event/teacher" class="btn">
+                    <i class="fas fa-plus-circle"></i> Create New Classroom
+                </a>
+            </div>
+
+        </div>
+
+        <div class="features">
+            <div class="feature">
+                <div class="feature-icon"><i class="fas fa-broadcast-tower"></i></div>
+                <h4>Broadcast Mode</h4>
+                <p>Teacher-only video for massive scale.</p>
+            </div>
+
+            <div class="feature">
+                <div class="feature-icon"><i class="fas fa-hand-paper"></i></div>
+                <h4>Raise Hand</h4>
+                <p>Students request to speak.</p>
+            </div>
+
+            <div class="feature">
+                <div class="feature-icon"><i class="fas fa-comments"></i></div>
+                <h4>Q&A</h4>
+                <p>Structured questions and answers.</p>
+            </div>
+
+            <div class="feature">
+                <div class="feature-icon"><i class="fas fa-poll"></i></div>
+                <h4>Live Polls</h4>
+                <p>Instant feedback from students.</p>
+            </div>
+        </div>
+
+        <div class="instructions">
+            <h4><i class="fas fa-info-circle"></i> How it works</h4>
+            <ul>
+                <li><i class="fas fa-check-circle"></i> Teachers create a room and share the ID.</li>
+                <li><i class="fas fa-check-circle"></i> Students join with ID and their real name.</li>
+                <li><i class="fas fa-check-circle"></i> No app needed. Works in the browser.</li>
+            </ul>
+        </div>
+
+        <div class="back-link">
+            <a href="/live_meeting"><i class="fas fa-arrow-left"></i> Back to Standard Classroom</a>
+        </div>
+
+    </div>
 </body>
 </html>
