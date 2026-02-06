@@ -704,10 +704,10 @@
                             Classroom ID
                         </label>
                         <input type="text" id="room_id" name="room_id" 
-                               placeholder="Enter 6-digit classroom ID (e.g., 5A3B8C)" 
-                               required pattern="[A-Za-z0-9]{6}"
-                               title="Enter a 6-character classroom ID">
-                        <div class="error-message" id="roomIdError">Classroom ID must be 6 characters</div>
+                               placeholder="Enter 8-character classroom ID (e.g., C5451D8E)" 
+                               required pattern="[A-Za-z0-9]{8}"
+                               title="Enter an 8-character classroom ID">
+                        <div class="error-message" id="roomIdError">Classroom ID must be 8 characters</div>
                     </div>
                     <div class="form-group">
                         <label for="username">
@@ -790,7 +790,7 @@
                     </div>
                     <div class="instruction-content">
                         <h5>For Teachers</h5>
-                        <p>Create a classroom, share the 6-digit ID with students, and start broadcasting. You control who speaks and manage Q&A.</p>
+                        <p>Create a classroom, share the 8-character ID with students, and start broadcasting. You control who speaks and manage Q&A.</p>
                     </div>
                 </div>
                 <div class="instruction-item">
@@ -847,7 +847,8 @@
                 // Real-time validation
                 roomIdInput.addEventListener('input', function() {
                     const value = this.value.trim();
-                    if (value.length !== 6 && value.length > 0) {
+                    // Changed from 6 to 8 characters
+                    if (value.length !== 8 && value.length > 0) {
                         this.classList.add('error');
                         roomIdError.style.display = 'block';
                     } else {
@@ -877,12 +878,12 @@
                     
                     let isValid = true;
                     
-                    // Validate room ID
-                    if (roomId.length !== 6) {
+                    // Validate room ID - Changed from 6 to 8 characters
+                    if (roomId.length !== 8) {
                         roomIdInput.classList.add('error');
                         roomIdError.style.display = 'block';
                         roomIdInput.focus();
-                        showToast('error', 'Invalid Classroom ID', 'Please enter a 6-digit classroom ID');
+                        showToast('error', 'Invalid Classroom ID', 'Please enter an 8-character classroom ID');
                         isValid = false;
                     }
                     
