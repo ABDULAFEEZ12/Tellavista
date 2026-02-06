@@ -634,20 +634,6 @@
             }
         }
 
-        /* ===== ANIMATIONS FOR MOBILE ===== */
-        @media (max-width: 768px) {
-            @keyframes slideUp {
-                from {
-                    opacity: 0;
-                    transform: translateY(30px);
-                }
-                to {
-                    opacity: 1;
-                    transform: translateY(0);
-                }
-            }
-        }
-
         /* ===== LOADING STATE ===== */
         .btn.loading {
             pointer-events: none;
@@ -661,6 +647,20 @@
         @keyframes spin {
             from { transform: rotate(0deg); }
             to { transform: rotate(360deg); }
+        }
+
+        /* ===== ANIMATIONS FOR MOBILE ===== */
+        @media (max-width: 768px) {
+            @keyframes slideUp {
+                from {
+                    opacity: 0;
+                    transform: translateY(30px);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
         }
     </style>
 </head>
@@ -968,21 +968,27 @@
                 // Ctrl+J focuses on room ID
                 if (e.ctrlKey && e.key === 'j') {
                     e.preventDefault();
-                    roomIdInput.focus();
-                    roomIdInput.select();
+                    if (roomIdInput) {
+                        roomIdInput.focus();
+                        roomIdInput.select();
+                    }
                 }
                 
                 // Ctrl+T focuses on username
                 if (e.ctrlKey && e.key === 't') {
                     e.preventDefault();
-                    usernameInput.focus();
-                    usernameInput.select();
+                    if (usernameInput) {
+                        usernameInput.focus();
+                        usernameInput.select();
+                    }
                 }
                 
                 // Enter in room ID moves to username
                 if (e.target === roomIdInput && e.key === 'Enter') {
                     e.preventDefault();
-                    usernameInput.focus();
+                    if (usernameInput) {
+                        usernameInput.focus();
+                    }
                 }
             });
 
