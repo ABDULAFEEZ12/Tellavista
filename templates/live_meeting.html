@@ -37,7 +37,7 @@
             background: #ffffff;
             border-radius: 10px;
             padding: 40px;
-            max-width: 500px;
+            max-width: 600px;
             width: 100%;
             text-align: center;
             border: 1px solid #e0e0e0;
@@ -86,13 +86,13 @@
         }
 
         .role-cards {
-            display: flex;
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
             gap: 20px;
             margin: 40px 0;
         }
 
         .role-card {
-            flex: 1;
             background: #ffffff;
             border-radius: 10px;
             padding: 30px 20px;
@@ -101,14 +101,23 @@
             border: 2px solid #e0e0e0;
             animation: fadeInUp 0.5s ease-out;
             animation-fill-mode: both;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
         }
 
-        .role-card:first-child {
+        .role-card:nth-child(1) {
+            animation-delay: 0.2s;
+        }
+
+        .role-card:nth-child(2) {
             animation-delay: 0.3s;
         }
 
-        .role-card:last-child {
+        .role-card:nth-child(3) {
             animation-delay: 0.4s;
+            grid-column: span 2;
         }
 
         @keyframes fadeInUp {
@@ -155,6 +164,20 @@
             font-size: 14px;
             line-height: 1.5;
             opacity: 0.8;
+            flex-grow: 1;
+        }
+
+        .feature-tag {
+            display: inline-block;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+            margin-top: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
         .join-section {
@@ -365,7 +388,97 @@
             animation: fadeIn 0.5s ease-out;
         }
 
-        @media (max-width: 600px) {
+        /* Teacher Options Modal */
+        .teacher-options-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        .teacher-options-content {
+            background: white;
+            border-radius: 15px;
+            padding: 40px;
+            max-width: 500px;
+            width: 90%;
+            text-align: center;
+            animation: slideUp 0.4s ease-out;
+        }
+
+        .teacher-options-content h2 {
+            color: #000000;
+            margin-bottom: 30px;
+            font-size: 24px;
+        }
+
+        .teacher-option-card {
+            background: #ffffff;
+            border-radius: 10px;
+            padding: 25px;
+            margin-bottom: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid #e0e0e0;
+            text-align: left;
+        }
+
+        .teacher-option-card:hover {
+            transform: translateY(-3px);
+            border-color: #000000;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .teacher-option-card h4 {
+            color: #000000;
+            font-size: 18px;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .teacher-option-card p {
+            color: #666666;
+            font-size: 14px;
+            line-height: 1.5;
+            margin-bottom: 10px;
+        }
+
+        .teacher-option-icon {
+            font-size: 24px;
+            color: #000000;
+        }
+
+        .close-modal-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: none;
+            border: none;
+            font-size: 24px;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .close-modal-btn:hover {
+            transform: scale(1.1);
+        }
+
+        /* Large Classroom Tag */
+        .large-class-tag {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+
+        @media (max-width: 768px) {
             .container {
                 padding: 25px;
                 animation: slideUpMobile 0.5s ease-out 0.1s both;
@@ -383,7 +496,11 @@
             }
             
             .role-cards {
-                flex-direction: column;
+                grid-template-columns: 1fr;
+            }
+            
+            .role-card:nth-child(3) {
+                grid-column: span 1;
             }
             
             .logo h1 {
@@ -446,20 +563,30 @@
         {% endwith %}
 
         <div class="role-cards">
-            <div class="role-card teacher" onclick="handleRoleCardClick('teacher')">
+            <div class="role-card" onclick="handleTeacherClick()">
                 <div class="role-icon">
                     <i class="fas fa-chalkboard-teacher"></i>
                 </div>
                 <h3>Create Meeting</h3>
                 <p>Start a new classroom session as a teacher. Share your screen, video, and audio with students.</p>
+                <span class="feature-tag">Teacher Panel</span>
             </div>
 
-            <div class="role-card student" onclick="handleRoleCardClick('student')">
+            <div class="role-card" onclick="handleRoleCardClick('student')">
                 <div class="role-icon">
                     <i class="fas fa-user-graduate"></i>
                 </div>
                 <h3>Join Meeting</h3>
                 <p>Join an existing classroom as a student. View teacher's screen and participate in the session.</p>
+            </div>
+
+            <div class="role-card" onclick="window.location.href='/large_event'">
+                <div class="role-icon">
+                    <i class="fas fa-broadcast-tower"></i>
+                </div>
+                <h3>Large Classroom</h3>
+                <p>Host or join large-scale classrooms with up to 1000+ students. Broadcast mode with Q&A and raised hand features.</p>
+                <span class="feature-tag large-class-tag">For Large Events</span>
             </div>
         </div>
 
@@ -496,7 +623,67 @@
         </div>
     </div>
 
+    <!-- Teacher Options Modal -->
+    <div class="teacher-options-modal" id="teacherOptionsModal">
+        <button class="close-modal-btn" onclick="closeTeacherModal()">
+            <i class="fas fa-times"></i>
+        </button>
+        <div class="teacher-options-content">
+            <h2>Choose Meeting Type</h2>
+            
+            <div class="teacher-option-card" onclick="navigateTo('/live_meeting/teacher')">
+                <h4><i class="fas fa-users teacher-option-icon"></i> Standard Classroom</h4>
+                <p>Interactive classroom with full video, audio, and screen sharing. Best for small to medium classes.</p>
+                <span class="feature-tag">Up to 50 students</span>
+            </div>
+            
+            <div class="teacher-option-card" onclick="navigateTo('/live_meeting/large_classroom_teacher')">
+                <h4><i class="fas fa-broadcast-tower teacher-option-icon"></i> Large Classroom (Broadcast Mode)</h4>
+                <p>Broadcast-style teaching with teacher-only video, raised hand system, and Q&A. Scales to 1000+ students.</p>
+                <span class="feature-tag large-class-tag">For 1000+ students</span>
+            </div>
+            
+            <div class="teacher-option-card" onclick="navigateTo('/large_event')">
+                <h4><i class="fas fa-chalkboard teacher-option-icon"></i> Smart Classroom Event</h4>
+                <p>Advanced features: Smart Q&A, polls, notes, and structured interaction. Perfect for exam prep and marathons.</p>
+                <span class="feature-tag large-class-tag">Premium Features</span>
+            </div>
+        </div>
+    </div>
+
     <script>
+        // Teacher Options Modal Functions
+        function handleTeacherClick() {
+            const modal = document.getElementById('teacherOptionsModal');
+            modal.style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeTeacherModal() {
+            const modal = document.getElementById('teacherOptionsModal');
+            modal.style.display = 'none';
+            document.body.style.overflow = 'auto';
+        }
+
+        // Close modal when clicking outside
+        document.getElementById('teacherOptionsModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeTeacherModal();
+            }
+        });
+
+        // Navigation function
+        function navigateTo(url) {
+            closeTeacherModal();
+            // Gentle animation before navigation
+            document.body.style.opacity = '0.9';
+            document.body.style.transform = 'scale(0.98)';
+            
+            setTimeout(() => {
+                window.location.href = url;
+            }, 300);
+        }
+
         // Auto-focus on meeting ID input with gentle animation
         document.addEventListener('DOMContentLoaded', function() {
             const roomIdInput = document.getElementById('room_id');
@@ -550,25 +737,6 @@
                 });
             });
 
-            // Smooth scroll to join form
-            function scrollToJoinForm() {
-                const joinForm = document.getElementById('joinForm');
-                if (joinForm) {
-                    joinForm.style.opacity = '0.9';
-                    joinForm.style.transform = 'translateY(-5px)';
-                    
-                    joinForm.scrollIntoView({ 
-                        behavior: 'smooth',
-                        block: 'start'
-                    });
-                    
-                    setTimeout(() => {
-                        joinForm.style.opacity = '1';
-                        joinForm.style.transform = 'translateY(0)';
-                    }, 500);
-                }
-            }
-
             // Initialize with reduced motion preference check
             const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
             if (prefersReducedMotion.matches) {
@@ -581,16 +749,8 @@
         });
 
         function handleRoleCardClick(role) {
-            if (role === 'teacher') {
-                // Gentle animation before navigation
-                const card = document.querySelector('.role-card.teacher');
-                card.style.opacity = '0.8';
-                
-                setTimeout(() => {
-                    window.location.href = '/live_meeting/teacher';
-                }, 300);
-            } else if (role === 'student') {
-                const card = document.querySelector('.role-card.student');
+            if (role === 'student') {
+                const card = document.querySelector('.role-card:nth-child(2)');
                 card.style.opacity = '0.8';
                 
                 setTimeout(() => {
@@ -625,6 +785,35 @@
                 }, 300);
             }
         }
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', function(e) {
+            // Escape key closes modal
+            if (e.key === 'Escape') {
+                closeTeacherModal();
+            }
+            
+            // Ctrl+T opens teacher options
+            if (e.ctrlKey && e.key === 't') {
+                e.preventDefault();
+                handleTeacherClick();
+            }
+            
+            // Ctrl+J focuses on join form
+            if (e.ctrlKey && e.key === 'j') {
+                e.preventDefault();
+                const roomIdInput = document.getElementById('room_id');
+                if (roomIdInput) {
+                    roomIdInput.focus();
+                    roomIdInput.scrollIntoView({ behavior: 'smooth' });
+                }
+            }
+        });
+
+        // Smooth transitions for page elements
+        window.addEventListener('load', function() {
+            document.body.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+        });
     </script>
 </body>
 </html>
