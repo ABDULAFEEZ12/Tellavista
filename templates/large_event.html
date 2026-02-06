@@ -2,69 +2,91 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Nelavista Smart Classroom</title>
     <script src="https://cdn.socket.io/4.5.0/socket.io.min.js"></script>
     <style>
+        /* ===== RESET & BASE ===== */
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+            -webkit-font-smoothing: antialiased;
         }
 
         body {
-            background: #f5f7fa;
-            color: #333;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: #0f172a;
+            color: #f8fafc;
             height: 100vh;
             overflow: hidden;
+            position: fixed;
+            width: 100%;
         }
 
-        .container {
-            display: flex;
-            height: 100vh;
-            padding: 10px;
-            gap: 10px;
-        }
-
-        /* Main Stage - Teacher Video */
-        .main-stage {
-            flex: 3;
-            background: #1a1a1a;
-            border-radius: 12px;
-            overflow: hidden;
+        /* ===== MAIN LAYOUT ===== */
+        .app-container {
             display: flex;
             flex-direction: column;
+            height: 100vh;
+            padding: 0;
             position: relative;
         }
 
-        .stage-header {
-            background: rgba(0, 0, 0, 0.8);
-            color: white;
-            padding: 15px 20px;
+        /* Header */
+        .app-header {
+            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+            padding: 12px 16px;
+            border-bottom: 1px solid #334155;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            flex-shrink: 0;
+            z-index: 100;
         }
 
         .room-info {
             display: flex;
             align-items: center;
-            gap: 15px;
+            gap: 12px;
+            flex: 1;
+            min-width: 0;
+        }
+
+        .room-id {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 500;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 40vw;
+        }
+
+        .status-indicators {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-shrink: 0;
         }
 
         .live-badge {
-            background: #ff4757;
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
             color: white;
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: bold;
-            display: none;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
         }
 
         .live-badge.active {
-            display: block;
             animation: pulse 2s infinite;
         }
 
@@ -75,195 +97,328 @@
         }
 
         .student-count {
-            background: rgba(255, 255, 255, 0.1);
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 14px;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .connection-status {
+            font-size: 12px;
+            color: #94a3b8;
+            padding: 4px 8px;
+        }
+
+        /* Main Content Area */
+        .main-content {
+            display: flex;
+            flex: 1;
+            min-height: 0;
+            overflow: hidden;
+        }
+
+        /* Video Stage */
+        .video-stage {
+            flex: 1;
+            background: #000;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            min-width: 0;
+        }
+
+        .teacher-video-container {
+            flex: 1;
+            position: relative;
+            background: #000;
         }
 
         #teacherVideo {
-            flex: 1;
             width: 100%;
+            height: 100%;
             object-fit: contain;
             background: #000;
         }
 
         .no-stream {
-            flex: 1;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: #000;
+            color: #64748b;
+            gap: 12px;
+        }
+
+        .no-stream i {
+            font-size: 48px;
+            opacity: 0.5;
+        }
+
+        .video-controls {
+            position: absolute;
+            bottom: 20px;
+            left: 0;
+            right: 0;
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            padding: 0 16px;
+        }
+
+        .video-control-btn {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: rgba(0, 0, 0, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
             display: flex;
             align-items: center;
             justify-content: center;
-            color: #888;
             font-size: 18px;
-            background: #000;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .video-control-btn:hover {
+            background: rgba(0, 0, 0, 0.9);
+            transform: scale(1.05);
         }
 
         /* Sidebar */
         .sidebar {
-            flex: 1;
-            max-width: 400px;
-            background: white;
-            border-radius: 12px;
+            width: 100%;
+            max-width: min(400px, 90vw);
+            background: #1e293b;
             display: flex;
             flex-direction: column;
-            overflow: hidden;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            border-left: 1px solid #334155;
+            transition: transform 0.3s ease;
         }
 
-        .sidebar-header {
-            padding: 15px;
-            background: #2c3e50;
+        /* Mobile Sidebar Toggle */
+        .sidebar-toggle {
+            display: none;
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            z-index: 101;
+            background: rgba(0, 0, 0, 0.7);
+            border: none;
             color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            font-size: 18px;
         }
 
-        .tabs {
+        /* Tabs */
+        .sidebar-tabs {
             display: flex;
-            background: #34495e;
+            background: #0f172a;
+            border-bottom: 1px solid #334155;
+            flex-shrink: 0;
         }
 
-        .tab {
+        .tab-btn {
             flex: 1;
-            padding: 12px;
-            text-align: center;
+            padding: 14px 12px;
             background: none;
             border: none;
-            color: rgba(255, 255, 255, 0.7);
-            cursor: pointer;
+            color: #94a3b8;
+            font-size: 14px;
             font-weight: 500;
-            transition: all 0.3s;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            transition: all 0.2s;
+            position: relative;
         }
 
-        .tab:hover {
-            background: rgba(255, 255, 255, 0.1);
+        .tab-btn.active {
+            color: #3b82f6;
+            background: rgba(59, 130, 246, 0.1);
         }
 
-        .tab.active {
-            background: #2c3e50;
+        .tab-btn.active::after {
+            content: '';
+            position: absolute;
+            bottom: -1px;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: #3b82f6;
+        }
+
+        .tab-badge {
+            background: #475569;
             color: white;
-            border-bottom: 3px solid #3498db;
+            font-size: 11px;
+            padding: 1px 6px;
+            border-radius: 10px;
+            min-width: 20px;
+            text-align: center;
         }
 
+        .tab-btn.active .tab-badge {
+            background: #3b82f6;
+        }
+
+        /* Tab Content */
         .tab-content {
             flex: 1;
-            overflow-y: auto;
-            padding: 15px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .tab-pane {
+            flex: 1;
+            overflow: hidden;
             display: none;
+            flex-direction: column;
         }
 
-        .tab-content.active {
-            display: block;
+        .tab-pane.active {
+            display: flex;
         }
 
-        /* Questions Tab */
-        .question-list {
-            max-height: 400px;
+        /* Lists */
+        .list-container {
+            flex: 1;
             overflow-y: auto;
-            margin-bottom: 15px;
+            -webkit-overflow-scrolling: touch;
+            padding: 16px;
         }
 
+        .list-empty {
+            text-align: center;
+            padding: 40px 20px;
+            color: #64748b;
+        }
+
+        .list-empty i {
+            font-size: 36px;
+            margin-bottom: 12px;
+            opacity: 0.5;
+        }
+
+        /* Questions */
         .question-item {
-            padding: 12px;
-            margin-bottom: 10px;
-            background: #f8f9fa;
-            border-left: 4px solid #3498db;
-            border-radius: 4px;
+            background: #334155;
+            border-radius: 12px;
+            padding: 14px;
+            margin-bottom: 12px;
+            border-left: 4px solid #3b82f6;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         .question-header {
             display: flex;
             justify-content: space-between;
-            margin-bottom: 5px;
+            margin-bottom: 8px;
             font-size: 12px;
-            color: #666;
+        }
+
+        .question-author {
+            color: #e2e8f0;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .question-time {
+            color: #94a3b8;
         }
 
         .question-text {
             font-size: 14px;
-            line-height: 1.4;
+            line-height: 1.5;
+            color: #f1f5f9;
         }
 
         .question-actions {
-            margin-top: 8px;
             display: flex;
             gap: 8px;
+            margin-top: 10px;
         }
 
-        .btn {
+        .action-btn {
             padding: 6px 12px;
             border: none;
-            border-radius: 4px;
-            cursor: pointer;
+            border-radius: 6px;
             font-size: 12px;
             font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 4px;
             transition: all 0.2s;
         }
 
-        .btn-primary {
-            background: #3498db;
-            color: white;
+        .action-btn.pin {
+            background: rgba(59, 130, 246, 0.2);
+            color: #3b82f6;
         }
 
-        .btn-primary:hover {
-            background: #2980b9;
+        .action-btn.highlight {
+            background: rgba(16, 185, 129, 0.2);
+            color: #10b981;
         }
 
-        .btn-success {
-            background: #2ecc71;
-            color: white;
-        }
-
-        .btn-success:hover {
-            background: #27ae60;
-        }
-
-        .btn-danger {
-            background: #e74c3c;
-            color: white;
-        }
-
-        .btn-danger:hover {
-            background: #c0392b;
-        }
-
-        .btn-warning {
-            background: #f39c12;
-            color: white;
-        }
-
-        .btn-warning:hover {
-            background: #d35400;
-        }
-
-        /* Raised Hands Tab */
-        .hand-list {
-            max-height: 400px;
-            overflow-y: auto;
-        }
-
+        /* Raised Hands */
         .hand-item {
-            padding: 12px;
-            margin-bottom: 10px;
-            background: #fff3cd;
-            border: 1px solid #ffeaa7;
-            border-radius: 8px;
+            background: rgba(245, 158, 11, 0.1);
+            border: 1px solid rgba(245, 158, 11, 0.3);
+            border-radius: 12px;
+            padding: 14px;
+            margin-bottom: 12px;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            animation: slideIn 0.3s ease;
         }
 
         .hand-info {
             flex: 1;
         }
 
-        .hand-username {
+        .hand-name {
+            color: #fbbf24;
             font-weight: 600;
-            color: #856404;
+            margin-bottom: 4px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
         }
 
         .hand-time {
             font-size: 11px;
-            color: #d39e00;
-            margin-top: 2px;
+            color: #fbbf24;
+            opacity: 0.8;
         }
 
         .hand-actions {
@@ -271,49 +426,76 @@
             gap: 8px;
         }
 
-        /* Participants Tab */
-        .participant-list {
-            max-height: 400px;
-            overflow-y: auto;
+        /* Participants */
+        .participant-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px;
+            margin-bottom: 8px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
         }
 
-        .participant-item {
-            padding: 10px;
-            margin-bottom: 8px;
-            background: #f8f9fa;
-            border-radius: 6px;
+        .participant-info {
             display: flex;
             align-items: center;
             gap: 10px;
         }
 
+        .participant-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .participant-name {
+            font-weight: 500;
+        }
+
+        .participant-you {
+            color: #3b82f6;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
         .participant-role {
-            padding: 2px 8px;
-            border-radius: 10px;
+            padding: 4px 10px;
+            border-radius: 12px;
             font-size: 11px;
-            font-weight: bold;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
         .role-teacher {
-            background: #3498db;
-            color: white;
+            background: rgba(59, 130, 246, 0.2);
+            color: #3b82f6;
         }
 
         .role-student {
-            background: #95a5a6;
-            color: white;
+            background: rgba(100, 116, 139, 0.2);
+            color: #94a3b8;
         }
 
         .role-speaking {
-            background: #2ecc71;
-            color: white;
+            background: rgba(16, 185, 129, 0.2);
+            color: #10b981;
         }
 
         /* Input Area */
         .input-area {
-            border-top: 1px solid #eee;
-            padding: 15px;
-            background: white;
+            padding: 16px;
+            border-top: 1px solid #334155;
+            background: #1e293b;
+            flex-shrink: 0;
         }
 
         .input-group {
@@ -323,130 +505,162 @@
 
         .input-group input {
             flex: 1;
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 6px;
+            padding: 12px 16px;
+            border: 1px solid #475569;
+            border-radius: 10px;
+            background: #0f172a;
+            color: white;
             font-size: 14px;
+            outline: none;
+            transition: all 0.2s;
         }
 
         .input-group input:focus {
-            outline: none;
-            border-color: #3498db;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
         }
 
         /* Controls */
-        .controls {
-            padding: 15px;
-            background: white;
-            border-top: 1px solid #eee;
+        .controls-area {
+            padding: 16px;
+            border-top: 1px solid #334155;
+            background: #1e293b;
+            flex-shrink: 0;
         }
 
-        .controls-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-            gap: 10px;
-        }
-
-        /* Student Specific */
+        /* Student Controls */
         .student-controls {
-            text-align: center;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
         }
 
-        .raise-hand-btn {
-            background: #9b59b6;
-            color: white;
+        .control-btn {
+            padding: 14px;
             border: none;
-            padding: 15px 30px;
-            font-size: 16px;
-            border-radius: 8px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            margin: 10px auto;
-            transition: all 0.3s;
-        }
-
-        .raise-hand-btn:hover:not(:disabled) {
-            background: #8e44ad;
-            transform: translateY(-2px);
-        }
-
-        .raise-hand-btn:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-        }
-
-        .help-btn {
-            background: #f39c12;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 6px;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 600;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 8px;
-            margin: 10px auto;
+            transition: all 0.2s;
         }
 
-        /* Teacher Specific */
-        .teacher-preview {
-            position: absolute;
-            bottom: 20px;
-            right: 20px;
-            width: 180px;
-            height: 120px;
-            background: #000;
-            border-radius: 8px;
-            overflow: hidden;
-            border: 3px solid #3498db;
-            display: none;
+        .control-btn:active {
+            transform: scale(0.98);
         }
 
-        #teacherPreview {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
+        .raise-hand-btn {
+            background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+            color: white;
+            grid-column: span 2;
         }
 
-        .broadcast-active .teacher-preview {
-            display: block;
+        .raise-hand-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
         }
 
-        /* Active Speaker Area */
+        .help-btn {
+            background: rgba(245, 158, 11, 0.2);
+            color: #f59e0b;
+            border: 1px solid rgba(245, 158, 11, 0.3);
+        }
+
+        /* Teacher Controls */
+        .teacher-controls {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+        }
+
+        .teacher-btn {
+            padding: 12px;
+            border: none;
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            transition: all 0.2s;
+        }
+
+        .teacher-btn i {
+            font-size: 18px;
+        }
+
+        .btn-broadcast {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+        }
+
+        .btn-broadcast.disabled {
+            background: #475569;
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .btn-mute {
+            background: rgba(239, 68, 68, 0.2);
+            color: #ef4444;
+            border: 1px solid rgba(239, 68, 68, 0.3);
+        }
+
+        .btn-end {
+            background: rgba(239, 68, 68, 0.2);
+            color: #ef4444;
+            border: 1px solid rgba(239, 68, 68, 0.3);
+        }
+
+        /* Active Speaker */
         .active-speaker {
             position: absolute;
             bottom: 20px;
             left: 20px;
-            background: rgba(0, 0, 0, 0.8);
-            border-radius: 8px;
-            padding: 15px;
-            color: white;
-            max-width: 300px;
+            background: rgba(0, 0, 0, 0.85);
+            border-radius: 12px;
+            padding: 16px;
+            max-width: min(300px, 80vw);
             display: none;
+            animation: slideIn 0.3s ease;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(59, 130, 246, 0.3);
         }
 
-        .active-speaker.active {
+        .active-speaker.show {
             display: block;
         }
 
-        .speaker-info {
+        .speaker-header {
             display: flex;
             align-items: center;
-            gap: 10px;
-            margin-bottom: 10px;
+            justify-content: space-between;
+            margin-bottom: 12px;
         }
 
-        .speaker-video {
-            width: 100px;
-            height: 75px;
+        .speaker-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #3b82f6;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .speaker-video-container {
+            width: 100%;
+            height: 120px;
             background: #000;
-            border-radius: 4px;
+            border-radius: 8px;
             overflow: hidden;
-            margin-top: 10px;
+            margin-top: 12px;
             display: none;
         }
 
@@ -456,167 +670,482 @@
             object-fit: cover;
         }
 
-        /* Status Messages */
-        .status-message {
+        /* Mobile Overlay */
+        .mobile-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(15, 23, 42, 0.95);
+            z-index: 1000;
+            flex-direction: column;
+            padding: 20px;
+        }
+
+        .mobile-overlay.active {
+            display: flex;
+        }
+
+        .mobile-tabs {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 20px;
+            flex-shrink: 0;
+        }
+
+        .mobile-tab {
+            flex: 1;
+            padding: 16px;
+            background: #1e293b;
+            border: 1px solid #334155;
+            border-radius: 12px;
+            color: #94a3b8;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .mobile-tab.active {
+            background: #3b82f6;
+            color: white;
+            border-color: #3b82f6;
+        }
+
+        .mobile-content {
+            flex: 1;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .close-overlay {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: none;
+            border: none;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+            z-index: 1001;
+        }
+
+        /* ===== MOBILE RESPONSIVE ===== */
+        @media (max-width: 768px) {
+            .app-container {
+                padding: 0;
+            }
+
+            .app-header {
+                padding: 10px 12px;
+            }
+
+            .room-id {
+                font-size: 13px;
+                padding: 4px 10px;
+            }
+
+            .student-count, .connection-status {
+                font-size: 11px;
+                padding: 3px 8px;
+            }
+
+            .main-content {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                position: fixed;
+                top: 0;
+                right: 0;
+                bottom: 0;
+                width: 100%;
+                max-width: 100%;
+                transform: translateX(100%);
+                z-index: 1000;
+            }
+
+            .sidebar.active {
+                transform: translateX(0);
+            }
+
+            .sidebar-toggle {
+                display: flex;
+            }
+
+            .video-controls {
+                bottom: 10px;
+                padding: 0 12px;
+            }
+
+            .video-control-btn {
+                width: 40px;
+                height: 40px;
+                font-size: 16px;
+            }
+
+            .active-speaker {
+                bottom: 10px;
+                left: 10px;
+                padding: 12px;
+                max-width: calc(100vw - 140px);
+            }
+
+            .student-controls {
+                grid-template-columns: 1fr;
+                gap: 10px;
+            }
+
+            .raise-hand-btn {
+                grid-column: span 1;
+            }
+
+            .teacher-controls {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .teacher-btn {
+                padding: 10px;
+                font-size: 12px;
+            }
+
+            .teacher-btn i {
+                font-size: 16px;
+            }
+
+            .btn-broadcast {
+                grid-column: span 2;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .tab-btn {
+                padding: 12px 8px;
+                font-size: 13px;
+            }
+
+            .list-container {
+                padding: 12px;
+            }
+
+            .input-area, .controls-area {
+                padding: 12px;
+            }
+
+            .input-group input {
+                padding: 10px 14px;
+                font-size: 13px;
+            }
+
+            .control-btn {
+                padding: 12px;
+                font-size: 13px;
+            }
+        }
+
+        /* ===== TOAST NOTIFICATIONS ===== */
+        .toast-container {
             position: fixed;
             top: 20px;
             right: 20px;
-            padding: 12px 20px;
-            border-radius: 6px;
-            background: white;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            z-index: 10000;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            max-width: 300px;
+        }
+
+        .toast {
+            background: #1e293b;
+            border-left: 4px solid #3b82f6;
+            border-radius: 8px;
+            padding: 14px;
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            animation: slideInRight 0.3s ease;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+        }
+
+        @keyframes slideInRight {
+            from {
+                opacity: 0;
+                transform: translateX(100%);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .toast-icon {
+            font-size: 18px;
+            color: #3b82f6;
+        }
+
+        .toast.success .toast-icon {
+            color: #10b981;
+        }
+
+        .toast.warning .toast-icon {
+            color: #f59e0b;
+        }
+
+        .toast.error .toast-icon {
+            color: #ef4444;
+        }
+
+        .toast-content {
+            flex: 1;
+        }
+
+        .toast-title {
+            font-weight: 600;
+            margin-bottom: 4px;
+            font-size: 14px;
+        }
+
+        .toast-message {
+            font-size: 13px;
+            color: #94a3b8;
+            line-height: 1.4;
+        }
+
+        /* ===== LOADING STATES ===== */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(15, 23, 42, 0.95);
             display: none;
-            z-index: 1000;
-            animation: slideIn 0.3s ease;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+            gap: 20px;
         }
 
-        @keyframes slideIn {
-            from { transform: translateX(100%); opacity: 0; }
-            to { transform: translateX(0); opacity: 1; }
+        .loading-overlay.active {
+            display: flex;
         }
 
-        .status-success {
-            border-left: 4px solid #2ecc71;
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 3px solid rgba(59, 130, 246, 0.3);
+            border-top-color: #3b82f6;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
         }
 
-        .status-info {
-            border-left: 4px solid #3498db;
+        @keyframes spin {
+            to { transform: rotate(360deg); }
         }
 
-        .status-warning {
-            border-left: 4px solid #f39c12;
-        }
-
-        /* Responsive */
-        @media (max-width: 768px) {
-            .container {
-                flex-direction: column;
-            }
-            
-            .sidebar {
-                max-width: none;
-                max-height: 40vh;
-            }
-            
-            .teacher-preview {
-                width: 120px;
-                height: 80px;
-            }
+        .loading-message {
+            color: #94a3b8;
+            font-size: 16px;
+            text-align: center;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <!-- Main Stage -->
-        <div class="main-stage" id="mainStage">
-            <div class="stage-header">
-                <div class="room-info">
-                    <h2 id="roomTitle">Room: Loading...</h2>
-                    <div class="live-badge" id="liveBadge">● LIVE</div>
-                    <div class="student-count">👥 <span id="studentCount">0</span> students</div>
+    <div class="app-container">
+        <!-- Header -->
+        <header class="app-header">
+            <div class="room-info">
+                <div class="room-id" id="roomTitle">Room: {{ room_id }}</div>
+                <div class="live-badge" id="liveBadge">● LIVE</div>
+                <div class="student-count">👥 <span id="studentCount">0</span> students</div>
+            </div>
+            <div class="status-indicators">
+                <div class="connection-status" id="connectionStatus">Connecting...</div>
+            </div>
+        </header>
+
+        <!-- Mobile Sidebar Toggle -->
+        <button class="sidebar-toggle" id="sidebarToggle" onclick="toggleSidebar()">
+            <i class="fas fa-comments"></i>
+        </button>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Video Stage -->
+            <div class="video-stage">
+                <div class="teacher-video-container">
+                    <video id="teacherVideo" autoplay playsinline muted></video>
+                    <div id="noStream" class="no-stream">
+                        <i class="fas fa-chalkboard-teacher"></i>
+                        <div>Waiting for teacher to start broadcast...</div>
+                    </div>
                 </div>
-                <div id="connectionStatus">Connecting...</div>
-            </div>
-            
-            <!-- Teacher Video Stream -->
-            <video id="teacherVideo" autoplay playsinline></video>
-            <div id="noStream" class="no-stream">
-                Waiting for teacher to start broadcast...
-            </div>
-            
-            <!-- Teacher Local Preview (Teacher Only) -->
-            <div class="teacher-preview">
-                <video id="teacherPreview" autoplay playsinline muted></video>
-            </div>
-            
-            <!-- Active Speaker Area -->
-            <div class="active-speaker" id="activeSpeaker">
-                <div class="speaker-info">
-                    <strong>🎤 Active Speaker:</strong>
-                    <span id="speakerName">None</span>
-                    <button class="btn btn-danger btn-sm" onclick="revokeSpeaker()" id="revokeBtn">Revoke</button>
+
+                <!-- Video Controls -->
+                <div class="video-controls">
+                    <button class="video-control-btn" onclick="toggleFullscreen()" title="Fullscreen">
+                        <i class="fas fa-expand"></i>
+                    </button>
+                    <button class="video-control-btn" onclick="toggleAudio()" title="Toggle Audio">
+                        <i class="fas fa-volume-up"></i>
+                    </button>
                 </div>
-                <div class="speaker-video" id="speakerVideo">
-                    <video id="studentSpeakerVideo" autoplay playsinline></video>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Sidebar -->
-        <div class="sidebar">
-            <div class="sidebar-header">
-                <h3>Classroom Controls</h3>
-                <div id="userRole">Role: Loading...</div>
-            </div>
-            
-            <!-- Tabs -->
-            <div class="tabs">
-                <button class="tab active" onclick="switchTab('questions')">📝 Q&A</button>
-                <button class="tab" onclick="switchTab('hands')">✋ Hands (<span id="handCount">0</span>)</button>
-                <button class="tab" onclick="switchTab('participants')">👥 Students (<span id="participantCount">0</span>)</button>
-            </div>
-            
-            <!-- Questions Tab -->
-            <div class="tab-content active" id="questionsTab">
-                <div class="question-list" id="questionList">
-                    <!-- Questions will be added here -->
-                </div>
-                
-                <!-- Question Input (Students Only) -->
-                <div class="input-area" id="questionInputArea">
-                    <div class="input-group">
-                        <input type="text" id="questionInput" placeholder="Type your question..." maxlength="200">
-                        <button class="btn btn-primary" onclick="sendQuestion()" id="sendQuestionBtn">Send</button>
+
+                <!-- Active Speaker -->
+                <div class="active-speaker" id="activeSpeaker">
+                    <div class="speaker-header">
+                        <div class="speaker-title">
+                            <i class="fas fa-microphone"></i>
+                            <span id="speakerName">No active speaker</span>
+                        </div>
+                        <button class="action-btn" onclick="revokeSpeaker()" id="revokeBtn" style="display: none;">
+                            <i class="fas fa-times"></i> Revoke
+                        </button>
+                    </div>
+                    <div class="speaker-video-container" id="speakerVideo">
+                        <video id="studentSpeakerVideo" autoplay playsinline></video>
                     </div>
                 </div>
             </div>
-            
-            <!-- Raised Hands Tab -->
-            <div class="tab-content" id="handsTab">
-                <div class="hand-list" id="handList">
-                    <!-- Raised hands will be added here -->
-                </div>
-            </div>
-            
-            <!-- Participants Tab -->
-            <div class="tab-content" id="participantsTab">
-                <div class="participant-list" id="participantList">
-                    <!-- Participants will be added here -->
-                </div>
-            </div>
-            
-            <!-- Controls Area -->
-            <div class="controls">
-                <!-- Student Controls -->
-                <div class="student-controls" id="studentControls">
-                    <button class="raise-hand-btn" onclick="raiseHand()" id="raiseHandBtn">
-                        <span>✋</span> Raise Hand
+
+            <!-- Sidebar -->
+            <div class="sidebar" id="sidebar">
+                <!-- Tabs -->
+                <div class="sidebar-tabs">
+                    <button class="tab-btn active" onclick="switchTab('questions')" data-tab="questions">
+                        <i class="fas fa-comments"></i>
+                        <span class="tab-text">Q&A</span>
+                        <span class="tab-badge" id="questionCount">0</span>
                     </button>
-                    <button class="help-btn" onclick="sendConfusionAlert()">
-                        <span>❓</span> I Need Help
+                    <button class="tab-btn" onclick="switchTab('hands')" data-tab="hands">
+                        <i class="fas fa-hand-paper"></i>
+                        <span class="tab-text">Hands</span>
+                        <span class="tab-badge" id="handCount">0</span>
+                    </button>
+                    <button class="tab-btn" onclick="switchTab('participants')" data-tab="participants">
+                        <i class="fas fa-users"></i>
+                        <span class="tab-text">Students</span>
+                        <span class="tab-badge" id="participantCount">0</span>
                     </button>
                 </div>
-                
-                <!-- Teacher Controls -->
-                <div class="teacher-controls" id="teacherControls">
-                    <div class="controls-grid">
-                        <button class="btn btn-success" onclick="startBroadcast()" id="startBroadcastBtn">
-                            ▶ Start Broadcast
+
+                <!-- Tab Content -->
+                <div class="tab-content">
+                    <!-- Questions Tab -->
+                    <div class="tab-pane active" id="questionsTab">
+                        <div class="list-container" id="questionList">
+                            <div class="list-empty">
+                                <i class="fas fa-comments"></i>
+                                <div>No questions yet</div>
+                                <div class="subtext">Be the first to ask a question!</div>
+                            </div>
+                        </div>
+                        <div class="input-area">
+                            <div class="input-group">
+                                <input type="text" id="questionInput" placeholder="Type your question..." maxlength="500">
+                                <button class="control-btn" onclick="sendQuestion()" id="sendQuestionBtn">
+                                    <i class="fas fa-paper-plane"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Raised Hands Tab -->
+                    <div class="tab-pane" id="handsTab">
+                        <div class="list-container" id="handList">
+                            <div class="list-empty">
+                                <i class="fas fa-hand-paper"></i>
+                                <div>No raised hands</div>
+                                <div class="subtext">Students will appear here when they raise hands</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Participants Tab -->
+                    <div class="tab-pane" id="participantsTab">
+                        <div class="list-container" id="participantList">
+                            <div class="list-empty">
+                                <i class="fas fa-users"></i>
+                                <div>No participants</div>
+                                <div class="subtext">Students will appear here when they join</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Controls Area -->
+                <div class="controls-area">
+                    <!-- Student Controls -->
+                    <div class="student-controls" id="studentControls">
+                        <button class="control-btn raise-hand-btn" onclick="raiseHand()" id="raiseHandBtn">
+                            <i class="fas fa-hand-paper"></i>
+                            <span>Raise Hand</span>
                         </button>
-                        <button class="btn btn-warning" onclick="toggleMuteAll()" id="muteAllBtn">
-                            🔇 Mute All
+                        <button class="control-btn help-btn" onclick="sendConfusionAlert()">
+                            <i class="fas fa-question-circle"></i>
+                            <span>I Need Help</span>
                         </button>
-                        <button class="btn btn-danger" onclick="endClass()" id="endClassBtn">
-                            ⏹ End Class
+                    </div>
+
+                    <!-- Teacher Controls -->
+                    <div class="teacher-controls" id="teacherControls">
+                        <button class="teacher-btn btn-broadcast" onclick="startBroadcast()" id="startBroadcastBtn">
+                            <i class="fas fa-broadcast-tower"></i>
+                            <span>Start Broadcast</span>
+                        </button>
+                        <button class="teacher-btn btn-mute" onclick="toggleMuteAll()" id="muteAllBtn">
+                            <i class="fas fa-microphone-slash"></i>
+                            <span>Mute All</span>
+                        </button>
+                        <button class="teacher-btn btn-end" onclick="endClass()" id="endClassBtn">
+                            <i class="fas fa-power-off"></i>
+                            <span>End Class</span>
                         </button>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-    
-    <!-- Status Message Container -->
-    <div id="statusContainer"></div>
+
+    <!-- Mobile Overlay for Tabs -->
+    <div class="mobile-overlay" id="mobileOverlay">
+        <button class="close-overlay" onclick="closeMobileOverlay()">
+            <i class="fas fa-times"></i>
+        </button>
+        <div class="mobile-tabs">
+            <button class="mobile-tab active" onclick="switchMobileTab('questions')">
+                <i class="fas fa-comments"></i>
+                <span>Q&A</span>
+            </button>
+            <button class="mobile-tab" onclick="switchMobileTab('hands')">
+                <i class="fas fa-hand-paper"></i>
+                <span>Hands</span>
+            </button>
+            <button class="mobile-tab" onclick="switchMobileTab('participants')">
+                <i class="fas fa-users"></i>
+                <span>Students</span>
+            </button>
+        </div>
+        <div class="mobile-content" id="mobileContent">
+            <!-- Content will be loaded here -->
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-spinner"></div>
+        <div class="loading-message" id="loadingMessage">Connecting to classroom...</div>
+    </div>
 
     <script>
         // ============================================
@@ -626,14 +1155,29 @@
             roomId: '{{ room_id }}',
             username: '{{ username }}',
             role: '{{ role }}',
-            maxQuestionLength: 200,
-            reconnectAttempts: 5
+            // Enhanced WebRTC configuration for mobile
+            rtcConfig: {
+                iceServers: [
+                    { urls: 'stun:stun.l.google.com:19302' },
+                    { urls: 'stun:stun1.l.google.com:19302' },
+                    { urls: 'stun:stun2.l.google.com:19302' },
+                    { urls: 'stun:stun3.l.google.com:19302' },
+                    { urls: 'stun:stun4.l.google.com:19302' }
+                ],
+                iceTransportPolicy: 'all',
+                bundlePolicy: 'max-bundle',
+                rtcpMuxPolicy: 'require'
+            },
+            reconnectDelay: 2000,
+            maxReconnectAttempts: 5,
+            connectionTimeout: 10000
         };
 
-        let state = {
+        // Global state
+        const state = {
             socket: null,
             roomId: config.roomId,
-            username: config.username,
+            username: config.username || 'Anonymous',
             role: config.role,
             sid: null,
             teacherSid: null,
@@ -641,51 +1185,51 @@
             isMutedAll: false,
             raisedHand: false,
             activeSpeakerSid: null,
-            peerConnections: new Map(), // Map<sid, RTCPeerConnection>
+            peerConnections: new Map(),
             teacherStream: null,
             studentStream: null,
-            participants: new Map(), // Map<sid, {username, role}>
+            participants: new Map(),
             questions: [],
-            raisedHands: new Map(), // Map<sid, {username, timestamp}>
-            reconnectCount: 0
+            raisedHands: new Map(),
+            isMobile: false,
+            isSidebarOpen: false,
+            currentTab: 'questions',
+            reconnectAttempts: 0,
+            connectionTimeout: null,
+            audioEnabled: true
         };
 
-        // ============================================
         // DOM Elements
-        // ============================================
         const elements = {
-            // Video elements
+            // Video
             teacherVideo: document.getElementById('teacherVideo'),
-            teacherPreview: document.getElementById('teacherPreview'),
             studentSpeakerVideo: document.getElementById('studentSpeakerVideo'),
             noStream: document.getElementById('noStream'),
             
-            // UI elements
+            // UI
             roomTitle: document.getElementById('roomTitle'),
             liveBadge: document.getElementById('liveBadge'),
             studentCount: document.getElementById('studentCount'),
-            userRole: document.getElementById('userRole'),
             connectionStatus: document.getElementById('connectionStatus'),
-            
-            // Tabs and content
-            mainStage: document.getElementById('mainStage'),
+            sidebar: document.getElementById('sidebar'),
+            sidebarToggle: document.getElementById('sidebarToggle'),
             activeSpeaker: document.getElementById('activeSpeaker'),
             speakerName: document.getElementById('speakerName'),
             speakerVideo: document.getElementById('speakerVideo'),
             revokeBtn: document.getElementById('revokeBtn'),
+            
+            // Tabs
+            questionCount: document.getElementById('questionCount'),
+            handCount: document.getElementById('handCount'),
+            participantCount: document.getElementById('participantCount'),
             
             // Lists
             questionList: document.getElementById('questionList'),
             handList: document.getElementById('handList'),
             participantList: document.getElementById('participantList'),
             
-            // Counts
-            handCount: document.getElementById('handCount'),
-            participantCount: document.getElementById('participantCount'),
-            
             // Inputs
             questionInput: document.getElementById('questionInput'),
-            questionInputArea: document.getElementById('questionInputArea'),
             sendQuestionBtn: document.getElementById('sendQuestionBtn'),
             
             // Controls
@@ -696,90 +1240,124 @@
             muteAllBtn: document.getElementById('muteAllBtn'),
             endClassBtn: document.getElementById('endClassBtn'),
             
-            // Status
-            statusContainer: document.getElementById('statusContainer')
+            // Mobile
+            mobileOverlay: document.getElementById('mobileOverlay'),
+            mobileContent: document.getElementById('mobileContent'),
+            
+            // Toast & Loading
+            toastContainer: document.getElementById('toastContainer'),
+            loadingOverlay: document.getElementById('loadingOverlay'),
+            loadingMessage: document.getElementById('loadingMessage')
         };
 
         // ============================================
         // Initialization
         // ============================================
         document.addEventListener('DOMContentLoaded', () => {
-            initializeUI();
-            initializeSocket();
+            initializeApp();
         });
 
-        function initializeUI() {
-            // Set room title
-            elements.roomTitle.textContent = `Room: ${state.roomId}`;
-            elements.userRole.textContent = `Role: ${state.role.toUpperCase()}`;
+        function initializeApp() {
+            // Detect mobile
+            state.isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
             
-            // Show/hide controls based on role
-            if (state.role === 'teacher') {
-                elements.studentControls.style.display = 'none';
-                elements.teacherControls.style.display = 'block';
-                elements.questionInputArea.style.display = 'none';
-            } else {
-                elements.studentControls.style.display = 'block';
-                elements.teacherControls.style.display = 'none';
-                elements.questionInputArea.style.display = 'block';
+            // Show loading
+            showLoading('Initializing classroom...');
+            
+            // Validate username
+            if (!state.username || state.username.trim() === '' || state.username === 'Anonymous') {
+                showToast('error', 'Username Required', 'Please enter your name before joining the class.');
+                setTimeout(() => {
+                    window.location.href = '/large_event/join?error=username_required&room=' + encodeURIComponent(state.roomId);
+                }, 3000);
+                return;
             }
             
-            // Add keyboard shortcuts
-            document.addEventListener('keydown', (e) => {
-                if (e.key === 'Enter' && document.activeElement === elements.questionInput) {
+            // Set room title
+            elements.roomTitle.textContent = `Room: ${state.roomId}`;
+            
+            // Setup UI based on role
+            if (state.role === 'teacher') {
+                elements.studentControls.style.display = 'none';
+                elements.teacherControls.style.display = 'grid';
+            } else {
+                elements.studentControls.style.display = 'grid';
+                elements.teacherControls.style.display = 'none';
+            }
+            
+            // Setup mobile UI
+            if (state.isMobile) {
+                setupMobileUI();
+            }
+            
+            // Initialize Socket.IO
+            initializeSocket();
+            
+            // Setup event listeners
+            setupEventListeners();
+            
+            // Check if teacher already broadcasting
+            setTimeout(checkExistingBroadcast, 1000);
+        }
+
+        function setupMobileUI() {
+            // Hide sidebar on mobile initially
+            elements.sidebar.style.display = 'none';
+            elements.sidebarToggle.style.display = 'flex';
+            
+            // Setup mobile tab switching
+            const mobileTabs = document.querySelectorAll('.mobile-tab');
+            mobileTabs.forEach(tab => {
+                tab.addEventListener('click', function() {
+                    mobileTabs.forEach(t => t.classList.remove('active'));
+                    this.classList.add('active');
+                    const tabName = this.getAttribute('onclick').match(/switchMobileTab\('(\w+)'\)/)[1];
+                    switchMobileTab(tabName);
+                });
+            });
+        }
+
+        function setupEventListeners() {
+            // Question input enter key
+            elements.questionInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
                     sendQuestion();
                 }
-                if (e.key === 'h' && e.ctrlKey && state.role === 'student') {
-                    e.preventDefault();
-                    raiseHand();
-                }
             });
+            
+            // Fullscreen change
+            document.addEventListener('fullscreenchange', handleFullscreenChange);
+            document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
+            
+            // Network status
+            window.addEventListener('online', handleOnline);
+            window.addEventListener('offline', handleOffline);
+            
+            // Page visibility
+            document.addEventListener('visibilitychange', handleVisibilityChange);
+            
+            // Resize handling
+            window.addEventListener('resize', debounce(handleResize, 250));
         }
 
         // ============================================
         // Socket.IO Connection
         // ============================================
         function initializeSocket() {
-            console.log('🔌 Connecting to Socket.IO server...');
-            elements.connectionStatus.textContent = 'Connecting...';
-            elements.connectionStatus.style.color = '#f39c12';
+            console.log('🔌 Connecting to server...');
             
-            state.socket = io();
+            state.socket = io({
+                reconnection: true,
+                reconnectionAttempts: config.maxReconnectAttempts,
+                reconnectionDelay: config.reconnectDelay,
+                timeout: config.connectionTimeout,
+                transports: ['websocket', 'polling']  // Try WebSocket first, fallback to polling
+            });
             
             // Connection events
-            state.socket.on('connect', () => {
-                console.log('✅ Connected to server. SID:', state.socket.id);
-                elements.connectionStatus.textContent = 'Connected ✓';
-                elements.connectionStatus.style.color = '#2ecc71';
-                state.sid = state.socket.id;
-                state.reconnectCount = 0;
-                joinRoom();
-            });
-            
-            state.socket.on('disconnect', (reason) => {
-                console.log('❌ Disconnected:', reason);
-                elements.connectionStatus.textContent = 'Disconnected ✗';
-                elements.connectionStatus.style.color = '#e74c3c';
-                
-                if (reason === 'io server disconnect') {
-                    // Server initiated disconnect, need to manually reconnect
-                    setTimeout(() => state.socket.connect(), 1000);
-                }
-            });
-            
-            state.socket.on('connect_error', (error) => {
-                console.error('❌ Connection error:', error);
-                elements.connectionStatus.textContent = 'Connection Error';
-                elements.connectionStatus.style.color = '#e74c3c';
-                
-                state.reconnectCount++;
-                if (state.reconnectCount <= config.reconnectAttempts) {
-                    setTimeout(() => {
-                        console.log(`🔄 Reconnection attempt ${state.reconnectCount}/${config.reconnectAttempts}`);
-                        state.socket.connect();
-                    }, 2000 * state.reconnectCount);
-                }
-            });
+            state.socket.on('connect', handleSocketConnect);
+            state.socket.on('disconnect', handleSocketDisconnect);
+            state.socket.on('connect_error', handleSocketConnectError);
             
             // Room events
             state.socket.on('room-joined', handleRoomJoined);
@@ -793,20 +1371,52 @@
             state.socket.on('webrtc-offer', handleWebRTCOffer);
             state.socket.on('webrtc-answer', handleWebRTCAnswer);
             state.socket.on('webrtc-ice-candidate', handleWebRTCICECandidate);
-            state.socket.on('start-broadcast', handleStartBroadcast);
             
-            // Custom events for broadcast mode
+            // Custom events
             state.socket.on('you-are-approved', handleYouAreApproved);
             state.socket.on('you-are-revoked', handleYouAreRevoked);
             state.socket.on('hand-lowered', handleHandLowered);
             state.socket.on('new-question', handleNewQuestion);
             state.socket.on('new-raised-hand', handleNewRaisedHand);
             state.socket.on('raised-hand-removed', handleRaisedHandRemoved);
+            state.socket.on('confusion-alert', handleConfusionAlert);
             
-            state.socket.on('error', (data) => {
-                showStatus(data.message || 'An error occurred', 'warning');
-                console.error('Server error:', data);
-            });
+            // Error handling
+            state.socket.on('error', handleSocketError);
+        }
+
+        function handleSocketConnect() {
+            console.log('✅ Connected! SID:', state.socket.id);
+            state.sid = state.socket.id;
+            state.reconnectAttempts = 0;
+            
+            updateConnectionStatus('Connected', 'success');
+            hideLoading();
+            
+            // Join room with username validation
+            joinRoom();
+        }
+
+        function handleSocketDisconnect(reason) {
+            console.log('❌ Disconnected:', reason);
+            updateConnectionStatus('Disconnected', 'error');
+            
+            if (reason === 'io server disconnect') {
+                showToast('warning', 'Reconnecting', 'Server disconnected. Reconnecting...');
+                state.socket.connect();
+            }
+        }
+
+        function handleSocketConnectError(error) {
+            console.error('❌ Connection error:', error);
+            state.reconnectAttempts++;
+            
+            if (state.reconnectAttempts <= config.maxReconnectAttempts) {
+                updateConnectionStatus(`Reconnecting (${state.reconnectAttempts}/${config.maxReconnectAttempts})`, 'warning');
+            } else {
+                updateConnectionStatus('Connection failed', 'error');
+                showToast('error', 'Connection Failed', 'Unable to connect to server. Please refresh the page.');
+            }
         }
 
         function joinRoom() {
@@ -839,35 +1449,26 @@
             }
             
             updateParticipantsList();
+            showToast('success', 'Joined Classroom', `Welcome to room ${state.roomId}`);
             
-            if (data.teacher_sid) {
-                console.log('👨‍🏫 Teacher already in room:', data.teacher_sid);
-                if (state.role === 'student') {
-                    // Student: Wait for teacher's offer
-                    console.log('🎓 Student waiting for teacher stream...');
-                }
-            } else if (state.role === 'teacher') {
-                console.log('👨‍🏫 You are the teacher. Ready to start broadcast.');
+            // If teacher is already broadcasting, request stream
+            if (state.role === 'student' && state.teacherSid) {
+                console.log('🎓 Teacher is broadcasting, waiting for stream...');
+                showToast('info', 'Teacher Connected', 'Waiting for teacher stream...');
             }
-            
-            showStatus('Successfully joined classroom', 'success');
         }
 
         function handleTeacherJoined(data) {
             console.log('👨‍🏫 Teacher joined:', data);
             state.teacherSid = data.teacher_sid;
             
-            // Add teacher to participants
             state.participants.set(data.teacher_sid, {
                 username: data.teacher_name,
                 role: 'teacher'
             });
             
             updateParticipantsList();
-            
-            if (state.role === 'student') {
-                showStatus('Teacher has joined the classroom', 'info');
-            }
+            showToast('success', 'Teacher Joined', `${data.teacher_name} has joined the classroom`);
         }
 
         function handleTeacherDisconnected() {
@@ -875,18 +1476,15 @@
             state.teacherSid = null;
             state.isBroadcasting = false;
             
-            // Clear teacher video
+            // Clear video
             elements.teacherVideo.srcObject = null;
             elements.noStream.style.display = 'flex';
             elements.liveBadge.classList.remove('active');
-            elements.mainStage.classList.remove('broadcast-active');
             
-            // Close all peer connections
+            // Close all connections
             closeAllPeerConnections();
             
-            if (state.role === 'student') {
-                showStatus('Teacher has left. Waiting for teacher to return...', 'warning');
-            }
+            showToast('warning', 'Teacher Left', 'Teacher has left the classroom. Waiting for return...');
         }
 
         function handleNewParticipant(data) {
@@ -899,9 +1497,8 @@
             
             updateParticipantsList();
             
-            // If teacher and broadcasting, create peer connection for new student
+            // If teacher and broadcasting, create connection for new student
             if (state.role === 'teacher' && state.isBroadcasting && data.role === 'student') {
-                console.log(`🔗 Creating connection for new student: ${data.sid}`);
                 createTeacherToStudentConnection(data.sid);
             }
         }
@@ -917,164 +1514,55 @@
                 updateRaisedHandsList();
             }
             
-            // Close peer connection if exists
+            // Close connection
             if (state.peerConnections.has(data.sid)) {
                 const pc = state.peerConnections.get(data.sid);
-                if (pc) {
-                    pc.close();
-                }
+                if (pc) pc.close();
                 state.peerConnections.delete(data.sid);
             }
             
             updateParticipantsList();
         }
 
-        function handleRoomState(data) {
-            console.log('⚙️ Room state updated:', data);
-            state.isMutedAll = data.muted_all || false;
-            
-            if (state.role === 'student') {
-                // Update UI based on mute state
-                if (state.isMutedAll) {
-                    showStatus('Teacher has muted all students', 'warning');
-                }
-            }
-        }
-
-        // ============================================
-        // WebRTC Handlers
-        // ============================================
-        function handleWebRTCOffer(data) {
-            console.log('📨 Received WebRTC offer from:', data.from_sid);
-            
-            // Students: Handle offer from teacher
-            if (state.role === 'student' && data.from_sid === state.teacherSid) {
-                console.log('🎓 Accepting teacher stream offer');
-                acceptTeacherOffer(data);
-            }
-            // Teacher: Handle offer from approved student
-            else if (state.role === 'teacher') {
-                console.log('👨‍🏫 Accepting student stream offer');
-                acceptStudentOffer(data);
-            }
-        }
-
-        function handleWebRTCAnswer(data) {
-            console.log('📨 Received WebRTC answer from:', data.from_sid);
-            
-            const pc = state.peerConnections.get(data.from_sid);
-            if (pc && pc.signalingState !== 'closed') {
-                pc.setRemoteDescription(new RTCSessionDescription(data.answer))
-                    .catch(err => console.error('Error setting remote description:', err));
-            }
-        }
-
-        function handleWebRTCICECandidate(data) {
-            console.log('📨 Received ICE candidate from:', data.from_sid);
-            
-            const pc = state.peerConnections.get(data.from_sid);
-            if (pc && pc.signalingState !== 'closed' && data.candidate) {
-                pc.addIceCandidate(new RTCIceCandidate(data.candidate))
-                    .catch(err => console.error('Error adding ICE candidate:', err));
-            }
-        }
-
-        function handleStartBroadcast(data) {
-            // This event is for students when teacher starts broadcast
-            if (state.role === 'student') {
-                console.log('📢 Teacher started broadcast');
-                showStatus('Teacher started the broadcast', 'info');
-            }
-        }
-
-        // ============================================
-        // Custom Event Handlers
-        // ============================================
-        function handleYouAreApproved() {
-            console.log('🎤 You are approved to speak!');
-            showStatus('You are now unmuted! You can speak.', 'success');
-            
-            if (state.role === 'student') {
-                // Enable microphone and start sending stream to teacher
-                startStudentStreaming();
-            }
-        }
-
-        function handleYouAreRevoked() {
-            console.log('🔇 Your speaking privileges have been revoked');
-            showStatus('You are now muted', 'warning');
-            
-            if (state.role === 'student') {
-                // Stop sending stream
-                stopStudentStreaming();
-            }
-        }
-
-        function handleHandLowered() {
-            console.log('✋ Your hand has been lowered');
-            state.raisedHand = false;
-            elements.raiseHandBtn.disabled = false;
-            elements.raiseHandBtn.innerHTML = '<span>✋</span> Raise Hand';
-            showStatus('Your hand has been lowered', 'info');
-        }
-
-        function handleNewQuestion(data) {
-            console.log('❓ New question:', data);
-            addQuestionToList(data);
-        }
-
-        function handleNewRaisedHand(data) {
-            console.log('✋ New raised hand:', data);
-            
-            if (state.role === 'teacher') {
-                state.raisedHands.set(data.sid, {
-                    username: data.username,
-                    timestamp: data.timestamp
-                });
-                updateRaisedHandsList();
-                
-                // Show notification
-                showStatus(`${data.username} raised their hand`, 'info');
-            }
-        }
-
-        function handleRaisedHandRemoved(data) {
-            console.log('✋ Raised hand removed:', data);
-            
-            if (state.role === 'teacher') {
-                state.raisedHands.delete(data.sid);
-                updateRaisedHandsList();
-            }
-        }
-
         // ============================================
         // WebRTC Functions
         // ============================================
         async function startTeacherBroadcast() {
-            console.log('🎬 Starting teacher broadcast...');
+            console.log('🎬 Starting broadcast...');
+            showLoading('Starting broadcast...');
             
             try {
-                // Get teacher's media stream
+                // Get media stream with mobile-optimized constraints
                 const constraints = {
                     video: {
-                        width: { ideal: 1280 },
-                        height: { ideal: 720 },
-                        frameRate: { ideal: 30 }
+                        width: { ideal: 1280, max: 1920 },
+                        height: { ideal: 720, max: 1080 },
+                        frameRate: { ideal: 24, max: 30 },
+                        facingMode: 'user'
                     },
                     audio: {
                         echoCancellation: true,
                         noiseSuppression: true,
-                        autoGainControl: true
+                        autoGainControl: true,
+                        sampleRate: 48000,
+                        channelCount: 1
                     }
                 };
                 
+                // For mobile, use lower resolution
+                if (state.isMobile) {
+                    constraints.video = {
+                        width: { ideal: 640, max: 1280 },
+                        height: { ideal: 480, max: 720 },
+                        frameRate: { ideal: 20, max: 24 },
+                        facingMode: 'user'
+                    };
+                }
+                
                 state.teacherStream = await navigator.mediaDevices.getUserMedia(constraints);
-                console.log('✅ Got teacher media stream');
+                console.log('✅ Got media stream');
                 
-                // Show preview
-                elements.teacherPreview.srcObject = state.teacherStream;
-                
-                // Create peer connections for all existing students
+                // Create connections for all existing students
                 const studentSids = Array.from(state.participants.entries())
                     .filter(([sid, data]) => data.role === 'student')
                     .map(([sid, data]) => sid);
@@ -1082,117 +1570,130 @@
                 console.log(`🔗 Creating connections for ${studentSids.length} students`);
                 
                 for (const studentSid of studentSids) {
-                    createTeacherToStudentConnection(studentSid);
+                    await createTeacherToStudentConnection(studentSid);
                 }
                 
                 // Update UI
                 state.isBroadcasting = true;
                 elements.liveBadge.classList.add('active');
-                elements.mainStage.classList.add('broadcast-active');
                 elements.noStream.style.display = 'none';
-                elements.startBroadcastBtn.disabled = true;
-                elements.startBroadcastBtn.textContent = '● Broadcasting';
-                elements.startBroadcastBtn.classList.remove('btn-success');
-                elements.startBroadcastBtn.classList.add('btn-danger');
+                elements.startBroadcastBtn.classList.add('disabled');
+                elements.startBroadcastBtn.innerHTML = '<i class="fas fa-broadcast-tower"></i><span>Broadcasting</span>';
                 
                 // Notify all students
                 state.socket.emit('start-broadcast', { room: state.roomId });
                 
-                showStatus('Broadcast started successfully', 'success');
+                showToast('success', 'Broadcast Started', 'Your video is now live for all students');
+                hideLoading();
                 
             } catch (error) {
                 console.error('❌ Error starting broadcast:', error);
-                showStatus(`Failed to start broadcast: ${error.message}`, 'warning');
+                showToast('error', 'Broadcast Failed', `Failed to start: ${error.message}`);
+                hideLoading();
             }
         }
 
-        function createTeacherToStudentConnection(studentSid) {
+        async function createTeacherToStudentConnection(studentSid) {
             console.log(`🔗 Creating connection to student: ${studentSid}`);
             
-            // Create RTCPeerConnection
-            const pc = new RTCPeerConnection({
-                iceServers: [
-                    { urls: 'stun:stun.l.google.com:19302' },
-                    { urls: 'stun:stun1.l.google.com:19302' }
-                ]
-            });
-            
-            // Add teacher's stream tracks
-            if (state.teacherStream) {
-                state.teacherStream.getTracks().forEach(track => {
-                    pc.addTrack(track, state.teacherStream);
+            try {
+                // Create RTCPeerConnection with mobile-optimized config
+                const pc = new RTCPeerConnection({
+                    ...config.rtcConfig,
+                    sdpSemantics: 'unified-plan'
                 });
+                
+                // Add tracks
+                if (state.teacherStream) {
+                    state.teacherStream.getTracks().forEach(track => {
+                        pc.addTrack(track, state.teacherStream);
+                    });
+                }
+                
+                // ICE candidate handling
+                pc.onicecandidate = (event) => {
+                    if (event.candidate) {
+                        state.socket.emit('webrtc-ice-candidate', {
+                            room: state.roomId,
+                            target_sid: studentSid,
+                            candidate: event.candidate
+                        });
+                    }
+                };
+                
+                // Connection state handling
+                pc.onconnectionstatechange = () => {
+                    console.log(`Connection state with ${studentSid}: ${pc.connectionState}`);
+                    
+                    if (pc.connectionState === 'failed' || pc.connectionState === 'disconnected') {
+                        console.log(`Attempting to reconnect to ${studentSid}...`);
+                        setTimeout(() => {
+                            if (pc.connectionState === 'failed') {
+                                createTeacherToStudentConnection(studentSid);
+                            }
+                        }, 2000);
+                    }
+                    
+                    if (pc.connectionState === 'closed') {
+                        state.peerConnections.delete(studentSid);
+                    }
+                };
+                
+                // Create offer
+                const offer = await pc.createOffer({
+                    offerToReceiveAudio: true,
+                    offerToReceiveVideo: true
+                });
+                
+                await pc.setLocalDescription(offer);
+                
+                // Send offer
+                state.socket.emit('webrtc-offer', {
+                    room: state.roomId,
+                    target_sid: studentSid,
+                    offer: pc.localDescription
+                });
+                
+                console.log(`📤 Sent offer to student: ${studentSid}`);
+                state.peerConnections.set(studentSid, pc);
+                
+            } catch (error) {
+                console.error(`❌ Error creating connection to ${studentSid}:`, error);
             }
-            
-            // Handle ICE candidates
-            pc.onicecandidate = (event) => {
-                if (event.candidate) {
-                    state.socket.emit('webrtc-ice-candidate', {
-                        room: state.roomId,
-                        target_sid: studentSid,
-                        candidate: event.candidate
-                    });
-                }
-            };
-            
-            // Create and send offer
-            pc.createOffer()
-                .then(offer => pc.setLocalDescription(offer))
-                .then(() => {
-                    state.socket.emit('webrtc-offer', {
-                        room: state.roomId,
-                        target_sid: studentSid,
-                        offer: pc.localDescription
-                    });
-                    console.log(`📤 Sent offer to student: ${studentSid}`);
-                })
-                .catch(err => console.error('Error creating offer:', err));
-            
-            // Store the connection
-            state.peerConnections.set(studentSid, pc);
-            
-            // Handle connection state
-            pc.onconnectionstatechange = () => {
-                console.log(`Connection state with ${studentSid}: ${pc.connectionState}`);
-                
-                if (pc.connectionState === 'failed' || pc.connectionState === 'disconnected') {
-                    setTimeout(() => {
-                        if (pc.connectionState === 'failed') {
-                            console.log(`Reconnecting to ${studentSid}...`);
-                            // Could implement reconnection logic here
-                        }
-                    }, 2000);
-                }
-                
-                if (pc.connectionState === 'closed') {
-                    state.peerConnections.delete(studentSid);
-                }
-            };
         }
 
         async function acceptTeacherOffer(data) {
+            console.log('🎓 Accepting teacher offer from:', data.from_sid);
+            
             try {
-                console.log('🎓 Accepting teacher offer...');
+                // Only accept if from teacher
+                if (data.from_sid !== state.teacherSid) {
+                    console.log('Ignoring offer from non-teacher:', data.from_sid);
+                    return;
+                }
                 
-                // Create RTCPeerConnection for receiving teacher stream
+                // Create RTCPeerConnection optimized for mobile
                 const pc = new RTCPeerConnection({
-                    iceServers: [
-                        { urls: 'stun:stun.l.google.com:19302' },
-                        { urls: 'stun:stun1.l.google.com:19302' }
-                    ]
+                    ...config.rtcConfig,
+                    sdpSemantics: 'unified-plan'
                 });
                 
-                // Handle incoming track (teacher's video/audio)
+                // Handle incoming track
                 pc.ontrack = (event) => {
                     console.log('📹 Received teacher track:', event.track.kind);
                     
                     if (event.streams && event.streams[0]) {
                         elements.teacherVideo.srcObject = event.streams[0];
                         elements.noStream.style.display = 'none';
+                        
+                        // Auto-play video on mobile
+                        elements.teacherVideo.play().catch(e => {
+                            console.log('Auto-play prevented, waiting for user interaction');
+                        });
                     }
                 };
                 
-                // Handle ICE candidates
+                // ICE candidate handling
                 pc.onicecandidate = (event) => {
                     if (event.candidate) {
                         state.socket.emit('webrtc-ice-candidate', {
@@ -1221,231 +1722,66 @@
                 
             } catch (error) {
                 console.error('❌ Error accepting teacher offer:', error);
-                showStatus('Failed to connect to teacher stream', 'warning');
-            }
-        }
-
-        async function acceptStudentOffer(data) {
-            try {
-                console.log(`👨‍🏫 Accepting student offer from: ${data.from_sid}`);
-                
-                const pc = new RTCPeerConnection({
-                    iceServers: [
-                        { urls: 'stun:stun.l.google.com:19302' },
-                        { urls: 'stun:stun1.l.google.com:19302' }
-                    ]
-                });
-                
-                // Handle incoming track (student's audio/video)
-                pc.ontrack = (event) => {
-                    console.log(`🎤 Received student track from ${data.from_sid}:`, event.track.kind);
-                    
-                    if (event.streams && event.streams[0]) {
-                        // Show active speaker UI
-                        const student = state.participants.get(data.from_sid);
-                        if (student) {
-                            elements.speakerName.textContent = student.username;
-                            elements.activeSpeaker.classList.add('active');
-                            
-                            // If video track exists, show it
-                            const videoTrack = event.streams[0].getVideoTracks()[0];
-                            if (videoTrack) {
-                                elements.studentSpeakerVideo.srcObject = event.streams[0];
-                                elements.speakerVideo.style.display = 'block';
-                            }
-                            
-                            state.activeSpeakerSid = data.from_sid;
-                        }
-                    }
-                };
-                
-                // Handle ICE candidates
-                pc.onicecandidate = (event) => {
-                    if (event.candidate) {
-                        state.socket.emit('webrtc-ice-candidate', {
-                            room: state.roomId,
-                            target_sid: data.from_sid,
-                            candidate: event.candidate
-                        });
-                    }
-                };
-                
-                // Set remote description
-                await pc.setRemoteDescription(new RTCSessionDescription(data.offer));
-                
-                // Create and send answer
-                const answer = await pc.createAnswer();
-                await pc.setLocalDescription(answer);
-                
-                state.socket.emit('webrtc-answer', {
-                    room: state.roomId,
-                    target_sid: data.from_sid,
-                    answer: pc.localDescription
-                });
-                
-                console.log(`✅ Successfully accepted student offer from ${data.from_sid}`);
-                state.peerConnections.set(data.from_sid, pc);
-                
-            } catch (error) {
-                console.error('❌ Error accepting student offer:', error);
-            }
-        }
-
-        async function startStudentStreaming() {
-            try {
-                console.log('🎤 Student starting to stream audio...');
-                
-                // Get student's audio stream
-                const constraints = {
-                    audio: {
-                        echoCancellation: true,
-                        noiseSuppression: true,
-                        autoGainControl: true
-                    },
-                    video: false // Students don't send video by default
-                };
-                
-                state.studentStream = await navigator.mediaDevices.getUserMedia(constraints);
-                console.log('✅ Got student audio stream');
-                
-                // Create RTCPeerConnection to teacher
-                const pc = new RTCPeerConnection({
-                    iceServers: [
-                        { urls: 'stun:stun.l.google.com:19302' },
-                        { urls: 'stun:stun1.l.google.com:19302' }
-                    ]
-                });
-                
-                // Add audio track
-                const audioTrack = state.studentStream.getAudioTracks()[0];
-                if (audioTrack) {
-                    pc.addTrack(audioTrack, state.studentStream);
-                }
-                
-                // Handle ICE candidates
-                pc.onicecandidate = (event) => {
-                    if (event.candidate && state.teacherSid) {
-                        state.socket.emit('webrtc-ice-candidate', {
-                            room: state.roomId,
-                            target_sid: state.teacherSid,
-                            candidate: event.candidate
-                        });
-                    }
-                };
-                
-                // Create and send offer
-                const offer = await pc.createOffer();
-                await pc.setLocalDescription(offer);
-                
-                state.socket.emit('webrtc-offer', {
-                    room: state.roomId,
-                    target_sid: state.teacherSid,
-                    offer: pc.localDescription
-                });
-                
-                console.log('📤 Sent audio offer to teacher');
-                state.peerConnections.set(state.teacherSid + '-audio', pc);
-                
-            } catch (error) {
-                console.error('❌ Error starting student stream:', error);
-                showStatus('Failed to enable microphone. Please check permissions.', 'warning');
-            }
-        }
-
-        function stopStudentStreaming() {
-            console.log('🔇 Stopping student stream');
-            
-            // Close the audio peer connection
-            const pcKey = state.teacherSid + '-audio';
-            const pc = state.peerConnections.get(pcKey);
-            if (pc) {
-                pc.close();
-                state.peerConnections.delete(pcKey);
-            }
-            
-            // Stop the media stream
-            if (state.studentStream) {
-                state.studentStream.getTracks().forEach(track => track.stop());
-                state.studentStream = null;
-            }
-            
-            // Clear active speaker UI if this student was speaking
-            if (state.activeSpeakerSid === state.sid) {
-                elements.activeSpeaker.classList.remove('active');
-                elements.speakerVideo.style.display = 'none';
-                state.activeSpeakerSid = null;
-            }
-        }
-
-        function closeAllPeerConnections() {
-            console.log('🔌 Closing all peer connections');
-            
-            state.peerConnections.forEach((pc, key) => {
-                if (pc && typeof pc.close === 'function') {
-                    pc.close();
-                }
-            });
-            
-            state.peerConnections.clear();
-            
-            // Stop all media streams
-            if (state.teacherStream) {
-                state.teacherStream.getTracks().forEach(track => track.stop());
-                state.teacherStream = null;
-            }
-            
-            if (state.studentStream) {
-                state.studentStream.getTracks().forEach(track => track.stop());
-                state.studentStream = null;
+                showToast('error', 'Connection Failed', 'Failed to connect to teacher stream');
             }
         }
 
         // ============================================
-        // UI Control Functions
+        // UI Functions
         // ============================================
         function switchTab(tabName) {
+            state.currentTab = tabName;
+            
             // Update tab buttons
-            document.querySelectorAll('.tab').forEach(tab => {
-                tab.classList.remove('active');
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active');
             });
             
-            document.querySelectorAll('.tab-content').forEach(content => {
-                content.classList.remove('active');
+            document.querySelector(`.tab-btn[data-tab="${tabName}"]`).classList.add('active');
+            
+            // Update tab panes
+            document.querySelectorAll('.tab-pane').forEach(pane => {
+                pane.classList.remove('active');
             });
             
-            // Activate selected tab
-            if (tabName === 'questions') {
-                document.querySelector('.tab:nth-child(1)').classList.add('active');
-                elements.questionsTab.classList.add('active');
-            } else if (tabName === 'hands') {
-                document.querySelector('.tab:nth-child(2)').classList.add('active');
-                elements.handsTab.classList.add('active');
-            } else if (tabName === 'participants') {
-                document.querySelector('.tab:nth-child(3)').classList.add('active');
-                elements.participantsTab.classList.add('active');
-            }
+            document.getElementById(`${tabName}Tab`).classList.add('active');
         }
 
         function updateParticipantsList() {
             elements.participantList.innerHTML = '';
+            
+            if (state.participants.size === 0) {
+                const emptyMsg = `<div class="list-empty">
+                    <i class="fas fa-users"></i>
+                    <div>No participants</div>
+                </div>`;
+                elements.participantList.innerHTML = emptyMsg;
+                return;
+            }
+            
             let studentCount = 0;
             
             state.participants.forEach((data, sid) => {
                 const participantDiv = document.createElement('div');
                 participantDiv.className = 'participant-item';
                 
+                // Get first letter for avatar
+                const firstLetter = data.username.charAt(0).toUpperCase();
+                
+                // Determine role class
                 let roleClass = 'role-student';
                 if (data.role === 'teacher') roleClass = 'role-teacher';
                 if (sid === state.activeSpeakerSid) roleClass = 'role-speaking';
                 
                 participantDiv.innerHTML = `
-                    <div>
-                        <strong>${data.username}</strong>
-                        ${sid === state.sid ? ' (You)' : ''}
+                    <div class="participant-info">
+                        <div class="participant-avatar">${firstLetter}</div>
+                        <div>
+                            <div class="participant-name">${data.username}</div>
+                            ${sid === state.sid ? '<div class="participant-you">(You)</div>' : ''}
+                        </div>
                     </div>
-                    <div class="participant-role ${roleClass}">
-                        ${data.role.toUpperCase()}
-                    </div>
+                    <div class="participant-role ${roleClass}">${data.role}</div>
                 `;
                 
                 elements.participantList.appendChild(participantDiv);
@@ -1464,10 +1800,11 @@
             elements.handCount.textContent = state.raisedHands.size;
             
             if (state.raisedHands.size === 0) {
-                const emptyMsg = document.createElement('div');
-                emptyMsg.className = 'question-item';
-                emptyMsg.textContent = 'No raised hands yet';
-                elements.handList.appendChild(emptyMsg);
+                const emptyMsg = `<div class="list-empty">
+                    <i class="fas fa-hand-paper"></i>
+                    <div>No raised hands</div>
+                </div>`;
+                elements.handList.innerHTML = emptyMsg;
                 return;
             }
             
@@ -1479,7 +1816,10 @@
                 
                 handDiv.innerHTML = `
                     <div class="hand-info">
-                        <div class="hand-username">${data.username}</div>
+                        <div class="hand-name">
+                            <i class="fas fa-user"></i>
+                            ${data.username}
+                        </div>
                         <div class="hand-time">Raised ${timeAgo}</div>
                     </div>
                 `;
@@ -1489,13 +1829,13 @@
                     actionsDiv.className = 'hand-actions';
                     
                     const approveBtn = document.createElement('button');
-                    approveBtn.className = 'btn btn-success btn-sm';
-                    approveBtn.textContent = 'Allow to Speak';
+                    approveBtn.className = 'action-btn';
+                    approveBtn.innerHTML = '<i class="fas fa-check"></i> Allow';
                     approveBtn.onclick = () => approveSpeaker(sid);
                     
                     const dismissBtn = document.createElement('button');
-                    dismissBtn.className = 'btn btn-warning btn-sm';
-                    dismissBtn.textContent = 'Dismiss';
+                    dismissBtn.className = 'action-btn';
+                    dismissBtn.innerHTML = '<i class="fas fa-times"></i> Dismiss';
                     dismissBtn.onclick = () => dismissHand(sid);
                     
                     actionsDiv.appendChild(approveBtn);
@@ -1507,62 +1847,19 @@
             });
         }
 
-        function addQuestionToList(questionData) {
-            const questionDiv = document.createElement('div');
-            questionDiv.className = 'question-item';
-            questionDiv.id = `question-${questionData.id}`;
-            
-            const timeAgo = formatTimeAgo(new Date().toISOString());
-            
-            questionDiv.innerHTML = `
-                <div class="question-header">
-                    <span><strong>${questionData.username}</strong></span>
-                    <span>${timeAgo}</span>
-                </div>
-                <div class="question-text">${escapeHtml(questionData.text)}</div>
-            `;
-            
-            if (state.role === 'teacher') {
-                const actionsDiv = document.createElement('div');
-                actionsDiv.className = 'question-actions';
-                
-                const pinBtn = document.createElement('button');
-                pinBtn.className = 'btn btn-primary btn-sm';
-                pinBtn.textContent = '📌 Pin';
-                pinBtn.onclick = () => pinQuestion(questionData.id);
-                
-                const highlightBtn = document.createElement('button');
-                highlightBtn.className = 'btn btn-success btn-sm';
-                highlightBtn.textContent = '⭐ Highlight';
-                highlightBtn.onclick = () => highlightQuestion(questionData.id);
-                
-                actionsDiv.appendChild(pinBtn);
-                actionsDiv.appendChild(highlightBtn);
-                questionDiv.appendChild(actionsDiv);
-            }
-            
-            elements.questionList.insertBefore(questionDiv, elements.questionList.firstChild);
-            
-            // Keep only last 50 questions
-            const allQuestions = elements.questionList.querySelectorAll('.question-item');
-            if (allQuestions.length > 50) {
-                elements.questionList.removeChild(allQuestions[allQuestions.length - 1]);
-            }
-        }
-
         // ============================================
-        // User Action Functions
+        // User Actions
         // ============================================
         function raiseHand() {
             if (state.raisedHand) {
-                showStatus('You already have your hand raised', 'warning');
+                showToast('warning', 'Already Raised', 'Your hand is already raised');
                 return;
             }
             
             console.log('✋ Raising hand');
             state.raisedHand = true;
             elements.raiseHandBtn.disabled = true;
-            elements.raiseHandBtn.innerHTML = '<span>✋</span> Hand Raised';
+            elements.raiseHandBtn.innerHTML = '<i class="fas fa-hand-paper"></i><span>Hand Raised</span>';
             
             state.socket.emit('raise-hand', {
                 room: state.roomId,
@@ -1570,19 +1867,19 @@
                 sid: state.sid
             });
             
-            showStatus('Hand raised! Teacher will call on you soon.', 'info');
+            showToast('success', 'Hand Raised', 'Teacher will call on you soon');
         }
 
         function sendQuestion() {
             const questionText = elements.questionInput.value.trim();
             
             if (!questionText) {
-                showStatus('Please enter a question', 'warning');
+                showToast('warning', 'Empty Question', 'Please type a question');
                 return;
             }
             
-            if (questionText.length > config.maxQuestionLength) {
-                showStatus(`Question too long (max ${config.maxQuestionLength} characters)`, 'warning');
+            if (questionText.length > 500) {
+                showToast('warning', 'Too Long', 'Question must be less than 500 characters');
                 return;
             }
             
@@ -1595,176 +1892,101 @@
                 text: questionText
             });
             
-            // Add to local list immediately
+            // Add to local list
             addQuestionToList({
                 id: Date.now(),
                 username: state.username,
-                text: questionText
+                text: questionText,
+                timestamp: new Date().toISOString()
             });
             
             elements.questionInput.value = '';
             elements.questionInput.focus();
             
-            showStatus('Question sent successfully', 'success');
+            showToast('success', 'Question Sent', 'Your question has been sent');
         }
 
-        function sendConfusionAlert() {
-            console.log('❓ Sending confusion alert');
-            
-            state.socket.emit('confusion-alert', {
-                room: state.roomId
-            });
-            
-            showStatus('Teacher notified that you need help', 'success');
-        }
-
-        function startBroadcast() {
-            if (state.role !== 'teacher') return;
-            startTeacherBroadcast();
-        }
-
-        function toggleMuteAll() {
-            if (state.role !== 'teacher') return;
-            
-            state.isMutedAll = !state.isMutedAll;
-            
-            state.socket.emit(state.isMutedAll ? 'teacher-mute-all' : 'teacher-unmute-all', {
-                room: state.roomId
-            });
-            
-            elements.muteAllBtn.textContent = state.isMutedAll ? '🔊 Unmute All' : '🔇 Mute All';
-            elements.muteAllBtn.classList.toggle('btn-warning', !state.isMutedAll);
-            elements.muteAllBtn.classList.toggle('btn-success', state.isMutedAll);
-            
-            showStatus(state.isMutedAll ? 'All students muted' : 'All students unmuted', 'info');
-        }
-
-        function endClass() {
-            if (state.role !== 'teacher') return;
-            
-            if (confirm('Are you sure you want to end the class? This will disconnect all students.')) {
-                console.log('⏹ Ending class');
-                
-                // Close all connections
-                closeAllPeerConnections();
-                
-                // Update UI
-                state.isBroadcasting = false;
-                elements.liveBadge.classList.remove('active');
-                elements.mainStage.classList.remove('broadcast-active');
-                elements.noStream.style.display = 'flex';
-                elements.startBroadcastBtn.disabled = false;
-                elements.startBroadcastBtn.textContent = '▶ Start Broadcast';
-                elements.startBroadcastBtn.classList.remove('btn-danger');
-                elements.startBroadcastBtn.classList.add('btn-success');
-                
-                showStatus('Class ended. All students disconnected.', 'info');
+        // ============================================
+        // Mobile UI Functions
+        // ============================================
+        function toggleSidebar() {
+            if (state.isMobile) {
+                if (state.isSidebarOpen) {
+                    elements.sidebar.style.display = 'none';
+                    elements.sidebarToggle.innerHTML = '<i class="fas fa-comments"></i>';
+                } else {
+                    elements.sidebar.style.display = 'flex';
+                    elements.sidebarToggle.innerHTML = '<i class="fas fa-times"></i>';
+                }
+                state.isSidebarOpen = !state.isSidebarOpen;
             }
         }
 
-        function approveSpeaker(studentSid) {
-            if (state.role !== 'teacher') return;
+        function switchMobileTab(tabName) {
+            // Update mobile content
+            const tabContent = document.getElementById(`${tabName}Tab`).cloneNode(true);
+            elements.mobileContent.innerHTML = '';
+            elements.mobileContent.appendChild(tabContent);
             
-            console.log(`✅ Approving speaker: ${studentSid}`);
-            
-            state.socket.emit('approve-speaker', {
-                room: state.roomId,
-                target_student_sid: studentSid
-            });
-            
-            // Remove from raised hands list
-            state.raisedHands.delete(studentSid);
-            updateRaisedHandsList();
-            
-            const student = state.participants.get(studentSid);
-            if (student) {
-                showStatus(`${student.username} is now unmuted and can speak`, 'success');
+            // Update controls visibility
+            const controls = tabContent.querySelector('.controls-area');
+            if (controls) {
+                controls.style.display = 'none';
             }
         }
 
-        function dismissHand(studentSid) {
-            if (state.role !== 'teacher') return;
-            
-            console.log(`❌ Dismissing hand: ${studentSid}`);
-            
-            // Notify student their hand was lowered
-            state.socket.emit('hand-lowered', {
-                room: state.roomId,
-                target_sid: studentSid
-            });
-            
-            // Remove from raised hands list
-            state.raisedHands.delete(studentSid);
-            updateRaisedHandsList();
-            
-            const student = state.participants.get(studentSid);
-            if (student) {
-                showStatus(`Dismissed ${student.username}'s raised hand`, 'info');
-            }
-        }
-
-        function revokeSpeaker() {
-            if (state.role !== 'teacher' || !state.activeSpeakerSid) return;
-            
-            console.log(`🔇 Revoking speaker: ${state.activeSpeakerSid}`);
-            
-            state.socket.emit('revoke-speaker', {
-                room: state.roomId,
-                target_student_sid: state.activeSpeakerSid
-            });
-            
-            // Clear active speaker UI
-            elements.activeSpeaker.classList.remove('active');
-            elements.speakerVideo.style.display = 'none';
-            
-            const student = state.participants.get(state.activeSpeakerSid);
-            if (student) {
-                showStatus(`${student.username} is now muted`, 'warning');
-            }
-            
-            state.activeSpeakerSid = null;
-        }
-
-        function pinQuestion(questionId) {
-            console.log(`📌 Pinning question: ${questionId}`);
-            showStatus('Question pinned (feature to be implemented)', 'info');
-        }
-
-        function highlightQuestion(questionId) {
-            console.log(`⭐ Highlighting question: ${questionId}`);
-            const questionDiv = document.getElementById(`question-${questionId}`);
-            if (questionDiv) {
-                questionDiv.style.backgroundColor = '#fff3cd';
-                questionDiv.style.borderLeftColor = '#ffc107';
-            }
-            showStatus('Question highlighted', 'success');
+        function closeMobileOverlay() {
+            elements.mobileOverlay.classList.remove('active');
         }
 
         // ============================================
         // Utility Functions
         // ============================================
-        function showStatus(message, type = 'info') {
-            console.log(`📢 Status (${type}): ${message}`);
+        function showToast(type, title, message) {
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
             
-            const statusDiv = document.createElement('div');
-            statusDiv.className = `status-message status-${type}`;
-            statusDiv.textContent = message;
+            const icon = type === 'success' ? 'fa-check-circle' :
+                        type === 'warning' ? 'fa-exclamation-triangle' :
+                        type === 'error' ? 'fa-times-circle' : 'fa-info-circle';
             
-            elements.statusContainer.appendChild(statusDiv);
-            statusDiv.style.display = 'block';
+            toast.innerHTML = `
+                <div class="toast-icon"><i class="fas ${icon}"></i></div>
+                <div class="toast-content">
+                    <div class="toast-title">${title}</div>
+                    <div class="toast-message">${message}</div>
+                </div>
+            `;
+            
+            elements.toastContainer.appendChild(toast);
             
             // Auto-remove after 5 seconds
             setTimeout(() => {
-                if (statusDiv.parentNode) {
-                    statusDiv.style.opacity = '0';
-                    statusDiv.style.transform = 'translateX(100%)';
-                    setTimeout(() => {
-                        if (statusDiv.parentNode) {
-                            elements.statusContainer.removeChild(statusDiv);
-                        }
-                    }, 300);
-                }
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateX(100%)';
+                setTimeout(() => {
+                    if (toast.parentNode) {
+                        toast.parentNode.removeChild(toast);
+                    }
+                }, 300);
             }, 5000);
+        }
+
+        function showLoading(message) {
+            elements.loadingMessage.textContent = message;
+            elements.loadingOverlay.classList.add('active');
+        }
+
+        function hideLoading() {
+            elements.loadingOverlay.classList.remove('active');
+        }
+
+        function updateConnectionStatus(text, type) {
+            elements.connectionStatus.textContent = text;
+            elements.connectionStatus.style.color = 
+                type === 'success' ? '#10b981' :
+                type === 'warning' ? '#f59e0b' :
+                type === 'error' ? '#ef4444' : '#94a3b8';
         }
 
         function formatTimeAgo(timestamp) {
@@ -1779,49 +2001,111 @@
             
             const diffHours = Math.floor(diffMins / 60);
             if (diffHours === 1) return '1 hour ago';
-            if (diffHours < 24) return `${diffHours} hours ago`;
+            return `${diffHours} hours ago`;
+        }
+
+        function debounce(func, wait) {
+            let timeout;
+            return function executedFunction(...args) {
+                const later = () => {
+                    clearTimeout(timeout);
+                    func(...args);
+                };
+                clearTimeout(timeout);
+                timeout = setTimeout(later, wait);
+            };
+        }
+
+        // ============================================
+        // Cleanup
+        // ============================================
+        function closeAllPeerConnections() {
+            console.log('🔌 Closing all peer connections');
             
-            const diffDays = Math.floor(diffHours / 24);
-            if (diffDays === 1) return '1 day ago';
-            return `${diffDays} days ago`;
+            state.peerConnections.forEach((pc, key) => {
+                if (pc && typeof pc.close === 'function') {
+                    pc.close();
+                }
+            });
+            
+            state.peerConnections.clear();
+            
+            // Stop media streams
+            if (state.teacherStream) {
+                state.teacherStream.getTracks().forEach(track => track.stop());
+                state.teacherStream = null;
+            }
+            
+            if (state.studentStream) {
+                state.studentStream.getTracks().forEach(track => track.stop());
+                state.studentStream = null;
+            }
         }
 
-        function escapeHtml(text) {
-            const div = document.createElement('div');
-            div.textContent = text;
-            return div.innerHTML;
-        }
-
-        // ============================================
-        // Cleanup on Page Unload
-        // ============================================
         window.addEventListener('beforeunload', () => {
-            console.log('🧹 Cleaning up before unload');
-            
-            // Close all WebRTC connections
             closeAllPeerConnections();
-            
-            // Notify server we're leaving
             if (state.socket && state.socket.connected) {
                 state.socket.disconnect();
             }
         });
 
         // ============================================
-        // Export functions for onclick handlers
+        // Public Functions (for onclick handlers)
         // ============================================
-        window.switchTab = switchTab;
+        window.startBroadcast = startTeacherBroadcast;
+        window.toggleMuteAll = () => {
+            state.isMutedAll = !state.isMutedAll;
+            state.socket.emit(state.isMutedAll ? 'teacher-mute-all' : 'teacher-unmute-all', {
+                room: state.roomId
+            });
+            
+            elements.muteAllBtn.innerHTML = state.isMutedAll ? 
+                '<i class="fas fa-microphone-slash"></i><span>Unmute All</span>' :
+                '<i class="fas fa-microphone-slash"></i><span>Mute All</span>';
+            
+            showToast('info', state.isMutedAll ? 'All Muted' : 'All Unmuted', 
+                state.isMutedAll ? 'All students are now muted' : 'All students can speak');
+        };
+        
+        window.endClass = () => {
+            if (confirm('Are you sure you want to end the class? This will disconnect all students.')) {
+                closeAllPeerConnections();
+                state.socket.disconnect();
+                window.location.href = '/';
+            }
+        };
+        
         window.raiseHand = raiseHand;
         window.sendQuestion = sendQuestion;
-        window.sendConfusionAlert = sendConfusionAlert;
-        window.startBroadcast = startBroadcast;
-        window.toggleMuteAll = toggleMuteAll;
-        window.endClass = endClass;
-        window.revokeSpeaker = revokeSpeaker;
-        window.pinQuestion = pinQuestion;
-        window.highlightQuestion = highlightQuestion;
-        window.approveSpeaker = approveSpeaker;
-        window.dismissHand = dismissHand;
+        window.sendConfusionAlert = () => {
+            state.socket.emit('confusion-alert', { room: state.roomId });
+            showToast('info', 'Help Requested', 'Teacher notified that you need help');
+        };
+        
+        window.toggleFullscreen = () => {
+            const elem = document.documentElement;
+            if (!document.fullscreenElement) {
+                elem.requestFullscreen().catch(err => {
+                    console.log('Fullscreen error:', err);
+                });
+            } else {
+                document.exitFullscreen();
+            }
+        };
+        
+        window.toggleAudio = () => {
+            state.audioEnabled = !state.audioEnabled;
+            elements.teacherVideo.muted = !state.audioEnabled;
+            const btn = document.querySelector('.video-control-btn:nth-child(2)');
+            btn.innerHTML = state.audioEnabled ? 
+                '<i class="fas fa-volume-up"></i>' : 
+                '<i class="fas fa-volume-mute"></i>';
+        };
+        
+        window.toggleSidebar = toggleSidebar;
+        window.switchTab = switchTab;
+        window.switchMobileTab = switchMobileTab;
+        window.closeMobileOverlay = closeMobileOverlay;
     </script>
 </body>
 </html>
