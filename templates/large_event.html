@@ -1298,6 +1298,12 @@
             if (state.role === 'teacher') {
                 elements.studentControls.style.display = 'none';
                 elements.teacherControls.style.display = 'grid';
+                // Teacher should automatically start broadcast
+                setTimeout(() => {
+                    if (!state.isBroadcasting) {
+                        startBroadcast();
+                    }
+                }, 1000);
             } else {
                 elements.studentControls.style.display = 'grid';
                 elements.teacherControls.style.display = 'none';
@@ -1313,9 +1319,6 @@
             
             // Setup event listeners
             setupEventListeners();
-            
-            // Check if teacher already broadcasting
-            setTimeout(checkExistingBroadcast, 1000);
         }
 
         function setupMobileUI() {
@@ -1377,7 +1380,7 @@
             state.socket.on('participant-left', handleParticipantLeft);
             state.socket.on('room-state', handleRoomState);
             
-            // WebRTC events
+            // WebRTC events - FIXED EVENT NAMES
             state.socket.on('webrtc-offer', handleWebRTCOffer);
             state.socket.on('webrtc-answer', handleWebRTCAnswer);
             state.socket.on('webrtc-ice-candidate', handleWebRTCICECandidate);
@@ -1390,6 +1393,7 @@
             state.socket.on('new-raised-hand', handleNewRaisedHand);
             state.socket.on('raised-hand-removed', handleRaisedHandRemoved);
             state.socket.on('confusion-alert', handleConfusionAlert);
+            state.socket.on('broadcast-started', handleBroadcastStarted);
             
             // Error handling
             state.socket.on('error', handleSocketError);
@@ -1440,7 +1444,7 @@
         }
 
         // ============================================
-        // Event Handlers
+        // Event Handlers - CRITICAL FIXES
         // ============================================
         function handleRoomJoined(data) {
             console.log('✅ Room joined:', data);
@@ -1465,6 +1469,29 @@
             if (state.role === 'student' && state.teacherSid) {
                 console.log('🎓 Teacher is broadcasting, waiting for stream...');
                 showToast('info', 'Teacher Connected', 'Waiting for teacher stream...');
+                // Request stream from teacher
+                requestTeacherStream();
+            }
+        }
+
+        function handleBroadcastStarted(data) {
+            console.log('📢 Teacher started broadcast:', data);
+            
+            if (state.role === 'student') {
+                state.teacherSid = data.teacher_sid;
+                showToast('info', 'Broadcast Started', 'Teacher has started broadcasting');
+                // Request stream from teacher
+                requestTeacherStream();
+            }
+        }
+
+        function requestTeacherStream() {
+            if (state.role === 'student' && state.teacherSid) {
+                console.log('📡 Requesting stream from teacher:', state.teacherSid);
+                state.socket.emit('request-stream', {
+                    room: state.roomId,
+                    teacher_sid: state.teacherSid
+                });
             }
         }
 
@@ -1539,6 +1566,9 @@
             
             if (state.role === 'student') {
                 acceptTeacherOffer(data);
+            } else if (state.role === 'teacher') {
+                // Teacher might receive offers from other teachers (shouldn't happen)
+                console.log('Ignoring offer as teacher:', data);
             }
         }
 
@@ -1693,7 +1723,7 @@
         }
 
         // ============================================
-        // WebRTC Functions
+        // WebRTC Functions - CRITICAL FIXES
         // ============================================
         async function startBroadcast() {
             console.log('🎬 Starting broadcast...');
@@ -1734,17 +1764,6 @@
                 elements.teacherVideo.srcObject = state.teacherStream;
                 elements.noStream.style.display = 'none';
                 
-                // Create connections for all existing students
-                const studentSids = Array.from(state.participants.entries())
-                    .filter(([sid, data]) => data.role === 'student')
-                    .map(([sid, data]) => sid);
-                
-                console.log(`🔗 Creating connections for ${studentSids.length} students`);
-                
-                for (const studentSid of studentSids) {
-                    await createTeacherToStudentConnection(studentSid);
-                }
-                
                 // Update UI
                 state.isBroadcasting = true;
                 elements.liveBadge.classList.add('active');
@@ -1756,6 +1775,17 @@
                 
                 showToast('success', 'Broadcast Started', 'Your video is now live for all students');
                 hideLoading();
+                
+                // Create connections for all existing students
+                const studentSids = Array.from(state.participants.entries())
+                    .filter(([sid, data]) => data.role === 'student')
+                    .map(([sid, data]) => sid);
+                
+                console.log(`🔗 Creating connections for ${studentSids.length} students`);
+                
+                for (const studentSid of studentSids) {
+                    await createTeacherToStudentConnection(studentSid);
+                }
                 
             } catch (error) {
                 console.error('❌ Error starting broadcast:', error);
@@ -1799,7 +1829,7 @@
                     if (pc.connectionState === 'failed' || pc.connectionState === 'disconnected') {
                         console.log(`Attempting to reconnect to ${studentSid}...`);
                         setTimeout(() => {
-                            if (pc.connectionState === 'failed') {
+                            if (pc.connectionState === 'failed' && state.isBroadcasting) {
                                 createTeacherToStudentConnection(studentSid);
                             }
                         }, 2000);
@@ -1808,6 +1838,12 @@
                     if (pc.connectionState === 'closed') {
                         state.peerConnections.delete(studentSid);
                     }
+                };
+                
+                // Handle incoming track from student (for student speaking)
+                pc.ontrack = (event) => {
+                    console.log('📹 Received student track:', event.track.kind);
+                    // Handle student audio if they're approved to speak
                 };
                 
                 // Create offer
@@ -1860,6 +1896,8 @@
                         // Auto-play video on mobile
                         elements.teacherVideo.play().catch(e => {
                             console.log('Auto-play prevented, waiting for user interaction');
+                            // Show play button or instruction
+                            showToast('info', 'Tap to Play', 'Tap the video to start playback');
                         });
                     }
                 };
@@ -1872,6 +1910,20 @@
                             target_sid: data.from_sid,
                             candidate: event.candidate
                         });
+                    }
+                };
+                
+                // Connection state handling
+                pc.onconnectionstatechange = () => {
+                    console.log(`Connection state with teacher: ${pc.connectionState}`);
+                    
+                    if (pc.connectionState === 'failed' || pc.connectionState === 'disconnected') {
+                        console.log('Attempting to reconnect to teacher...');
+                        setTimeout(() => {
+                            if (pc.connectionState === 'failed' && state.teacherSid) {
+                                requestTeacherStream();
+                            }
+                        }, 2000);
                     }
                 };
                 
@@ -1891,9 +1943,24 @@
                 console.log('✅ Successfully accepted teacher offer');
                 state.peerConnections.set(data.from_sid, pc);
                 
+                // Start playing video
+                setTimeout(() => {
+                    if (elements.teacherVideo.srcObject) {
+                        elements.teacherVideo.play().catch(e => {
+                            console.log('Video play failed:', e);
+                        });
+                    }
+                }, 1000);
+                
             } catch (error) {
                 console.error('❌ Error accepting teacher offer:', error);
-                showToast('error', 'Connection Failed', 'Failed to connect to teacher stream');
+                showToast('error', 'Connection Failed', 'Failed to connect to teacher stream. Retrying...');
+                // Retry after 2 seconds
+                setTimeout(() => {
+                    if (state.teacherSid) {
+                        requestTeacherStream();
+                    }
+                }, 2000);
             }
         }
 
@@ -2373,12 +2440,6 @@
                 closeAllPeerConnections();
                 state.socket.disconnect();
                 window.location.href = '/';
-            }
-        }
-
-        function checkExistingBroadcast() {
-            if (state.role === 'student' && !state.isBroadcasting) {
-                state.socket.emit('check-broadcast', { room: state.roomId });
             }
         }
 
