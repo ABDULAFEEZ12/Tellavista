@@ -2,20 +2,24 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Large Classroom Broadcast - Nelavista</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
     <style>
+        /* ===== RESET & BASE ===== */
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+            -webkit-font-smoothing: antialiased;
         }
 
         body {
-            font-family: 'Poppins', sans-serif;
-            background: #000000;
+            font-family: 'Poppins', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            color: #f8fafc;
             min-height: 100vh;
             display: flex;
             justify-content: center;
@@ -25,26 +29,139 @@
         }
 
         @keyframes fadeIn {
-            from {
-                opacity: 0;
-            }
-            to {
-                opacity: 1;
-            }
+            from { opacity: 0; }
+            to { opacity: 1; }
         }
 
         .container {
-            background: #ffffff;
-            border-radius: 15px;
-            padding: 40px;
-            max-width: 1000px;
+            background: rgba(30, 41, 59, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            max-width: 900px;
             width: 100%;
-            text-align: center;
-            border: 1px solid #e0e0e0;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
             animation: slideUp 0.5s ease-out 0.1s both;
         }
 
         @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* ===== HEADER ===== */
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            animation: fadeIn 0.8s ease-out 0.2s both;
+        }
+
+        .header-icon {
+            font-size: 60px;
+            margin-bottom: 20px;
+            background: linear-gradient(135deg, #8b5cf6 0%, #3b82f6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .header h1 {
+            color: #ffffff;
+            font-size: 36px;
+            font-weight: 700;
+            margin-bottom: 12px;
+            line-height: 1.2;
+        }
+
+        .header p {
+            color: #94a3b8;
+            font-size: 18px;
+            font-weight: 400;
+            max-width: 600px;
+            margin: 0 auto 20px;
+            line-height: 1.6;
+        }
+
+        .scale-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            color: white;
+            padding: 8px 20px;
+            border-radius: 25px;
+            font-size: 14px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        /* ===== MAIN CARDS ===== */
+        .main-cards {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 25px;
+            margin: 40px 0;
+        }
+
+        @media (max-width: 768px) {
+            .main-cards {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+        }
+
+        .card {
+            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+            border-radius: 20px;
+            padding: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+            animation: fadeInUp 0.5s ease-out;
+            animation-fill-mode: both;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(135deg, #8b5cf6 0%, #3b82f6 100%);
+        }
+
+        .card:nth-child(2)::before {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        }
+
+        .card:nth-child(1) { animation-delay: 0.3s; }
+        .card:nth-child(2) { animation-delay: 0.4s; }
+
+        @keyframes fadeInUp {
             from {
                 opacity: 0;
                 transform: translateY(10px);
@@ -55,111 +172,27 @@
             }
         }
 
-        .header {
-            margin-bottom: 40px;
-            animation: fadeIn 0.8s ease-out 0.2s both;
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.4);
+            border-color: rgba(59, 130, 246, 0.3);
         }
 
-        .header-icon {
-            font-size: 56px;
-            margin-bottom: 20px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        .card-icon {
+            font-size: 48px;
+            margin-bottom: 25px;
+            background: linear-gradient(135deg, #8b5cf6 0%, #3b82f6 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
             transition: transform 0.3s ease;
         }
 
-        .header-icon:hover {
-            transform: scale(1.05);
-        }
-
-        .header h1 {
-            color: #000000;
-            font-size: 36px;
-            font-weight: 700;
-            margin-bottom: 10px;
-        }
-
-        .header p {
-            color: #666666;
-            font-size: 18px;
-            font-weight: 400;
-            opacity: 0.9;
-            max-width: 600px;
-            margin: 0 auto 15px;
-        }
-
-        .scale-badge {
-            display: inline-block;
-            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-            color: white;
-            padding: 6px 18px;
-            border-radius: 25px;
-            font-size: 14px;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            animation: pulse 2s infinite;
-        }
-
-        @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-            100% { transform: scale(1); }
-        }
-
-        .main-cards {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 30px;
-            margin: 40px 0;
-        }
-
-        .card {
-            background: #ffffff;
-            border-radius: 15px;
-            padding: 35px 30px;
-            border: 2px solid #e0e0e0;
-            transition: all 0.3s ease;
-            animation: fadeInUp 0.5s ease-out;
-            animation-fill-mode: both;
-            display: flex;
-            flex-direction: column;
-            height: 100%;
-        }
-
-        .card:nth-child(1) {
-            animation-delay: 0.3s;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        }
-
-        .card:nth-child(2) {
-            animation-delay: 0.4s;
-            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-        }
-
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(8px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
-        }
-
-        .card-icon {
-            font-size: 42px;
-            margin-bottom: 20px;
-            color: white;
-            transition: transform 0.3s ease;
+        .card:nth-child(2) .card-icon {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
 
         .card:hover .card-icon {
@@ -167,113 +200,140 @@
         }
 
         .card h3 {
-            color: white;
+            color: #ffffff;
             font-size: 24px;
             font-weight: 600;
             margin-bottom: 15px;
         }
 
         .card p {
-            color: rgba(255, 255, 255, 0.9);
+            color: #cbd5e1;
             font-size: 15px;
             line-height: 1.6;
             margin-bottom: 25px;
             flex-grow: 1;
         }
 
+        /* ===== FORMS ===== */
         .form-group {
             margin-bottom: 20px;
             animation: fadeIn 0.5s ease-out;
             animation-fill-mode: both;
         }
 
-        .form-group:first-of-type {
-            animation-delay: 0.5s;
-        }
-
-        .form-group:last-of-type {
-            animation-delay: 0.6s;
-        }
+        .form-group:first-of-type { animation-delay: 0.5s; }
+        .form-group:last-of-type { animation-delay: 0.6s; }
 
         .form-group label {
             display: block;
-            color: rgba(255, 255, 255, 0.9);
+            color: #94a3b8;
             font-size: 14px;
             font-weight: 500;
             margin-bottom: 8px;
-            text-align: left;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
 
         .form-group input {
             width: 100%;
-            padding: 14px 18px;
-            border: 2px solid rgba(255, 255, 255, 0.3);
-            border-radius: 10px;
+            padding: 16px 20px;
+            border: 2px solid #334155;
+            border-radius: 12px;
             font-size: 16px;
             font-family: 'Poppins', sans-serif;
             transition: all 0.3s ease;
-            background: rgba(255, 255, 255, 0.1);
-            color: white;
+            background: rgba(15, 23, 42, 0.8);
+            color: #ffffff;
+            outline: none;
         }
 
         .form-group input:focus {
-            outline: none;
-            border-color: white;
-            background: rgba(255, 255, 255, 0.15);
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+            background: rgba(15, 23, 42, 0.9);
         }
 
-        .form-group input::placeholder {
-            color: rgba(255, 255, 255, 0.6);
+        .form-group input.error {
+            border-color: #ef4444;
+            animation: shake 0.5s ease;
         }
 
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+            20%, 40%, 60%, 80% { transform: translateX(5px); }
+        }
+
+        .error-message {
+            color: #ef4444;
+            font-size: 13px;
+            margin-top: 5px;
+            display: none;
+        }
+
+        .error-message.show {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        /* ===== BUTTONS ===== */
         .btn {
-            display: inline-block;
-            padding: 14px 35px;
-            background: #000000;
-            color: #ffffff;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            padding: 16px 30px;
             border: none;
-            border-radius: 10px;
+            border-radius: 12px;
             font-size: 16px;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s ease;
             text-decoration: none;
-            text-align: center;
             width: 100%;
             position: relative;
             overflow: hidden;
             animation: fadeInUp 0.5s ease-out 0.8s both;
         }
 
-        .btn:hover {
-            background: #333333;
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+        .btn-primary {
+            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+            color: white;
         }
 
-        .btn:active {
-            transform: translateY(0);
-            transition: transform 0.1s ease;
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(59, 130, 246, 0.3);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+        }
+
+        .btn-success:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(16, 185, 129, 0.3);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none !important;
+            box-shadow: none !important;
         }
 
         .btn i {
-            margin-right: 8px;
+            font-size: 18px;
             transition: transform 0.3s ease;
         }
 
         .btn:hover i {
-            transform: translateX(3px);
+            transform: translateX(5px);
         }
 
-        .btn-light {
-            background: rgba(255, 255, 255, 0.9);
-            color: #000000;
-        }
-
-        .btn-light:hover {
-            background: white;
-        }
-
+        /* ===== FEATURES ===== */
         .features {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
@@ -281,11 +341,24 @@
             margin: 50px 0 30px;
         }
 
+        @media (max-width: 992px) {
+            .features {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 576px) {
+            .features {
+                grid-template-columns: 1fr;
+            }
+        }
+
         .feature {
+            background: rgba(30, 41, 59, 0.8);
+            border-radius: 15px;
             padding: 25px 20px;
-            background: #f8f9fa;
-            border-radius: 12px;
-            border: 2px solid #e0e0e0;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.1);
             transition: all 0.3s ease;
             animation: fadeInUp 0.5s ease-out;
             animation-fill-mode: both;
@@ -298,14 +371,17 @@
 
         .feature:hover {
             transform: translateY(-3px);
-            border-color: #000000;
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.05);
+            border-color: rgba(59, 130, 246, 0.3);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
         }
 
         .feature-icon {
-            font-size: 32px;
+            font-size: 36px;
             margin-bottom: 15px;
-            color: #000000;
+            background: linear-gradient(135deg, #8b5cf6 0%, #3b82f6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
             transition: transform 0.3s ease;
         }
 
@@ -314,29 +390,30 @@
         }
 
         .feature h4 {
-            color: #000000;
+            color: #ffffff;
             font-size: 16px;
             font-weight: 600;
             margin-bottom: 8px;
         }
 
         .feature p {
-            color: #666666;
+            color: #94a3b8;
             font-size: 13px;
             line-height: 1.5;
+            margin: 0;
         }
 
+        /* ===== INSTRUCTIONS ===== */
         .instructions {
-            margin-top: 40px;
+            background: rgba(15, 23, 42, 0.8);
+            border-radius: 15px;
             padding: 25px;
-            background: #f5f5f5;
-            border-radius: 12px;
-            text-align: left;
+            margin-top: 30px;
             animation: fadeIn 0.5s ease-out 0.9s both;
         }
 
         .instructions h4 {
-            color: #000000;
+            color: #ffffff;
             font-size: 18px;
             font-weight: 600;
             margin-bottom: 15px;
@@ -347,16 +424,16 @@
 
         .instructions ul {
             list-style: none;
-            padding-left: 5px;
+            padding: 0;
         }
 
         .instructions li {
-            color: #666666;
+            color: #cbd5e1;
             font-size: 14px;
-            margin-bottom: 10px;
+            margin-bottom: 12px;
             display: flex;
             align-items: flex-start;
-            gap: 10px;
+            gap: 12px;
             animation: fadeInLeft 0.5s ease-out;
             animation-fill-mode: both;
         }
@@ -377,24 +454,23 @@
         .instructions li:nth-child(3) { animation-delay: 1.2s; }
 
         .instructions li i {
-            color: #000000;
-            font-size: 12px;
-            margin-top: 3px;
-            transition: transform 0.3s ease;
+            color: #3b82f6;
+            font-size: 14px;
+            margin-top: 2px;
+            flex-shrink: 0;
         }
 
-        .instructions li:hover i {
-            transform: scale(1.2);
-        }
-
+        /* ===== BACK LINK ===== */
         .back-link {
-            margin-top: 30px;
             text-align: center;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
             animation: fadeIn 0.5s ease-out 1s both;
         }
 
         .back-link a {
-            color: #666666;
+            color: #94a3b8;
             text-decoration: none;
             font-size: 14px;
             display: inline-flex;
@@ -404,115 +480,163 @@
         }
 
         .back-link a:hover {
-            color: #000000;
+            color: #3b82f6;
             transform: translateX(-3px);
         }
 
+        /* ===== FLASH MESSAGES ===== */
         .flash-message {
-            background: #f0f0f0;
-            color: #333333;
-            padding: 14px 20px;
-            border-radius: 10px;
+            background: rgba(30, 41, 59, 0.9);
+            color: #ffffff;
+            padding: 16px 20px;
+            border-radius: 12px;
             margin-bottom: 25px;
             font-size: 14px;
-            text-align: left;
-            border-left: 5px solid #333333;
-            animation: fadeIn 0.5s ease-out;
+            border-left: 5px solid #3b82f6;
+            animation: slideInRight 0.5s ease-out;
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 12px;
+            backdrop-filter: blur(10px);
         }
 
-        @media (max-width: 900px) {
-            .features {
-                grid-template-columns: repeat(2, 1fr);
+        @keyframes slideInRight {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
             }
-            
-            .main-cards {
-                gap: 20px;
+            to {
+                opacity: 1;
+                transform: translateX(0);
             }
         }
 
+        .flash-message.error {
+            border-left-color: #ef4444;
+        }
+
+        .flash-message.warning {
+            border-left-color: #f59e0b;
+        }
+
+        .flash-message.success {
+            border-left-color: #10b981;
+        }
+
+        /* ===== MOBILE OPTIMIZATIONS ===== */
         @media (max-width: 768px) {
-            .container {
-                padding: 25px;
-                animation: slideUpMobile 0.5s ease-out 0.1s both;
+            body {
+                padding: 15px;
+                align-items: flex-start;
+                min-height: 100vh;
+                height: auto;
             }
 
-            @keyframes slideUpMobile {
-                from {
-                    opacity: 0;
-                    transform: translateY(20px);
-                }
-                to {
-                    opacity: 1;
-                    transform: translateY(0);
-                }
+            .container {
+                padding: 20px;
+                margin: 0;
+                border-radius: 15px;
             }
-            
-            .main-cards {
-                grid-template-columns: 1fr;
-            }
-            
-            .features {
-                grid-template-columns: 1fr;
-            }
-            
+
             .header h1 {
                 font-size: 28px;
             }
-            
+
             .header p {
                 font-size: 16px;
             }
-            
+
+            .header-icon {
+                font-size: 48px;
+            }
+
+            .card {
+                padding: 25px 20px;
+            }
+
             .card h3 {
                 font-size: 22px;
             }
-            
-            .btn:hover {
-                transform: translateY(-1px);
+
+            .card p {
+                font-size: 14px;
             }
-            
-            .card:hover {
-                transform: translateY(-3px);
+
+            .form-group input {
+                padding: 14px 16px;
+                font-size: 15px;
+            }
+
+            .btn {
+                padding: 14px 20px;
+                font-size: 15px;
             }
         }
 
-        /* Smooth scrolling */
-        html {
-            scroll-behavior: smooth;
-        }
-
-        /* Selection color */
-        ::selection {
-            background: rgba(0, 0, 0, 0.1);
-            color: #000000;
-        }
-
-        /* Focus styles for accessibility */
-        *:focus {
-            outline: 2px solid rgba(0, 0, 0, 0.3);
-            outline-offset: 2px;
-        }
-
-        /* Smooth transitions for reduced motion users */
-        @media (prefers-reduced-motion: reduce) {
-            * {
-                animation-duration: 0.01ms !important;
-                animation-iteration-count: 1 !important;
-                transition-duration: 0.01ms !important;
-                scroll-behavior: auto !important;
+        @media (max-width: 480px) {
+            .container {
+                padding: 15px;
             }
-            
-            .scale-badge {
-                animation: none;
+
+            .header h1 {
+                font-size: 24px;
+            }
+
+            .header p {
+                font-size: 15px;
+            }
+
+            .features {
+                gap: 15px;
+            }
+
+            .feature {
+                padding: 20px 15px;
+            }
+
+            .feature h4 {
+                font-size: 15px;
+            }
+
+            .instructions {
+                padding: 20px;
+            }
+
+            .instructions li {
+                font-size: 13px;
             }
         }
+
+        /* ===== LOADING STATE ===== */
+        .btn.loading {
+            position: relative;
+            color: transparent;
+        }
+
+        .btn.loading::after {
+            content: '';
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* ===== UTILITY CLASSES ===== */
+        .text-center { text-align: center; }
+        .mt-20 { margin-top: 20px; }
+        .mb-20 { margin-bottom: 20px; }
     </style>
 </head>
 <body>
     <div class="container">
+        <!-- Header -->
         <div class="header">
             <div class="header-icon">
                 <i class="fas fa-broadcast-tower"></i>
@@ -522,14 +646,19 @@
             <div class="scale-badge">For 1000+ Students</div>
         </div>
 
-        {% with messages = get_flashed_messages() %}
+        <!-- Flash Messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
-                <div class="flash-message">
-                    <i class="fas fa-exclamation-circle"></i> {{ messages[0] }}
-                </div>
+                {% for category, message in messages %}
+                    <div class="flash-message {{ category }}">
+                        <i class="fas fa-{{ 'check-circle' if category == 'success' else 'exclamation-circle' if category == 'warning' else 'times-circle' if category == 'error' else 'info-circle' }}"></i>
+                        {{ message }}
+                    </div>
+                {% endfor %}
             {% endif %}
         {% endwith %}
 
+        <!-- Main Cards -->
         <div class="main-cards">
             <!-- Card 1: Join as Student -->
             <div class="card">
@@ -538,17 +667,35 @@
                 </div>
                 <h3>Join as Student</h3>
                 <p>Enter the classroom ID provided by your teacher. Participate with raised hand, Q&A, and interactive features designed for large-scale learning.</p>
-                <form action="/large_event/join" method="POST">
+                
+                <form id="joinForm" action="/large_event/join" method="POST" onsubmit="return validateJoinForm()">
                     <div class="form-group">
-                        <label for="room_id"><i class="fas fa-door-open"></i> Classroom ID</label>
-                        <input type="text" id="room_id" name="room_id" placeholder="Enter classroom ID (e.g., 5a3b8c)" required>
+                        <label for="room_id">
+                            <i class="fas fa-door-open"></i>
+                            Classroom ID
+                        </label>
+                        <input type="text" id="room_id" name="room_id" 
+                               placeholder="Enter classroom ID (e.g., 5a3b8c)" 
+                               minlength="3" maxlength="20"
+                               oninput="validateField(this)">
+                        <div class="error-message" id="roomIdError"></div>
                     </div>
+                    
                     <div class="form-group">
-                        <label for="username"><i class="fas fa-user"></i> Your Name</label>
-                        <input type="text" id="username" name="username" placeholder="Enter your name">
+                        <label for="username">
+                            <i class="fas fa-user"></i>
+                            Your Name <span style="color: #ef4444;">*</span>
+                        </label>
+                        <input type="text" id="username" name="username" 
+                               placeholder="Enter your full name" 
+                               minlength="2" maxlength="50"
+                               oninput="validateField(this)">
+                        <div class="error-message" id="usernameError"></div>
                     </div>
-                    <button type="submit" class="btn btn-light">
-                        <i class="fas fa-video"></i> Join Classroom
+                    
+                    <button type="submit" class="btn btn-primary" id="joinBtn">
+                        <i class="fas fa-video"></i>
+                        Join Classroom
                     </button>
                 </form>
             </div>
@@ -560,15 +707,34 @@
                 </div>
                 <h3>Start as Teacher</h3>
                 <p>Create a new large classroom session. You'll get a unique classroom ID to share with students. Enjoy full teacher controls and broadcast mode.</p>
-                <a href="/large_event/teacher" class="btn btn-light">
-                    <i class="fas fa-plus-circle"></i> Create New Classroom
-                </a>
-                <div style="margin-top: 20px; font-size: 12px; color: rgba(255,255,255,0.8);">
-                    <i class="fas fa-shield-alt"></i> Secure & Private • <i class="fas fa-bolt"></i> Instant Setup
+                
+                <form id="createForm" action="/large_event/teacher" method="GET" onsubmit="return validateCreateForm()">
+                    <div class="form-group">
+                        <label for="teacher_name">
+                            <i class="fas fa-user-tie"></i>
+                            Your Name <span style="color: #ef4444;">*</span>
+                        </label>
+                        <input type="text" id="teacher_name" name="teacher_name" 
+                               placeholder="Enter your teacher name" 
+                               minlength="2" maxlength="50"
+                               oninput="validateField(this)">
+                        <div class="error-message" id="teacherNameError"></div>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-success" id="createBtn">
+                        <i class="fas fa-plus-circle"></i>
+                        Create New Classroom
+                    </button>
+                </form>
+                
+                <div style="margin-top: 20px; font-size: 13px; color: #94a3b8; text-align: center;">
+                    <i class="fas fa-shield-alt"></i> Secure & Private • 
+                    <i class="fas fa-bolt"></i> Instant Setup
                 </div>
             </div>
         </div>
 
+        <!-- Features -->
         <div class="features">
             <div class="feature">
                 <div class="feature-icon">
@@ -603,6 +769,7 @@
             </div>
         </div>
 
+        <!-- Instructions -->
         <div class="instructions">
             <h4><i class="fas fa-info-circle"></i> How Large Classroom Works</h4>
             <ul>
@@ -612,6 +779,7 @@
             </ul>
         </div>
 
+        <!-- Back Link -->
         <div class="back-link">
             <a href="/live_meeting">
                 <i class="fas fa-arrow-left"></i> Back to Standard Classroom
@@ -620,147 +788,225 @@
     </div>
 
     <script>
-        // Auto-focus on room ID input with gentle animation
+        // ============================================
+        // Form Validation Functions
+        // ============================================
+        
+        function validateField(field) {
+            const errorElement = document.getElementById(field.id + 'Error');
+            
+            if (!field.value.trim()) {
+                showError(field, 'This field is required');
+                return false;
+            }
+            
+            if (field.id === 'room_id' && field.value.length < 3) {
+                showError(field, 'Room ID must be at least 3 characters');
+                return false;
+            }
+            
+            if ((field.id === 'username' || field.id === 'teacher_name') && field.value.length < 2) {
+                showError(field, 'Name must be at least 2 characters');
+                return false;
+            }
+            
+            // Valid characters check
+            const invalidChars = /[<>{}[\]\\]/;
+            if (invalidChars.test(field.value)) {
+                showError(field, 'Invalid characters detected');
+                return false;
+            }
+            
+            // Clear error
+            hideError(field);
+            return true;
+        }
+        
+        function showError(field, message) {
+            field.classList.add('error');
+            const errorElement = document.getElementById(field.id + 'Error');
+            errorElement.textContent = message;
+            errorElement.classList.add('show');
+        }
+        
+        function hideError(field) {
+            field.classList.remove('error');
+            const errorElement = document.getElementById(field.id + 'Error');
+            errorElement.classList.remove('show');
+        }
+        
+        function validateJoinForm() {
+            const roomId = document.getElementById('room_id');
+            const username = document.getElementById('username');
+            const joinBtn = document.getElementById('joinBtn');
+            
+            const roomValid = validateField(roomId);
+            const nameValid = validateField(username);
+            
+            if (roomValid && nameValid) {
+                // Show loading state
+                joinBtn.classList.add('loading');
+                joinBtn.disabled = true;
+                
+                // Store username in sessionStorage for the classroom page
+                sessionStorage.setItem('studentName', username.value.trim());
+                
+                return true;
+            }
+            
+            // Focus on first invalid field
+            if (!roomValid) roomId.focus();
+            else if (!nameValid) username.focus();
+            
+            return false;
+        }
+        
+        function validateCreateForm() {
+            const teacherName = document.getElementById('teacher_name');
+            const createBtn = document.getElementById('createBtn');
+            
+            const nameValid = validateField(teacherName);
+            
+            if (nameValid) {
+                // Show loading state
+                createBtn.classList.add('loading');
+                createBtn.disabled = true;
+                
+                // Store teacher name in URL parameter
+                const form = document.getElementById('createForm');
+                const nameInput = document.createElement('input');
+                nameInput.type = 'hidden';
+                nameInput.name = 'teacher_name';
+                nameInput.value = teacherName.value.trim();
+                form.appendChild(nameInput);
+                
+                return true;
+            }
+            
+            teacherName.focus();
+            return false;
+        }
+        
+        // ============================================
+        // Page Initialization
+        // ============================================
         document.addEventListener('DOMContentLoaded', function() {
-            const roomIdInput = document.getElementById('room_id');
-            if (roomIdInput) {
-                setTimeout(() => {
+            // Auto-focus on first input field
+            setTimeout(() => {
+                const roomIdInput = document.getElementById('room_id');
+                if (roomIdInput) {
                     roomIdInput.focus();
+                    // Add animation on focus
                     roomIdInput.style.transform = 'translateY(-2px)';
                     setTimeout(() => {
                         roomIdInput.style.transform = 'translateY(0)';
                     }, 200);
-                }, 500);
-            }
-
-            // Generate a random student name placeholder if empty
-            const usernameInput = document.getElementById('username');
-            if (usernameInput && !usernameInput.value.trim()) {
-                const adjectives = ['Bright', 'Clever', 'Smart', 'Quick', 'Sharp', 'Wise', 'Curious', 'Eager', 'Active', 'Focused'];
-                const nouns = ['Learner', 'Student', 'Scholar', 'Thinker', 'Analyst', 'Observer', 'Participant', 'Member', 'Attendee', 'Viewer'];
-                const randomAdj = adjectives[Math.floor(Math.random() * adjectives.length)];
-                const randomNoun = nouns[Math.floor(Math.random() * nouns.length)];
-                usernameInput.placeholder = `${randomAdj} ${randomNoun}`;
-            }
-
-            // Add smooth click animation to feature cards
-            const features = document.querySelectorAll('.feature');
-            features.forEach(feature => {
-                feature.addEventListener('click', function(e) {
-                    if (!this.getAttribute('data-clicked')) {
-                        this.style.transform = 'scale(0.98)';
-                        this.style.borderColor = '#333333';
-                        this.setAttribute('data-clicked', 'true');
-                        
-                        setTimeout(() => {
-                            this.style.transform = '';
-                            this.style.borderColor = '';
-                            this.removeAttribute('data-clicked');
-                        }, 300);
-                    }
-                });
-            });
-
-            // Add subtle animation to form inputs on focus
-            const formInputs = document.querySelectorAll('.form-group input');
-            formInputs.forEach(input => {
-                input.addEventListener('focus', function() {
-                    this.parentElement.style.transform = 'translateY(-2px)';
-                });
-                
-                input.addEventListener('blur', function() {
-                    this.parentElement.style.transform = 'translateY(0)';
-                });
-            });
-
-            // Form validation
-            const joinForm = document.querySelector('form');
-            if (joinForm) {
-                joinForm.addEventListener('submit', function(e) {
-                    const roomId = document.getElementById('room_id').value.trim();
-                    const username = document.getElementById('username').value.trim();
-                    
-                    if (!roomId) {
-                        e.preventDefault();
-                        showError('Please enter a classroom ID');
-                        return false;
-                    }
-                    
-                    // If username is empty, set a random one
-                    if (!username) {
-                        document.getElementById('username').value = document.getElementById('username').placeholder;
-                    }
-                    
-                    // Show loading state on button
-                    const submitBtn = this.querySelector('.btn');
-                    if (submitBtn) {
-                        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Joining...';
-                        submitBtn.disabled = true;
-                    }
-                });
-            }
-
-            // Show error function
-            function showError(message) {
-                const flashDiv = document.createElement('div');
-                flashDiv.className = 'flash-message';
-                flashDiv.innerHTML = `<i class="fas fa-exclamation-circle"></i> ${message}`;
-                
-                const container = document.querySelector('.container');
-                const header = document.querySelector('.header');
-                container.insertBefore(flashDiv, header.nextSibling);
-                
-                // Auto-remove after 5 seconds
-                setTimeout(() => {
-                    if (flashDiv.parentNode) {
-                        flashDiv.style.opacity = '0';
-                        flashDiv.style.transform = 'translateY(-10px)';
-                        setTimeout(() => {
-                            if (flashDiv.parentNode) {
-                                flashDiv.parentNode.removeChild(flashDiv);
-                            }
-                        }, 300);
-                    }
-                }, 5000);
-            }
-
-            // Initialize with reduced motion preference check
-            const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
-            if (prefersReducedMotion.matches) {
-                document.documentElement.style.scrollBehavior = 'auto';
-                document.querySelectorAll('*').forEach(el => {
-                    el.style.animation = 'none !important';
-                    el.style.transition = 'none !important';
-                });
-            }
-
-            // Keyboard shortcuts
-            document.addEventListener('keydown', function(e) {
-                // Ctrl+J focuses on room ID
-                if (e.ctrlKey && e.key === 'j') {
-                    e.preventDefault();
-                    const roomIdInput = document.getElementById('room_id');
-                    if (roomIdInput) {
-                        roomIdInput.focus();
-                        roomIdInput.select();
-                    }
                 }
+            }, 500);
+            
+            // Check for URL parameters
+            const urlParams = new URLSearchParams(window.location.search);
+            const roomParam = urlParams.get('room');
+            const errorParam = urlParams.get('error');
+            
+            if (roomParam) {
+                document.getElementById('room_id').value = roomParam;
+            }
+            
+            if (errorParam === 'username_required') {
+                showToast('Please enter your name to join the classroom', 'error');
+            }
+            
+            // Check for stored name
+            const storedName = sessionStorage.getItem('studentName');
+            if (storedName && document.getElementById('username')) {
+                document.getElementById('username').value = storedName;
+            }
+            
+            // Mobile optimizations
+            if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+                // Add touch feedback to buttons
+                document.querySelectorAll('.btn').forEach(btn => {
+                    btn.addEventListener('touchstart', function() {
+                        this.style.opacity = '0.8';
+                    });
+                    btn.addEventListener('touchend', function() {
+                        this.style.opacity = '1';
+                    });
+                });
                 
-                // Ctrl+T focuses on username
-                if (e.ctrlKey && e.key === 't') {
-                    e.preventDefault();
-                    const usernameInput = document.getElementById('username');
-                    if (usernameInput) {
-                        usernameInput.focus();
-                        usernameInput.select();
+                // Prevent zoom on input focus
+                document.querySelectorAll('input').forEach(input => {
+                    input.addEventListener('focus', function() {
+                        this.style.fontSize = '16px'; // Prevents iOS zoom
+                    });
+                });
+            }
+            
+            // Handle form submissions with keyboard
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter') {
+                    const activeElement = document.activeElement;
+                    const form = activeElement.closest('form');
+                    if (form && activeElement.tagName === 'INPUT') {
+                        e.preventDefault();
+                        const submitBtn = form.querySelector('button[type="submit"]');
+                        if (submitBtn) {
+                            submitBtn.click();
+                        }
                     }
                 }
             });
         });
-
-        // Smooth transitions for page elements
-        window.addEventListener('load', function() {
-            document.body.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+        
+        // ============================================
+        // Toast Notification Function
+        // ============================================
+        function showToast(message, type = 'info') {
+            const toast = document.createElement('div');
+            toast.className = `flash-message ${type}`;
+            
+            const icon = type === 'success' ? 'fa-check-circle' :
+                        type === 'warning' ? 'fa-exclamation-triangle' :
+                        type === 'error' ? 'fa-times-circle' : 'fa-info-circle';
+            
+            toast.innerHTML = `
+                <i class="fas ${icon}"></i>
+                ${message}
+            `;
+            
+            const container = document.querySelector('.container');
+            const header = document.querySelector('.header');
+            container.insertBefore(toast, header.nextSibling);
+            
+            // Auto-remove after 5 seconds
+            setTimeout(() => {
+                if (toast.parentNode) {
+                    toast.style.opacity = '0';
+                    toast.style.transform = 'translateY(-10px)';
+                    setTimeout(() => {
+                        if (toast.parentNode) {
+                            toast.parentNode.removeChild(toast);
+                        }
+                    }, 300);
+                }
+            }, 5000);
+        }
+        
+        // ============================================
+        // Handle Flash Messages
+        // ============================================
+        const flashMessages = document.querySelectorAll('.flash-message');
+        flashMessages.forEach(msg => {
+            setTimeout(() => {
+                msg.style.opacity = '0';
+                msg.style.transform = 'translateY(-10px)';
+                setTimeout(() => {
+                    if (msg.parentNode) {
+                        msg.parentNode.removeChild(msg);
+                    }
+                }, 300);
+            }, 8000);
         });
     </script>
 </body>
