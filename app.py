@@ -2629,6 +2629,10 @@ def ai_materials():
         "books": books
     })
 
+@app.route("/math101")
+def math101():
+    return render_template("math101.html")
+
 @app.route('/reels', methods=['GET'])
 @login_required
 def reels():
@@ -2989,4 +2993,5 @@ if __name__ == '__main__':
     
     port = int(os.environ.get('PORT', 5000))
     socketio.run(app, host='0.0.0.0', port=port, debug=DEBUG_MODE)
+
 
