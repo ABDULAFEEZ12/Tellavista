@@ -6,7 +6,7 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
   <meta http-equiv="Pragma" content="no-cache" />
   <meta http-equiv="Expires" content="0" />
-  <title>CBT Platform - Nelavista</title>
+  <title>CBT Platform – 20‑Question Batches</title>
   
   <style>
     /* ===== CSS VARIABLES & RESET ===== */
@@ -104,82 +104,24 @@
 
     /* ===== ANIMATIONS ===== */
     @keyframes fadeIn {
-      from {
-        opacity: 0;
-      }
-      to {
-        opacity: 1;
-      }
+      from { opacity: 0; }
+      to { opacity: 1; }
     }
-
     @keyframes fadeInUp {
-      from {
-        opacity: 0;
-        transform: translateY(15px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
+      from { opacity: 0; transform: translateY(15px); }
+      to { opacity: 1; transform: translateY(0); }
     }
-
     @keyframes fadeInDown {
-      from {
-        opacity: 0;
-        transform: translateY(-10px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
     }
-
     @keyframes slideIn {
-      from {
-        opacity: 0;
-        transform: translateX(-20px);
-      }
-      to {
-        opacity: 1;
-        transform: translateX(0);
-      }
+      from { opacity: 0; transform: translateX(-20px); }
+      to { opacity: 1; transform: translateX(0); }
     }
-
     @keyframes slideUp {
-      from {
-        opacity: 0;
-        transform: translateY(30px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-
-    @keyframes pulse {
-      0%, 100% {
-        transform: scale(1);
-        opacity: 1;
-      }
-      50% {
-        transform: scale(1.02);
-        opacity: 0.9;
-      }
-    }
-
-    @keyframes checkmark {
-      0% {
-        opacity: 0;
-        transform: scale(0) rotate(-45deg);
-      }
-      50% {
-        opacity: 1;
-        transform: scale(1.2) rotate(-45deg);
-      }
-      100% {
-        opacity: 1;
-        transform: scale(1) rotate(-45deg);
-      }
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
     }
 
     /* ===== MAIN CONTAINER ===== */
@@ -196,7 +138,6 @@
       text-align: center;
       margin-bottom: 2rem;
     }
-
     .header-title {
       font-size: 2rem;
       font-weight: 700;
@@ -208,7 +149,6 @@
       opacity: 0;
       animation: fadeInUp 0.7s ease-out 0.4s forwards;
     }
-
     .header-subtitle {
       color: #a0a0a0;
       font-size: 1rem;
@@ -229,25 +169,14 @@
       opacity: 0;
       animation: fadeInUp 0.7s ease-out 0.6s forwards;
     }
-
     .input-group {
       margin-bottom: 1.8rem;
       opacity: 0;
       animation: slideIn 0.6s ease-out forwards;
     }
-
-    .input-group:nth-child(1) {
-      animation-delay: 0.6s;
-    }
-
-    .input-group:nth-child(2) {
-      animation-delay: 0.7s;
-    }
-
-    .input-group:nth-child(3) {
-      animation-delay: 0.8s;
-    }
-
+    .input-group:nth-child(1) { animation-delay: 0.6s; }
+    .input-group:nth-child(2) { animation-delay: 0.7s; }
+    .input-group:nth-child(3) { animation-delay: 0.8s; }
     .input-label {
       display: block;
       margin-bottom: 0.7rem;
@@ -255,7 +184,6 @@
       font-weight: 500;
       color: #e0e0e0;
     }
-
     .input-wrapper {
       position: relative;
       background: var(--input-bg);
@@ -263,13 +191,11 @@
       border: 1px solid var(--border-dark);
       transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
-
     .input-wrapper:focus-within {
       border-color: rgba(255, 255, 255, 0.3);
       transform: translateY(-1px);
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
     }
-
     .styled-select {
       width: 100%;
       padding: 1rem 1.2rem;
@@ -286,33 +212,11 @@
       background-position: right 1rem center;
       background-size: 16px;
     }
-
     .styled-select:disabled {
       opacity: 0.5;
       cursor: not-allowed;
       background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23888888' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
     }
-
-    /* Style dropdown options */
-    .styled-select option {
-      background-color: #1a1a1a;
-      color: #ffffff;
-      padding: 12px;
-      font-size: 1rem;
-    }
-
-    /* For Firefox */
-    @-moz-document url-prefix() {
-      .styled-select {
-        text-overflow: '';
-        color: #ffffff;
-      }
-      .styled-select option {
-        background-color: #1a1a1a;
-        color: #ffffff;
-      }
-    }
-
     .start-btn {
       width: 100%;
       padding: 1rem;
@@ -328,16 +232,11 @@
       opacity: 0;
       animation: fadeInUp 0.6s ease-out 0.9s forwards;
     }
-
     .start-btn:hover:not(:disabled) {
       opacity: 0.9;
       transform: translateY(-2px);
     }
-
-    .start-btn:active:not(:disabled) {
-      transform: translateY(0);
-    }
-
+    .start-btn:active:not(:disabled) { transform: translateY(0); }
     .start-btn:disabled {
       opacity: 0.3;
       cursor: not-allowed;
@@ -353,12 +252,10 @@
       display: none;
       opacity: 0;
     }
-
     .quiz-section.active {
       display: block;
       animation: slideUp 0.6s ease-out forwards;
     }
-
     .quiz-header {
       display: flex;
       justify-content: space-between;
@@ -367,7 +264,6 @@
       padding-bottom: 1rem;
       border-bottom: 1px solid var(--border-dark);
     }
-
     .quiz-title {
       font-size: 1.5rem;
       font-weight: 600;
@@ -376,12 +272,10 @@
       -webkit-text-fill-color: transparent;
       background-clip: text;
     }
-
     .quiz-stats {
       display: flex;
       gap: 1rem;
     }
-
     .stat-item {
       background: var(--accent-color);
       border: 1px solid var(--border-dark);
@@ -390,7 +284,6 @@
       font-size: 0.85rem;
       color: #a0a0a0;
     }
-
     .stat-value {
       color: #ffffff;
       font-weight: 600;
@@ -403,20 +296,17 @@
       opacity: 0;
       animation: fadeInUp 0.6s ease-out forwards;
     }
-
     .progress-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
       margin-bottom: 0.8rem;
     }
-
     .progress-text {
       font-size: 0.9rem;
       font-weight: 500;
       color: #e0e0e0;
     }
-
     .progress-bar {
       height: 6px;
       background: var(--accent-color);
@@ -424,7 +314,6 @@
       overflow: hidden;
       position: relative;
     }
-
     .progress-fill {
       height: 100%;
       background: linear-gradient(90deg, var(--gradient-start), var(--gradient-end));
@@ -443,7 +332,6 @@
       opacity: 0;
       animation: slideIn 0.6s ease-out 0.3s forwards;
     }
-
     .question-number {
       font-size: 0.85rem;
       font-weight: 600;
@@ -455,7 +343,6 @@
       align-items: center;
       gap: 8px;
     }
-
     .question-text {
       font-size: 1.1rem;
       line-height: 1.6;
@@ -471,7 +358,6 @@
       opacity: 0;
       animation: fadeInUp 0.6s ease-out 0.4s forwards;
     }
-
     .option-label {
       display: flex;
       align-items: center;
@@ -484,21 +370,15 @@
       position: relative;
       overflow: hidden;
     }
-
     .option-label:hover:not(.selected) {
       border-color: rgba(255, 255, 255, 0.3);
       transform: translateX(5px);
     }
-
     .option-label.selected {
       background: var(--selected-color);
       border-color: rgba(255, 255, 255, 0.5);
     }
-
-    .option-radio {
-      display: none;
-    }
-
+    .option-radio { display: none; }
     .option-marker {
       width: 20px;
       height: 20px;
@@ -512,11 +392,9 @@
       transition: all 0.3s ease;
       position: relative;
     }
-
     .option-label.selected .option-marker {
       border-color: #ffffff;
     }
-
     .option-label.selected .option-marker::after {
       content: '';
       width: 8px;
@@ -524,13 +402,11 @@
       background: #ffffff;
       border-radius: 50%;
     }
-
     .option-text {
       flex: 1;
       font-size: 0.95rem;
       color: #e0e0e0;
     }
-
     .option-label.selected .option-text {
       color: #ffffff;
       font-weight: 500;
@@ -544,7 +420,6 @@
       opacity: 0;
       animation: fadeInUp 0.6s ease-out 0.5s forwards;
     }
-
     .nav-btn {
       padding: 1rem;
       background: var(--accent-color);
@@ -560,21 +435,15 @@
       justify-content: center;
       gap: 8px;
     }
-
     .nav-btn:hover:not(:disabled) {
       border-color: rgba(255, 255, 255, 0.3);
       transform: translateY(-2px);
     }
-
-    .nav-btn:active:not(:disabled) {
-      transform: translateY(0);
-    }
-
+    .nav-btn:active:not(:disabled) { transform: translateY(0); }
     .nav-btn:disabled {
       opacity: 0.3;
       cursor: not-allowed;
     }
-
     .nav-btn.primary {
       background: var(--primary-color);
       border: none;
@@ -590,17 +459,14 @@
       display: none;
       opacity: 0;
     }
-
     .result-section.active {
       display: block;
       animation: slideUp 0.6s ease-out forwards;
     }
-
     .result-header {
       text-align: center;
       margin-bottom: 2rem;
     }
-
     .result-title {
       font-size: 1.8rem;
       font-weight: 700;
@@ -610,12 +476,10 @@
       background-clip: text;
       margin-bottom: 0.5rem;
     }
-
     .result-subtitle {
       color: #a0a0a0;
       font-size: 1rem;
     }
-
     .score-display {
       display: flex;
       align-items: center;
@@ -623,25 +487,21 @@
       gap: 2rem;
       margin-bottom: 2rem;
     }
-
     .score-circle {
       width: 120px;
       height: 120px;
       position: relative;
     }
-
     .score-circle svg {
       width: 100%;
       height: 100%;
       transform: rotate(-90deg);
     }
-
     .score-circle-bg {
       fill: none;
       stroke: var(--accent-color);
       stroke-width: 8;
     }
-
     .score-circle-fill {
       fill: none;
       stroke: url(#scoreGradient);
@@ -651,7 +511,6 @@
       stroke-dashoffset: 314;
       transition: stroke-dashoffset 1.5s cubic-bezier(0.4, 0, 0.2, 1);
     }
-
     .score-text {
       position: absolute;
       top: 50%;
@@ -659,7 +518,6 @@
       transform: translate(-50%, -50%);
       text-align: center;
     }
-
     .score-value {
       font-size: 2rem;
       font-weight: 700;
@@ -669,18 +527,15 @@
       background-clip: text;
       line-height: 1;
     }
-
     .score-label {
       font-size: 0.9rem;
       color: #a0a0a0;
       margin-top: 5px;
     }
-
     .score-breakdown {
       flex: 1;
       max-width: 300px;
     }
-
     .breakdown-item {
       display: flex;
       justify-content: space-between;
@@ -688,30 +543,18 @@
       padding: 0.8rem 0;
       border-bottom: 1px solid rgba(255, 255, 255, 0.05);
     }
-
-    .breakdown-item:last-child {
-      border-bottom: none;
-    }
-
+    .breakdown-item:last-child { border-bottom: none; }
     .breakdown-label {
       font-size: 0.95rem;
       color: #e0e0e0;
     }
-
     .breakdown-value {
       font-size: 0.95rem;
       font-weight: 500;
       color: #ffffff;
     }
-
-    .breakdown-value.correct {
-      color: var(--correct-color);
-    }
-
-    .breakdown-value.incorrect {
-      color: var(--incorrect-color);
-    }
-
+    .breakdown-value.correct { color: var(--correct-color); }
+    .breakdown-value.incorrect { color: var(--incorrect-color); }
     .result-actions {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
@@ -729,17 +572,14 @@
       display: none;
       opacity: 0;
     }
-
     .review-section.active {
       display: block;
       animation: slideUp 0.6s ease-out forwards;
     }
-
     .review-header {
       text-align: center;
       margin-bottom: 2rem;
     }
-
     .review-title {
       font-size: 1.8rem;
       font-weight: 700;
@@ -749,18 +589,15 @@
       background-clip: text;
       margin-bottom: 0.5rem;
     }
-
     .review-subtitle {
       color: #a0a0a0;
       font-size: 1rem;
     }
-
     .review-list {
       max-height: 500px;
       overflow-y: auto;
       padding-right: 10px;
     }
-
     .review-question {
       background: var(--accent-color);
       border: 1px solid var(--border-dark);
@@ -768,82 +605,56 @@
       padding: 1.5rem;
       margin-bottom: 1rem;
     }
-
-    .review-question.correct {
-      background: var(--review-correct);
-      border-left: 4px solid var(--correct-color);
-    }
-
-    .review-question.incorrect {
-      background: var(--review-incorrect);
-      border-left: 4px solid var(--incorrect-color);
-    }
-
+    .review-question.correct { background: var(--review-correct); border-left: 4px solid var(--correct-color); }
+    .review-question.incorrect { background: var(--review-incorrect); border-left: 4px solid var(--incorrect-color); }
     .review-question-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
       margin-bottom: 1rem;
     }
-
     .review-question-number {
       font-weight: 600;
       color: #e0e0e0;
     }
-
     .review-status {
       font-size: 0.85rem;
       padding: 0.3rem 0.8rem;
       border-radius: 20px;
       font-weight: 500;
     }
-
-    .review-status.correct {
-      background: var(--correct-color);
-      color: white;
-    }
-
-    .review-status.incorrect {
-      background: var(--incorrect-color);
-      color: white;
-    }
-
+    .review-status.correct { background: var(--correct-color); color: white; }
+    .review-status.incorrect { background: var(--incorrect-color); color: white; }
     .review-question-text {
       font-size: 1.1rem;
       margin-bottom: 1rem;
       color: #ffffff;
     }
-
     .review-options {
       display: grid;
       gap: 0.5rem;
     }
-
     .review-option {
       padding: 0.8rem 1rem;
       border-radius: 8px;
       background: rgba(255, 255, 255, 0.05);
       border: 1px solid var(--border-dark);
     }
-
     .review-option.correct-answer {
       background: rgba(76, 175, 80, 0.2);
       border-color: var(--correct-color);
       color: #ffffff;
     }
-
     .review-option.user-answer {
       background: rgba(244, 67, 54, 0.2);
       border-color: var(--incorrect-color);
       color: #ffffff;
     }
-
     .review-option.user-correct {
       background: rgba(76, 175, 80, 0.3);
       border-color: var(--correct-color);
       color: #ffffff;
     }
-
     .option-indicator {
       display: inline-block;
       width: 20px;
@@ -854,17 +665,8 @@
       font-size: 0.8rem;
       line-height: 20px;
     }
-
-    .correct-indicator {
-      background: var(--correct-color);
-      color: white;
-    }
-
-    .incorrect-indicator {
-      background: var(--incorrect-color);
-      color: white;
-    }
-
+    .correct-indicator { background: var(--correct-color); color: white; }
+    .incorrect-indicator { background: var(--incorrect-color); color: white; }
     .review-actions {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
@@ -873,202 +675,25 @@
     }
 
     @media (max-width: 768px) {
-      .score-display {
-        flex-direction: column;
-        gap: 1.5rem;
-      }
-      
-      .score-breakdown {
-        max-width: 100%;
-        width: 100%;
-      }
-      
-      .result-actions,
-      .review-actions {
-        grid-template-columns: 1fr;
-      }
-    }
-
-    /* ===== COURSE SEARCH ===== */
-    .course-search {
-      position: relative;
-      margin-bottom: 1.5rem;
-    }
-
-    .search-input {
-      width: 100%;
-      padding: 1rem 1.2rem 1rem 3rem;
-      background: var(--input-bg);
-      border: 1px solid var(--border-dark);
-      border-radius: 12px;
-      font-size: 1rem;
-      color: var(--text-dark);
-      transition: all 0.3s ease;
-    }
-
-    .search-input:focus {
-      border-color: rgba(255, 255, 255, 0.3);
-      transform: translateY(-1px);
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-    }
-
-    .search-icon {
-      position: absolute;
-      left: 1rem;
-      top: 50%;
-      transform: translateY(-50%);
-      color: #888;
-      pointer-events: none;
-    }
-
-    /* ===== COURSE LIST ===== */
-    .course-list {
-      max-height: 300px;
-      overflow-y: auto;
-      margin-top: 1rem;
-      padding-right: 4px;
-    }
-
-    .course-option {
-      padding: 0.8rem 1rem;
-      background: var(--input-bg);
-      border: 1px solid var(--border-dark);
-      border-radius: 8px;
-      margin-bottom: 0.5rem;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      font-size: 0.9rem;
-      color: #e0e0e0;
-    }
-
-    .course-option:hover {
-      background: var(--selected-color);
-      border-color: rgba(255, 255, 255, 0.3);
-      transform: translateX(5px);
-    }
-
-    .course-option.selected {
-      background: var(--selected-color);
-      border-color: rgba(255, 255, 255, 0.5);
-      color: #ffffff;
-      font-weight: 500;
-    }
-
-    /* ===== SCROLLBAR ===== */
-    ::-webkit-scrollbar {
-      width: 6px;
-    }
-
-    ::-webkit-scrollbar-track {
-      background: transparent;
-    }
-
-    ::-webkit-scrollbar-thumb {
-      background: rgba(255, 255, 255, 0.1);
-      border-radius: 3px;
-      transition: background 0.3s ease;
-    }
-
-    ::-webkit-scrollbar-thumb:hover {
-      background: rgba(255, 255, 255, 0.2);
-    }
-
-    /* ===== RESPONSIVE DESIGN ===== */
-    @media (max-width: 768px) {
-      body {
-        padding: 0 16px;
-        padding-top: 70px;
-      }
-
-      .cbt-container {
-        margin-top: 70px;
-      }
-
-      .header-title {
-        font-size: 1.6rem;
-      }
-
-      .header-subtitle {
-        font-size: 0.95rem;
-      }
-
-      .selection-section,
-      .quiz-section,
-      .result-section,
-      .review-section {
-        padding: 1.5rem;
-        border-radius: 12px;
-      }
-
-      .quiz-title {
-        font-size: 1.3rem;
-      }
-
-      .quiz-stats {
-        flex-direction: column;
-        gap: 0.5rem;
-      }
-
-      .question-text {
-        font-size: 1rem;
-      }
-
-      .option-label {
-        padding: 0.9rem 1rem;
-      }
-
-      .nav-buttons {
-        grid-template-columns: 1fr;
-      }
-
-      .score-circle {
-        width: 100px;
-        height: 100px;
-      }
-
-      .score-value {
-        font-size: 1.8rem;
-      }
-    }
-
-    @media (max-width: 480px) {
-      .header-title {
-        font-size: 1.4rem;
-      }
-
-      .selection-section,
-      .quiz-section,
-      .result-section,
-      .review-section {
-        padding: 1.2rem;
-        border-radius: 10px;
-      }
-
-      .option-label {
-        padding: 0.8rem;
-      }
-
-      .option-text {
-        font-size: 0.9rem;
-      }
-
-      .nav-btn {
-        padding: 0.9rem;
-        font-size: 0.9rem;
-      }
+      .score-display { flex-direction: column; gap: 1.5rem; }
+      .score-breakdown { max-width: 100%; width: 100%; }
+      .result-actions, .review-actions { grid-template-columns: 1fr; }
     }
 
     /* ===== UTILITY CLASSES ===== */
-    .hidden {
-      display: none !important;
-    }
+    .hidden { display: none !important; }
+    .show { display: block !important; }
+    .flex-show { display: flex !important; }
 
-    .show {
-      display: block !important;
-    }
-
-    .flex-show {
-      display: flex !important;
+    /* ===== BATCH INDICATOR ===== */
+    .batch-badge {
+      background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
+      color: black;
+      padding: 0.2rem 0.8rem;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      margin-left: 0.5rem;
     }
   </style>
 </head>
@@ -1076,8 +701,8 @@
   <!-- TOP BAR -->
   <div id="top-bar">
     <button id="back-btn" onclick="goBack()">←</button>
-    <div id="top-bar-title">CBT Platform</div>
-    <div style="width: 40px;"></div> <!-- Spacer for symmetry -->
+    <div id="top-bar-title">CBT Platform – 20‑Question Batches</div>
+    <div style="width: 40px;"></div>
   </div>
 
   <!-- MAIN CONTAINER -->
@@ -1085,10 +710,10 @@
     <!-- HEADER -->
     <div class="header-section">
       <h1 class="header-title">Computer-Based Testing</h1>
-      <p class="header-subtitle">Practice with comprehensive exam questions from various courses</p>
+      <p class="header-subtitle">Solve 20 questions at a time – continue or stop after each batch</p>
     </div>
 
-    <!-- SELECTION SECTION -->
+    <!-- SELECTION SECTION – Course + Level + Course Code -->
     <div class="selection-section" id="selectionSection">
       <div class="input-group">
         <label class="input-label">Select Course</label>
@@ -1103,7 +728,6 @@
             <option value="Botany">Botany</option>
             <option value="Chemistry">Chemistry</option>
             <option value="Physics">Physics</option>
-            <option value="ScienceLaboratoryTechnology">Science Laboratory Technology</option>
           </select>
         </div>
       </div>
@@ -1138,6 +762,9 @@
       <div class="quiz-header">
         <div class="quiz-title" id="quizTitle"></div>
         <div class="quiz-stats">
+          <div class="stat-item">
+            Batch: <span class="stat-value" id="batchIndicator">1/?</span>
+          </div>
           <div class="stat-item">
             Questions: <span class="stat-value" id="currentQuestion">0</span>/<span id="totalQuestions">0</span>
           </div>
@@ -1186,8 +813,8 @@
     <!-- RESULT SECTION -->
     <div class="result-section" id="resultSection">
       <div class="result-header">
-        <h2 class="result-title">Test Completed!</h2>
-        <p class="result-subtitle">Review your performance</p>
+        <h2 class="result-title">Session Completed!</h2>
+        <p class="result-subtitle" id="resultSummary">You have completed X out of Y batches</p>
       </div>
 
       <!-- SCORE DISPLAY -->
@@ -1211,7 +838,7 @@
 
         <div class="score-breakdown">
           <div class="breakdown-item">
-            <div class="breakdown-label">Total Questions</div>
+            <div class="breakdown-label">Total Attempted</div>
             <div class="breakdown-value" id="totalQuestionsResult">0</div>
           </div>
           <div class="breakdown-item">
@@ -1269,21 +896,34 @@
   <script>
     // ===== CBT STATE MANAGEMENT =====
     const cbtState = {
+      // Per‑batch state
+      quizData: [],          // current batch questions
+      selectedAnswers: [],  // answers for current batch
       currentQuestion: 0,
-      score: 0,
-      quizStarted: false,
-      selectedAnswers: [],
-      quizData: [],
-      totalQuestions: 0,
+      
+      // Full question list & batch control
+      fullQuestionList: [], // all questions for the selected course/level/code
+      batchSize: 20,
+      currentBatch: 0,
+      totalBatches: 0,
+      
+      // Cumulative data
+      cumulativeCorrect: 0,
+      totalAttempted: 0,
+      allQuestions: [],     // all attempted questions
+      allUserAnswers: [],   // corresponding user answers
+      
+      // Metadata
       course: '',
       level: '',
-      courseCode: ''
+      courseCode: '',
+      quizStarted: false
     };
 
-    // ===== QUESTION BANK =====
-
-const allQuestions = {
-  "Biochemistry": {
+    // ===== QUESTION BANK – FULLY NESTED (COURSE → LEVEL → COURSE CODE → ARRAY) =====
+    const allQuestions = {
+      // ---------- MATHEMATICS ----------
+      "Biochemistry": {
 "100": {
 "BCH101": [
 { q: "Which of the following is NOT a major class of biomolecules?", o: ["Carbohydrates", "Lipids", "Nucleic Acids", "Minerals"], a: 3 },
@@ -4825,19 +4465,207 @@ const allQuestions = {
 }
 },
 "Mathematics": {
-"100": {
-"MTH101": [
-{ "q": "What is the solution of the quadratic equation x² - 5x + 6 = 0?", "o": ["x = 2, 3", "x = -2, -3", "x = 1, 6", "x = 0, 5"], "a": 0 },
-{ "q": "What is the value of sin(π/2)?", "o": ["1", "0", "-1", "0.5"], "a": 0 },
-{ "q": "Simplify the expression (a + b)².", "o": ["a² + 2ab + b²", "a² - 2ab + b²", "a² + b²", "a² - b²"], "a": 0 },
-{ "q": "What is the logarithm of 100 to base 10?", "o": ["2", "10", "1", "0"], "a": 0 },
-{ "q": "Which of these is a trigonometric identity?", "o": ["sin²θ + cos²θ = 1", "sinθ + cosθ = 1", "tanθ = sinθ/cosθ", "sec²θ = 1 + tan²θ"], "a": 0 },
-{ "q": "Solve for x: 2x + 3 = 11.", "o": ["x = 4", "x = 7", "x = 5", "x = 3"], "a": 0 },
-{ "q": "What is the factorial of 5?", "o": ["120", "60", "24", "720"], "a": 0 },
-{ "q": "Which of the following is a rational number?", "o": ["3/4", "√2", "π", "e"], "a": 0 },
-{ "q": "What is the sum of the interior angles of a triangle?", "o": ["180°", "90°", "360°", "270°"], "a": 0 },
-{ "q": "Evaluate 3! + 4!.", "o": ["30", "24", "120", "144"], "a": 0 }
-],
+        "100": {
+          "MTH101":
+            // ----- BATCH 1 (1‑20) -----
+            [
+  { "q": "In a recent survey of 400 students in Palm Ville High College, 100 were listed as smokers and 150 as Chewers of gum, 75 were listed as both Smokers and Chewers of Gum. Find how many students are neither smokers nor gum chewers.", "o": ["150", "250", "225", "125"], "a": 2 },
+  { "q": "In a survey among 140 patients, 60 had malaria, 70 had typhoid, 75 had measles, 30 had malaria and typhoid, 18 typhoid and measles, 42 malaria and measles. Using a Venn diagram, find patients who had all three ailments.", "o": ["12", "10", "15", "8"], "a": 0 },
+  { "q": "In a survey among 140 patients, 60 had malaria, 70 had typhoid, 75 had measles, 30 had malaria and typhoid, 18 typhoid and measles, 42 malaria and measles. Using a Venn diagram, find patients who had malaria only.", "o": ["15", "20", "25", "30"], "a": 0 },
+  { "q": "In a survey among 140 patients, 60 had malaria, 70 had typhoid, 75 had measles, 30 had malaria and typhoid, 18 typhoid and measles, 42 malaria and measles. Using a Venn diagram, find patients who had typhoid but not malaria.", "o": ["25", "20", "30", "15"], "a": 0 },
+  { "q": "At a conference of 100 people there are 29 Indian women and 23 Indian men. Out of these Indian people 4 are doctors and 24 are either men or doctors. There are no foreign doctors. Find the number of women doctors attending the conference.", "o": ["2", "4", "6", "8"], "a": 0 },
+  { "q": "In a population of cats, 10% are tabby, 5% are pregnant, and 3% are both tabby and pregnant. What is the probability that a cat is tabby but not pregnant?", "o": ["0.07", "0.10", "0.13", "0.05"], "a": 0 },
+  { "q": "A survey in a class Show that 15 out of the pupils play Cricket,11 play Tennis and 6 play Cricket and Tennis, How many pupils are there in the class. (Hint: assume that everyone plays at least one of these game)", "o": ["15", "21", "20", "31"], "a": 2 },
+  { "q": "Survey of 18 families: 8 keep cat, 14 keep dog. All keep at least one. How many keep both?", "o": ["4", "6", "8", "10"], "a": 0 },
+  { "q": "Out of 1000 students, 650 offer Algebra, 500 offer Trigonometry, 210 offer neither. How many offer both?", "o": ["360", "290", "140", "120"], "a": 0 },
+  { "q": "If U={1,3,5,7,11}, A={1,3,7,11}, B={3,5,7,19}, find (A∩B')-(A∪B')", "o": ["∅", "{1,11}", "{3,7}", "{5,19}"], "a": 0 },
+  { "q": "Which term of the arithmetic progression 49,44,39,.. , is 9?", "o": ["second term", "first term", "seventh term", "ninth term"], "a": 3 },
+  { "q": "In a geometric series, the first term is 7, the last term is 448, and the sum is 889. find the common ratio 'r'", "o": ["r = 3", "r = 12", "r = 14", "r = 2"], "a": 3 },
+  { "q": "Let x be the required arithmetic mean, then 8,x,16 form three successive terms in the arithmetic progression, find x", "o": ["15", "13", "30", "12"], "a": 3 },
+  { "q": "The sum of five numbers in an arithmetic progression is 25 and the sum of their squares is 165. Find the common difference", "o": ["3", "-2", "2", "-3"], "a": 2 },
+  { "q": "Find the number of terms in an Arithmetic progression whose first term is 5, common difference is 3, and sum is 55.", "o": ["n = 5", "n = 7", "n = 9", "n = -8"], "a": 0 },
+  { "q": "The sum of the first n terms of a series is (2n² - n). Find the nth term", "o": ["6n-3", "4n-3", "2n-3", "5n-4"], "a": 1 },
+  { "q": "The 383rd term of the series 5 + 8 + 11 + ... is?", "o": ["120", "128", "89", "150"], "a": 1 },
+  { "q": "The sum of first ten terms of AP is 60, sum of first 22 terms is 220. Find common difference and first term.", "o": ["2/3, 3", "3, 2/3", "1, 5", "5, 1"], "a": 0 },
+  { "q": "Find sum to infinity of 16 + 12 + 9 + ...", "o": ["64", "48", "32", "∞"], "a": 0 },
+  { "q": "GP has first term 27, ratio 4/3. Find least number of terms for sum > 550", "o": ["8", "7", "6", "9"], "a": 0 },
+  { "q": "5th term of AP is 23, 12th is 37. Find first term, common difference, sum of first 11 terms", "o": ["15,2,275", "13,2,253", "17,2,297", "19,2,319"], "a": 0 },
+  { "q": "3rd and 6th terms of GP are 108 and -32. Find sum of first 7 terms", "o": ["154.3", "142.5", "168.2", "176.4"], "a": 0 },
+  { "q": "In GP, U₃=32, U₆=4. Find sum of first eight terms", "o": ["255", "127", "511", "63"], "a": 0 },
+  { "q": "Three consecutive terms of GP have product 343 and sum 49/2. Find numbers", "o": ["7/2,7,14", "1,7,49", "7,14,28", "14,28,56"], "a": 0 },
+  { "q": "First three terms of GP: k-3,2k-4,4k-3. Find k", "o": ["7", "5", "3", "2"], "a": 0 },
+  { "q": "In AP, sum of first and fifth terms is 18, fifth term is 6 more than third. Find sum of first ten terms", "o": ["165", "150", "180", "195"], "a": 0 },
+  { "q": "In an AP, T₁₈ = 2T₉. Find the ratio S₁₈:S₉.", "o": ["3:1", "2:1", "4:1", "5:2"], "a": 0 },
+  { "q": "How many terms of the series 2+5+8+... must be taken to sum to 155?", "o": ["10", "11", "9", "12"], "a": 0 },
+  { "q": "The 2nd and 6th terms of a GP are 8/9 and 9/2. Find a and r.", "o": ["a=4/3, r=2/3", "a=2/3, r=4/3", "a=4/3, r=3/2", "a=2/3, r=3/2"], "a": 0 },
+  { "q": "If x+1, 2x-1, x+5 are in AP, find x.", "o": ["2", "3", "4", "5"], "a": 0 },
+  { "q": "Insert 4 arithmetic means between -12 and 13.", "o": ["-7,-2,3,8", "-6,0,6,12", "-5,2,9,16", "-8,-4,0,4"], "a": 0 },
+  { "q": "If 8, x, y, 27 are in GP, find x and y.", "o": ["x=12, y=18", "x=6, y=9", "x=9, y=13.5", "x=10, y=15"], "a": 0 },
+  { "q": "The arithmetic mean of two numbers is 15 and their geometric mean is 9. Find the numbers.", "o": ["3 and 27", "9 and 21", "6 and 24", "12 and 18"], "a": 0 },
+  { "q": "For an AP with a=25, d=-3, find n if S_n=112.", "o": ["7 or 16", "7 only", "16 only", "8 or 15"], "a": 0 },
+  { "q": "A GP has common ratio 2. Find n such that sum of 2n terms is 33 times sum of n terms.", "o": ["5", "4", "6", "7"], "a": 0 },
+  { "q": "What are the values of the x for which (x³ - 3x² + 2x)/(x² + 5x + 5) = 0", "o": ["x = 0, -1 or -2", "x = 0,1 or 3", "x = 0,1 or -3", "x = 0, -1 or 3"], "a": 1 },
+  { "q": "Find the value of x for which (x³ + 3x² + 2x + 7)/(x² + 5x + 6) is undefined", "o": ["x = -3 or -2", "x = 3", "x = 2 or 3", "x = -2 or 3"], "a": 0 },
+  { "q": "In solving the quadratic equation x² - 4x + 3 = 0 the roots are", "o": ["imaginary", "real", "zero", "equal"], "a": 1 },
+  { "q": "The factors of x² - 10x - 24 are ....", "o": ["(x-12) and (x+2)", "(x-8) and (x+3)", "(x-6) and (x+4)", "(x+6) and (x-4)"], "a": 0 },
+  { "q": "What is the square root of -9 i.e √(-9)", "o": ["-3", "A negative number cannot have a square root", "3", "3i"], "a": 3 },
+  { "q": "Suppose Z₁ = 5 + 12i and Z₂ = 3 + 4i, express Z₁/Z₂ in polar form", "o": ["(13/5)[Cos(14.3) - iSin(14.3)]", "(69/25)[Cos(14.3) + iSin(14.3)]", "(4/5)[Cos(14.3) + iSin(14.3)]", "(13/5)[Cos(14.4) + iSin(14.3)]"], "a": 0 },
+  { "q": "Write algebraic form: (1+3i)−(2−5i).", "o": ["-1+8i", "1-8i", "-1-2i", "3+8i"], "a": 0 },
+  { "q": "Write algebraic form: (2−3i)².", "o": ["-5-12i", "5-12i", "-5+12i", "5+12i"], "a": 0 },
+  { "q": "Find inverse of -4+3i in algebraic form.", "o": ["-4/25 - 3i/25", "-4/25 + 3i/25", "4/25 - 3i/25", "4/25 + 3i/25"], "a": 0 },
+  { "q": "Write algebraic form: (3−2i)/(1+i).", "o": ["1/2 - 5i/2", "1/2 + 5i/2", "5/2 - i/2", "5/2 + i/2"], "a": 0 },
+  { "q": "Evaluate Log₄25", "o": ["1.756", "2.322", "6.25", "4.753"], "a": 1 },
+  { "q": "If log₉(x+3) - log₉(1/3) = 3/2, find x", "o": ["6", "3", "9", "12"], "a": 0 },
+  { "q": "If log₂(2a)=c, 2log₈a=b, and b-c=-4, find a", "o": ["512", "256", "128", "64"], "a": 0 },
+  { "q": "Solve log₂(xy)=7, log₂(x²/y)=5", "o": ["x=8,y=16", "x=16,y=8", "x=4,y=32", "x=32,y=4"], "a": 1 },
+  { "q": "Simplify log6+log4+log20-log3-log16", "o": ["1", "2", "3", "4"], "a": 0 },
+  { "q": "Solve log₃(x+2)=log₉(6x+4)", "o": ["0", "1", "2", "3"], "a": 0 },
+  { "q": "If log√₂ N = a, find log₂√₂ N", "o": ["a/3", "2a/3", "3a/2", "a/2"], "a": 0 },
+  { "q": "If (log₄x)² = log₂x·logₙx, find n", "o": ["16", "8", "4", "2"], "a": 0 },
+  { "q": "Solve for x: 2^(2x+1)·3^(2x+2) + 2^x·3^(x+2) - 2 = 0", "o": ["-1", "0", "1", "2"], "a": 0 },
+  { "q": "Solve 3^(2x+1)-28(3^(x-1))+1=0", "o": ["1", "0", "-1", "2"], "a": 0 },
+  { "q": "Solve 2^(2x+3)+1 = 9·2^x.", "o": ["0 or 3", "1 or 2", "-1 or 4", "0 or 2"], "a": 0 },
+  { "q": "Express (1+2x+3x²)/((1-x)(1+x²)) in partial fractions", "o": ["3/(1-x) - 2/(1+x²)", "2/(1-x) + 1/(1+x²)", "1/(1-x) + 2/(1+x²)", "3/(1-x) + 2/(1+x²)"], "a": 0 },
+  { "q": "Express (3x²+2x-9)/((x²-1)²) in partial fractions", "o": ["3/(x²-1) - (2x-6)/(x²-1)²", "2/(x²-1) + (x-3)/(x²-1)²", "1/(x²-1) + (2x-4)/(x²-1)²", "3/(x²-1) + (2x-6)/(x²-1)²"], "a": 0 },
+  { "q": "Express (5x+4)/((x-1)(x+2)²) in partial fractions", "o": ["1/(x-1) - 1/(x+2) + 2/(x+2)²", "2/(x-1) - 1/(x+2) + 1/(x+2)²", "1/(x-1) + 1/(x+2) - 2/(x+2)²", "2/(x-1) + 1/(x+2) - 1/(x+2)²"], "a": 0 },
+  { "q": "Resolve (6x−10)/(x²−2x−3) into partial fractions.", "o": ["4/(x-3)+2/(x+1)", "2/(x-3)+4/(x+1)", "3/(x-3)+3/(x+1)", "5/(x-3)+1/(x+1)"], "a": 0 },
+  { "q": "Resolve (x²+4x−7)/[(x+1)(x²+4)] into partial fractions.", "o": ["-2/(x+1) + (3x-1)/(x²+4)", "-2/(x+1) + (3x+1)/(x²+4)", "2/(x+1) + (3x-1)/(x²+4)", "2/(x+1) + (3x+1)/(x²+4)"], "a": 0 },
+  { "q": "Solve (x-2)(x-3)/(x-1) ≤ 0", "o": ["{x: 2 ≤ x ≤ 3}", "{x: x < 1}", "{x: x > 3}", "{x: x ≤ 1}"], "a": 0 },
+  { "q": "Solve |2x-3| > |x+3|", "o": ["x>6", "x<0", "0<x<6", "x<-3"], "a": 0 },
+  { "q": "Obtain set of x for which 2x > 1/x", "o": ["-1/√2 < x < 0", "x > 1/√2", "x < -1/√2", "0 < x < 1/√2"], "a": 0 },
+  { "q": "Solve (x+4)/(x+1) ≤ (x-2)/(x-4)", "o": ["4≤x≤14", "x≤4 or x≥14", "x<4 or x>14", "1<x<4"], "a": 0 },
+  { "q": "Find the interval for x in x²+x-6 < 0.", "o": ["-3 < x < 2", "x < -3 or x > 2", "-2 < x < 3", "x < -2 or x > 3"], "a": 0 },
+  { "q": "Solve |x-1| < 2.", "o": ["-1 < x < 3", "x < 3", "x > -1", "x < -1 or x > 3"], "a": 0 },
+  { "q": "Which of the following relations is a/are Functions? i) {(x,y)|y = x² + 1} ii) {x,y} |y² = x + 2} iii) (2,1),(3,1),(4,1)", "o": ["i and ii only", "ii only", "iii only", "i only"], "a": 3 },
+  { "q": "Find inverse of h(x) = x/(x²-1)", "o": ["(1-√(1+4x²))/(2x)", "(1+√(1+4x²))/(2x)", "x/(1-x²)", "(x²-1)/x"], "a": 0 },
+  { "q": "Domain for f(x)=(32x+3)/(4x+1)", "o": ["x≠-1/4, y≠8", "x≠-1/4, y≠0", "x≠1/4, y≠8", "x≠1/4, y≠0"], "a": 0 },
+  { "q": "Given f(x)=ax+b, f(2)=7, f(3)=12, find a and b", "o": ["5,-3", "3,1", "4,-1", "6,-5"], "a": 0 },
+  { "q": "Domain of f(x)=x/(x²+3x+2)+2/(x+1)", "o": ["x≠-2,x≠-1", "x≠-1", "x≠-2", "All real"], "a": 0 },
+  { "q": "Range of f(x)=x²-2x+3", "o": ["[2,∞)", "[3,∞)", "[1,∞)", "[0,∞)"], "a": 0 },
+  { "q": "If h(x)=ax+b and h(2)=4, h(4)=10, find a and b.", "o": ["a=3, b=-2", "a=2, b=0", "a=1, b=2", "a=3, b=2"], "a": 0 },
+  { "q": "One-to-One function is defined as:", "o": ["Each y in the range has exactly one x from the domain", "Each x maps to multiple y", "The function is always increasing", "The function is even"], "a": 0 },
+  { "q": "How to verify if f⁻¹ is the inverse of f?", "o": ["f(f⁻¹(x)) = x and f⁻¹(f(x)) = x", "f(x) = 1/x", "The graphs are symmetric about the x-axis", "f(x) = f⁻¹(x)"], "a": 0 },
+  { "q": "Find inverse of matrix [[2,4,3],[1,-2,-2],[-3,3,2]]", "o": ["(1/11)[[2,1,-2],[4,13,7],[-3,-18,-8]]", "(1/11)[[2,4,-3],[1,-2,3],[3,7,-8]]", "(1/11)[[1,2,3],[4,5,6],[7,8,9]]", "(1/11)[[2,4,3],[1,2,2],[3,3,2]]"], "a": 0 },
+  { "q": "If M=[[-x,2],[-x+1,x-1]] and |M|=0, find x", "o": ["1 or 2", "2 or 3", "0 or 1", "-1 or 2"], "a": 0 },
+  { "q": "Find p for which matrix [[p+1,6],[1,p]] has no inverse", "o": ["-3", "3", "2", "-2"], "a": 0 },
+  { "q": "Evaluate determinant [[7,5,5],[5,8,5],[3,-2,8]]", "o": ["92", "-92", "112", "-112"], "a": 0 },
+  { "q": "Solve for x: det[[x,2,3],[2,x,4],[3,4,x]] = 0.", "o": ["x=1, x=2±√17", "x=-1, x=2±√17", "x=1, x=-2±√17", "x=-1, x=-2±√17"], "a": 0 },
+  { "q": "First three terms of (1+x)^15 in ascending order", "o": ["1+15x+105x²", "1+15x+90x²", "1+15x+120x²", "1+15x+135x²"], "a": 0 },
+  { "q": "Find term x⁵ in expansion of (1+x)^10", "o": ["252x⁵", "210x⁵", "120x⁵", "45x⁵"], "a": 0 },
+  { "q": "First four terms in expansion of (1-x)^(-1/2)", "o": ["1+(1/2)x+(3/8)x²+(5/16)x³", "1+(1/2)x+(3/4)x²+(5/8)x³", "1-x+x²-x³", "1+(1/2)x+(1/4)x²+(1/8)x³"], "a": 0 },
+  { "q": "Expand (2x-3)^4-(2x+3)^4 in descending powers", "o": ["-192x³", "192x³", "-96x³", "96x³"], "a": 0 },
+  { "q": "First three terms of (2+x)^5", "o": ["32+80x+80x²", "32+80x+40x²", "32+40x+80x²", "16+40x+80x²"], "a": 0 },
+  { "q": "Range of validity for expansion of (1-2x)^(-3/2)", "o": ["-1/2 < x < 1/2", "-1 < x < 1", "-2 < x < 2", "-1/4 < x < 1/4"], "a": 0 },
+  { "q": "Coefficient of x² in (3-x)^10", "o": ["295245", "196830", "59049", "98415"], "a": 0 },
+  { "q": "Expand (1+3x)⁴.", "o": ["1+12x+54x²+108x³+81x⁴", "1+12x+36x²+108x³+81x⁴", "1+6x+9x²+12x³+3x⁴", "1+4x+6x²+4x³+x⁴"], "a": 0 },
+  { "q": "Calculate a if the coefficient of x³ in (a+2x)⁵ is 320.", "o": ["2", "1", "4", "8"], "a": 0 },
+  { "q": "Calculate the coefficient of x³y⁴ in (2x−3y)⁷.", "o": ["-15120", "15120", "-22680", "22680"], "a": 0 },
+  { "q": "Find the term independent of x in (2x − 3/x²)⁶.", "o": ["-160", "160", "-240", "240"], "a": 0 },
+  { "q": "Expand (1-x)⁴(1+2x)⁷ up to x³.", "o": ["1+10x+40x²+80x³", "1+12x+60x²+160x³", "1+14x+84x²+280x³", "1+13x+76x²+504x⁴"], "a": 1 },
+  { "q": "Hence evaluate (1.02)⁷ to four significant figures.", "o": ["1.149", "1.148", "1.150", "1.147"], "a": 0 },
+  { "q": "Roots of x²+7x+11=0 are α and β (α>β). Find α-β", "o": ["√5", "√3", "2", "1"], "a": 0 },
+  { "q": "If α,β are roots of 3x²-7x-1, find (α-β)²", "o": ["61/9", "49/9", "13/3", "37/9"], "a": 0 },
+  { "q": "If one root of ax²+bx+c=0 is triple the other, which is true?", "o": ["3b²=16ac", "b²=4ac", "b²=16ac", "3b²=4ac"], "a": 0 },
+  { "q": "If α,β are roots of 5x²−3x−1=0, form equation with roots 1/α², 1/β².", "o": ["x² + 19x + 25 = 0", "x² - 19x + 25 = 0", "x² + 11x + 25 = 0", "x² - 11x + 25 = 0"], "a": 0 },
+  { "q": "Form the quadratic equation for which sum of roots = 5 and sum of squares of roots = 53.", "o": ["x²−5x−14=0", "x²−5x+14=0", "x²+5x−14=0", "x²+5x+14=0"], "a": 0 },
+  { "q": "If (7p+1)x²+(5p−1)x+p=1 has equal roots, find p.", "o": ["0 or 8/9", "0 or 9/8", "1 or 8/9", "1 or 9/8"], "a": 0 },
+  { "q": "Polynomial p(x) divided by x²-x gives remainder a+bx. Find a and b", "o": ["p(0) and p(1)-p(0)", "p(1) and p(0)", "p(0) and p(1)", "p(1) and p(0)-p(1)"], "a": 0 },
+  { "q": "Remainder when x⁴-5x³+6x²-7 divided by x²-4x+3", "o": ["-x-4", "x+4", "-x+4", "x-4"], "a": 0 },
+  { "q": "When x³+2x²+px-3 divided by x+1 and x-2 gives same remainder, find p", "o": ["-5", "-3", "-1", "1"], "a": 0 },
+  { "q": "Given x²-3x+2 is factor of x⁴+ax²+bx+8, find a and b", "o": ["-3,-6", "-2,-4", "-1,-2", "0,0"], "a": 0 },
+  { "q": "Find m,n if mx³+nx²-28x+15 divisible by x+3, remainder -60 when divided by x-3. Then find roots", "o": ["-3,1/2,5", "-2,1,3", "-1,2,4", "-4,1,6"], "a": 0 },
+  { "q": "Find remainder when x²−5x+1 is divided by x−2.", "o": ["-5", "5", "-3", "3"], "a": 0 },
+  { "q": "What is the value of k if (x−1) is a factor of x³+x²+kx+1?", "o": ["-3", "3", "-1", "1"], "a": 0 },
+  { "q": "(x−1) and (x+3) are factors of x³+ax²+bx+12. Find a and b.", "o": ["a=4, b=-7", "a=4, b=7", "a=-4, b=-7", "a=-4, b=7"], "a": 0 },
+  { "q": "Factorise x³−27.", "o": ["(x-3)(x²+3x+9)", "(x+3)(x²-3x+9)", "(x-3)(x²-3x+9)", "(x+3)(x²+3x+9)"], "a": 0 },
+  { "q": "Sum to infinity of 1+1/2+1/4+...", "o": ["2", "1", "∞", "3"], "a": 0 },
+  { "q": "Find Σ(k/10^r) from r=1 to ∞", "o": ["k/9", "k/10", "10k/9", "k/90"], "a": 0 },
+  { "q": "Use induction to find sum of 1/(1·2)+1/(2·3)+...+1/(n(n+1))", "o": ["n/(n+1)", "1/(n+1)", "(n-1)/n", "1/n"], "a": 0 },
+  { "q": "Sum of first n terms of log3+log6+log12+...", "o": ["n log3 + n(n-1)log2/2", "n log6", "n log12", "log(3·6·12·...)"], "a": 0 },
+  { "q": "Show by induction that for every non-zero natural number n, n! ≥ 2ⁿ⁻¹.", "o": ["True", "False", "Only for n≥3", "Only for n≤5"], "a": 0 },
+  { "q": "Show by induction that 1²+2²+...+n² = n(n+1)(2n+1)/6 for all n∈ℕ*.", "o": ["True", "False", "Only for even n", "Only for odd n"], "a": 0 },
+  { "q": "Prove that for every natural number n ≥ 5, 2ⁿ > 5(n+1).", "o": ["True", "False", "Only for n=5", "Only for n≥6"], "a": 0 },
+  { "q": "Prove that ∑_{k=1}^n k(k+1) = n(n+1)(n+2)/3 for all n∈ℕ*.", "o": ["True", "False", "Only for n even", "Only for n odd"], "a": 0 },
+  { "q": "Find positive square root of 49 - 12√5", "o": ["2+3√5", "3+2√5", "5-2√3", "7-√5"], "a": 0 },
+  { "q": "Find √(14+6√5)", "o": ["±(3+√5)", "±(2+√5)", "±(1+√5)", "±(4+√5)"], "a": 0 },
+  { "q": "Simplify √72 − √12 + √75.", "o": ["6√2 + 3√3", "6√2 - 3√3", "6√2 + √3", "6√2 - √3"], "a": 0 },
+  { "q": "Simplify (2√2+3)/(2√2+1) by rationalising denominator.", "o": ["(10-√2)/7", "(10+√2)/7", "(5-2√2)/7", "(5+2√2)/7"], "a": 0 },
+  { "q": "If 1/(3√5+√2) ≡ a√2+b√5, find a and b", "o": ["-1/43, 3/43", "1/43, -3/43", "3/43, -1/43", "-3/43, 1/43"], "a": 0 },
+  { "q": "Prove or disprove: The relation aRb: a|b (a divides b) on ℤ is an equivalence relation.", "o": ["Not equivalence (fails symmetry)", "It is equivalence", "Fails reflexivity", "Fails transitivity"], "a": 0 },
+  { "q": "Prove or disprove: The relation a<b on ℝ is an equivalence relation.", "o": ["Not equivalence (fails reflexivity)", "It is equivalence", "Fails symmetry", "Fails transitivity"], "a": 0 },
+  { "q": "Prove or disprove: The relation a≤b on ℤ is an equivalence relation.", "o": ["Not equivalence (fails symmetry)", "It is equivalence", "Fails reflexivity", "Fails transitivity"], "a": 0 },
+  { "q": "Show that the relation R = {(a,b): |a−b| is even} on A={1,2,3,4,5} is an equivalence relation.", "o": ["True", "False, fails reflexivity", "False, fails symmetry", "False, fails transitivity"], "a": 0 },
+  { "q": "Evaluate C(18,16).", "o": ["153", "171", "136", "120"], "a": 0 },
+  { "q": "Evaluate C(13,8).", "o": ["1287", "1716", "1430", "1144"], "a": 0 },
+  { "q": "Simplify (x^(1/3) + x^(-2/3))/x^(1/2)", "o": ["(x+1)/x²", "x+1", "x^(-1/6)", "1"], "a": 0 },
+  { "q": "Simplify ((x^a)/(x^b))^(a+b) × ((x^(a+b))/(x^(a-b)))^(a²/b)", "o": ["x^(3a²-b²)", "x^(a²+b²)", "1", "x^(a²-b²)"], "a": 0 },
+  { "q": "Simplify ((x^a)/(x^b))^(a+b) × ((x^b)/(x^c))^(b+c) × ((x^c)/(x^a))^(c+a)", "o": ["1", "0", "x^(a+b+c)", "x^(abc)"], "a": 0 },
+  { "q": "Given 2^x=3^y and x+y=1, find x in terms of logarithms", "o": ["log2/(log2+log3)", "log3/(log2+log3)", "log2/log3", "log3/log2"], "a": 1 },
+  { "q": "If x²-3x+1 = n(x-3) has equal roots, find n", "o": ["5", "3", "2", "1"], "a": 0 },
+  { "q": "Find greatest value of -2x²+4x+3", "o": ["1", "3", "5", "7"], "a": 2 },
+  { "q": "If minimum value of x²+2x+k is 3, find k", "o": ["4", "3", "2", "1"], "a": 0 },
+  { "q": "Find p for which x²-(x-1)p+3=0 has real roots", "o": ["p≤-2 or p≥6", "p≥2", "p≤6", "-2≤p≤6"], "a": 0 },
+  { "q": "For what m is 9x²+mx+16 a perfect square?", "o": ["±24", "24", "-12", "12"], "a": 0 },
+  { "q": "Find k for which f(t)=t²+3kt+k > 0 for all real t", "o": ["0<k<4/9", "k>0", "k<4/9", "k>4/9"], "a": 0 },
+  { "q": "Identify the pattern and give the next term: 5,17,29,41,53, __", "o": ["65", "64", "66", "63"], "a": 0 },
+  { "q": "Write first 4 terms of sequence T_n = n(n+1).", "o": ["2,6,12,20", "1,2,6,12", "2,4,6,8", "1,3,6,10"], "a": 0 },
+  { "q": "Write first 4 terms of sequence T_n = n/(n+1).", "o": ["1/2,2/3,3/4,4/5", "1/2,1/3,1/4,1/5", "1,2,3,4", "1,1/2,1/3,1/4"], "a": 0 },
+  { "q": "If T_n = (2n+1)(n-2), which term is 33?", "o": ["7th", "8th", "6th", "9th"], "a": 0 },
+  { "q": "In a sequence T_n = a+bn, T₇=19, T₁₅=43. Find a,b.", "o": ["a=1, b=3", "a=2, b=3", "a=1, b=2", "a=2, b=2"], "a": 0 },
+  { "q": "First five terms of U₁=0, Uₙ=1/(5-Uₙ₋₁)", "o": ["0,1/5,5/24,24/115,115/551", "0,1/5,1/4,4/19,19/91", "0,1/5,5/26,26/131,131/656", "0,1/4,4/19,19/90,90/451"], "a": 0 },
+  { "q": "Solve |2x-1| ≥ 2.", "o": ["x ≤ -0.5 or x ≥ 1.5", "-0.5 ≤ x ≤ 1.5", "x ≤ 0.5 or x ≥ 1.5", "0.5 ≤ x ≤ 1.5"], "a": 0 },
+  { "q": "Solve |3-2x| < 5.", "o": ["-1 < x < 4", "x < -1 or x > 4", "-4 < x < 1", "x < -4 or x > 1"], "a": 0 },
+  { "q": "Solve in ℤ²: xy=1, 3x+y=−4.", "o": ["(-1,-1)", "(1,1)", "(-1,1)", "(1,-1)"], "a": 0 },
+  { "q": "Solve simultaneous equations: x+3y=10, 3x+2y=2.", "o": ["x=-2, y=4", "x=2, y=4", "x=-2, y=-4", "x=2, y=-4"], "a": 0 },
+  { "q": "Deer park: 41 heads, 136 legs. Number of deer and people?", "o": ["27 deer, 14 people", "24 deer, 17 people", "30 deer, 11 people", "21 deer, 20 people"], "a": 0 },
+  { "q": "A man travels x km at 60 km/h and y km at 40 km/h, takes 2¾ h. Travel 5x km at 40 km/h and 3y km at 30 km/h takes 11 h 42 min. Find x,y.", "o": ["x=15, y=30", "x=30, y=15", "x=20, y=25", "x=25, y=20"], "a": 0 },
+  { "q": "The exponential function f(x)=ca^x. Identify c and a.", "o": ["c = initial value, a = base", "c = base, a = initial value", "c = growth rate, a = time", "c = exponent, a = coefficient"], "a": 0 },
+  { "q": "Graph of y = a^x, a > 1 is:", "o": ["Increasing, passes through (0,1), horizontal asymptote y=0", "Decreasing, passes through (0,1), horizontal asymptote y=0", "Increasing, passes through (1,0), vertical asymptote x=0", "Decreasing, passes through (1,0), vertical asymptote x=0"], "a": 0 },
+  { "q": "Graph of y = a^x, 0 < a < 1 is:", "o": ["Decreasing, passes through (0,1), horizontal asymptote y=0", "Increasing, passes through (0,1), horizontal asymptote y=0", "Decreasing, passes through (1,0), vertical asymptote x=0", "Increasing, passes through (1,0), vertical asymptote x=0"], "a": 0 },
+  { "q": "Write algebraic form: (1/2 − i√3/2)⁴.", "o": ["-1/2 - i√3/2", "-1/2 + i√3/2", "1/2 - i√3/2", "1/2 + i√3/2"], "a": 0 },
+  { "q": "Find inverse of i in algebraic form.", "o": ["-i", "i", "1", "-1"], "a": 0 },
+  { "q": "Write algebraic form: (4+2i)/(4−3i).", "o": ["2/5 + 4i/5", "2/5 - 4i/5", "4/5 + 2i/5", "4/5 - 2i/5"], "a": 0 },
+  { "q": "Find the transpose, adjoint and inverse of matrix [[1,3,4],[2,-2,2],[-2,3,4]].", "o": ["det=-34, inverse exists", "det=0, singular", "det=34, inverse exists", "det=-34, singular"], "a": 0 },
+  { "q": "Evaluate determinant [[2,-4,-7],[12,9,6],[9,-3,13]].", "o": ["123", "-123", "143", "-143"], "a": 0 },
+  { "q": "If a,b,c are in AP and a,c,b are in GP, find common ratio.", "o": ["-1/2", "1/2", "2", "-2"], "a": 0 },
+  { "q": "If k-6,k,k+18 are successive terms of GP, which is true about k? (i) k even (ii) k odd (iii) k prime", "o": ["(i) only", "(i) and (iii)", "(ii) only", "(iii) only"], "a": 0 },
+  { "q": "m-6, m ,and m+8 are successive terms of a geometric series, which of the following is/are not true about m? i) m is even ii) m is odd iii) m is prime", "o": ["ii and iii only", "ii only", "i and iii", "i only"], "a": 0 },
+  { "q": "Coefficient of x³ in expansion of (1-x)⁻²(1+x)⁻²", "o": ["0", "1", "2", "3"], "a": 0 },
+  { "q": "Coefficient of x⁵ in (1+5x)⁸ equals coefficient of x⁴ in (k+5x)⁷. Find k", "o": ["2", "3", "4", "5"], "a": 0 },
+  { "q": "If logₐ(1+1/8)=l, logₐ(1+1/15)=m, logₐ(1+1/24)=n, find l-m-n", "o": ["logₐ(1+1/80)", "logₐ(1+1/60)", "logₐ(1+1/40)", "logₐ(1+1/100)"], "a": 0 },
+  { "q": "Given log₄u = log₈v + 1, find u in terms of v", "o": ["u=4v^(2/3)", "u=2v^(3/2)", "u=4v^(3/2)", "u=2v^(2/3)"], "a": 0 },
+  { "q": "Express 1/(x⁴+5x²+6) in partial fractions.", "o": ["1/(x²+2)-1/(x²+3)", "1/(x+2)-1/(x+3)", "1/(x²+2)+1/(x²+3)", "1/(x+2)+1/(x+3)"], "a": 0 },
+  { "q": "Resolve x²/(x+1)³ into partial fractions.", "o": ["1/(x+1) - 2/(x+1)² + 1/(x+1)³", "1/(x+1) + 2/(x+1)² + 1/(x+1)³", "1/(x+1) - 2/(x+1)² - 1/(x+1)³", "1/(x+1) + 2/(x+1)² - 1/(x+1)³"], "a": 0 },
+  { "q": "If α,β are roots of 2x²+8x+7=0, find √(α²+β²)+1", "o": ["4", "3", "2", "1"], "a": 0 },
+  { "q": "If α,β are roots of 2x²-x-4=0, find equation with roots α-β/α and β-α/β", "o": ["2x²-7x+5=0", "x²-7x+5=0", "2x²-7x-5=0", "x²-7x-5=0"], "a": 0 },
+  { "q": "If α,β are roots of 2x²+8x+7=0, find √(α²+β²)+1", "o": ["4", "3", "2", "1"], "a": 0 },
+  { "q": "Prove that ∑_{k=1}^n k(k+1)(k+2) = n(n+1)(n+2)(n+3)/4 for all n∈ℕ*.", "o": ["True", "False", "Only for n≥3", "Only for n≥2"], "a": 0 },
+  { "q": "Prove that ∑_{k=1}^n k(n-k) = (n-1)n(n+1)/6 for all n∈ℕ*.", "o": ["True", "False", "Only for n even", "Only for n odd"], "a": 0 },
+  { "q": "Solve x/(x-1) > 1/(x+1) for |x|≠1.", "o": ["-1<x<1", "x>-1", "x>1", "x<1"], "a": 0 },
+  { "q": "Solve 2|x-1| > |x+1|.", "o": ["x<1/3 or x>3", "1/3<x<3", "x>3", "x<1/3"], "a": 0 },
+  { "q": "Solution of x²-2x-8≤0.", "o": ["[-2,4]", "[2,4]", "[-2,-4]", "[-4,-2]"], "a": 0 },
+  { "q": "For f(x)=x²−x, g(x)=2x−3, evaluate f(0).", "o": ["0", "-1", "1", "2"], "a": 0 },
+  { "q": "If f(x)+g(x)=3 for f(x)=x²−x, g(x)=2x−3, find x.", "o": ["2 or -3", "1 or -4", "0 or 5", "-2 or 3"], "a": 0 },
+  { "q": "Given f(x)=x²−3x−2, express f(2a)−f(a) in terms of a.", "o": ["3a²−3a", "2a²−3a", "a²−3a", "4a²−6a"], "a": 0 },
+  { "q": "If f(x)=x²−x+1, find f(a)+f(b).", "o": ["a²+b²−a−b+2", "a²+b²−a−b+1", "a²+b²−2a−2b+2", "a²+b²−a−b"], "a": 0 },
+  { "q": "If f(x)=ax²+bx+c, f(0)=5, f(1)=6, f(−1)=8, find a,b,c.", "o": ["a=2, b=-1, c=5", "a=1, b=0, c=5", "a=2, b=1, c=5", "a=1, b=1, c=5"], "a": 0 },
+  { "q": "Expand f(x)=ln x by Taylor's series about x=1.", "o": ["(x-1) - (x-1)²/2 + (x-1)³/3 - ...", "1 + (x-1) + ...", "(x-1) + (x-1)²/2 + (x-1)³/3 + ...", "0"], "a": 0 },
+  { "q": "Find the first 3 terms in the Maclaurin expansion of sin²x.", "o": ["x² - x⁴/3 + 2x⁶/45", "x - x³/6 + x⁵/120", "1 - x²/2 + x⁴/24", "x² + x⁴/3 + 2x⁶/45"], "a": 0 },
+  { "q": "Expand f(x)=7x²−6x+1 about x=2.", "o": ["17 + 22(x-2) + 7(x-2)²", "17 + 22(x-2) + 14(x-2)²", "17 - 22(x-2) + 7(x-2)²", "17 - 22(x-2) + 14(x-2)²"], "a": 0 },
+  { "q": "Expand f(x)=ln(3+4x) about x=0 (Maclaurin).", "o": ["ln3 + (4/3)x - (8/9)x² + (64/81)x³ - ...", "ln3 + (4/3)x + (8/9)x² + (64/81)x³ + ...", "ln3 + 4x - 8x² + 64x³ - ...", "ln3 + 4x + 8x² + 64x³ + ..."], "a": 0 },
+  { "q": "Find a if (5a+1)x²−8ax+3a=0 has equal roots.", "o": ["0 or 3", "0 or 1", "1 or 2", "2 or 3"], "a": 0 },
+  { "q": "Find greatest value of λ for which (λ−1)x²−2x+(λ−1)=0 has real roots.", "o": ["2", "1", "0", "-1"], "a": 0 },
+  { "q": "If α,β are roots of ax²+bx+c=0, form equation whose roots are α/β² and β/α².", "o": ["ac² x² + b(2ac-b²)x + a²c = 0", "ac² x² - b(2ac-b²)x + a²c = 0", "a²c x² + b(2ac-b²)x + ac² = 0", "a²c x² - b(2ac-b²)x + ac² = 0"], "a": 0 },
+  { "q": "Show that x²+4x+13 > 0 for all x.", "o": ["True (discriminant < 0)", "False (has real roots)", "Only for x>0", "Only for x<0"], "a": 0 },
+  { "q": "Simplify −log_a(1/6).", "o": ["log_a 6", "-log_a 6", "log_a (1/6)", "1/6"], "a": 0 },
+  { "q": "Simplify 5log2 − log32.", "o": ["0", "log2", "log32", "1"], "a": 0 },
+  { "q": "Simplify (log₃81)/(log₃9).", "o": ["2", "4", "9", "81/9"], "a": 0 },
+  { "q": "Evaluate (1/5)^{1/2}.", "o": ["1/√5", "√5", "1/25", "5"], "a": 0 },
+  { "q": "Evaluate 64^{−2/3}.", "o": ["1/16", "16", "-1/16", "-16"], "a": 0 },
+  { "q": "Evaluate (4/9)^{−3/2}.", "o": ["27/8", "8/27", "-27/8", "-8/27"], "a": 0 },
+  { "q": "The spread of tuberculosis is modelled as P(t)=3t−7. How many people will be infected the next day if 25 are affected at the beginning of the month?", "o": ["71", "68", "74", "65"], "a": 0 }
+]
+       ,
 "MTH121": [
 { "q": "In programming, what is a variable?", "o": ["A named storage location", "A function that returns a value", "A loop construct", "A conditional statement"], "a": 0 },
 { "q": "Which of the following is a logical operator?", "o": ["AND", "ADD", "SUB", "MUL"], "a": 0 },
@@ -5303,30 +5131,29 @@ const allQuestions = {
       const course = cbtState.course;
       const level = cbtState.level;
       
-      // Clear existing options
+      // Clear dropdown
       courseCodeSelect.innerHTML = '<option value="">-- Select Course Code --</option>';
       
       if (course && level) {
-        // Enable dropdown
-        courseCodeSelect.disabled = false;
-        
-        // Get course codes for selected course and level
-        const courseCodes = allQuestions[course]?.[level];
-        if (courseCodes) {
-          Object.keys(courseCodes).forEach(code => {
+        const levelObj = allQuestions[course]?.[level];
+        if (levelObj && Object.keys(levelObj).length > 0) {
+          courseCodeSelect.disabled = false;
+          Object.keys(levelObj).forEach(code => {
             const option = document.createElement('option');
             option.value = code;
             option.textContent = code;
             courseCodeSelect.appendChild(option);
           });
+        } else {
+          courseCodeSelect.disabled = true;
+          courseCodeSelect.innerHTML = '<option value="">-- No codes available --</option>';
         }
       } else {
-        // Disable dropdown if course or level not selected
         courseCodeSelect.disabled = true;
         courseCodeSelect.innerHTML = '<option value="">-- First select Course and Level --</option>';
       }
       
-      // Reset course code selection
+      // Reset selected course code
       cbtState.courseCode = '';
     }
 
@@ -5335,46 +5162,63 @@ const allQuestions = {
       startBtn.disabled = !(cbtState.course && cbtState.level && cbtState.courseCode);
     }
 
-    // ===== QUIZ CONTROL FUNCTIONS =====
+    // ===== BATCH & QUIZ CONTROL =====
     function startQuiz() {
       const course = cbtState.course;
       const level = cbtState.level;
-      const courseCode = cbtState.courseCode;
+      const code = cbtState.courseCode;
       
-      if (!course || !level || !courseCode) {
+      if (!course || !level || !code) {
         alert('Please select course, level, and course code.');
         return;
       }
       
-      const questions = allQuestions[course]?.[level]?.[courseCode];
+      const questions = allQuestions[course]?.[level]?.[code];
       if (!questions || questions.length === 0) {
         alert('No questions available for this selection. Please try another combination.');
         return;
       }
-      
-      // Set quiz parameters
-      cbtState.quizData = questions;
-      cbtState.totalQuestions = questions.length;
-      cbtState.selectedAnswers = new Array(questions.length).fill(null);
-      cbtState.currentQuestion = 0;
-      cbtState.score = 0;
+
+      // Reset cumulative data
+      cbtState.fullQuestionList = questions;
+      cbtState.totalBatches = Math.ceil(questions.length / cbtState.batchSize);
+      cbtState.currentBatch = 0;
+      cbtState.cumulativeCorrect = 0;
+      cbtState.totalAttempted = 0;
+      cbtState.allQuestions = [];
+      cbtState.allUserAnswers = [];
       cbtState.quizStarted = true;
-      
-      // Update UI
+
+      // Hide selection, show quiz
       document.getElementById('selectionSection').style.display = 'none';
       document.getElementById('quizSection').classList.add('active');
       document.getElementById('resultSection').classList.remove('active');
       document.getElementById('reviewSection').classList.remove('active');
+
+      // Load first batch
+      loadBatch(0);
+    }
+
+    function loadBatch(batchIndex) {
+      const start = batchIndex * cbtState.batchSize;
+      const end = Math.min(start + cbtState.batchSize, cbtState.fullQuestionList.length);
+      const batchQuestions = cbtState.fullQuestionList.slice(start, end);
       
-      // Update quiz title with new format
-      document.getElementById('quizTitle').textContent = `${course} – ${courseCode} – ${level} Level CBT`;
-      document.getElementById('totalQuestions').textContent = cbtState.totalQuestions;
-      
-      // Load first question
+      cbtState.quizData = batchQuestions;
+      cbtState.selectedAnswers = new Array(batchQuestions.length).fill(null);
+      cbtState.currentQuestion = 0;
+
+      const totalInBatch = batchQuestions.length;
+      document.getElementById('totalQuestions').textContent = totalInBatch;
+      document.getElementById('currentQuestion').textContent = 1;
+      document.getElementById('progressText').textContent = `Question 1 of ${totalInBatch}`;
+      document.getElementById('progressFill').style.width = `${(1 / totalInBatch) * 100}%`;
+
+      document.getElementById('batchIndicator').textContent = `${batchIndex + 1}/${cbtState.totalBatches}`;
+      document.getElementById('quizTitle').innerHTML = 
+        `${cbtState.course} – ${cbtState.courseCode} – ${cbtState.level} Level <span class="batch-badge">Batch ${batchIndex + 1}/${cbtState.totalBatches}</span>`;
+
       loadQuestion(0);
-      
-      // Update progress
-      updateProgress();
     }
 
     function loadQuestion(index) {
@@ -5383,14 +5227,10 @@ const allQuestions = {
       cbtState.currentQuestion = index;
       const question = cbtState.quizData[index];
       
-      // Update question text
       document.getElementById('questionText').textContent = question.q;
-      
-      // Update question number
       document.getElementById('currentQuestion').textContent = index + 1;
-      document.getElementById('progressText').textContent = `Question ${index + 1} of ${cbtState.totalQuestions}`;
+      document.getElementById('progressText').textContent = `Question ${index + 1} of ${cbtState.quizData.length}`;
       
-      // Generate options
       const optionsContainer = document.getElementById('optionsContainer');
       optionsContainer.innerHTML = '';
       
@@ -5412,13 +5252,14 @@ const allQuestions = {
         optionsContainer.appendChild(optionElement);
       });
       
-      // Update navigation buttons
       document.getElementById('prevBtn').disabled = index === 0;
-      document.getElementById('nextBtn').textContent = 
-        index === cbtState.totalQuestions - 1 ? 'Submit Quiz' : 'Next';
       
-      // Update progress bar
-      const progressPercent = ((index + 1) / cbtState.totalQuestions) * 100;
+      const isLastInBatch = (index === cbtState.quizData.length - 1);
+      document.getElementById('nextBtn').innerHTML = isLastInBatch 
+        ? 'Finish Batch <span>→</span>' 
+        : 'Next <span>→</span>';
+      
+      const progressPercent = ((index + 1) / cbtState.quizData.length) * 100;
       document.getElementById('progressFill').style.width = `${progressPercent}%`;
     }
 
@@ -5426,7 +5267,6 @@ const allQuestions = {
       const currentIndex = cbtState.currentQuestion;
       cbtState.selectedAnswers[currentIndex] = optionIndex;
       
-      // Update UI
       const options = document.querySelectorAll('.option-label');
       options.forEach((option, i) => {
         option.classList.remove('selected');
@@ -5439,16 +5279,15 @@ const allQuestions = {
     function nextQuestion() {
       const currentIndex = cbtState.currentQuestion;
       
-      // Check if current question has been answered
       if (cbtState.selectedAnswers[currentIndex] === null) {
         alert('Please select an answer before proceeding.');
         return;
       }
       
-      if (currentIndex < cbtState.totalQuestions - 1) {
+      if (currentIndex < cbtState.quizData.length - 1) {
         loadQuestion(currentIndex + 1);
       } else {
-        submitQuiz();
+        completeBatch();
       }
     }
 
@@ -5458,58 +5297,72 @@ const allQuestions = {
       }
     }
 
-    function submitQuiz() {
-      // Check if all questions have been answered
-      const unanswered = cbtState.selectedAnswers.filter(answer => answer === null).length;
+    function completeBatch() {
+      const unanswered = cbtState.selectedAnswers.filter(ans => ans === null).length;
       if (unanswered > 0) {
-        if (!confirm(`You have ${unanswered} unanswered question(s). Are you sure you want to submit?`)) {
+        if (!confirm(`You have ${unanswered} unanswered question(s) in this batch. Submit anyway?`)) {
           return;
         }
       }
-      
-      calculateScore();
-      showResults();
-    }
 
-    function calculateScore() {
-      let correct = 0;
-      
+      let batchCorrect = 0;
       for (let i = 0; i < cbtState.quizData.length; i++) {
         if (cbtState.selectedAnswers[i] === cbtState.quizData[i].a) {
-          correct++;
+          batchCorrect++;
         }
       }
-      
-      cbtState.score = correct;
+
+      cbtState.cumulativeCorrect += batchCorrect;
+      cbtState.totalAttempted += cbtState.quizData.length;
+      cbtState.allQuestions.push(...cbtState.quizData);
+      cbtState.allUserAnswers.push(...cbtState.selectedAnswers);
+
+      const nextBatch = cbtState.currentBatch + 1;
+      const hasMore = nextBatch < cbtState.totalBatches;
+
+      if (hasMore) {
+        const continueQuiz = confirm(
+          `You scored ${batchCorrect} out of ${cbtState.quizData.length} in this batch.\n\n` +
+          `Batch ${cbtState.currentBatch + 1} of ${cbtState.totalBatches} completed.\n\n` +
+          `Solve more questions?`
+        );
+        
+        if (continueQuiz) {
+          cbtState.currentBatch = nextBatch;
+          loadBatch(nextBatch);
+        } else {
+          showResults();
+        }
+      } else {
+        showResults();
+      }
     }
 
     function showResults() {
-      // Hide quiz section, show result section
       document.getElementById('quizSection').classList.remove('active');
       document.getElementById('resultSection').classList.add('active');
       document.getElementById('reviewSection').classList.remove('active');
-      
-      const total = cbtState.totalQuestions;
-      const correct = cbtState.score;
+
+      const total = cbtState.totalAttempted;
+      const correct = cbtState.cumulativeCorrect;
       const incorrect = total - correct;
-      const percentage = Math.round((correct / total) * 100);
-      
-      // Update result elements
+      const percentage = total > 0 ? Math.round((correct / total) * 100) : 0;
+
+      const batchesDone = cbtState.currentBatch + 1;
+      document.getElementById('resultSummary').innerHTML = 
+        `You completed ${batchesDone} out of ${cbtState.totalBatches} batches (${total} questions)`;
+
       document.getElementById('totalQuestionsResult').textContent = total;
       document.getElementById('correctAnswers').textContent = correct;
       document.getElementById('incorrectAnswers').textContent = incorrect;
       document.getElementById('percentageScore').textContent = `${percentage}%`;
-      
-      // Update score
       document.getElementById('scoreValue').textContent = `${percentage}%`;
-      
-      // Animate score circle
+
       const circle = document.getElementById('scoreCircle');
       const circumference = 2 * Math.PI * 45;
       const offset = circumference - (percentage / 100) * circumference;
       circle.style.strokeDashoffset = offset;
-      
-      // Save result to local storage
+
       saveQuizResult(percentage);
     }
 
@@ -5520,29 +5373,24 @@ const allQuestions = {
         level: cbtState.level,
         courseCode: cbtState.courseCode,
         score: score,
-        total: cbtState.totalQuestions,
+        total: cbtState.totalAttempted,
+        batches: cbtState.currentBatch + 1,
         date: new Date().toISOString()
       });
-      
-      // Keep only last 20 results
-      if (results.length > 20) {
-        results.shift();
-      }
-      
+      if (results.length > 20) results.shift();
       localStorage.setItem('cbtResults', JSON.stringify(results));
     }
 
     function showReview() {
-      // Hide result section, show review section
       document.getElementById('resultSection').classList.remove('active');
       document.getElementById('reviewSection').classList.add('active');
       
       const reviewList = document.getElementById('reviewList');
       reviewList.innerHTML = '';
-      
-      for (let i = 0; i < cbtState.quizData.length; i++) {
-        const question = cbtState.quizData[i];
-        const userAnswer = cbtState.selectedAnswers[i];
+
+      for (let i = 0; i < cbtState.allQuestions.length; i++) {
+        const question = cbtState.allQuestions[i];
+        const userAnswer = cbtState.allUserAnswers[i];
         const correctAnswer = question.a;
         const isCorrect = userAnswer === correctAnswer;
         
@@ -5589,78 +5437,64 @@ const allQuestions = {
         reviewList.appendChild(reviewItem);
       }
       
-      // Scroll to top of review
       reviewList.scrollTop = 0;
     }
 
     function goBackToResults() {
-      // Hide review section, show result section
       document.getElementById('reviewSection').classList.remove('active');
       document.getElementById('resultSection').classList.add('active');
     }
 
     function restartQuiz() {
-      // Reset state
       cbtState.currentQuestion = 0;
-      cbtState.score = 0;
       cbtState.quizStarted = false;
       cbtState.selectedAnswers = [];
+      cbtState.fullQuestionList = [];
+      cbtState.currentBatch = 0;
+      cbtState.totalBatches = 0;
+      cbtState.cumulativeCorrect = 0;
+      cbtState.totalAttempted = 0;
+      cbtState.allQuestions = [];
+      cbtState.allUserAnswers = [];
       cbtState.course = '';
       cbtState.level = '';
       cbtState.courseCode = '';
       
-      // Reset UI
       document.getElementById('resultSection').classList.remove('active');
       document.getElementById('reviewSection').classList.remove('active');
       document.getElementById('selectionSection').style.display = 'block';
       document.getElementById('quizSection').classList.remove('active');
       
-      // Reset form
       document.getElementById('courseSelect').value = '';
       document.getElementById('levelSelect').value = '';
       document.getElementById('courseCodeSelect').innerHTML = '<option value="">-- First select Course and Level --</option>';
       document.getElementById('courseCodeSelect').disabled = true;
       
-      // Reset progress bar
       document.getElementById('progressFill').style.width = '0%';
-      
-      // Focus course select
       document.getElementById('courseSelect').focus();
     }
 
-    // ===== UTILITY FUNCTIONS =====
+    // ===== UTILITY =====
     function goBack() {
       if (document.getElementById('reviewSection').classList.contains('active')) {
         goBackToResults();
         return;
       }
-      
       if (document.getElementById('resultSection').classList.contains('active')) {
         restartQuiz();
         return;
       }
-      
       if (document.getElementById('quizSection').classList.contains('active')) {
         if (confirm('Are you sure you want to leave the quiz? Your progress will be lost.')) {
           restartQuiz();
         }
         return;
       }
-      
-      // Smooth page transition
-      document.body.style.opacity = '0';
-      document.body.style.transform = 'translateX(20px)';
-      document.body.style.transition = 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)';
-      
-      setTimeout(() => {
-        window.history.back();
-      }, 300);
+      window.history.back();
     }
 
-    // Handle page visibility for better Android experience
     document.addEventListener('visibilitychange', function() {
       if (!document.hidden) {
-        // Page became visible again, refresh animations
         document.body.style.animation = 'none';
         setTimeout(() => {
           document.body.style.animation = 'fadeIn 0.6s ease-out forwards';
@@ -5668,40 +5502,29 @@ const allQuestions = {
       }
     });
 
-    // Keyboard navigation
     document.addEventListener('keydown', function(e) {
       if (e.key === 'Escape') {
         goBack();
       }
-      
       if (e.key === 'ArrowLeft' && !e.shiftKey && !e.ctrlKey && !e.altKey) {
         if (cbtState.quizStarted && cbtState.currentQuestion > 0) {
           previousQuestion();
         }
       }
-      
       if (e.key === 'ArrowRight' && !e.shiftKey && !e.ctrlKey && !e.altKey) {
         if (cbtState.quizStarted) {
           nextQuestion();
         }
       }
-      
-      // Number keys 1-4 for answer selection
       if (cbtState.quizStarted && e.key >= '1' && e.key <= '4') {
         const optionIndex = parseInt(e.key) - 1;
         if (optionIndex < cbtState.quizData[cbtState.currentQuestion]?.o.length) {
           selectAnswer(optionIndex);
         }
       }
-      
-      // Space bar to submit/next
       if (e.key === ' ' && cbtState.quizStarted) {
         e.preventDefault();
-        if (cbtState.currentQuestion === cbtState.totalQuestions - 1) {
-          submitQuiz();
-        } else {
-          nextQuestion();
-        }
+        nextQuestion();
       }
     });
   </script>
