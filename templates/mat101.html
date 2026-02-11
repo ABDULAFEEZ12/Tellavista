@@ -1,105 +1,856 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Nelavista | Math 101 Videos</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
+  <title>Nelavista | Math 101 Videos · CBT style</title>
+  
   <style>
-    body {
-      font-family: Arial, sans-serif;
+    /* ===== CSS VARIABLES & RESET (from CBT Platform) ===== */
+    :root {
+      --primary-color: #000000;
+      --primary-dark: #333333;
+      --light-bg: #ffffff;
+      --dark-bg: #000000;
+      --card-light: #ffffff;
+      --card-dark: #0a0a0a;
+      --text-light: #000000;
+      --text-dark: #ffffff;
+      --input-bg: #0a0a0a;
+      --border-light: rgba(0, 0, 0, 0.1);
+      --border-dark: rgba(255, 255, 255, 0.1);
+      --gradient-start: #ffffff;
+      --gradient-end: #888888;
+      --accent-color: #1a1a1a;
+      --correct-color: #4caf50;
+      --incorrect-color: #f44336;
+      --selected-color: rgba(255, 255, 255, 0.15);
+      --review-correct: rgba(76, 175, 80, 0.2);
+      --review-incorrect: rgba(244, 67, 54, 0.2);
+    }
+
+    * {
       margin: 0;
       padding: 0;
-      background: #f6f7fb;
-      color: #222;
+      box-sizing: border-box;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      -webkit-tap-highlight-color: transparent;
     }
-    header {
-      background: #1f2a44;
-      color: #fff;
-      padding: 16px;
+
+    body {
+      background: var(--dark-bg);
+      color: var(--text-dark);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      overflow-x: hidden;
+      padding: 0 20px;
+      opacity: 0;
+      animation: fadeIn 0.6s ease-out forwards;
+      animation-delay: 0.1s;
+    }
+
+    /* ===== TOP BAR ===== */
+    #top-bar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 60px;
+      background: rgba(0, 0, 0, 0.95);
+      backdrop-filter: blur(10px);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 16px;
+      z-index: 1002;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      opacity: 0;
+      animation: fadeInDown 0.5s ease-out 0.2s forwards;
+    }
+
+    #back-btn {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 20px;
+      background: rgba(255, 255, 255, 0.1);
+      border: none;
+      color: white;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    #back-btn:hover {
+      background: rgba(255, 255, 255, 0.2);
+      transform: translateX(-2px);
+    }
+
+    #top-bar-title {
+      font-weight: 600;
+      font-size: 1.1rem;
+      background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    /* ===== ANIMATIONS ===== */
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(15px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes fadeInDown {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateX(-20px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ===== MAIN CONTAINER ===== */
+    .cbt-container {
+      width: 100%;
+      max-width: 1100px;  /* Slightly wider for video grid */
+      margin-top: 80px;
+      opacity: 0;
+      animation: fadeInUp 0.7s ease-out 0.3s forwards;
+    }
+
+    /* ===== HEADER SECTION ===== */
+    .header-section {
       text-align: center;
+      margin-bottom: 2rem;
     }
-    .container {
-      padding: 20px;
-      max-width: 900px;
-      margin: auto;
+    .header-title {
+      font-size: 2rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 0.5rem;
+      opacity: 0;
+      animation: fadeInUp 0.7s ease-out 0.4s forwards;
     }
-    h2 {
-      margin-top: 30px;
-      border-bottom: 2px solid #ddd;
-      padding-bottom: 8px;
+    .header-subtitle {
+      color: #a0a0a0;
+      font-size: 1rem;
+      line-height: 1.5;
+      max-width: 500px;
+      margin: 0 auto;
+      opacity: 0;
+      animation: fadeInUp 0.7s ease-out 0.5s forwards;
     }
-    .video-list {
+
+    /* ===== SELECTION SECTION (reused as video folder container) ===== */
+    .selection-section {
+      background: var(--card-dark);
+      border: 1px solid var(--border-dark);
+      border-radius: 16px;
+      padding: 2rem;
+      margin-bottom: 2rem;
+      opacity: 0;
+      animation: fadeInUp 0.7s ease-out 0.6s forwards;
+    }
+
+    /* ===== QUIZ HEADER style for folder titles ===== */
+    .quiz-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid var(--border-dark);
+    }
+    .quiz-title {
+      font-size: 1.5rem;
+      font-weight: 600;
+      background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    /* ===== VIDEO GRID – extended CBT style ===== */
+    .video-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-      gap: 15px;
-      margin-top: 15px;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 1.2rem;
+      margin-top: 0.5rem;
     }
+
     .video-card {
-      background: #fff;
-      border-radius: 8px;
-      padding: 12px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      background: var(--accent-color);
+      border: 1px solid var(--border-dark);
+      border-radius: 12px;
+      padding: 1.2rem 1rem;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      display: flex;
+      flex-direction: column;
+      opacity: 0;
+      animation: slideIn 0.5s ease-out forwards;
     }
+
+    .video-card:hover {
+      border-color: rgba(255, 255, 255, 0.3);
+      transform: translateY(-4px);
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+    }
+
     .video-card h4 {
-      margin: 0 0 8px 0;
-      font-size: 16px;
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin-bottom: 0.75rem;
+      color: #ffffff;
+      letter-spacing: -0.01em;
     }
+
     .video-card a {
       text-decoration: none;
-      color: #1f2a44;
-      font-weight: bold;
+      color: #b0b0b0;
+      font-weight: 500;
+      font-size: 0.9rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: color 0.2s ease;
+      margin-top: auto;
+      border-top: 1px solid rgba(255,255,255,0.05);
+      padding-top: 0.75rem;
     }
+
     .video-card a:hover {
-      text-decoration: underline;
+      color: white;
+      text-decoration: none;
+    }
+
+    .video-card a::before {
+      content: "▶";
+      font-size: 0.8rem;
+      color: var(--gradient-end);
+    }
+
+    /* Different animation delays for cards */
+    .video-card:nth-child(1) { animation-delay: 0.7s; }
+    .video-card:nth-child(2) { animation-delay: 0.8s; }
+    .video-card:nth-child(3) { animation-delay: 0.9s; }
+    .video-card:nth-child(4) { animation-delay: 1.0s; }
+    .video-card:nth-child(5) { animation-delay: 1.1s; }
+    .video-card:nth-child(6) { animation-delay: 1.2s; }
+    .video-card:nth-child(7) { animation-delay: 1.3s; }
+    .video-card:nth-child(8) { animation-delay: 1.4s; }
+    .video-card:nth-child(9) { animation-delay: 1.5s; }
+    .video-card:nth-child(10) { animation-delay: 1.6s; }
+
+    /* ===== RETAIN original utility classes ===== */
+    .hidden { display: none !important; }
+    .show { display: block !important; }
+    .flex-show { display: flex !important; }
+
+    /* ===== BATCH INDICATOR (unused here but kept) ===== */
+    .batch-badge {
+      background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
+      color: black;
+      padding: 0.2rem 0.8rem;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      margin-left: 0.5rem;
+    }
+
+    /* ===== ADDITIONAL TOUCH: keep stat-item etc. (present but not used) ===== */
+    /* (full CBT styles retained below – we keep everything for consistency) */
+
+    /* ----- the rest of the CBT styles (quiz, result, review) are untouched ----- */
+    .input-group {
+      margin-bottom: 1.8rem;
+      opacity: 0;
+      animation: slideIn 0.6s ease-out forwards;
+    }
+    .input-group:nth-child(1) { animation-delay: 0.6s; }
+    .input-group:nth-child(2) { animation-delay: 0.7s; }
+    .input-group:nth-child(3) { animation-delay: 0.8s; }
+    .input-label {
+      display: block;
+      margin-bottom: 0.7rem;
+      font-size: 0.95rem;
+      font-weight: 500;
+      color: #e0e0e0;
+    }
+    .input-wrapper {
+      position: relative;
+      background: var(--input-bg);
+      border-radius: 12px;
+      border: 1px solid var(--border-dark);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .input-wrapper:focus-within {
+      border-color: rgba(255, 255, 255, 0.3);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    }
+    .styled-select {
+      width: 100%;
+      padding: 1rem 1.2rem;
+      background: var(--input-bg);
+      border: none;
+      outline: none;
+      font-size: 1rem;
+      color: #ffffff;
+      appearance: none;
+      -webkit-appearance: none;
+      cursor: pointer;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23ffffff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 1rem center;
+      background-size: 16px;
+    }
+    .styled-select:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23888888' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+    }
+    .start-btn {
+      width: 100%;
+      padding: 1rem;
+      background: var(--primary-color);
+      color: white;
+      border: none;
+      border-radius: 12px;
+      font-size: 1rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      margin-top: 0.5rem;
+      opacity: 0;
+      animation: fadeInUp 0.6s ease-out 0.9s forwards;
+    }
+    .start-btn:hover:not(:disabled) {
+      opacity: 0.9;
+      transform: translateY(-2px);
+    }
+    .start-btn:active:not(:disabled) { transform: translateY(0); }
+    .start-btn:disabled {
+      opacity: 0.3;
+      cursor: not-allowed;
+    }
+    .quiz-section {
+      background: var(--card-dark);
+      border: 1px solid var(--border-dark);
+      border-radius: 16px;
+      padding: 2rem;
+      margin-bottom: 2rem;
+      display: none;
+      opacity: 0;
+    }
+    .quiz-section.active {
+      display: block;
+      animation: slideUp 0.6s ease-out forwards;
+    }
+    .quiz-stats {
+      display: flex;
+      gap: 1rem;
+    }
+    .stat-item {
+      background: var(--accent-color);
+      border: 1px solid var(--border-dark);
+      border-radius: 8px;
+      padding: 0.5rem 1rem;
+      font-size: 0.85rem;
+      color: #a0a0a0;
+    }
+    .stat-value {
+      color: #ffffff;
+      font-weight: 600;
+      margin-left: 4px;
+    }
+    .progress-section {
+      margin-bottom: 2rem;
+      opacity: 0;
+      animation: fadeInUp 0.6s ease-out forwards;
+    }
+    .progress-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.8rem;
+    }
+    .progress-text {
+      font-size: 0.9rem;
+      font-weight: 500;
+      color: #e0e0e0;
+    }
+    .progress-bar {
+      height: 6px;
+      background: var(--accent-color);
+      border-radius: 3px;
+      overflow: hidden;
+      position: relative;
+    }
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--gradient-start), var(--gradient-end));
+      border-radius: 3px;
+      width: 0%;
+      transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .question-block {
+      background: var(--accent-color);
+      border: 1px solid var(--border-dark);
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+      opacity: 0;
+      animation: slideIn 0.6s ease-out 0.3s forwards;
+    }
+    .question-number {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #888;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 0.5rem;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .question-text {
+      font-size: 1.1rem;
+      line-height: 1.6;
+      color: #ffffff;
+      margin-bottom: 1rem;
+    }
+    .options-container {
+      display: grid;
+      gap: 0.8rem;
+      margin-bottom: 2rem;
+      opacity: 0;
+      animation: fadeInUp 0.6s ease-out 0.4s forwards;
+    }
+    .option-label {
+      display: flex;
+      align-items: center;
+      padding: 1rem 1.2rem;
+      background: var(--input-bg);
+      border: 1px solid var(--border-dark);
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      overflow: hidden;
+    }
+    .option-label:hover:not(.selected) {
+      border-color: rgba(255, 255, 255, 0.3);
+      transform: translateX(5px);
+    }
+    .option-label.selected {
+      background: var(--selected-color);
+      border-color: rgba(255, 255, 255, 0.5);
+    }
+    .option-radio { display: none; }
+    .option-marker {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      margin-right: 12px;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s ease;
+      position: relative;
+    }
+    .option-label.selected .option-marker {
+      border-color: #ffffff;
+    }
+    .option-label.selected .option-marker::after {
+      content: '';
+      width: 8px;
+      height: 8px;
+      background: #ffffff;
+      border-radius: 50%;
+    }
+    .option-text {
+      flex: 1;
+      font-size: 0.95rem;
+      color: #e0e0e0;
+    }
+    .option-label.selected .option-text {
+      color: #ffffff;
+      font-weight: 500;
+    }
+    .nav-buttons {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      opacity: 0;
+      animation: fadeInUp 0.6s ease-out 0.5s forwards;
+    }
+    .nav-btn {
+      padding: 1rem;
+      background: var(--accent-color);
+      border: 1px solid var(--border-dark);
+      color: white;
+      border-radius: 12px;
+      font-size: 0.95rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    .nav-btn:hover:not(:disabled) {
+      border-color: rgba(255, 255, 255, 0.3);
+      transform: translateY(-2px);
+    }
+    .nav-btn:active:not(:disabled) { transform: translateY(0); }
+    .nav-btn:disabled {
+      opacity: 0.3;
+      cursor: not-allowed;
+    }
+    .nav-btn.primary {
+      background: var(--primary-color);
+      border: none;
+    }
+    .result-section {
+      background: var(--card-dark);
+      border: 1px solid var(--border-dark);
+      border-radius: 16px;
+      padding: 2rem;
+      margin-bottom: 2rem;
+      display: none;
+      opacity: 0;
+    }
+    .result-section.active {
+      display: block;
+      animation: slideUp 0.6s ease-out forwards;
+    }
+    .result-header {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+    .result-title {
+      font-size: 1.8rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 0.5rem;
+    }
+    .result-subtitle {
+      color: #a0a0a0;
+      font-size: 1rem;
+    }
+    .score-display {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 2rem;
+      margin-bottom: 2rem;
+    }
+    .score-circle {
+      width: 120px;
+      height: 120px;
+      position: relative;
+    }
+    .score-circle svg {
+      width: 100%;
+      height: 100%;
+      transform: rotate(-90deg);
+    }
+    .score-circle-bg {
+      fill: none;
+      stroke: var(--accent-color);
+      stroke-width: 8;
+    }
+    .score-circle-fill {
+      fill: none;
+      stroke: url(#scoreGradient);
+      stroke-width: 8;
+      stroke-linecap: round;
+      stroke-dasharray: 314;
+      stroke-dashoffset: 314;
+      transition: stroke-dashoffset 1.5s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .score-text {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center;
+    }
+    .score-value {
+      font-size: 2rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      line-height: 1;
+    }
+    .score-label {
+      font-size: 0.9rem;
+      color: #a0a0a0;
+      margin-top: 5px;
+    }
+    .score-breakdown {
+      flex: 1;
+      max-width: 300px;
+    }
+    .breakdown-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.8rem 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+    .breakdown-item:last-child { border-bottom: none; }
+    .breakdown-label {
+      font-size: 0.95rem;
+      color: #e0e0e0;
+    }
+    .breakdown-value {
+      font-size: 0.95rem;
+      font-weight: 500;
+      color: #ffffff;
+    }
+    .breakdown-value.correct { color: var(--correct-color); }
+    .breakdown-value.incorrect { color: var(--incorrect-color); }
+    .result-actions {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1rem;
+      margin-top: 2rem;
+    }
+    .review-section {
+      background: var(--card-dark);
+      border: 1px solid var(--border-dark);
+      border-radius: 16px;
+      padding: 2rem;
+      margin-bottom: 2rem;
+      display: none;
+      opacity: 0;
+    }
+    .review-section.active {
+      display: block;
+      animation: slideUp 0.6s ease-out forwards;
+    }
+    .review-header {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+    .review-title {
+      font-size: 1.8rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 0.5rem;
+    }
+    .review-subtitle {
+      color: #a0a0a0;
+      font-size: 1rem;
+    }
+    .review-list {
+      max-height: 500px;
+      overflow-y: auto;
+      padding-right: 10px;
+    }
+    .review-question {
+      background: var(--accent-color);
+      border: 1px solid var(--border-dark);
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-bottom: 1rem;
+    }
+    .review-question.correct { background: var(--review-correct); border-left: 4px solid var(--correct-color); }
+    .review-question.incorrect { background: var(--review-incorrect); border-left: 4px solid var(--incorrect-color); }
+    .review-question-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+    .review-question-number {
+      font-weight: 600;
+      color: #e0e0e0;
+    }
+    .review-status {
+      font-size: 0.85rem;
+      padding: 0.3rem 0.8rem;
+      border-radius: 20px;
+      font-weight: 500;
+    }
+    .review-status.correct { background: var(--correct-color); color: white; }
+    .review-status.incorrect { background: var(--incorrect-color); color: white; }
+    .review-question-text {
+      font-size: 1.1rem;
+      margin-bottom: 1rem;
+      color: #ffffff;
+    }
+    .review-options {
+      display: grid;
+      gap: 0.5rem;
+    }
+    .review-option {
+      padding: 0.8rem 1rem;
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border-dark);
+    }
+    .review-option.correct-answer {
+      background: rgba(76, 175, 80, 0.2);
+      border-color: var(--correct-color);
+      color: #ffffff;
+    }
+    .review-option.user-answer {
+      background: rgba(244, 67, 54, 0.2);
+      border-color: var(--incorrect-color);
+      color: #ffffff;
+    }
+    .review-option.user-correct {
+      background: rgba(76, 175, 80, 0.3);
+      border-color: var(--correct-color);
+      color: #ffffff;
+    }
+    .option-indicator {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      margin-right: 10px;
+      text-align: center;
+      font-size: 0.8rem;
+      line-height: 20px;
+    }
+    .correct-indicator { background: var(--correct-color); color: white; }
+    .incorrect-indicator { background: var(--incorrect-color); color: white; }
+    .review-actions {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1rem;
+      margin-top: 2rem;
+    }
+
+    @media (max-width: 768px) {
+      .score-display { flex-direction: column; gap: 1.5rem; }
+      .score-breakdown { max-width: 100%; width: 100%; }
+      .result-actions, .review-actions { grid-template-columns: 1fr; }
     }
   </style>
 </head>
 <body>
 
-  <header>
-    <h1>Math 101 Videos</h1>
-    <p>Learn the concepts and practice with CBT solutions</p>
-  </header>
-
-  <div class="container">
-
-    <!-- Folder 1: Bunday's Videos -->
-    <h2>Bunday’s Videos (Concept Lessons)</h2>
-    <div class="video-list">
-      <div class="video-card">
-        <h4>Introduction to Sets</h4>
-        <a href="#">Watch Video</a>
-      </div>
-      <div class="video-card">
-        <h4>Functions and Relations</h4>
-        <a href="#">Watch Video</a>
-      </div>
-      <div class="video-card">
-        <h4>Sequences and Series</h4>
-        <a href="#">Watch Video</a>
-      </div>
-      <!-- Add more Bunday videos here -->
-    </div>
-
-    <!-- Folder 2: CBT Solver Videos -->
-    <h2>CBT Solver Videos (Exam Practice)</h2>
-    <div class="video-list">
-      <div class="video-card">
-        <h4>CBT Question 1 Solution</h4>
-        <a href="#">Watch Solution</a>
-      </div>
-      <div class="video-card">
-        <h4>CBT Question 2 Solution</h4>
-        <a href="#">Watch Solution</a>
-      </div>
-      <div class="video-card">
-        <h4>CBT Question 3 Solution</h4>
-        <a href="#">Watch Solution</a>
-      </div>
-      <!-- Add more CBT solver videos here -->
-    </div>
-
+  <!-- ===== TOP BAR (CBT style) ===== -->
+  <div id="top-bar">
+    <button id="back-btn" onclick="history.back()" aria-label="Go back">←</button>
+    <span id="top-bar-title">Nelavista · Math 101</span>
+    <span style="width: 40px;"></span> <!-- placeholder for symmetry -->
   </div>
 
+  <!-- ===== MAIN CONTAINER ===== -->
+  <div class="cbt-container">
+
+    <!-- HEADER SECTION -->
+    <div class="header-section">
+      <h1 class="header-title">Math 101 Videos</h1>
+      <p class="header-subtitle">Learn the concepts and practice with CBT solutions</p>
+    </div>
+
+    <!-- FOLDER 1: BUNDAY'S VIDEOS (Concept Lessons) -->
+    <div class="selection-section">
+      <div class="quiz-header">
+        <h2 class="quiz-title">Bunday’s Videos <span class="batch-badge">concept</span></h2>
+      </div>
+      <div class="video-grid">
+        <!-- Exactly the same video entries, with CBT styling -->
+        <div class="video-card">
+          <h4>Director Of Vector</h4>
+          <a href="static/directorofvector.mp4">Watch Video</a>
+        </div>
+        <div class="video-card">
+          <h4>Inequality shortcut</h4>
+          <a href="static/inequalityshortcut.mp4">Watch Video</a>
+        </div>
+        <div class="video-card">
+          <h4>Maclaurin Series</h4>
+          <a href="static/MaclaurinSeries.mp4">Watch Video</a>
+        </div>
+        <div class="video-card">
+          <h4>Partial Functions SHortcut</h4>
+          <a href="static/PartialFunctionsSHortcut.mp4">Watch Video</a>
+        </div>
+        <div class="video-card">
+          <h4>Maclaurin Series</h4>
+          <a href="static/MaclaurinSeries.mp4">Watch Video</a>
+        </div>
+        <div class="video-card">
+          <h4>Quadratic Equation Shortcut</h4>
+          <a href="static/QuadraticEquationShortcut.mp4">Watch Video</a>
+        </div>
+        <div class="video-card">
+          <h4>real number system</h4>
+          <a href="static/realnumbersystem.mp4">Watch Video</a>
+        </div>
+        <!-- Additional placeholder if needed (original had 'Add more') -->
+      </div>
+    </div>
+
+    <!-- FOLDER 2: CBT SOLVER VIDEOS (Exam Practice) -->
+    <div class="selection-section">
+      <div class="quiz-header">
+        <h2 class="quiz-title">CBT Solver Videos <span class="batch-badge">exam practice</span></h2>
+      </div>
+      <div class="video-grid">
+        <div class="video-card">
+          <h4>CBT Question 1 Solution</h4>
+          <a href="#">Watch Solution</a>
+        </div>
+        <div class="video-card">
+          <h4>CBT Question 2 Solution</h4>
+          <a href="#">Watch Solution</a>
+        </div>
+        <div class="video-card">
+          <h4>CBT Question 3 Solution</h4>
+          <a href="#">Watch Solution</a>
+        </div>
+        <!-- Add more CBT solver videos here (kept from original) -->
+      </div>
+    </div>
+
+    <!-- subtle gradient definition for score circle (kept for completeness) -->
+    <svg width="0" height="0" style="position:absolute;">
+      <defs>
+        <linearGradient id="scoreGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" stop-color="var(--gradient-start)" />
+          <stop offset="100%" stop-color="var(--gradient-end)" />
+        </linearGradient>
+      </defs>
+    </svg>
+  </div>
+
+  <!-- all CBT script/interactivity not needed for static video page; pure styling adoption -->
 </body>
 </html>
