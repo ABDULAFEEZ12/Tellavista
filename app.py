@@ -786,13 +786,13 @@ class User(db.Model):
         return check_password_hash(self.password_hash, password)
 
 class UserQuestions(db.Model):
-    """Model for storing user questions and AI responses."""
+    """Model for storing user questions and AI responses (memory system)."""
     id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(150), nullable=False)
+    username = db.Column(db.String(150), nullable=False, index=True)
     question = db.Column(db.Text, nullable=False)
     answer = db.Column(db.Text, nullable=False)
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
-    memory_layer = db.Column(db.String(50))  # Store which memory layer was used
+    memory_layer = db.Column(db.String(50))
 
 class UserProfile(db.Model):
     """Model for storing user preferences and learning styles."""
@@ -823,6 +823,27 @@ class Room(db.Model):
     teacher_name = db.Column(db.String(80))
     is_active = db.Column(db.Boolean, default=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+# ============================================
+# SESSION MEMORY FUNCTIONS (temporary, last 5 messages)
+# ============================================
+def get_session_memory():
+    """Retrieve the current session's chat memory."""
+    if 'chat_memory' not in session:
+        session['chat_memory'] = []
+    return session['chat_memory']
+
+def add_to_session_memory(role, content, max_messages=5):
+    """Add a message to session memory, keeping only the last `max_messages` exchanges."""
+    memory = get_session_memory()
+    memory.append({
+        "role": role,
+        "content": content
+    })
+    # Keep only last N messages (each exchange = user + assistant → 2 messages per exchange)
+    if len(memory) > max_messages * 2:
+        memory = memory[-max_messages * 2:]
+    session['chat_memory'] = memory
 
 # ============================================
 # Helper Functions
@@ -887,8 +908,8 @@ def init_database():
         with app.app_context():
             db.create_all()
             print("✅ Database tables created/verified")
-            # Test the connection
-            db.session.execute('SELECT 1')
+            # Test the connection - FIXED: use text() for raw SQL
+            db.session.execute(text('SELECT 1'))
             print("✅ Database connection successful")
             return True
     except Exception as e:
@@ -1883,7 +1904,144 @@ def serve_extracted_image(filename):
         return "Image not found", 404
 
 # ============================================
-# AI TUTOR ROUTES
+# SAFE HTML POST-PROCESSING (preserves LaTeX)
+# ============================================
+def safe_markdown_to_html(text):
+    """
+    Convert common Markdown patterns to HTML while preserving LaTeX math.
+    This is a safety net; the AI is instructed to output HTML, but if it fails,
+    we salvage the output.
+    """
+    if not text:
+        return text
+
+    # Temporarily replace LaTeX math blocks with placeholders
+    math_placeholders = {}
+    # Inline math: \( ... \) and $ ... $
+    def replace_inline_math(match):
+        placeholder = f"__INLINE_MATH_{len(math_placeholders)}__"
+        math_placeholders[placeholder] = match.group(0)
+        return placeholder
+    # Display math: $$ ... $$ and \[ ... \]
+    def replace_display_math(match):
+        placeholder = f"__DISPLAY_MATH_{len(math_placeholders)}__"
+        math_placeholders[placeholder] = match.group(0)
+        return placeholder
+
+    # First protect math
+    text = re.sub(r'\\\(.*?\\\)', replace_inline_math, text, flags=re.DOTALL)
+    text = re.sub(r'\$[^\$]*?\$', replace_inline_math, text, flags=re.DOTALL)
+    text = re.sub(r'\$\$.*?\$\$', replace_display_math, text, flags=re.DOTALL)
+    text = re.sub(r'\\\[.*?\\\]', replace_display_math, text, flags=re.DOTALL)
+
+    # Convert Markdown headings
+    # Replace ### heading with <h3>heading</h3>
+    text = re.sub(r'^### (.*?)$', r'<h3>\1</h3>', text, flags=re.MULTILINE)
+    text = re.sub(r'^## (.*?)$', r'<h2>\1</h2>', text, flags=re.MULTILINE)
+    text = re.sub(r'^# (.*?)$', r'<h2>\1</h2>', text, flags=re.MULTILINE)  # treat # as h2
+
+    # Convert bold and italic
+    text = re.sub(r'\*\*(.*?)\*\*', r'<strong>\1</strong>', text, flags=re.DOTALL)
+    text = re.sub(r'__(.*?)__', r'<strong>\1</strong>', text, flags=re.DOTALL)
+    text = re.sub(r'\*(.*?)\*', r'<em>\1</em>', text, flags=re.DOTALL)
+    text = re.sub(r'_(.*?)_', r'<em>\1</em>', text, flags=re.DOTALL)
+
+    # Convert unordered lists: lines starting with - or * or + 
+    lines = text.split('\n')
+    in_list = False
+    new_lines = []
+    for line in lines:
+        stripped = line.lstrip()
+        if stripped.startswith(('- ', '* ', '+ ')):
+            if not in_list:
+                new_lines.append('<ul>')
+                in_list = True
+            # Remove the bullet and wrap in <li>
+            item = stripped[2:].strip()
+            new_lines.append(f'<li>{item}</li>')
+        else:
+            if in_list:
+                new_lines.append('</ul>')
+                in_list = False
+            new_lines.append(line)
+    if in_list:
+        new_lines.append('</ul>')
+    text = '\n'.join(new_lines)
+
+    # Convert numbered lists (simple: 1., 2., etc.)
+    lines = text.split('\n')
+    in_ol = False
+    new_lines = []
+    for line in lines:
+        stripped = line.lstrip()
+        match = re.match(r'^(\d+)\.\s+(.*)$', stripped)
+        if match:
+            if not in_ol:
+                new_lines.append('<ol>')
+                in_ol = True
+            item = match.group(2).strip()
+            new_lines.append(f'<li>{item}</li>')
+        else:
+            if in_ol:
+                new_lines.append('</ol>')
+                in_ol = False
+            new_lines.append(line)
+    if in_ol:
+        new_lines.append('</ol>')
+    text = '\n'.join(new_lines)
+
+    # Convert Markdown tables to HTML tables (simplified)
+    # This is basic; for complex tables AI should output proper <table>
+    # We'll look for lines with | and --- separators
+    lines = text.split('\n')
+    i = 0
+    while i < len(lines):
+        if '|' in lines[i]:
+            # potential table header
+            header_line = lines[i].strip()
+            if i+1 < len(lines) and re.match(r'^[\s\|:-]+$', lines[i+1]):  # separator line
+                # extract headers
+                headers = [h.strip() for h in header_line.split('|') if h.strip()]
+                separator = lines[i+1]
+                # collect data rows
+                data_rows = []
+                j = i+2
+                while j < len(lines) and '|' in lines[j] and not re.match(r'^[\s\|:-]+$', lines[j]):
+                    row = [c.strip() for c in lines[j].split('|') if c.strip()]
+                    data_rows.append(row)
+                    j += 1
+                # build HTML table
+                table_html = '<table>\n<thead>\n<tr>\n'
+                for h in headers:
+                    table_html += f'<th>{h}</th>\n'
+                table_html += '</tr>\n</thead>\n<tbody>\n'
+                for row in data_rows:
+                    table_html += '<tr>\n'
+                    for cell in row:
+                        table_html += f'<td>{cell}</td>\n'
+                    table_html += '</tr>\n'
+                table_html += '</tbody>\n</table>'
+                # replace the block
+                lines[i:j] = [table_html]
+                i = j
+                continue
+        i += 1
+    text = '\n'.join(lines)
+
+    # Restore math placeholders
+    for placeholder, math in math_placeholders.items():
+        text = text.replace(placeholder, math)
+
+    # Remove any remaining lone Markdown symbols (like ** without closing)
+    text = re.sub(r'\*\*', '', text)
+    text = re.sub(r'__', '', text)
+    text = re.sub(r'\*', '', text)
+    text = re.sub(r'\_', '', text)
+
+    return text
+
+# ============================================
+# AI TUTOR ROUTES - WITH SESSION MEMORY (last 5 messages) & HTML‑ONLY OUTPUT
 # ============================================
 @app.route('/talk-to-nelavista')
 @login_required
@@ -1894,78 +2052,43 @@ def talk_to_nelavista():
 @app.route('/ask_with_files', methods=['POST'])
 @login_required
 def ask_with_files():
-    """
-    SINGLE ENTRY POINT for AI requests.
-    ALWAYS returns JSON with non-empty "answer" field.
-    Follows strict fallback requirements.
-    """
-    # Fallback message to use in case of any failure
     GRACEFUL_FALLBACK = "I'm having a little trouble answering right now, but please try again."
     
     try:
-        # Get user info
         username = session['user']['username']
         
-        # Get message (always present)
         message = request.form.get('message', '').strip()
-        if not message:
-            return jsonify({
-                "success": True,
-                "answer": GRACEFUL_FALLBACK
-            })
+        if not message and 'files' not in request.files:
+            return jsonify({"success": True, "answer": GRACEFUL_FALLBACK})
         
-        # Get and validate chat history
-        history_json = request.form.get('history', '[]')
-        chat_history = []
-        try:
-            if history_json:
-                chat_history = json.loads(history_json)
-                # Validate and clean history
-                clean_history = []
-                for msg in chat_history:
-                    if isinstance(msg, dict) and 'role' in msg and 'content' in msg:
-                        role = msg['role'].lower()
-                        content = str(msg['content']).strip()
-                        if role in ['user', 'assistant'] and content:
-                            clean_history.append({
-                                'role': role,
-                                'content': content
-                            })
-                chat_history = clean_history
-        except:
-            chat_history = []
+        # ---- SESSION MEMORY ----
+        session_memory = get_session_memory()
         
-        # Process files (0 or more)
+        # Process files
         file_texts = []
         vision_images = []
         has_pdfs = False
         
         if 'files' in request.files:
             files = request.files.getlist('files')
-            
             for file in files:
                 if file and file.filename and file.filename.strip():
                     filename = file.filename.lower()
                     
                     if filename.endswith('.pdf'):
                         has_pdfs = True
-                        # Extract text from PDF
                         file.seek(0)
                         text = extract_text_from_pdf(file)
                         if text:
                             file_texts.append(f"[PDF: {file.filename}]\n{text}")
                     
                     elif filename.endswith(('.png', '.jpg', '.jpeg', '.gif')):
-                        # Prepare for vision model
                         file.seek(0)
                         image_bytes = file.read()
                         image_base64 = base64.b64encode(image_bytes).decode('utf-8')
                         
-                        # Determine MIME type
                         if filename.endswith('.png'):
                             mime_type = 'image/png'
-                        elif filename.endswith('.jpg') or filename.endswith('.jpeg'):
-                            mime_type = 'image/jpeg'
                         elif filename.endswith('.gif'):
                             mime_type = 'image/gif'
                         else:
@@ -1977,85 +2100,75 @@ def ask_with_files():
                             'filename': file.filename
                         })
         
-        # STRICT REQUIREMENT: Build user content with clear context separation
         user_content_parts = []
-        
-        # Add message text if present
         if message:
             user_content_parts.append(message)
-        
-        # Add file texts if present
         if file_texts:
-            file_context = "\n\n".join(file_texts)
-            user_content_parts.append(f"DOCUMENT CONTENT:\n{file_context}")
+            user_content_parts.append("DOCUMENT CONTENT:\n" + "\n\n".join(file_texts))
         
-        # Create final user content
         if not user_content_parts and not vision_images:
-            return jsonify({
-                "success": True,
-                "answer": "Please provide a message or upload files for analysis."
-            })
+            return jsonify({"success": True, "answer": "Please provide a message or upload files for analysis."})
         
         user_content = "\n\n".join(user_content_parts) if user_content_parts else "Please analyze the uploaded image(s)."
         
-        pdf_context = ""
-        if has_pdfs and file_texts:
-            pdf_context = "\n\n".join(file_texts)
-        
-        # Build system prompt
         system_prompt = """You are Nelavista, an advanced AI tutor created by Afeez Adewale Tella for Nigerian university students (100–400 level).
 
 ROLE:
-You are a specialized analytical tutor and researcher.
+You are a professional university-level tutor and explainer.
 
-STYLE: Analytical Expert
-Follow these rules strictly.
+GOAL:
+Your goal is to teach clearly, patiently, and in a way students can easily understand and enjoy reading.
 
-GLOBAL RULES:
-- Always respond in clean HTML using <p>, <ul>, <li>, <strong>, <h2>, <h3>, and <table> when appropriate.
-- Respond naturally to greetings when the user greets you, but do not add greetings unnecessarily.
-- Do not use labels like Step 1, Step 2, Intro, or Final Answer.
-- No emojis in academic explanations.
-- Use clear, calm, and friendly academic language.
-- Explain ideas patiently, like a lecturer guiding students through the topic.
-- Avoid hype, exaggeration, or unnecessary filler.
+TEACHING STYLE:
+- Write like a good lecturer and a good textbook combined.
+- Always start with a short, clear introduction that explains what the topic or problem is about.
+- Break the explanation into clear sections with headings.
+- Explain ideas in smooth, connected paragraphs, not in scattered notes.
+- When solving problems, explain each step in words before or after showing the math.
+- Use simple language, but do not oversimplify the mathematics.
+- Use examples where helpful.
+- Only use lists for short summaries or examples, not for the main explanation.
+- The answer should feel like a lesson, not like raw notes or a checklist.
 
-STRUCTURE REQUIREMENTS:
-- Begin with a brief <strong>Key Idea</strong> statement introducing the core conclusion.
-- Use clear headers and bullet points to organize information.
-- Break complex ideas into logical components and explain the reasoning behind them.
-- Use short paragraphs (1–2 sentences).
+STRUCTURE:
+- Use <h2> for main sections and <h3> for subsections.
+- Use <p> for explanations.
+- Keep paragraphs reasonably short and focused.
+- Present ideas in a logical order: introduction → explanation → steps → conclusion or summary.
+- End with a short conclusion or final result when appropriate.
 
-REASONING:
-- Show the reasoning path clearly but naturally.
-- Explain why conclusions follow from facts or data.
+FORMAT RULES:
+- You MUST output pure HTML, not Markdown.
+- Do NOT use Markdown syntax.
+- Use only valid HTML tags such as <h2>, <h3>, <p>, <ul>, <li>, <strong>, <em>.
+- Do NOT wrap the whole answer in <html> or <body>.
+- Do NOT include code blocks.
+- If you include mathematics, use LaTeX with \\( ... \\) for inline math or $$ ... $$ for displayed equations.
+- Do NOT use placeholders like INLINEMATH or DISPLAYMATH.
 
-DATA & ACCURACY:
-- Include formulas, definitions, metrics, or comparisons when relevant.
-- Do not speculate or invent facts.
+LATEX RULES:
+- Every mathematical expression MUST be complete inside a single \\( ... \\) or $$ ... $$ block.
+- NEVER split one formula across multiple lines or tags.
+- NEVER break fractions, powers, roots, or equations into pieces.
+- Do NOT mix normal text inside math expressions.
+- Prefer $$ ... $$ for important equations or multi-step derivations.
 
-GENERAL INSTRUCTIONS:
-- Provide accurate, structured academic explanations.
-- Use relevant examples only when they add clarity.
-- Maintain a logical flow from premises to conclusions.
+LANGUAGE:
+- Use clear, calm, friendly academic language.
+- Sound supportive and encouraging, like a good teacher.
+- Avoid hype, emojis, slang, or overly casual tone.
+- Avoid robotic or repetitive phrasing.
+"""
 
-ENDING:
-- End naturally after the explanation. Do not add summaries beyond the TL;DR."""
-        
-        # Prepare messages array
         messages = [{"role": "system", "content": system_prompt}]
         
-        # Add chat history (validated)
-        for msg in chat_history:
-            messages.append({"role": msg['role'], "content": msg['content']})
+        for mem in session_memory:
+            messages.append({"role": mem["role"], "content": mem["content"]})
         
-        # STRICT REQUIREMENT: Handle different input types
         openrouter_model = "openai/gpt-4o-mini"
         
         if vision_images:
-            # Use vision model
             content_parts = [{"type": "text", "text": user_content}]
-            
             for image_data in vision_images:
                 content_parts.append({
                     "type": "image_url",
@@ -2063,165 +2176,123 @@ ENDING:
                         "url": f"data:{image_data['mime_type']};base64,{image_data['base64']}"
                     }
                 })
-            
-            messages.append({
-                "role": "user",
-                "content": content_parts
-            })
+            messages.append({"role": "user", "content": content_parts})
             openrouter_model = "openai/gpt-4o"
         else:
-            # Use text-only model
             messages.append({"role": "user", "content": user_content})
         
-        # STRICT REQUIREMENT: Call OpenRouter with timeout and error handling
-        try:
-            headers = {
-                "Authorization": f"Bearer {os.getenv('OPENROUTER_API_KEY')}",
-                "Content-Type": "application/json",
-                "HTTP-Referer": "https://nelavista.com",
-                "X-Title": "Nelavista AI Tutor"
-            }
-            
-            payload = {
-                "model": openrouter_model,
-                "messages": messages,
-                "temperature": 0.6,
-                "max_tokens": 1500
-            }
-            
-            # Make API call with timeout
-            response = requests.post(
-                "https://openrouter.ai/api/v1/chat/completions",
-                headers=headers,
-                json=payload,
-                timeout=30  # 30 second timeout
-            )
-            
-            if response.status_code != 200:
-                # OpenRouter failed, return fallback
-                return jsonify({
-                    "success": True,
-                    "answer": GRACEFUL_FALLBACK
-                })
-            
-            # Extract response
-            response_json = response.json()
-            ai_response = response_json.get("choices", [{}])[0].get("message", {}).get("content", "")
-            
-            # STRICT REQUIREMENT: Ensure response is non-empty
-            if not ai_response or not ai_response.strip():
-                ai_response = GRACEFUL_FALLBACK
-            
-        except requests.exceptions.Timeout:
-            # Timeout occurred
-            return jsonify({
-                "success": True,
-                "answer": GRACEFUL_FALLBACK
-            })
-        except Exception as e:
-            # Any other API error
-            debug_print(f"❌ OpenRouter API error: {e}")
-            return jsonify({
-                "success": True,
-                "answer": GRACEFUL_FALLBACK
-            })
+        headers = {
+            "Authorization": f"Bearer {os.getenv('OPENROUTER_API_KEY')}",
+            "Content-Type": "application/json",
+            "HTTP-Referer": "https://nelavista.com",
+            "X-Title": "Nelavista AI Tutor"
+        }
         
-        # Save to database (optional, don't fail if this doesn't work)
-        try:
-            with app.app_context():
-                new_q = UserQuestions(
-                    username=username,
-                    question=message[:500] if message else "[File analysis]",
-                    answer=ai_response[:1000],
-                    memory_layer="GENERAL"
-                )
-                db.session.add(new_q)
-                db.session.commit()
-        except Exception as db_error:
-            debug_print(f"⚠️ Database save error: {db_error}")
-            # Don't fail the response
+        payload = {
+            "model": openrouter_model,
+            "messages": messages,
+            "temperature": 0.5,
+            "max_tokens": 1500
+        }
         
-        # Clean up old files
+        response = requests.post("https://openrouter.ai/api/v1/chat/completions", headers=headers, json=payload, timeout=30)
+        
+        if response.status_code != 200:
+            return jsonify({"success": True, "answer": GRACEFUL_FALLBACK})
+        
+        response_json = response.json()
+        ai_response = response_json.get("choices", [{}])[0].get("message", {}).get("content", "")
+        
+        if not ai_response or not ai_response.strip():
+            ai_response = GRACEFUL_FALLBACK
+        
+        final_answer = ai_response
+        
+        add_to_session_memory("user", user_content)
+        add_to_session_memory("assistant", final_answer)
+        
         cleanup_old_files()
         
-        # STRICT REQUIREMENT: Return in MANDATORY format
-        return jsonify({
-            "success": True,
-            "answer": ai_response
-        })
+        return jsonify({"success": True, "answer": final_answer})
         
     except Exception as e:
-        # STRICT REQUIREMENT: Catch ALL exceptions and return fallback
         debug_print(f"❌ Unhandled error in /ask_with_files: {e}")
         traceback.print_exc()
-        
-        return jsonify({
-            "success": True,
-            "answer": GRACEFUL_FALLBACK
-        })
+        return jsonify({"success": True, "answer": GRACEFUL_FALLBACK})
+
 
 @app.route('/ask', methods=['POST'])
 @login_required
 def ask():
-    """Handle AI requests without uploaded files."""
     GRACEFUL_FALLBACK = "I'm having a little trouble answering right now, but please try again."
     
     try:
-        # Get data from request
         data = request.get_json() or {}
         message = data.get('message', '').strip()
-        
         if not message:
             return jsonify({'error': 'No question provided'}), 400
         
-        # Get user info for database saving
         username = session['user']['username']
         
-        # Build system prompt
+        session_memory = get_session_memory()
+        
         system_prompt = """You are Nelavista, an advanced AI tutor created by Afeez Adewale Tella for Nigerian university students (100–400 level).
 
 ROLE:
-You are a specialized analytical tutor and researcher.
+You are a professional university-level tutor and explainer.
 
-STYLE: Analytical Expert
-Follow these rules strictly.
+GOAL:
+Your goal is to teach clearly, patiently, and in a way students can easily understand and enjoy reading.
 
-GLOBAL RULES:
-- Always respond in clean HTML using <p>, <ul>, <li>, <strong>, <h2>, <h3>, and <table> when appropriate.
-- Respond naturally to greetings when the user greets you, but do not add greetings unnecessarily.
-- Do not use labels like Step 1, Step 2, Intro, or Final Answer.
-- No emojis in academic explanations.
-- Use clear, calm, and friendly academic language.
-- Explain ideas patiently, like a lecturer guiding students through the topic.
-- Avoid hype, exaggeration, or unnecessary filler.
+TEACHING STYLE:
+- Write like a good lecturer and a good textbook combined.
+- Always start with a short, clear introduction that explains what the topic or problem is about.
+- Break the explanation into clear sections with headings.
+- Explain ideas in smooth, connected paragraphs, not in scattered notes.
+- When solving problems, explain each step in words before or after showing the math.
+- Use simple language, but do not oversimplify the mathematics.
+- Use examples where helpful.
+- Only use lists for short summaries or examples, not for the main explanation.
+- The answer should feel like a lesson, not like raw notes or a checklist.
 
-STRUCTURE REQUIREMENTS:
-- Begin with a brief <strong>Key Idea</strong> statement introducing the core conclusion.
-- Use clear headers and bullet points to organize information.
-- Break complex ideas into logical components and explain the reasoning behind them.
-- Use short paragraphs (1–2 sentences).
+STRUCTURE:
+- Use <h2> for main sections and <h3> for subsections.
+- Use <p> for explanations.
+- Keep paragraphs reasonably short and focused.
+- Present ideas in a logical order: introduction → explanation → steps → conclusion or summary.
+- End with a short conclusion or final result when appropriate.
 
-REASONING:
-- Show the reasoning path clearly but naturally.
-- Explain why conclusions follow from facts or data.
+FORMAT RULES:
+- You MUST output pure HTML, not Markdown.
+- Do NOT use Markdown syntax.
+- Use only valid HTML tags such as <h2>, <h3>, <p>, <ul>, <li>, <strong>, <em>.
+- Do NOT wrap the whole answer in <html> or <body>.
+- Do NOT include code blocks.
+- If you include mathematics, use LaTeX with \\( ... \\) for inline math or $$ ... $$ for displayed equations.
+- Do NOT use placeholders like INLINEMATH or DISPLAYMATH.
 
-DATA & ACCURACY:
-- Include formulas, definitions, metrics, or comparisons when relevant.
-- Do not speculate or invent facts.
+LATEX RULES:
+- Every mathematical expression MUST be complete inside a single \\( ... \\) or $$ ... $$ block.
+- NEVER split one formula across multiple lines or tags.
+- NEVER break fractions, powers, roots, or equations into pieces.
+- Do NOT mix normal text inside math expressions.
+- Prefer $$ ... $$ for important equations or multi-step derivations.
 
-GENERAL INSTRUCTIONS:
-- Provide accurate, structured academic explanations.
-- Use relevant examples only when they add clarity.
-- Maintain a logical flow from premises to conclusions.
+LANGUAGE:
+- Use clear, calm, friendly academic language.
+- Sound supportive and encouraging, like a good teacher.
+- Avoid hype, emojis, slang, or overly casual tone.
+- Avoid robotic or repetitive phrasing.
+"""
 
-ENDING:
-- End naturally after the explanation. Do not add summaries beyond the TL;DR."""
-        
-        # Prepare messages array
+
         messages = [{"role": "system", "content": system_prompt}]
+        
+        for mem in session_memory:
+            messages.append({"role": mem["role"], "content": mem["content"]})
+        
         messages.append({"role": "user", "content": message})
         
-        # Call OpenRouter API
         headers = {
             "Authorization": f"Bearer {os.getenv('OPENROUTER_API_KEY')}",
             "Content-Type": "application/json",
@@ -2232,66 +2303,33 @@ ENDING:
         payload = {
             "model": "openai/gpt-4o-mini",
             "messages": messages,
-            "temperature": 0.6,
+            "temperature": 0.5,
             "max_tokens": 1500
         }
         
-        response = requests.post(
-            "https://openrouter.ai/api/v1/chat/completions",
-            headers=headers,
-            json=payload,
-            timeout=30
-        )
+        response = requests.post("https://openrouter.ai/api/v1/chat/completions", headers=headers, json=payload, timeout=30)
         
         if response.status_code != 200:
-            debug_print(f"❌ OpenRouter API error: {response.status_code} - {response.text}")
-            return jsonify({
-                "success": True,
-                "answer": GRACEFUL_FALLBACK
-            })
+            return jsonify({"success": True, "answer": GRACEFUL_FALLBACK})
         
-        # Extract response
         response_json = response.json()
         ai_response = response_json.get("choices", [{}])[0].get("message", {}).get("content", "")
         
-        # 🔹 CLEANUP: remove HTML tags and normalize spacing
-        if ai_response:
-            import re
-            ai_response = re.sub(r'<[^>]+>', '', ai_response)
-            ai_response = ai_response.replace('\n', ' ').strip()
-        
-        if not ai_response:
+        if not ai_response or not ai_response.strip():
             ai_response = GRACEFUL_FALLBACK
         
-        # Save to database (optional)
-        try:
-            with app.app_context():
-                new_q = UserQuestions(
-                    username=username,
-                    question=message[:500],
-                    answer=ai_response[:1000],
-                    memory_layer="GENERAL"
-                )
-                db.session.add(new_q)
-                db.session.commit()
-        except Exception as db_error:
-            debug_print(f"⚠️ Database save error: {db_error}")
+        final_answer = ai_response
         
-        # Return response in the format frontend expects
-        return jsonify({
-            "success": True,
-            "answer": ai_response
-        })
+        add_to_session_memory("user", message)
+        add_to_session_memory("assistant", final_answer)
+        
+        return jsonify({"success": True, "answer": final_answer})
         
     except Exception as e:
         debug_print(f"❌ Unhandled error in /ask: {e}")
         traceback.print_exc()
-        return jsonify({
-            "success": True,
-            "answer": GRACEFUL_FALLBACK
-        })
+        return jsonify({"success": True, "answer": GRACEFUL_FALLBACK})
 
-# ============================================
 # FILE UPLOAD ENDPOINT
 # ============================================
 @app.route('/upload', methods=['POST'])
@@ -2976,6 +3014,9 @@ if __name__ == '__main__':
     print("      • File upload support (PDFs, Images)")
     print("      • Vision AI for image analysis")
     print("      • Context-aware responses")
+    print("      • **TEMPORARY SESSION MEMORY**: Last 5 messages only – no permanent storage")
+    print("      • **LECTURER STYLE**: Enforced with explicit anti‑generic‑tone rules")
+    print("      • **HTML‑ONLY OUTPUT**: No Markdown, pure HTML with LaTeX preservation")
     print("   5. 📚 Study Materials Library")
     print("   6. 🎬 Educational Reels")
     print("   7. 📝 CBT Test System")
@@ -2993,6 +3034,3 @@ if __name__ == '__main__':
     
     port = int(os.environ.get('PORT', 5000))
     socketio.run(app, host='0.0.0.0', port=port, debug=DEBUG_MODE)
-
-
-
