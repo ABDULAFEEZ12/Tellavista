@@ -20,8 +20,82 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            padding: 20px;
+            padding: 60px 20px 20px 20px;  /* Added top padding for fixed navbar */
             animation: fadeIn 0.5s ease-out;
+        }
+
+        /* Page exit transition for goBack() */
+        body.page-exit {
+            opacity: 0;
+            transform: translateX(-20px);
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+
+        /* Fixed Top Navigation Bar */
+        .fixed-top-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 60px;
+            background: #000000;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 16px;
+            z-index: 1000;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            color: #ffffff;
+        }
+
+        .top-bar-left, .top-bar-right {
+            display: flex;
+            align-items: center;
+            flex: 1;
+        }
+
+        .top-bar-left {
+            justify-content: flex-start;
+        }
+
+        .top-bar-right {
+            justify-content: flex-end;
+        }
+
+        .back-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            color: #ffffff;
+            font-size: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .back-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .top-bar-title {
+            font-size: 1.1rem;
+            font-weight: 500;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 40%;
+            text-align: center;
+            color: #ffffff;
+        }
+
+        .spacer {
+            width: 40px;  /* Same as back button for symmetry */
+            height: 40px;
+            visibility: hidden;
         }
 
         @keyframes fadeIn {
@@ -397,6 +471,11 @@
             .role-card:hover {
                 transform: translateY(-2px);
             }
+
+            .top-bar-title {
+                max-width: 50%;
+                font-size: 1rem;
+            }
         }
 
         /* Smooth scrolling */
@@ -428,6 +507,17 @@
     </style>
 </head>
 <body>
+    <!-- Fixed Top Navigation Bar -->
+    <div class="fixed-top-bar">
+        <div class="top-bar-left">
+            <button class="back-btn" onclick="goBack()" aria-label="Go back">←</button>
+        </div>
+        <span class="top-bar-title">Live Classroom Meeting</span>
+        <div class="top-bar-right">
+            <div class="spacer"></div>
+        </div>
+    </div>
+
     <div class="container">
         <div class="logo">
             <div class="logo-icon">
@@ -624,6 +714,38 @@
                     }
                 }, 300);
             }
+        }
+
+        // ===== BACK BUTTON FUNCTION =====
+        function goBack() {
+            // 1. Stop any speech recognition if present (attempt to abort any active instance)
+            if (window.SpeechRecognition || window.webkitSpeechRecognition) {
+                // If there is a global recognition instance, abort it.
+                // Since we don't have a reference, we try to create a dummy and abort? Not reliable.
+                // We'll attempt to cancel any ongoing by checking for active recognition via browser API?
+                // As a safe fallback, we'll just attempt to abort if there's a stored instance.
+                if (window.currentRecognition && typeof window.currentRecognition.abort === 'function') {
+                    window.currentRecognition.abort();
+                }
+            }
+
+            // 2. Cancel speech synthesis
+            if (window.speechSynthesis) {
+                window.speechSynthesis.cancel();
+            }
+
+            // 3. Add smooth fade + slide transition
+            document.body.classList.add('page-exit');
+
+            // 4. Use window.history.back() safely after a short delay
+            setTimeout(() => {
+                if (window.history.length > 1) {
+                    window.history.back();
+                } else {
+                    // Fallback redirect
+                    window.location.href = '/dashboard';
+                }
+            }, 200); // match transition duration
         }
     </script>
 </body>
