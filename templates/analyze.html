@@ -54,8 +54,15 @@ body {
   background: var(--dark-bg);
   color: var(--text-dark);
   min-height: 100vh;
-  transition: background 0.3s, color 0.3s;
+  transition: background 0.3s, color 0.3s, opacity 0.3s ease, transform 0.3s ease;
   overflow-x: hidden;
+}
+
+/* Page exit transition for goBack() */
+body.page-exit {
+  opacity: 0;
+  transform: translateX(-20px);
+  transition: opacity 0.3s ease, transform 0.3s ease;
 }
 
 body.light-mode {
@@ -63,7 +70,7 @@ body.light-mode {
   color: var(--text-light);
 }
 
-/* ===== TOP BAR (Updated with proper z-index) ===== */
+/* ===== TOP BAR (updated with back button, centered title, spacer) ===== */
 #top-bar {
   position: fixed;
   top: 0;
@@ -83,6 +90,72 @@ body.light-mode {
 body.light-mode #top-bar {
   background: rgba(255, 255, 255, 0.95);
   border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.top-bar-left,
+.top-bar-right {
+  display: flex;
+  align-items: center;
+  flex: 1;
+  gap: 8px;
+}
+
+.top-bar-left {
+  justify-content: flex-start;
+}
+
+.top-bar-right {
+  justify-content: flex-end;
+}
+
+.top-bar-title {
+  font-size: 1.1rem;
+  font-weight: 500;
+  color: var(--text-dark);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 40%;
+  text-align: center;
+}
+
+body.light-mode .top-bar-title {
+  color: var(--text-light);
+}
+
+.spacer {
+  width: 40px;          /* matches button width */
+  height: 40px;
+  visibility: hidden;
+}
+
+/* Back button (circular) */
+.back-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  color: white;
+  font-size: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+body.light-mode .back-btn {
+  background: rgba(0, 0, 0, 0.05);
+  color: #000;
+}
+
+.back-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+body.light-mode .back-btn:hover {
+  background: rgba(0, 0, 0, 0.1);
 }
 
 #menu-toggle,
@@ -979,6 +1052,11 @@ body.light-mode ::-webkit-scrollbar-thumb:hover {
     width: 44px;
     height: 44px;
   }
+
+  .top-bar-title {
+    max-width: 50%;
+    font-size: 1rem;
+  }
 }
 
 @media (max-width: 480px) {
@@ -1024,10 +1102,17 @@ body.light-mode ::-webkit-scrollbar-thumb:hover {
 </head>
 <body class="dark-mode">
 
-<!-- TOP BAR -->
+<!-- TOP BAR with back button, centered title, and spacer -->
 <div id="top-bar">
-  <button id="menu-toggle" onclick="toggleMenu()">☰</button>
-  <button id="theme-toggle" onclick="toggleTheme()">🌙</button>
+  <div class="top-bar-left">
+    <button class="back-btn" onclick="goBack()" aria-label="Go back">←</button>
+    <button id="menu-toggle" onclick="toggleMenu()">☰</button>
+  </div>
+  <span class="top-bar-title" id="top-bar-title">Nelavista • Document Analyzer</span>
+  <div class="top-bar-right">
+    <div class="spacer"></div>
+    <button id="theme-toggle" onclick="toggleTheme()">🌙</button>
+  </div>
 </div>
 
 <!-- SIDEBAR -->
@@ -1197,6 +1282,12 @@ body.light-mode ::-webkit-scrollbar-thumb:hover {
         initializeTheme();
         setupEventListeners();
         setupDragAndDrop();
+
+        // Set top bar title from page title
+        const titleEl = document.getElementById('top-bar-title');
+        if (titleEl) {
+            titleEl.textContent = document.title;
+        }
     });
 
     function initializeTheme() {
@@ -1760,7 +1851,35 @@ body.light-mode ::-webkit-scrollbar-thumb:hover {
         }
     }
 
-    // Add CSS for fadeOut animation
+    // ===== BACK BUTTON FUNCTION =====
+    function goBack() {
+        // 1. Stop any speech recognition if present (attempt to abort any active instance)
+        if (window.SpeechRecognition || window.webkitSpeechRecognition) {
+            // If there is a global reference, abort it.
+            if (window.currentRecognition && typeof window.currentRecognition.abort === 'function') {
+                window.currentRecognition.abort();
+            }
+        }
+
+        // 2. Cancel speech synthesis
+        if (window.speechSynthesis) {
+            window.speechSynthesis.cancel();
+        }
+
+        // 3. Add smooth fade + slide transition
+        document.body.classList.add('page-exit');
+
+        // 4. Use window.history.back() safely after a short delay
+        setTimeout(() => {
+            if (window.history.length > 1) {
+                window.history.back();
+            } else {
+                window.location.href = '/dashboard';
+            }
+        }, 200); // match transition duration
+    }
+
+    // Add CSS for fadeOut animation (already included above)
     const style = document.createElement('style');
     style.textContent = `
         @keyframes fadeOut {
