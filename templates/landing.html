@@ -1,0 +1,784 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Nelavista · clarity for complex coursework</title>
+  <!-- elegant typography: Inter & Poppins -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz@14..32&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    /* ===== VARIABLES – light mode (pure white) & dark mode (pure black) ===== */
+    :root {
+      /* light mode – white background, black text */
+      --bg-primary: #ffffff;
+      --text-primary: #000000;
+      --text-soft: #333333;
+      --card-bg: #ffffff;
+      --border-light: rgba(0, 0, 0, 0.1);
+      --shadow-color: rgba(0, 0, 0, 0.05);
+      --accent-glow: rgba(0, 0, 0, 0.08);
+      --gradient-start: #f5f5f5;
+      --gradient-end: #eaeaea;
+      --overlay-light: rgba(0, 0, 0, 0.02);
+      --header-bg: rgba(255, 255, 255, 0.9);
+    }
+
+    /* dark mode – black background, white text */
+    body.dark-mode {
+      --bg-primary: #000000;
+      --text-primary: #ffffff;
+      --text-soft: #cccccc;
+      --card-bg: #1a1a1a;
+      --border-light: rgba(255, 255, 255, 0.15);
+      --shadow-color: rgba(255, 255, 255, 0.02);
+      --accent-glow: rgba(255, 255, 255, 0.15);
+      --gradient-start: #222222;
+      --gradient-end: #111111;
+      --overlay-light: rgba(0, 0, 0, 0.8);
+      --header-bg: rgba(0, 0, 0, 0.9);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Inter', 'Poppins', -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+
+    body {
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      min-height: 100vh;
+      transition: background 0.4s cubic-bezier(0.2, 0.9, 0.3, 1), color 0.3s ease;
+      overflow-x: hidden;
+    }
+
+    /* ===== TOP BAR (blur) ===== */
+    #top-bar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 64px;
+      background: var(--header-bg);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 clamp(1rem, 5vw, 2rem);
+      z-index: 1002;
+      border-bottom: 1px solid var(--border-light);
+    }
+
+    .brand {
+      font-weight: 500;
+      letter-spacing: -0.02em;
+      font-size: clamp(1.2rem, 4vw, 1.4rem);
+    }
+
+    #menu-toggle, #theme-toggle {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 1.4rem;
+      background: transparent;
+      border: none;
+      color: var(--text-primary);
+      transition: background 0.2s, transform 0.2s;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    #menu-toggle:hover, #theme-toggle:hover {
+      background: color-mix(in srgb, var(--text-primary) 8%, transparent);
+      transform: scale(1.05);
+    }
+
+    /* ===== SIDEBAR MENU ===== */
+    #side-menu {
+      position: fixed;
+      top: 0;
+      left: -280px;
+      width: min(280px, 80vw);
+      height: 100%;
+      background: var(--card-bg);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      transition: left 0.4s cubic-bezier(0.2, 0.9, 0.3, 1);
+      z-index: 1003;
+      overflow-y: auto;
+      padding: 80px 0 20px;
+      border-right: 1px solid var(--border-light);
+    }
+
+    #side-menu.active {
+      left: 0;
+    }
+
+    #side-menu ul {
+      list-style: none;
+    }
+
+    #side-menu a {
+      display: flex;
+      align-items: center;
+      padding: 16px 24px;
+      color: var(--text-primary);
+      text-decoration: none;
+      font-size: 1rem;
+      font-weight: 400;
+      transition: background 0.2s, padding-left 0.2s;
+      border-left: 2px solid transparent;
+    }
+
+    #side-menu a:hover {
+      background: color-mix(in srgb, var(--text-primary) 6%, transparent);
+      border-left-color: var(--text-primary);
+      padding-left: 32px;
+    }
+
+    #side-menu a::before {
+      content: '';
+      display: inline-block;
+      width: 28px;
+      margin-right: 16px;
+      font-size: 1.2rem;
+    }
+
+    #side-menu a[href*="home"]::before { content: '📄'; }
+    #side-menu a[href*="features"]::before { content: '⋮⋮'; }
+    #side-menu a[href*="founder"]::before { content: '👤'; }
+    #side-menu a[href*="cta"]::before { content: '→'; }
+
+    /* ===== OVERLAY ===== */
+    #overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: var(--overlay-light);
+      display: none;
+      z-index: 1001;
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
+      cursor: pointer;
+    }
+
+    #overlay.active {
+      display: block;
+    }
+
+    /* ===== SCROLL PROGRESS ===== */
+    #scroll-progress {
+      position: fixed;
+      top: 64px;
+      left: 0;
+      width: 0%;
+      height: 2px;
+      background: var(--text-primary);
+      opacity: 0.3;
+      z-index: 1003;
+      transition: width 0.1s ease;
+    }
+
+    /* ===== MAIN CONTENT ===== */
+    .main-content {
+      margin-top: 64px;
+    }
+
+    .container {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 0 clamp(1rem, 5vw, 2rem);
+    }
+
+    /* ===== SECTION BASE ===== */
+    .section {
+      padding: clamp(3rem, 10vh, 5rem) 0;
+      border-bottom: 1px solid var(--border-light);
+    }
+    .section:last-of-type {
+      border-bottom: none;
+    }
+
+    /* ===== HERO ===== */
+    .hero {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 2rem;
+      min-height: 70vh;
+      padding: 2rem 0 3rem;
+    }
+
+    .hero-left {
+      flex: 1 1 360px;
+      position: relative;
+    }
+
+    .hero-left h1 {
+      font-size: clamp(2.8rem, 10vw, 4rem);
+      font-weight: 600;
+      color: var(--text-primary);
+      line-height: 1.1;
+      position: relative;
+      display: inline-block;
+      z-index: 2;
+    }
+
+    /* animated greyscale gradient behind headline */
+    .hero-left h1::before {
+      content: '';
+      position: absolute;
+      top: -20%;
+      left: -10%;
+      width: 120%;
+      height: 160%;
+      background: radial-gradient(circle at 30% 40%, var(--accent-glow), transparent 70%);
+      filter: blur(40px);
+      border-radius: 50%;
+      z-index: -1;
+      animation: glowShift 8s infinite alternate ease-in-out;
+    }
+    @keyframes glowShift {
+      0% { opacity: 0.2; transform: scale(0.9); }
+      100% { opacity: 0.6; transform: scale(1.3); }
+    }
+
+    /* subtle underline glow (greyscale) */
+    .hero-left h1::after {
+      content: '';
+      position: absolute;
+      bottom: 8px;
+      left: 0;
+      width: 100%;
+      height: 4px;
+      background: linear-gradient(90deg, transparent, var(--accent-glow), transparent);
+      filter: blur(6px);
+      border-radius: 2px;
+      opacity: 0.4;
+      animation: underlineGlow 4s infinite alternate;
+    }
+    @keyframes underlineGlow {
+      0% { opacity: 0.2; width: 40%; left: 30%; }
+      100% { opacity: 0.7; width: 100%; left: 0; }
+    }
+
+    .subheadline {
+      font-size: clamp(1.2rem, 4vw, 1.6rem);
+      font-weight: 400;
+      color: var(--text-soft);
+      margin: 1rem 0 1.2rem;
+      line-height: 1.3;
+    }
+
+    .description {
+      font-size: clamp(1rem, 3.5vw, 1.15rem);
+      color: var(--text-soft);
+      max-width: 540px;
+      font-weight: 350;
+      line-height: 1.6;
+    }
+
+    .credibility {
+      margin-top: 1.5rem;
+      font-size: 0.9rem;
+      color: var(--text-soft);
+      font-weight: 330;
+    }
+
+    .hero-right {
+      flex: 0 1 auto;
+      min-width: 240px;
+      width: 100%;
+      max-width: 320px;
+    }
+
+    .button-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.9rem;
+    }
+
+    .btn {
+      display: inline-block;
+      padding: 0.9rem 2rem;
+      border-radius: 60px;
+      font-weight: 500;
+      font-size: 1rem;
+      text-decoration: none;
+      transition: all 0.3s cubic-bezier(0.2, 0.9, 0.3, 1.1);
+      box-shadow: 0 8px 20px -10px var(--shadow-color);
+      border: 1px solid var(--border-light);
+      cursor: pointer;
+      background: var(--card-bg);
+      color: var(--text-primary);
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
+      text-align: center;
+    }
+
+    .btn-primary {
+      background: var(--card-bg);
+      border: 1px solid var(--border-light);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-3px) scale(1.01);
+      box-shadow: 0 20px 28px -14px var(--accent-glow);
+      background: color-mix(in srgb, var(--card-bg) 95%, white);
+    }
+
+    .btn-secondary {
+      background: transparent;
+    }
+
+    .btn-secondary:hover {
+      transform: translateY(-3px) scale(1.01);
+      box-shadow: 0 18px 26px -14px var(--accent-glow);
+      background: color-mix(in srgb, var(--card-bg) 50%, transparent);
+    }
+
+    /* ===== EXPLANATION CARD ===== */
+    .explanation-card {
+      background: var(--card-bg);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      padding: clamp(2rem, 6vw, 3rem) clamp(1.8rem, 5vw, 3rem);
+      border-radius: 48px;
+      box-shadow: 0 25px 40px -24px var(--shadow-color);
+      border: 1px solid var(--border-light);
+      max-width: 1000px;
+      margin: 0 auto;
+      text-align: center;
+      font-size: clamp(1.1rem, 3.5vw, 1.3rem);
+      color: var(--text-primary);
+    }
+
+    .explanation-card p {
+      font-weight: 350;
+      line-height: 1.6;
+    }
+
+    /* ===== FEATURE CARDS ===== */
+    .cards-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 1.8rem;
+      margin-top: 2.5rem;
+    }
+
+    .feature-card {
+      background: var(--card-bg);
+      border-radius: 36px;
+      padding: 2rem 1.5rem;
+      box-shadow: 0 15px 30px -18px var(--shadow-color);
+      border: 1px solid var(--border-light);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      text-align: center;
+      transition: all 0.3s cubic-bezier(0.2, 0.9, 0.3, 1.1);
+      animation: float-subtle 7s infinite ease-in-out;
+    }
+    .feature-card:hover {
+      transform: translateY(-6px) scale(1.01);
+      box-shadow: 0 28px 40px -22px var(--accent-glow);
+      border-color: color-mix(in srgb, var(--accent-glow) 60%, transparent);
+      background: color-mix(in srgb, var(--card-bg) 90%, white);
+    }
+    @keyframes float-subtle {
+      0% { transform: translateY(0); }
+      50% { transform: translateY(-4px); }
+      100% { transform: translateY(0); }
+    }
+
+    .feature-card h3 {
+      font-size: 1.4rem;
+      font-weight: 500;
+      margin-bottom: 0.8rem;
+      color: var(--text-primary);
+    }
+
+    .feature-card p {
+      color: var(--text-soft);
+      font-weight: 350;
+      font-size: 0.95rem;
+      line-height: 1.5;
+    }
+
+    /* ===== FOUNDER SECTION ===== */
+    .founder-wrap {
+      display: flex;
+      align-items: center;
+      gap: 2.5rem;
+      flex-wrap: wrap;
+      background: var(--card-bg);
+      border-radius: 48px;
+      padding: clamp(2rem, 5vw, 2.8rem) clamp(2rem, 5vw, 3rem);
+      border: 1px solid var(--border-light);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      box-shadow: 0 15px 30px -20px var(--shadow-color);
+    }
+
+    .founder-quote {
+      font-size: 2.5rem;
+      opacity: 0.3;
+      line-height: 1;
+      margin-right: 0.2rem;
+    }
+
+    .founder-tag {
+      font-size: clamp(1.1rem, 3.5vw, 1.3rem);
+      font-weight: 350;
+      color: var(--text-primary);
+      line-height: 1.6;
+      margin-bottom: 1rem;
+    }
+
+    .founder-name {
+      font-weight: 540;
+      color: var(--text-primary);
+      font-size: clamp(1.3rem, 4vw, 1.6rem);
+      margin-top: 0.5rem;
+    }
+
+    .founder-support {
+      font-size: 1rem;
+      font-weight: 330;
+      color: var(--text-soft);
+    }
+
+    .avatar-placeholder {
+      width: 90px;
+      height: 90px;
+      border-radius: 50%;
+      background: color-mix(in srgb, var(--text-primary) 10%, transparent);
+      box-shadow: 0 8px 18px var(--shadow-color);
+    }
+
+    /* ===== CTA SECTION ===== */
+    .cta-section {
+      text-align: center;
+      background: var(--card-bg);
+      border-radius: 64px;
+      padding: clamp(2.8rem, 8vw, 4rem) clamp(1.8rem, 5vw, 3rem);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid var(--border-light);
+      box-shadow: 0 25px 40px -28px var(--shadow-color);
+    }
+
+    .cta-title {
+      font-size: clamp(2rem, 7vw, 2.8rem);
+      font-weight: 460;
+      margin-bottom: 2rem;
+      color: var(--text-primary);
+      line-height: 1.2;
+    }
+
+    .cta-btn {
+      padding: 1rem 3rem;
+      font-size: 1.2rem;
+      background: var(--card-bg);
+      border: 1px solid var(--border-light);
+      animation: softPulse 3s infinite ease-in-out;
+      display: inline-block;
+      min-width: 260px;
+    }
+    @keyframes softPulse {
+      0% { box-shadow: 0 20px 28px -20px var(--accent-glow); transform: scale(1); }
+      50% { box-shadow: 0 24px 36px -18px var(--accent-glow); transform: scale(1.01); }
+      100% { box-shadow: 0 20px 28px -20px var(--accent-glow); transform: scale(1); }
+    }
+
+    .cta-note {
+      margin-top: 2rem;
+      color: var(--text-soft);
+      font-size: 0.9rem;
+    }
+
+    /* ===== FOOTER ===== */
+    .footer {
+      padding: 2rem 0 3rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1.5rem;
+      color: var(--text-soft);
+      font-weight: 350;
+      border-top: 1px solid var(--border-light);
+    }
+
+    .footer-links {
+      display: flex;
+      gap: 2rem;
+      flex-wrap: wrap;
+    }
+
+    .footer-links a {
+      text-decoration: none;
+      color: currentColor;
+      transition: color 0.15s;
+      padding: 0.5rem 0;
+    }
+    .footer-links a:hover {
+      color: var(--text-primary);
+    }
+
+    /* ===== FADE SLIDE UP ANIMATION ===== */
+    .fade-slide-up {
+      opacity: 0;
+      transform: translateY(24px);
+      transition: opacity 0.8s cubic-bezier(0.15, 0.85, 0.3, 1.05), transform 0.8s cubic-bezier(0.15, 0.85, 0.3, 1.05);
+    }
+    .fade-slide-up.revealed {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* ===== RESPONSIVE FINE-TUNING ===== */
+    @media (max-width: 720px) {
+      .hero {
+        flex-direction: column;
+        align-items: flex-start;
+        min-height: auto;
+      }
+      .hero-right {
+        max-width: 100%;
+      }
+      .button-group {
+        flex-direction: row;
+        flex-wrap: wrap;
+      }
+      .btn {
+        flex: 1 1 auto;
+        min-width: 140px;
+      }
+      .founder-wrap {
+        flex-direction: column;
+        text-align: center;
+      }
+      .avatar-placeholder {
+        margin: 0 auto;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .button-group {
+        flex-direction: column;
+      }
+      .btn {
+        width: 100%;
+      }
+      .footer {
+        flex-direction: column;
+        text-align: center;
+      }
+      .footer-links {
+        justify-content: center;
+      }
+    }
+
+    /* improve tap targets */
+    button, .btn, #menu-toggle, #theme-toggle, a {
+      touch-action: manipulation;
+    }
+  </style>
+</head>
+<body class="dark-mode"> <!-- default to dark mode -->
+  <!-- scroll progress bar -->
+  <div id="scroll-progress"></div>
+
+  <!-- top bar with menu & theme toggle -->
+  <div id="top-bar">
+    <div id="menu-toggle" aria-label="Menu">☰</div>
+    <div class="brand">Nelavista</div>
+    <div id="theme-toggle" aria-label="Toggle dark mode">☀️</div> <!-- sun indicates dark mode (default) -->
+  </div>
+
+  <!-- side menu -->
+  <div id="side-menu">
+    <ul>
+      <li><a href="#home">Home</a></li>
+      <li><a href="#features">Features</a></li>
+      <li><a href="#founder">Founder</a></li>
+      <li><a href="#cta">Get started</a></li>
+    </ul>
+  </div>
+
+  <!-- overlay -->
+  <div id="overlay"></div>
+
+  <!-- MAIN CONTENT -->
+  <div class="main-content">
+    <div class="container">
+      <!-- HERO SECTION -->
+      <div id="home" class="hero fade-slide-up">
+        <div class="hero-left">
+          <h1>Nelavista</h1>
+          <div class="subheadline">Clarity for complex coursework.</div>
+          <p class="description">
+            Move beyond memorization. Get clear, structured explanations, adaptive practice, and lecture analysis—built for the way university students actually learn.
+          </p>
+          <div class="credibility">Used by students at LASUITES and beyond · early access</div>
+        </div>
+        <div class="hero-right">
+          <div class="button-group">
+            <a href="/login" class="btn btn-primary">Log in</a>
+            <a href="/signup" class="btn btn-secondary">Sign up</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- SECOND SECTION: explanation -->
+      <div class="section fade-slide-up">
+        <div class="explanation-card">
+          <p>
+            Nelavista transforms how you engage with course material. Break down complex topics, prepare for exams with adaptive tests, and extract key insights from lecture notes—so you can focus on mastery, not memorization.
+          </p>
+        </div>
+      </div>
+
+      <!-- THIRD SECTION: feature cards -->
+      <div id="features" class="section fade-slide-up">
+        <h2 style="text-align: center; font-weight: 440; margin-bottom: 1rem;">Built for clarity</h2>
+        <div class="cards-grid">
+          <div class="feature-card fade-slide-up" style="transition-delay: 0.05s;">
+            <h3>📘 AI Explanations</h3>
+            <p>Turn dense concepts into clear, structured explanations in seconds.</p>
+          </div>
+          <div class="feature-card fade-slide-up" style="transition-delay: 0.1s;">
+            <h3>⚡ Adaptive CBT</h3>
+            <p>Tests that evolve with your performance, targeting weak areas precisely.</p>
+          </div>
+          <div class="feature-card fade-slide-up" style="transition-delay: 0.15s;">
+            <h3>📄 Lecture Analyzer</h3>
+            <p>Upload notes, get concise summaries and key term extraction.</p>
+          </div>
+          <div class="feature-card fade-slide-up" style="transition-delay: 0.2s;">
+            <h3>✨ Personalized Pace</h3>
+            <p>Recommendations that adapt to your strengths, not generic paths.</p>
+          </div>
+          <div class="feature-card fade-slide-up" style="transition-delay: 0.25s;">
+            <h3>🌍 African Curriculum</h3>
+            <p>Aligned with local syllabi, context, and university expectations.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- FOURTH SECTION: founder -->
+      <div id="founder" class="section fade-slide-up">
+        <div class="founder-wrap">
+          <div style="flex: 1;">
+            <span class="founder-quote">“</span>
+            <div class="founder-tag">
+              I started Nelavista because I needed it myself—an AI that understands the pressure of African university academics. It's built by a student, for students.
+            </div>
+            <div class="founder-name">Abdul Afeez Tella</div>
+            <div class="founder-support">Founder · Mathematics, LASU</div>
+          </div>
+          <div style="min-width: 80px; text-align: right;">
+            <div class="avatar-placeholder"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- FINAL SECTION: call to action -->
+      <div id="cta" class="section" style="border-bottom: none;">
+        <div class="cta-section fade-slide-up">
+          <div class="cta-title">Begin your semester with clarity.</div>
+          <a href="/signup" class="btn cta-btn">Create free account</a>
+          <p class="cta-note">No credit card · For university students · 2‑minute setup</p>
+        </div>
+      </div>
+
+      <!-- FOOTER -->
+      <footer class="footer fade-slide-up">
+        <div>© Nelavista — academic clarity</div>
+        <div class="footer-links">
+          <a href="/privacy">Privacy</a>
+          <a href="/contact">Contact</a>
+          <a href="/faqs">FAQs</a>
+        </div>
+      </footer>
+    </div>
+  </div>
+
+  <!-- vanilla JS -->
+  <script>
+    (function() {
+      const themeToggle = document.getElementById('theme-toggle');
+      const body = document.body;
+
+      // saved theme logic: default to dark (no saved theme = dark)
+      const savedTheme = localStorage.getItem('nelavista-theme');
+      if (savedTheme === 'light') {
+        body.classList.remove('dark-mode');
+        themeToggle.textContent = '🌙';   // moon for light mode
+      } else {
+        // default to dark (savedTheme === 'dark' or null)
+        body.classList.add('dark-mode');
+        themeToggle.textContent = '☀️';   // sun for dark mode
+      }
+
+      themeToggle.addEventListener('click', () => {
+        body.classList.toggle('dark-mode');
+        if (body.classList.contains('dark-mode')) {
+          localStorage.setItem('nelavista-theme', 'dark');
+          themeToggle.textContent = '☀️';
+        } else {
+          localStorage.setItem('nelavista-theme', 'light');
+          themeToggle.textContent = '🌙';
+        }
+      });
+
+      // menu toggle
+      const menuToggle = document.getElementById('menu-toggle');
+      const sideMenu = document.getElementById('side-menu');
+      const overlay = document.getElementById('overlay');
+
+      menuToggle.addEventListener('click', () => {
+        sideMenu.classList.toggle('active');
+        overlay.classList.toggle('active');
+      });
+
+      overlay.addEventListener('click', () => {
+        sideMenu.classList.remove('active');
+        overlay.classList.remove('active');
+      });
+
+      // scroll progress
+      const progressBar = document.getElementById('scroll-progress');
+      window.addEventListener('scroll', () => {
+        const winScroll = document.documentElement.scrollTop;
+        const height = document.documentElement.scrollHeight - window.innerHeight;
+        const scrolled = (winScroll / height) * 100;
+        progressBar.style.width = scrolled + '%';
+      });
+
+      // intersection observer for fade-slide-up
+      const revealElements = document.querySelectorAll('.fade-slide-up');
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('revealed');
+            observer.unobserve(entry.target);
+          }
+        });
+      }, { threshold: 0.15, rootMargin: '0px 0px -30px 0px' });
+
+      revealElements.forEach(el => observer.observe(el));
+    })();
+  </script>
+</body>
+</html>
