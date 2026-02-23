@@ -303,7 +303,7 @@ def extract_tables_from_pdf(file_stream):
     
     try:
         file_stream.seek(0)
-        with pdfplumber.open(BytesIO(file_stream.read())) as pdf:
+        with pdfplumber.open(BytesIO(file.read())) as pdf:
             for page_num, page in enumerate(pdf.pages[:20]):
                 tables = page.extract_tables()
                 
@@ -1513,11 +1513,18 @@ def handle_ping(data):
 # FLASK ROUTES - CORE PLATFORM
 # ============================================
 @app.route('/')
-def index():
-    """Render main index page."""
+def landing():
+    """Render landing page if not logged in, otherwise redirect to dashboard."""
     user = session.get('user')
-    if not user:
-        return redirect(url_for('login'))
+    if user:
+        return redirect(url_for('dashboard'))
+    return render_template('landing.html')
+
+@app.route('/dashboard')
+@login_required
+def dashboard():
+    """Render main dashboard (index.html) for logged-in users."""
+    user = session.get('user')
     return render_template('index.html', user=user)
 
 @app.route('/signup', methods=['GET', 'POST'])
@@ -1562,7 +1569,7 @@ def signup():
                 'last_login': datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')
             }
             flash('Account created successfully!')
-            return redirect(url_for('index'))
+            return redirect(url_for('dashboard'))
             
         except Exception as e:
             print(f"❌ Error during signup: {e}")
@@ -1611,12 +1618,12 @@ def login():
                         'username': user.username,
                         'email': user.email,
                         'joined_on': user.joined_on.strftime('%Y-%m-%d'),
-                        'last_login': user.last_login.strftime('%Y-%m-d %H:%M:%S')
+                        'last_login': user.last_login.strftime('%Y-%m-%d %H:%M:%S')
                     }
                     
                     print(f"🎉 Login successful for user: {user.username}")
                     flash('Logged in successfully!')
-                    return redirect(url_for('index'))
+                    return redirect(url_for('dashboard'))
                 else:
                     print(f"❌ Password incorrect for user: {login_input}")
                     flash('Invalid password.')
@@ -2127,7 +2134,7 @@ Teach clearly, patiently, and in a way students love to read and keep using. Eve
 
 ## TEACHING STYLE
 - **Start with a warm, encouraging opening** – e.g., "Great question!", "Let's dive into that together.", "That's an excellent topic to explore."
-- **Break the explanation into clear sections** with descriptive headings (`<h2>`, `<h3>`). Use headings to guide the reader through the logic.
+- **Use headings (`<h2>`, `<h3>`) to structure longer explanations** – for multi‑part answers, use headings to guide the reader. For simple or introductory responses (e.g., "What can you teach me?"), you may start directly with a warm opening paragraph **without** a heading. Avoid headings that merely repeat the user's question.
 - **Use short paragraphs** – no more than 3–4 sentences each. Keep each paragraph focused on one idea.
 - **Use bullet points** (`<ul>`) for lists of key points, examples, or summaries.
 - **Use numbered lists** (`<ol>`) for step‑by‑step processes.
@@ -2168,12 +2175,15 @@ Teach clearly, patiently, and in a way students love to read and keep using. Eve
 - Use phrases like “Let’s break this down”, “Think of it this way”, “You’ll often see this in…”.
 - Sound like a real teacher who genuinely wants the student to understand.
 
-## EXAMPLE OPENING
-> **<h2>📘 Understanding Cellular Respiration</h2>**
+## EXAMPLES
+**For a detailed topic (use heading):**
+> <h2>📘 Understanding Cellular Respiration</h2>
 > <p>That's an excellent question! Cellular respiration is how your cells turn food into energy – think of it as the cell's power plant. Let’s explore it step by step.</p>
 
-Your final answer should be so clear and pleasant that a student would *want* to read it and come back for more."""
+**For a simple introductory question (no heading):**
+> <p>Great question! I can help you with a wide range of university subjects – from Mathematics and Sciences to Computer Science, Social Sciences, Literature, and more. Just tell me what topic you'd like to explore, and we'll dive right in!</p>
 
+Your final answer should be so clear and pleasant that a student would *want* to read it and come back for more."""
         messages = [{"role": "system", "content": system_prompt}]
         
         for mem in session_memory:
