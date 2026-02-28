@@ -3,19 +3,19 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
-  <title>Nelavista · LASU Campus Map</title>
+  <title>Nelavista · LASU Campus Map (fixed landmarks, coordinates on side)</title>
   
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
   
   <style>
+    /* === styles identical to previous version, keep unchanged === */
     * {
       margin: 0;
       padding: 0;
       box-sizing: border-box;
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
     }
-
     body {
       background-color: #fafafa;
       color: #333;
@@ -25,7 +25,6 @@
       min-height: 100vh;
       overflow-x: hidden;
     }
-
     .header {
       background-color: #fff;
       border-bottom: 1px solid #e0e0e0;
@@ -36,29 +35,24 @@
       align-items: center;
       justify-content: space-between;
     }
-
     .header-left {
       flex: 1 1 300px;
     }
-
     .header-left h1 {
       font-size: 1.4rem;
       font-weight: 700;
       color: #222;
       margin-bottom: 0.3rem;
     }
-
     .header-left p {
       font-size: 0.85rem;
       color: #666;
       max-width: 600px;
     }
-
     .location-dropdown {
       margin-left: 1rem;
       flex-shrink: 0;
     }
-
     .location-dropdown select {
       background-color: #111;
       color: white;
@@ -80,16 +74,8 @@
       overflow: hidden;
       text-overflow: ellipsis;
     }
-
-    .location-dropdown select:hover {
-      background-color: #333;
-    }
-
-    .location-dropdown select:focus {
-      outline: none;
-      box-shadow: 0 0 0 2px rgba(0,0,0,0.2);
-    }
-
+    .location-dropdown select:hover { background-color: #333; }
+    .location-dropdown select:focus { outline: none; box-shadow: 0 0 0 2px rgba(0,0,0,0.2); }
     /* Location permission banner */
     .location-prompt {
       background-color: #f0f7ff;
@@ -105,71 +91,30 @@
       box-shadow: 0 2px 6px rgba(0,0,0,0.02);
       transition: all 0.2s ease;
     }
-    .location-prompt.hidden {
-      display: none;
-    }
-    .prompt-message i {
-      margin-right: 0.5rem;
-      color: #0066cc;
-    }
-    .prompt-actions {
-      display: flex;
-      gap: 0.6rem;
-      flex-shrink: 0;
-    }
+    .location-prompt.hidden { display: none; }
+    .prompt-message i { margin-right: 0.5rem; color: #0066cc; }
+    .prompt-actions { display: flex; gap: 0.6rem; flex-shrink: 0; }
     .prompt-btn {
-      border: none;
-      padding: 0.4rem 1rem;
-      border-radius: 30px;
-      font-weight: 500;
-      font-size: 0.85rem;
-      cursor: pointer;
-      transition: background 0.15s, transform 0.1s;
+      border: none; padding: 0.4rem 1rem; border-radius: 30px; font-weight: 500;
+      font-size: 0.85rem; cursor: pointer; transition: background 0.15s, transform 0.1s;
       touch-action: manipulation;
     }
-    .prompt-btn.primary {
-      background-color: #0066cc;
-      color: white;
-    }
-    .prompt-btn.primary:hover,
-    .prompt-btn.primary:active {
-      background-color: #004999;
-    }
-    .prompt-btn.secondary {
-      background-color: #e2eaf6;
-      color: #1a3e6f;
-    }
-    .prompt-btn.secondary:hover,
-    .prompt-btn.secondary:active {
-      background-color: #c9d6e8;
-    }
-    .prompt-btn:active {
-      transform: scale(0.96);
-    }
-
+    .prompt-btn.primary { background-color: #0066cc; color: white; }
+    .prompt-btn.primary:hover, .prompt-btn.primary:active { background-color: #004999; }
+    .prompt-btn.secondary { background-color: #e2eaf6; color: #1a3e6f; }
+    .prompt-btn.secondary:hover, .prompt-btn.secondary:active { background-color: #c9d6e8; }
+    .prompt-btn:active { transform: scale(0.96); }
     @media (max-width: 500px) {
-      .location-prompt {
-        flex-direction: column;
-        align-items: flex-start;
-      }
-      .prompt-actions {
-        align-self: flex-end;
-      }
+      .location-prompt { flex-direction: column; align-items: flex-start; }
+      .prompt-actions { align-self: flex-end; }
     }
-
     .container {
       display: flex;
       flex-direction: column;
       flex: 1;
       height: calc(100vh - 140px);
     }
-
-    @media (min-width: 768px) {
-      .container {
-        flex-direction: row;
-      }
-    }
-
+    @media (min-width: 768px) { .container { flex-direction: row; } }
     #map {
       flex: 1;
       min-height: 50vh;
@@ -177,13 +122,7 @@
       width: 100%;
       z-index: 1;
     }
-
-    @media (min-width: 768px) {
-      #map {
-        min-height: calc(100vh - 120px);
-      }
-    }
-
+    @media (min-width: 768px) { #map { min-height: calc(100vh - 120px); } }
     .sidebar {
       width: 100%;
       background-color: #fff;
@@ -193,7 +132,6 @@
       max-height: 50vh;
       z-index: 1000;
     }
-
     @media (min-width: 768px) {
       .sidebar {
         width: 320px;
@@ -203,7 +141,6 @@
         max-height: calc(100vh - 120px);
       }
     }
-
     .sidebar h2 {
       font-size: 1.1rem;
       font-weight: 600;
@@ -212,11 +149,7 @@
       padding-bottom: 0.5rem;
       border-bottom: 2px solid #111;
     }
-
-    .controls {
-      margin-bottom: 1.5rem;
-    }
-
+    .controls { margin-bottom: 1.5rem; }
     .btn {
       display: inline-flex;
       align-items: center;
@@ -234,20 +167,9 @@
       margin-bottom: 0.8rem;
       touch-action: manipulation;
     }
-
-    .btn:hover, .btn:active {
-      background-color: #333;
-    }
-
-    .btn:active {
-      transform: scale(0.98);
-    }
-
-    .btn i {
-      margin-right: 0.5rem;
-      font-weight: bold;
-    }
-
+    .btn:hover, .btn:active { background-color: #333; }
+    .btn:active { transform: scale(0.98); }
+    .btn i { margin-right: 0.5rem; font-weight: bold; }
     .coords-box {
       font-size: 0.85rem;
       padding: 0.8rem;
@@ -261,39 +183,29 @@
       align-items: center;
       word-break: break-all;
     }
-
     .info-panel {
       margin-top: 1.5rem;
       padding-top: 1.2rem;
       border-top: 1px solid #eee;
     }
-
     .info-panel p {
       font-size: 0.8rem;
       color: #777;
       margin-bottom: 0.5rem;
       line-height: 1.4;
     }
-
     .locations-list h3 {
       font-size: 1rem;
       font-weight: 600;
       margin-bottom: 0.8rem;
       color: #444;
     }
-
     .locations-list ul {
       list-style-type: none;
       max-height: 200px;
       overflow-y: auto;
     }
-
-    @media (min-width: 768px) {
-      .locations-list ul {
-        max-height: 300px;
-      }
-    }
-
+    @media (min-width: 768px) { .locations-list ul { max-height: 300px; } }
     .locations-list li {
       padding: 0.9rem 0;
       border-bottom: 1px solid #f0f0f0;
@@ -303,119 +215,52 @@
       transition: background-color 0.2s;
       touch-action: manipulation;
     }
-
-    .locations-list li:hover, .locations-list li:active {
-      background-color: #f9f9f9;
-    }
-
-    .locations-list li:last-child {
-      border-bottom: none;
-    }
-
+    .locations-list li:hover, .locations-list li:active { background-color: #f9f9f9; }
+    .locations-list li:last-child { border-bottom: none; }
     .location-marker {
-      width: 12px;
-      height: 12px;
-      border-radius: 50%;
-      margin-right: 0.8rem;
-      flex-shrink: 0;
-      background-color: #111;
+      width: 12px; height: 12px; border-radius: 50%; margin-right: 0.8rem;
+      flex-shrink: 0; background-color: #111;
     }
-
-    .location-name {
-      font-weight: 500;
-      font-size: 0.95rem;
-    }
-
+    .location-name { font-weight: 500; font-size: 0.95rem; }
     .footer {
-      background-color: #111;
-      color: #aaa;
-      text-align: center;
-      padding: 1rem;
-      font-size: 0.75rem;
-      border-top: 1px solid #333;
+      background-color: #111; color: #aaa; text-align: center; padding: 1rem;
+      font-size: 0.75rem; border-top: 1px solid #333;
     }
-
-    .footer a {
-      color: #fff;
-      text-decoration: underline;
-    }
-
-    /* mobile toggle etc. (keep all existing styles) */
+    .footer a { color: #fff; text-decoration: underline; }
     .mobile-nav-toggle {
       display: none;
-      position: fixed;
-      bottom: 20px;
-      right: 20px;
-      width: 60px;
-      height: 60px;
-      background-color: #111;
-      color: white;
-      border-radius: 50%;
-      border: none;
-      font-size: 1.5rem;
-      z-index: 1001;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-      cursor: pointer;
-      touch-action: manipulation;
+      position: fixed; bottom: 20px; right: 20px; width: 60px; height: 60px;
+      background-color: #111; color: white; border-radius: 50%; border: none;
+      font-size: 1.5rem; z-index: 1001; box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+      cursor: pointer; touch-action: manipulation;
     }
-
     @media (max-width: 767px) {
-      .mobile-nav-toggle {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-      }
-      
+      .mobile-nav-toggle { display: flex; align-items: center; justify-content: center; }
       .sidebar {
-        position: fixed;
-        bottom: 0;
-        left: 0;
-        right: 0;
-        max-height: 70vh;
-        transform: translateY(100%);
-        transition: transform 0.3s ease-in-out;
-        border-top: 2px solid #111;
-        box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.15);
+        position: fixed; bottom: 0; left: 0; right: 0; max-height: 70vh;
+        transform: translateY(100%); transition: transform 0.3s ease-in-out;
+        border-top: 2px solid #111; box-shadow: 0 -4px 20px rgba(0,0,0,0.15);
         padding-bottom: 80px;
       }
-      
-      .sidebar.active {
-        transform: translateY(0);
-      }
-      
-      #map {
-        min-height: 60vh;
-        height: 60vh;
-      }
+      .sidebar.active { transform: translateY(0); }
+      #map { min-height: 60vh; height: 60vh; }
     }
-
     .leaflet-pulsing-icon {
       border-radius: 100%;
       box-shadow: 0 0 0 5px rgba(0, 102, 204, 0.4);
     }
     .leaflet-pulsing-icon::before {
       content: "";
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      width: 12px;
-      height: 12px;
-      background-color: #0066cc;
-      border-radius: 100%;
+      position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+      width: 12px; height: 12px; background-color: #0066cc; border-radius: 100%;
     }
-    .nav-line {
-      stroke: #0066cc;
-      stroke-width: 3;
-      stroke-dasharray: 10, 5;
-      fill: none;
-    }
+    .nav-line { stroke: #0066cc; stroke-width: 3; stroke-dasharray: 10, 5; fill: none; }
   </style>
 </head>
 <body>
   <header class="header">
       <h1>Nelavista LASU Campus Map</h1>
-      <p>Interactive map of Lagos State University (LASU). All landmarks are fixed. Click any marker for details and navigation.</p>
+      <p>Interactive map of Lagos State University. Landmarks are fixed. Click any marker to see its coordinates and get directions from your location.</p>
     </div>
     <div class="location-dropdown">
       <select id="campusLocationSelect" aria-label="Select a campus location">
@@ -424,7 +269,7 @@
     </div>
   </header>
 
-  <!-- LOCATION PERMISSION BANNER (appears on first visit, unless previously dismissed) -->
+  <!-- LOCATION PERMISSION BANNER -->
   <div id="locationPrompt" class="location-prompt">
     <div class="prompt-message">
       <i class="fas fa-location-dot"></i> For a better experience, enable your location.
@@ -447,7 +292,7 @@
         </button>
         
         <div class="coords-box" id="coordsBox">
-          Click a landmark to see details.
+          Click a landmark to see its coordinates.
         </div>
 
         <div class="search-container">
@@ -455,19 +300,19 @@
         </div>
         
         <div class="key-hint">
-          <i class="fas fa-info-circle"></i> <strong>Note:</strong> Landmarks are fixed. Use the buttons to navigate.
+          <i class="fas fa-info-circle"></i> <strong>Note:</strong> Landmarks are fixed. Click any marker to display its latitude & longitude.
         </div>
       </div>
 
       <div class="locations-list">
         <h3><i class="fas fa-building"></i> Campus Locations</h3>
         <ul id="locationsList">
-          <!-- List will be generated dynamically -->
+          <!-- dynamic -->
         </ul>
       </div>
 
       <div class="info-panel">
-        <p><i class="fas fa-info-circle"></i> <strong>Tip:</strong> Click any marker to see details and get directions from your location.</p>
+        <p><i class="fas fa-info-circle"></i> <strong>Tip:</strong> Click a marker to see its coordinates and get directions from your location.</p>
         <p><i class="fas fa-database"></i> <strong>Storage:</strong> Your last view and selected location are saved.</p>
         <p><i class="fas fa-mobile-alt"></i> <strong>Mobile:</strong> Tap a location to focus, then use the Navigate button.</p>
       </div>
@@ -483,211 +328,117 @@
        <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a> contributors | 
        Powered by <a href="https://leafletjs.com/" target="_blank">Leaflet</a>
     </p>
-    <p style="margin-top:0.3rem; font-size:0.7rem;">Student navigation tool. Landmark positions are fixed.</p>
+    <p style="margin-top:0.3rem; font-size:0.7rem;">Fixed landmarks – coordinates shown on click.</p>
   </footer>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
   <script>
-    // ---------- LOCATION PERMISSION PROMPT LOGIC ----------
+    // ---------- LOCATION PERMISSION PROMPT ----------
     const promptElement = document.getElementById('locationPrompt');
     const promptTurnOn = document.getElementById('promptTurnOn');
     const promptLater = document.getElementById('promptLater');
     const DISMISSAL_KEY = 'lasu_location_prompt_dismissed';
-    let promptInteracted = false;  // session flag
+    let promptInteracted = false;
 
-    // Helper to hide banner and mark as interacted (for session)
     function hideLocationPrompt() {
       if (promptElement) promptElement.classList.add('hidden');
       promptInteracted = true;
     }
-
-    // Show banner only if not permanently dismissed & not interacted yet
     function maybeShowPrompt() {
       const permanentlyDismissed = localStorage.getItem(DISMISSAL_KEY) === 'true';
-      if (!permanentlyDismissed && !promptInteracted) {
-        promptElement.classList.remove('hidden');
-      } else {
-        promptElement.classList.add('hidden');
-      }
+      if (!permanentlyDismissed && !promptInteracted) promptElement.classList.remove('hidden');
+      else promptElement.classList.add('hidden');
     }
+    promptTurnOn.addEventListener('click', function() { hideLocationPrompt(); locateUser(); });
+    promptLater.addEventListener('click', function() { localStorage.setItem(DISMISSAL_KEY, 'true'); hideLocationPrompt(); });
 
-    // Event: Turn On
-    promptTurnOn.addEventListener('click', function() {
-      hideLocationPrompt();          // hide for this session
-      // No localStorage dismissal -> will show again next session unless they dismiss permanently
-      locateUser();                  // request location
-    });
-
-    // Event: Maybe later → dismiss permanently
-    promptLater.addEventListener('click', function() {
-      localStorage.setItem(DISMISSAL_KEY, 'true');
-      hideLocationPrompt();
-    });
-
-    // Also if user manually uses "Show My Location" we can hide the prompt (they obviously engaged)
-    const originalLocateUser = window.locateUser; // we'll override after function declaration, but careful with hoisting.
-    // We'll patch locateUser after it's defined.
-
-    // ---------- EXISTING MAP CODE (with minor integration) ----------
+    // ---------- MAP DATA (comprehensive list as provided) ----------
     const locations = [
+      { id: "Abisogun_Leigh_Science_Building", name: "Abisogun Leigh Science Building", coords: [6.467138, 3.199167] },
+      { id: "Agriculture_Society_Building", name: "Agriculture Society Building", coords: [6.469889, 3.200425] },
       { id: "arcade", name: "Arcade (Student Commercial Hub)", coords: [6.465718, 3.203115] },
-      { id: "main_auditorium", name: "Main Auditorium", coords: [6.473108, 3.201887] },
-      { id: "mass_comm_hall", name: "Mass Communication Lecture Hall", coords: [6.472277, 3.200154] },
-      { id: "economics_hall", name: "Economics Hall", coords: [6.475243, 3.199060] },
-      { id: "library", name: "Main Library", coords: [6.464857, 3.200701] },
-      { id: "science_library", name: "Science Library", coords: [6.464526, 3.199186] },
-      { id: "law_library", name: "Law Library", coords: [6.464095, 3.200192] },
-      { id: "cbt_center", name: "CBT Center (Exam Hall)", coords: [6.475192, 3.201302] },
-      { id: "ict", name: "ICT Building", coords: [6.468753, 3.201230] },
-      { id: "health", name: "Health Center", coords: [6.465443, 3.202018] },
-      { id: "sports", name: "Sports Center", coords: [6.469750, 3.202550] },
-      { id: "education", name: "Faculty of Education", coords: [6.472996, 3.199889] },
       { id: "arts", name: "Faculty of Arts", coords: [6.464550, 3.201790] },
-      { id: "law", name: "Faculty of Law", coords: [6.467085, 3.202029] },
-      { id: "management_sciences", name: "Faculty of Management Sciences", coords: [6.475661, 3.199942] },
-      { id: "sciences", name: "Faculty of Sciences", coords: [6.466275, 3.200283] },
-      { id: "social_sciences", name: "Faculty of Social Sciences", coords: [6.475243, 3.199060] },
-      { id: "school_of_transport", name: "School of Transport and Logistics", coords: [6.474193, 3.198038] },
-      { id: "post_graduate_school", name: "Post Graduate School", coords: [6.468391, 3.201227] },
       { id: "bank_arena", name: "Bank Arena", coords: [6.464388, 3.204019] },
+      { id: "cbt_center", name: "CBT Center (Exam Hall)", coords: [6.475192, 3.201302] },
+      { id: "Chapel_Of_Light", name: "Chapel Of Light", coords: [6.464979, 3.198642] },
+      { id: "cheif_s.l._edu_lecture_hall", name: "Cheif S.L. Edu Lecture Hall", coords: [6.468023, 3.200031] },
+      { id: "Department_Of_Fisheries", name: "Department Of Fisheries Lagos State University", coords: [6.470422, 3.200270] },
+      { id: "economics_hall", name: "Economics Hall", coords: [6.475243, 3.199060] },
+      { id: "education", name: "Faculty of Education", coords: [6.472996, 3.199889] },
+      { id: "health", name: "Health Center", coords: [6.465443, 3.202018] },
+      { id: "Hussam_okoya_Sports_Complex", name: "Hussam okoya Sports Complex", coords: [6.468703, 3.203875] },
+      { id: "ict", name: "ICT Building", coords: [6.468753, 3.201230] },
+      { id: "lasu_football_pitch", name: "Lasu Football Pitch", coords: [6.467892, 3.203102] },
+      { id: "law", name: "Faculty of Law", coords: [6.467085, 3.202029] },
+      { id: "law_library", name: "Law Library", coords: [6.464095, 3.200192] },
+      { id: "library", name: "Main Library", coords: [6.464857, 3.200701] },
+      { id: "Library_Complex", name: "Library Complex", coords: [6.471904, 3.201474] },
+      { id: "love_garden", name: "Love Garden", coords: [6.469094, 3.200508] },
+      { id: "main_auditorium", name: "Main Auditorium", coords: [6.473108, 3.201887] },
+      { id: "management_sciences", name: "Faculty of Management Sciences", coords: [6.475661, 3.199942] },
+      { id: "mass_comm_hall", name: "Mass Communication Lecture Hall", coords: [6.472277, 3.200154] },
+      { id: "mba_hall", name: "MBA Hall", coords: [6.468553, 3.200275] },
       { id: "mosque", name: "LASU Central Mosque", coords: [6.465425, 3.200015] },
-      { id: "lasu_shuttle_park", name: "LASU Shuttle Park", coords: [6.475243, 3.199060] }
+      { id: "post_graduate_school", name: "Post Graduate School", coords: [6.468391, 3.201227] },
+      { id: "sciences", name: "Faculty of Sciences", coords: [6.466275, 3.200283] },
+      { id: "Sciences_Laboratory", name: "Sciences Laboratory", coords: [6.467114, 3.199851] },
+      { id: "science_library", name: "Science Library", coords: [6.464526, 3.199186] },
+      { id: "science_market", name: "Science Market", coords: [6.468047, 3.199285] },
+      { id: "school_of_transport", name: "School of Transport and Logistics", coords: [6.474193, 3.198038] },
+      { id: "Senate_Building", name: "Senate Building", coords: [6.471272, 3.199924] },
+      { id: "social_sciences", name: "Faculty of Social Sciences", coords: [6.475243, 3.199060] },
+      { id: "sports", name: "Sports Center", coords: [6.469750, 3.202550] }
     ];
 
     const lasuCenter = [6.4700, 3.2000];
-    const map = L.map("map", {
-      maxZoom: 21,
-      zoomControl: true,
-      tap: true,
-      touchZoom: true,
-      dragging: true,
-      scrollWheelZoom: true
-    }).setView(lasuCenter, 15);
+    const map = L.map("map", { maxZoom: 21, zoomControl: true, tap: true, touchZoom: true, dragging: true, scrollWheelZoom: true }).setView(lasuCenter, 15);
 
-    const streetLayer = L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-      attribution: '© OpenStreetMap contributors | © <a href="https://www.esri.com/">Esri</a>',
-      maxZoom: 19
-    });
-
-    const satelliteLayer = L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}", {
-      attribution: '© OpenStreetMap contributors | Tiles © Esri &mdash; Source: Esri, Maxar, Earthstar Geographics, and the GIS User Community',
-      maxZoom: 20
-    });
-
-    const terrainLayer = L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}", {
-      attribution: '© OpenStreetMap contributors | Tiles © Esri &mdash; Esri, DeLorme, NAVTEQ',
-      maxZoom: 19
-    });
-
+    // ---------- LAYERS ----------
+    const streetLayer = L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", { attribution: '© OpenStreetMap contributors | © <a href="https://www.esri.com/">Esri</a>', maxZoom: 19 });
+    const satelliteLayer = L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}", { attribution: '© OpenStreetMap contributors | Tiles © Esri &mdash; Source: Esri, Maxar, Earthstar Geographics, and the GIS User Community', maxZoom: 20 });
+    const terrainLayer = L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}", { attribution: '© OpenStreetMap contributors | Tiles © Esri &mdash; Esri, DeLorme, NAVTEQ', maxZoom: 19 });
     const hybridLayer = L.layerGroup([
-      L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}", {
-        attribution: '© OpenStreetMap contributors | Tiles © Esri &mdash; Source: Esri, Maxar, Earthstar Geographics, and the GIS User Community',
-        maxZoom: 20
-      }),
-      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-        opacity: 0.3,
-        attribution: '© OpenStreetMap contributors',
-        maxZoom: 19
-      })
+      L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}", { attribution: '© OpenStreetMap contributors | Tiles © Esri &mdash; Source: Esri, Maxar, Earthstar Geographics, and the GIS User Community', maxZoom: 20 }),
+      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", { opacity: 0.3, attribution: '© OpenStreetMap contributors', maxZoom: 19 })
     ]);
-
-    streetLayer.maxAvailableZoom = 19;
-    satelliteLayer.maxAvailableZoom = 19;
-    terrainLayer.maxAvailableZoom = 19;
-    hybridLayer.maxAvailableZoom = 20;
-
-    const baseLayers = {
-      "Street": streetLayer,
-      "Satellite": satelliteLayer,
-      "Terrain": terrainLayer,
-      "Hybrid": hybridLayer
-    };
-
+    streetLayer.maxAvailableZoom = 19; satelliteLayer.maxAvailableZoom = 19; terrainLayer.maxAvailableZoom = 19; hybridLayer.maxAvailableZoom = 20;
+    const baseLayers = { "Street": streetLayer, "Satellite": satelliteLayer, "Terrain": terrainLayer, "Hybrid": hybridLayer };
     satelliteLayer.addTo(map);
-
-    const layerControl = L.control.layers(baseLayers, null, {
-      position: 'topright',
-      collapsed: true
-    }).addTo(map);
+    const layerControl = L.control.layers(baseLayers, null, { position: 'topright', collapsed: true }).addTo(map);
 
     let userManualSelection = false;
     let currentBaseLayer = satelliteLayer;
     const USER_PREFERENCE_KEY = 'lasu_map_base_layer';
-
-    function getCurrentLayerMaxZoom() {
-      return currentBaseLayer.maxAvailableZoom || 19;
-    }
-
+    function getCurrentLayerMaxZoom() { return currentBaseLayer.maxAvailableZoom || 19; }
     function updateMapZoomLimits() {
       const maxZoom = getCurrentLayerMaxZoom();
-      const currentZoom = map.getZoom();
-      if (currentZoom > maxZoom) map.setZoom(maxZoom);
+      if (map.getZoom() > maxZoom) map.setZoom(maxZoom);
       map.options.maxZoom = maxZoom;
       if (map.zoomControl) map.zoomControl._updateDisabled();
     }
-
-    function clampZoomToLayer() {
-      const maxZoom = getCurrentLayerMaxZoom();
-      const currentZoom = map.getZoom();
-      if (currentZoom > maxZoom) map.setZoom(maxZoom);
-    }
-
-    function saveUserPreference(layerName) {
-      localStorage.setItem(USER_PREFERENCE_KEY, layerName);
-      userManualSelection = true;
-      updateMapZoomLimits();
-    }
-
+    function clampZoomToLayer() { const m = getCurrentLayerMaxZoom(); if (map.getZoom() > m) map.setZoom(m); }
+    function saveUserPreference(layerName) { localStorage.setItem(USER_PREFERENCE_KEY, layerName); userManualSelection = true; updateMapZoomLimits(); }
     function restoreUserPreference() {
-      const savedLayer = localStorage.getItem(USER_PREFERENCE_KEY);
-      if (savedLayer && baseLayers[savedLayer]) {
-        map.removeLayer(currentBaseLayer);
-        baseLayers[savedLayer].addTo(map);
-        currentBaseLayer = baseLayers[savedLayer];
-        userManualSelection = true;
-        updateMapZoomLimits();
-        return true;
-      }
+      const saved = localStorage.getItem(USER_PREFERENCE_KEY);
+      if (saved && baseLayers[saved]) { map.removeLayer(currentBaseLayer); baseLayers[saved].addTo(map); currentBaseLayer = baseLayers[saved]; userManualSelection = true; updateMapZoomLimits(); return true; }
       return false;
     }
-
     function autoSwitchLayerByZoom() {
       if (userManualSelection) return;
-      const zoom = map.getZoom();
-      let targetLayer;
-      if (zoom < 16) targetLayer = streetLayer;
-      else if (zoom >= 16 && zoom < 18) targetLayer = terrainLayer;
-      else targetLayer = satelliteLayer;
-      if (targetLayer !== currentBaseLayer) {
-        map.removeLayer(currentBaseLayer);
-        targetLayer.addTo(map);
-        currentBaseLayer = targetLayer;
-        updateMapZoomLimits();
-      }
+      const z = map.getZoom(); let target;
+      if (z < 16) target = streetLayer; else if (z < 18) target = terrainLayer; else target = satelliteLayer;
+      if (target !== currentBaseLayer) { map.removeLayer(currentBaseLayer); target.addTo(map); currentBaseLayer = target; updateMapZoomLimits(); }
     }
-
     const hasRestored = restoreUserPreference();
-
-    map.on('zoomend', function() {
-      clampZoomToLayer();
-      if (!userManualSelection) autoSwitchLayerByZoom();
+    map.on('zoomend', function() { clampZoomToLayer(); if (!userManualSelection) autoSwitchLayerByZoom(); });
+    map.on('baselayerchange', function(e) {
+      const name = Object.keys(baseLayers).find(k => baseLayers[k] === e.layer);
+      if (name) { saveUserPreference(name); currentBaseLayer = e.layer; updateMapZoomLimits(); }
     });
+    if (!hasRestored) { updateMapZoomLimits(); autoSwitchLayerByZoom(); }
 
-    map.on('baselayerchange', function(event) {
-      const layerName = Object.keys(baseLayers).find(key => baseLayers[key] === event.layer);
-      if (layerName) {
-        saveUserPreference(layerName);
-        currentBaseLayer = event.layer;
-        updateMapZoomLimits();
-      }
-    });
-
-    if (!hasRestored) {
-      updateMapZoomLimits();
-      autoSwitchLayerByZoom();
-    }
-
+    // ---------- GLOBAL VARS ----------
     const coordsBox = document.getElementById("coordsBox");
     const locationsList = document.getElementById("locationsList");
     let activeMarker = null;
@@ -703,139 +454,98 @@
 
     function toggleSidebar() {
       sidebar.classList.toggle('active');
-      if (sidebar.classList.contains('active')) {
-        toggleIcon.className = 'fas fa-times';
-        mobileToggle.style.backgroundColor = '#e74c3c';
-      } else {
-        toggleIcon.className = 'fas fa-bars';
-        mobileToggle.style.backgroundColor = '#111';
-      }
+      toggleIcon.className = sidebar.classList.contains('active') ? 'fas fa-times' : 'fas fa-bars';
+      mobileToggle.style.backgroundColor = sidebar.classList.contains('active') ? '#e74c3c' : '#111';
     }
-
-    function closeSidebarOnMobile() {
-      if (window.innerWidth < 768 && sidebar.classList.contains('active')) toggleSidebar();
-    }
-
-    function onSearchFocus() {
-      if (window.innerWidth < 768) {
-        sidebar.classList.add('active');
-        toggleIcon.className = 'fas fa-times';
-        mobileToggle.style.backgroundColor = '#e74c3c';
-      }
-    }
-
+    function closeSidebarOnMobile() { if (window.innerWidth < 768 && sidebar.classList.contains('active')) toggleSidebar(); }
+    function onSearchFocus() { if (window.innerWidth < 768) { sidebar.classList.add('active'); toggleIcon.className = 'fas fa-times'; mobileToggle.style.backgroundColor = '#e74c3c'; } }
     mobileToggle.addEventListener('click', toggleSidebar);
+    function getDistanceInMeters(a, b) { return a.distanceTo(b); }
 
-    function getDistanceInMeters(latLng1, latLng2) {
-      return latLng1.distanceTo(latLng2);
+    function getMarkerColor(cat) {
+      const c = { faculty:'#3498db', department:'#9b59b6', lecture:'#1abc9c', administrative:'#f39c12', healthcare:'#e74c3c', religious:'#2c3e50', ict:'#16a085', bank:'#27ae60', sports:'#c0392b', commercial:'#8e44ad', utility:'#7f8c8d' };
+      return c[cat] || '#2ecc71';
     }
-
-    function getMarkerColor(category) {
-      const colors = {
-        faculty: '#3498db', department: '#9b59b6', lecture: '#1abc9c',
-        administrative: '#f39c12', healthcare: '#e74c3c', religious: '#2c3e50',
-        ict: '#16a085', bank: '#27ae60', sports: '#c0392b',
-        commercial: '#8e44ad', utility: '#7f8c8d'
-      };
-      return colors[category] || '#2ecc71';
-    }
-
-    function getCategoryFromLocation(location) {
-      const name = location.name.toLowerCase();
-      const id = location.id.toLowerCase();
-      if (name.includes('arcade') || name.includes('commercial')) return 'commercial';
-      if (name.includes('mosque')) return 'religious';
-      if (name.includes('bank')) return 'bank';
-      if (name.includes('sport') || name.includes('court')) return 'sports';
-      if (name.includes('shuttle')) return 'utility';
-      if (name.includes('ict') || name.includes('cbt') || name.includes('computer')) return 'ict';
-      if (name.includes('medical') || name.includes('health')) return 'healthcare';
-      if (name.includes('faculty') || name.includes('school')) return 'faculty';
-      if (name.includes('library') || name.includes('lab')) return 'department';
-      if (name.includes('lecture') || name.includes('hall') || name.includes('auditorium')) return 'lecture';
+    function getCategoryFromLocation(loc) {
+      const n = loc.name.toLowerCase();
+      if (n.includes('arcade')||n.includes('commercial')) return 'commercial';
+      if (n.includes('mosque')) return 'religious';
+      if (n.includes('bank')) return 'bank';
+      if (n.includes('sport')||n.includes('court')) return 'sports';
+      if (n.includes('ict')||n.includes('cbt')||n.includes('computer')) return 'ict';
+      if (n.includes('medical')||n.includes('health')) return 'healthcare';
+      if (n.includes('faculty')||n.includes('school')) return 'faculty';
+      if (n.includes('library')||n.includes('lab')) return 'department';
+      if (n.includes('lecture')||n.includes('hall')||n.includes('auditorium')) return 'lecture';
       return 'general';
     }
 
     function populateSidebar() {
       locationsList.innerHTML = '';
-      locations.forEach(location => {
+      locations.forEach(loc => {
         const li = document.createElement('li');
-        li.setAttribute('data-location-id', location.id);
-        li.innerHTML = `
-          <div class="location-marker" style="background-color: ${getMarkerColor(getCategoryFromLocation(location))}"></div>
-          <div class="location-name">${location.name}</div>
-        `;
-        li.onclick = () => {
-          focusOnMarker(location.id);
-          closeSidebarOnMobile();
-        };
+        li.setAttribute('data-location-id', loc.id);
+        li.innerHTML = `<div class="location-marker" style="background-color:${getMarkerColor(getCategoryFromLocation(loc))}"></div><div class="location-name">${loc.name}</div>`;
+        li.onclick = () => { focusOnMarker(loc.id); closeSidebarOnMobile(); };
         locationsList.appendChild(li);
       });
     }
-
     function populateDropdown() {
       locationSelect.innerHTML = '<option value="">— Select a location —</option>';
-      locations.forEach(location => {
-        const option = document.createElement('option');
-        option.value = location.id;
-        option.textContent = location.name;
-        locationSelect.appendChild(option);
+      locations.forEach(loc => {
+        const opt = document.createElement('option');
+        opt.value = loc.id; opt.textContent = loc.name;
+        locationSelect.appendChild(opt);
       });
     }
+    locationSelect.addEventListener('change', e => { if (e.target.value) focusOnMarker(e.target.value); });
 
-    locationSelect.addEventListener('change', function(e) {
-      const locationId = e.target.value;
-      if (locationId) focusOnMarker(locationId);
-    });
+    function getSavedCoords(id, fallback) { const s = localStorage.getItem(`lasu_${id}`); return s ? JSON.parse(s) : fallback; }
+    // saveCoords is no longer used but kept for compatibility (won't be called)
+    function saveCoords(id, latlng) { localStorage.setItem(`lasu_${id}`, JSON.stringify([latlng.lat, latlng.lng])); }
+    function findLocationById(id) { return locations.find(l => l.id === id); }
 
-    function getSavedCoords(locationId, fallback) {
-      const saved = localStorage.getItem(`lasu_${locationId}`);
-      return saved ? JSON.parse(saved) : fallback;
-    }
-
-    function saveCoords(locationId, latlng) {
-      localStorage.setItem(`lasu_${locationId}`, JSON.stringify([latlng.lat, latlng.lng]));
-    }
-
-    function findLocationById(id) {
-      return locations.find(loc => loc.id === id);
-    }
-
-    function createNavigationLine(fromLatLng, toLatLng) {
+    function createNavigationLine(from, to) {
       if (navigationLine) map.removeLayer(navigationLine);
-      navigationLine = L.polyline([fromLatLng, toLatLng], {
-        color: '#0066cc', weight: 3, opacity: 0.7, dashArray: '10, 5', className: 'nav-line'
-      }).addTo(map);
-      const distance = getDistanceInMeters(fromLatLng, toLatLng);
-      navigationLine.bindTooltip(`Distance: ${Math.round(distance)} meters`, { permanent: false, direction: 'top' });
-      return navigationLine;
+      navigationLine = L.polyline([from, to], { color:'#0066cc', weight:3, opacity:0.7, dashArray:'10,5', className:'nav-line' }).addTo(map);
+      navigationLine.bindTooltip(`Distance: ${Math.round(getDistanceInMeters(from, to))} m`, { permanent: false, direction:'top' });
     }
 
+    // ---- helper to update coordsBox with name + lat/lng ----
+    function updateCoordsBox(locationName, latlng) {
+      const lat = latlng.lat.toFixed(6);
+      const lng = latlng.lng.toFixed(6);
+      coordsBox.textContent = `${locationName} : ${lat}, ${lng}`;
+    }
+
+    // ---- INIT MARKERS (draggable = false) ----
     function initializeMarkers() {
       locations.forEach(location => {
-        const startCoords = getSavedCoords(location.id, location.coords);
-        const category = getCategoryFromLocation(location);
-        const marker = L.marker(startCoords, { 
-          draggable: false,
+        const start = getSavedCoords(location.id, location.coords); // still loads any previously saved coords if any (though never saved now)
+        const cat = getCategoryFromLocation(location);
+        const marker = L.marker(start, {
+          draggable: false,                // ✨ landmarks are now fixed
           title: location.name,
           icon: L.divIcon({
             className: 'custom-marker',
-            html: `<div style="background-color: ${getMarkerColor(category)}; width: 14px; height: 14px; border-radius: 50%; border: 2px solid white; box-shadow: 0 0 5px rgba(0,0,0,0.5);"></div>`,
-            iconSize: [18, 18],
-            iconAnchor: [9, 9]
+            html: `<div style="background-color:${getMarkerColor(cat)}; width:14px; height:14px; border-radius:50%; border:2px solid white; box-shadow:0 0 5px rgba(0,0,0,0.5);"></div>`,
+            iconSize: [18,18], iconAnchor: [9,9]
           })
         }).addTo(map);
-        
+
         const popupContent = `<strong>${location.name}</strong><br><button class="nav-btn" onclick="navigateToMarker('${location.id}'); closeSidebarOnMobile();">Navigate from my location</button>`;
         marker.bindPopup(popupContent);
         marker.locationData = location;
-        marker.on("click", () => {
+
+        // --- click: show coordinates in sidebar ---
+        marker.on("click", function() {
           activeMarker = marker;
-          coordsBox.textContent = `${location.name} selected`;
+          updateCoordsBox(location.name, marker.getLatLng());
           locationSelect.value = location.id;
           saveState('marker', location.id);
           closeSidebarOnMobile();
         });
+
         markers[location.id] = marker;
       });
     }
@@ -847,144 +557,97 @@
         map.setView(marker.getLatLng(), Math.min(17, getCurrentLayerMaxZoom()));
         marker.openPopup();
         activeMarker = marker;
-        coordsBox.textContent = `${location.name} selected`;
+        updateCoordsBox(location.name, marker.getLatLng());
         locationSelect.value = locationId;
         saveState('marker', locationId);
       } else {
-        coordsBox.textContent = `Location data not available.`;
+        coordsBox.textContent = 'Location data not available.';
       }
     }
 
-    function findNearestBuilding(userLatLng) {
-      let nearestDistance = Infinity, nearestLocation = null;
-      locations.forEach(location => {
-        const marker = markers[location.id];
-        if (marker) {
-          const distance = getDistanceInMeters(userLatLng, marker.getLatLng());
-          if (distance < nearestDistance) {
-            nearestDistance = distance;
-            nearestLocation = location;
-          }
-        }
+    function findNearestBuilding(userLL) {
+      let bestDist = Infinity, bestLoc = null;
+      locations.forEach(loc => {
+        const m = markers[loc.id];
+        if (m) { const d = getDistanceInMeters(userLL, m.getLatLng()); if (d < bestDist) { bestDist = d; bestLoc = loc; } }
       });
-      return { location: nearestLocation, distance: nearestDistance };
+      return { location: bestLoc, distance: bestDist };
     }
 
-    // ----- PATCH locateUser to also hide prompt on use -----
+    // ----- locateUser (hides prompt) -----
     window.locateUser = function() {
-      // Hide location prompt if visible (user engaged)
       hideLocationPrompt();
-
-      if (!navigator.geolocation) {
-        coordsBox.textContent = "Geolocation is not supported by your browser";
-        return;
-      }
-      coordsBox.textContent = "Locating...";
-      navigator.geolocation.getCurrentPosition(position => {
-        const userCoords = [position.coords.latitude, position.coords.longitude];
+      if (!navigator.geolocation) { coordsBox.textContent = 'Geolocation not supported'; return; }
+      coordsBox.textContent = 'Locating...';
+      navigator.geolocation.getCurrentPosition(pos => {
+        const userCoords = [pos.coords.latitude, pos.coords.longitude];
         userLatLng = L.latLng(userCoords[0], userCoords[1]);
-        const lasuCenterLatLng = L.latLng(lasuCenter[0], lasuCenter[1]);
-        const distanceFromCampus = getDistanceInMeters(userLatLng, lasuCenterLatLng);
-        if (distanceFromCampus > 2000) {
-          coordsBox.textContent = "You are outside LASU campus. Showing campus instead.";
+        const distToCampus = getDistanceInMeters(userLatLng, L.latLng(lasuCenter[0], lasuCenter[1]));
+        if (distToCampus > 2000) {
+          coordsBox.textContent = 'You are outside LASU campus. Showing campus instead.';
           map.setView(lasuCenter, Math.min(17, getCurrentLayerMaxZoom()));
           return;
         }
         if (userLocationMarker) map.removeLayer(userLocationMarker);
-        const blueDotIcon = L.divIcon({
-          className: 'leaflet-pulsing-icon',
-          iconSize: [24, 24],
-          iconAnchor: [12, 12]
-        });
-        userLocationMarker = L.marker(userCoords, { icon: blueDotIcon }).addTo(map).bindPopup("You are here").openPopup();
+        const blueDot = L.divIcon({ className:'leaflet-pulsing-icon', iconSize:[24,24], iconAnchor:[12,12] });
+        userLocationMarker = L.marker(userCoords, { icon: blueDot }).addTo(map).bindPopup('You are here').openPopup();
         map.setView(userCoords, Math.min(17, getCurrentLayerMaxZoom()));
         const nearest = findNearestBuilding(userLatLng);
         if (nearest.location) {
-          coordsBox.textContent = `Nearest building: ${nearest.location.name} – ${Math.round(nearest.distance)} meters away`;
+          coordsBox.textContent = `Nearest: ${nearest.location.name} – ${Math.round(nearest.distance)} m away`;
           if (lastNearestMarker) lastNearestMarker.closePopup();
           markers[nearest.location.id].openPopup();
           lastNearestMarker = markers[nearest.location.id];
         }
         saveState('view', null);
         closeSidebarOnMobile();
-      }, () => {
-        coordsBox.textContent = "Location access denied or unavailable";
-      }, { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 });
+      }, () => { coordsBox.textContent = 'Location access denied or unavailable'; }, { enableHighAccuracy:true, timeout:10000, maximumAge:0 });
     };
 
     window.navigateToMarker = function(locationId) {
-      if (!userLatLng) {
-        alert("Please enable location services and click 'Show My Location' first.");
-        return;
-      }
-      const marker = markers[locationId];
-      if (marker) {
-        createNavigationLine(userLatLng, marker.getLatLng());
-        marker.openPopup();
-      }
+      if (!userLatLng) { alert('Please enable location services and click "Show My Location" first.'); return; }
+      const m = markers[locationId];
+      if (m) { createNavigationLine(userLatLng, m.getLatLng()); m.openPopup(); }
     };
 
-    function saveState(type, value) {
-      if (type === 'marker') localStorage.setItem('lasu_last_marker', value);
-      else if (type === 'view') {
-        const center = map.getCenter();
-        localStorage.setItem('lasu_map_view', JSON.stringify({ center: [center.lat, center.lng], zoom: map.getZoom() }));
-      }
+    function saveState(type, val) {
+      if (type === 'marker') localStorage.setItem('lasu_last_marker', val);
+      else if (type === 'view') { const c = map.getCenter(); localStorage.setItem('lasu_map_view', JSON.stringify({ center:[c.lat, c.lng], zoom:map.getZoom() })); }
     }
-
     function restoreState() {
-      const lastMarker = localStorage.getItem('lasu_last_marker');
-      if (lastMarker && markers[lastMarker]) { focusOnMarker(lastMarker); return; }
-      const savedView = localStorage.getItem('lasu_map_view');
-      if (savedView) {
-        try { const { center, zoom } = JSON.parse(savedView); map.setView(center, zoom); } catch(e) {}
-      }
+      const last = localStorage.getItem('lasu_last_marker');
+      if (last && markers[last]) { focusOnMarker(last); return; }
+      const saved = localStorage.getItem('lasu_map_view');
+      if (saved) { try { const {center,zoom}=JSON.parse(saved); map.setView(center,zoom); }catch(e){} }
     }
 
     function searchLocations() {
-      const searchTerm = document.getElementById('searchInput').value.toLowerCase();
-      const listItems = document.querySelectorAll('#locationsList li');
-      let firstMatch = null;
-      listItems.forEach(item => {
-        const locationId = item.getAttribute('data-location-id');
-        const location = findLocationById(locationId);
-        if (location.name.toLowerCase().includes(searchTerm)) {
-          item.style.display = 'flex';
-          if (!firstMatch) firstMatch = locationId;
-        } else {
-          item.style.display = 'none';
-        }
+      const term = document.getElementById('searchInput').value.toLowerCase();
+      const items = document.querySelectorAll('#locationsList li');
+      let first = null;
+      items.forEach(li => {
+        const id = li.getAttribute('data-location-id');
+        const loc = findLocationById(id);
+        if (loc.name.toLowerCase().includes(term)) { li.style.display = 'flex'; if (!first) first = id; }
+        else li.style.display = 'none';
       });
-      if (firstMatch && searchTerm.length > 0) focusOnMarker(firstMatch);
+      if (first && term.length>0) focusOnMarker(first);
     }
-
     document.getElementById('searchInput').addEventListener('input', searchLocations);
     map.on('moveend', () => saveState('view', null));
     map.on('click', closeSidebarOnMobile);
 
-    // Initialize everything
+    // ---------- START ----------
     populateSidebar();
     populateDropdown();
     initializeMarkers();
     restoreState();
-
-    // Show location prompt if not dismissed
     maybeShowPrompt();
 
-    if (window.innerWidth < 768) {
-      sidebar.classList.remove('active');
-      mobileToggle.style.display = 'flex';
-    }
-
+    if (window.innerWidth < 768) { sidebar.classList.remove('active'); mobileToggle.style.display = 'flex'; }
     window.addEventListener('resize', function() {
-      if (window.innerWidth >= 768) {
-        sidebar.classList.remove('active');
-        mobileToggle.style.display = 'none';
-        toggleIcon.className = 'fas fa-bars';
-        mobileToggle.style.backgroundColor = '#111';
-      } else {
-        mobileToggle.style.display = 'flex';
-      }
+      if (window.innerWidth >= 768) { sidebar.classList.remove('active'); mobileToggle.style.display = 'none'; toggleIcon.className = 'fas fa-bars'; mobileToggle.style.backgroundColor = '#111'; }
+      else { mobileToggle.style.display = 'flex'; }
     });
   </script>
 </body>
