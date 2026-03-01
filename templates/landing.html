@@ -76,7 +76,7 @@
       color: var(--white); 
     }
     
-    #menu-toggle, #theme-toggle {
+    #menu-toggle {
       width: 40px;
       height: 40px;
       border-radius: 50%;
@@ -88,6 +88,55 @@
       border: none;
       color: var(--white);
       cursor: pointer;
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    /* Sign Up & Login links */
+    .header-link {
+      color: var(--off-white);
+      font-size: 0.9rem;
+      font-weight: 500;
+      padding: 8px 14px;
+      border-radius: 40px;
+      transition: background 0.2s;
+      white-space: nowrap;
+      border: 1px solid transparent;
+    }
+    .header-link:hover {
+      background: rgba(255,255,255,0.1);
+      border-color: rgba(255,255,255,0.2);
+    }
+
+    /* Special style for Sign Up (subtle emphasis) */
+    .header-link:first-child {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.15);
+    }
+    .header-link:first-child:hover {
+      background: rgba(255,255,255,0.15);
+    }
+
+    #theme-toggle {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.4rem;
+      background: transparent;
+      border: none;
+      color: var(--white);
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    #theme-toggle:hover {
+      background: rgba(255,255,255,0.1);
     }
 
     /* side menu (unchanged) */
@@ -351,13 +400,17 @@
       font-size: 1.4rem; 
       font-weight: 600; 
     }
-    .avatar { 
-      width: 100px; 
-      height: 100px; 
-      border-radius: 50%; 
-      background: #2a2a2a; 
-      border: 2px solid #fff; 
-      margin: 0 auto; 
+    .founder-title { color: #aaa; }
+    
+    /* Avatar image styling */
+    .avatar {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 2px solid #fff;
+      margin: 0 auto;
+      background: #2a2a2a; /* fallback while loading */
     }
 
     /* CTA - full width button */
@@ -428,6 +481,17 @@
       .founder-card { flex-direction: row; text-align: left; }
       .avatar { margin: 0; }
     }
+
+    /* Mobile adjustments for header links */
+    @media (max-width: 480px) {
+      .header-link {
+        font-size: 0.8rem;
+        padding: 6px 10px;
+      }
+      .header-actions {
+        gap: 6px;
+      }
+    }
   </style>
 </head>
 <body>
@@ -449,17 +513,19 @@
     </nav>
   </aside>
 
-  <!-- TOP BAR -->
+  <!-- TOP BAR with Sign Up and Login links -->
   <header id="top-bar">
     <button id="menu-toggle" aria-label="Menu">☰</button>
     <div class="brand-logo">Nelavista</div>
     <div class="header-actions">
+      <a href="/signup" class="header-link">Sign Up</a>
+      <a href="/login" class="header-link">Login</a>
       <button id="theme-toggle" aria-label="Toggle theme">🌙</button>
     </div>
   </header>
 
   <main>
-    <!-- HERO SECTION - properly structured for mobile -->
+    <!-- HERO SECTION -->
     <section class="kh-hero-section" id="home">
       <div class="container kh-container">
         <div class="kh-text-content">
@@ -491,20 +557,20 @@
       </div>
     </section>
 
-    <!-- REST OF CONTENT (unchanged but will flow nicely) -->
+    <!-- EXPLANATION CARD -->
     <div class="container">
       <div class="explain-card">
         <p>Nelavista is a complete platform built by a LASU student to solve every academic challenge: chat, analyze, collaborate, practice, and navigate campus – all in one sleek interface.</p>
       </div>
     </div>
 
+    <!-- FEATURES GRID -->
     <section id="features" class="product-grid-section container">
       <header class="section-header">
         <h2>Everything you need</h2>
         <a href="#cta" class="link-muted">Get started →</a>
       </header>
       <div class="product-grid">
-        <!-- Feature cards (9 items) -->
         <div class="feature-card"><i class="ri-user-line feature-icon"></i><h3>Profile</h3><p>Track your progress and study habits.</p></div>
         <div class="feature-card"><i class="ri-chat-1-line feature-icon"></i><h3>Talk to Nelavista</h3><p>AI assistant that answers questions.</p></div>
         <div class="feature-card"><i class="ri-file-search-line feature-icon"></i><h3>Analyze Materials</h3><p>Upload notes, get summaries.</p></div>
@@ -517,6 +583,7 @@
       </div>
     </section>
 
+    <!-- FOUNDER SECTION WITH IMAGE -->
     <section id="about" class="container">
       <div class="founder-card">
         <div class="founder-left">
@@ -526,11 +593,12 @@
           <div class="founder-title">Founder · Mathematics, LASU</div>
         </div>
         <div class="founder-right">
-          <div class="avatar"></div>
+          <img src="{{ url_for('static', filename='founder.jpeg') }}" alt="founder.jpeg" class="avatar">
         </div>
       </div>
     </section>
 
+    <!-- CTA SECTION -->
     <section id="cta" class="container" style="padding: 40px 0 60px;">
       <div class="cta-card">
         <h2 class="cta-title">Ready to transform your study life?</h2>
@@ -542,6 +610,7 @@
       </div>
     </section>
 
+    <!-- FOOTER -->
     <footer class="footer">
       <div class="container footer-grid">
         <div><h4>Nelavista</h4><p>Academic ecosystem for LASU.</p></div>
