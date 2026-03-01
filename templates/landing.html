@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
   <title>Nelavista · your complete academic ecosystem</title>
 
   <!-- premium fonts & icons -->
@@ -11,7 +11,7 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
   <style>
-    /* ----- GLOBAL MONOCHROME VARIABLES (inspired by Kikky) ----- */
+    /* ----- GLOBAL VARIABLES ----- */
     :root {
       --white: #ffffff;
       --off-white: #f4f4f4;
@@ -25,305 +25,415 @@
       --font-heading: 'Playfair Display', serif;
       --font-body: 'Montserrat', sans-serif;
       --soft-shadow: 0 20px 35px -15px rgba(0,0,0,0.7);
-      --card-hover-shadow: 0 25px 35px -20px rgba(255,255,255,0.1), 0 0 0 1px rgba(255,255,255,0.2);
-      --transition: all 0.3s cubic-bezier(0.23,1,0.32,1);
+      --transition: all 0.3s ease;
     }
 
     * { margin: 0; padding: 0; box-sizing: border-box; }
+    
     body {
       font-family: var(--font-body);
       background: linear-gradient(to bottom, #0c0c0c, #111111);
       color: var(--off-white);
-      line-height: 1.7;
+      line-height: 1.6;
       overflow-x: hidden;
     }
-    h1, h2, h3, .heading-font { font-family: var(--font-heading); font-weight: 500; letter-spacing: 0.02em; }
+    
+    h1, h2, h3, .heading-font { 
+      font-family: var(--font-heading); 
+      font-weight: 600; 
+      letter-spacing: -0.02em;
+    }
+    
     a { text-decoration: none; color: inherit; }
-    .container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
+    .container { 
+      max-width: 1200px; 
+      margin: 0 auto; 
+      padding: 0 20px; 
+    }
 
-    /* ----- LEFT SLIDE‑IN MENU (same as Kikky) ----- */
+    /* ----- TOP BAR (compact on mobile) ----- */
     #top-bar {
       position: fixed;
       top: 0;
       left: 0;
       right: 0;
-      height: 70px;
-      background: rgba(18,14,12,0.85);
+      height: 60px;
+      background: rgba(18,14,12,0.95);
       backdrop-filter: blur(12px);
       -webkit-backdrop-filter: blur(12px);
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 0 5%;
+      padding: 0 16px;
       z-index: 1002;
       border-bottom: 1px solid rgba(255,255,255,0.1);
     }
-    .brand-logo { font-size: 1.8rem; font-weight: 600; font-family: var(--font-heading); color: var(--off-white); }
-    #menu-toggle {
-      width: 44px; height: 44px; border-radius: 50%;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 1.8rem; color: var(--off-white);
-      background: transparent; border: none; cursor: pointer;
-      transition: background 0.2s;
+    
+    .brand-logo { 
+      font-size: 1.4rem; 
+      font-weight: 600; 
+      font-family: var(--font-heading); 
+      color: var(--white); 
     }
-    #menu-toggle:hover { background: rgba(255,255,255,0.1); }
-    .header-actions { display: flex; gap: 1rem; align-items: center; }
-    #theme-toggle {
-      width: 44px; height: 44px; border-radius: 50%;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 1.4rem; background: transparent; border: none; color: var(--off-white);
-      cursor: pointer; transition: background 0.2s;
+    
+    #menu-toggle, #theme-toggle {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.4rem;
+      background: transparent;
+      border: none;
+      color: var(--white);
+      cursor: pointer;
     }
-    #theme-toggle:hover { background: rgba(255,255,255,0.1); }
 
-    /* side menu panel */
+    /* side menu (unchanged) */
     #side-menu {
       position: fixed;
       top: 0;
-      left: -320px;
-      width: min(300px, 80vw);
+      left: -280px;
+      width: min(280px, 80vw);
       height: 100vh;
-      background: rgba(18,14,12,0.97);
+      background: rgba(18,14,12,0.98);
       backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
       border-right: 1px solid rgba(255,255,255,0.1);
-      transition: left 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+      transition: left 0.3s ease;
       z-index: 1003;
-      overflow-y: auto;
-      padding: 2rem 1.5rem;
-      display: flex;
-      flex-direction: column;
+      padding: 80px 20px 20px;
     }
     #side-menu.active { left: 0; }
-    .sidebar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2.5rem; }
-    .sidebar-header h2 { color: var(--off-white); font-size: 1.8rem; }
-    .close-icon { font-size: 2rem; cursor: pointer; color: var(--light-grey); }
-    .sidebar-nav ul { list-style: none; }
-    .sidebar-nav li { margin: 1.2rem 0; }
-    .sidebar-nav a { display: flex; align-items: center; gap: 15px; font-size: 1.1rem; color: #ddd; transition: 0.2s; }
-    .sidebar-nav a:hover { color: var(--white); transform: translateX(5px); }
-    .sidebar-social { margin-top: auto; display: flex; gap: 1.5rem; justify-content: center; padding: 2rem 0; }
-    .sidebar-social a { font-size: 1.5rem; color: #aaa; }
-    .sidebar-social a:hover { color: var(--white); }
-
+    .sidebar-header { 
+      display: flex; 
+      justify-content: space-between; 
+      align-items: center; 
+      margin-bottom: 30px; 
+    }
+    .close-icon { 
+      font-size: 2rem; 
+      cursor: pointer; 
+      color: var(--light-grey); 
+    }
+    .sidebar-nav li { 
+      margin: 20px 0; 
+      list-style: none; 
+    }
+    .sidebar-nav a { 
+      display: flex; 
+      align-items: center; 
+      gap: 15px; 
+      font-size: 1.1rem; 
+      color: #ddd; 
+    }
+    
     #overlay {
-      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(0,0,0,0.5); backdrop-filter: blur(4px);
-      display: none; z-index: 1001; cursor: pointer;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.7);
+      backdrop-filter: blur(4px);
+      display: none;
+      z-index: 1001;
     }
     #overlay.active { display: block; }
 
-    /* desktop navigation */
-    .desktop-nav { display: none; }
-    @media (min-width: 900px) {
-      .desktop-nav { display: flex; gap: 2.5rem; font-size: 1rem; text-transform: uppercase; letter-spacing: 1px; }
-      .desktop-nav a { color: #fff; border-bottom: 2px solid transparent; padding-bottom: 4px; }
-      .desktop-nav a:hover { border-bottom-color: var(--white); }
-    }
-
-    /* ----- HERO SECTION (Kikky style, monochrome) ----- */
+    /* ----- HERO SECTION (mobile-first) ----- */
     .kh-hero-section {
-      background: #0c0c0c;
-      background-image: radial-gradient(circle at 80% 20%, #2a2a2a 0%, #0a0806 90%);
-      min-height: 90vh;
-      display: flex;
-      align-items: center;
-      padding: 80px 0;
-      margin-top: 70px;
+      min-height: auto;
+      padding: 80px 0 40px;
+      margin-top: 60px;
     }
+    
     .kh-container {
-      max-width: 1200px; width: 90%; margin: 0 auto;
-      display: grid; grid-template-columns: 1.1fr 0.9fr; align-items: center; gap: 4rem;
+      display: flex;
+      flex-direction: column;
+      gap: 30px;
     }
-    .kh-tagline { font-family: var(--font-body); color: var(--light-grey); text-transform: uppercase; letter-spacing: 3px; font-size: 0.85rem; font-weight: 600; margin-bottom: 1rem; }
-    .kh-headline { font-family: var(--font-heading); color: var(--off-white); font-size: 3.8rem; line-height: 1.1; margin-bottom: 1.5rem; font-weight: 700; }
-    .text-white-gradient { background: linear-gradient(135deg, #ffffff, #cccccc); background-clip: text; -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-    .kh-desc { color: #ccc; font-size: 1.1rem; line-height: 1.7; margin-bottom: 2.5rem; max-width: 90%; }
-    .kh-features { display: flex; flex-wrap: wrap; gap: 1.5rem; margin-bottom: 3rem; }
-    .kh-feature-pill { display: flex; align-items: center; gap: 10px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); padding: 10px 20px; border-radius: 50px; color: #fff; font-size: 0.85rem; }
-    .kh-btn-gold { display: inline-flex; align-items: center; justify-content: center; padding: 18px 45px; background: #ffffff; color: #000; font-weight: 700; text-transform: uppercase; border-radius: 50px; box-shadow: 0 10px 30px rgba(255,255,255,0.1); transition: 0.4s; border: none; cursor: pointer; }
-    .kh-btn-gold:hover { transform: translateY(-5px); box-shadow: 0 15px 40px rgba(255,255,255,0.2); }
-    .kh-image-wrapper { position: relative; display: flex; justify-content: center; }
-    .kh-blob-bg { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); width: 120%; height: 120%; background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%); filter: blur(40px); }
-    .kh-img-main {
-      width: 100%;
-      max-width: 500px;
-      border-radius: 200px 200px 50px 50px;
-      border: 2px solid rgba(255,255,255,0.2);
-      box-shadow: 0 25px 60px -10px #000;
+    
+    /* Text content - properly stacked */
+    .kh-text-content {
+      order: 2;
+      text-align: left;
     }
-    /* ensure video fills the frame like a cover image */
-    video.kh-img-main {
-      object-fit: cover;
-      aspect-ratio: 1 / 1.2; /* maintain consistent shape */
+    
+    .kh-tagline { 
+      color: var(--light-grey); 
+      text-transform: uppercase; 
+      letter-spacing: 2px; 
+      font-size: 0.7rem; 
+      font-weight: 500; 
+      margin-bottom: 10px; 
+      display: block;
     }
-    .kh-float-badge {
-      position: absolute;
-      bottom: 40px;
-      right: -20px;
-      background: rgba(18,14,12,0.95);
-      border: 1px solid var(--white);
-      padding: 15px 25px;
-      backdrop-filter: blur(5px);
-      border-radius: 50px;
-      color: white;
-      font-size: 1rem;
+    
+    .kh-headline { 
+      font-size: 2.2rem; 
+      line-height: 1.2; 
+      margin-bottom: 15px; 
+      font-weight: 700; 
+    }
+    
+    .text-white-gradient { 
+      background: linear-gradient(135deg, #ffffff, #cccccc); 
+      background-clip: text; 
+      -webkit-background-clip: text; 
+      -webkit-text-fill-color: transparent; 
+      display: inline-block;
+    }
+    
+    .kh-desc { 
+      color: #ccc; 
+      font-size: 0.95rem; 
+      line-height: 1.6; 
+      margin-bottom: 20px; 
+      max-width: 100%; 
+    }
+    
+    /* Feature pills - horizontal scroll on mobile */
+    .kh-features { 
+      display: flex; 
+      gap: 8px; 
+      margin-bottom: 25px; 
+      overflow-x: auto;
+      padding-bottom: 5px;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+    }
+    .kh-features::-webkit-scrollbar { display: none; }
+    
+    .kh-feature-pill { 
+      display: flex; 
+      align-items: center; 
+      gap: 6px; 
+      background: rgba(255,255,255,0.05); 
+      border: 1px solid rgba(255,255,255,0.1); 
+      padding: 8px 14px; 
+      border-radius: 50px; 
+      color: #fff; 
+      font-size: 0.75rem; 
       white-space: nowrap;
     }
-    .badge-head { font-family: var(--font-heading); font-style: italic; }
-
-    /* ----- FEATURE CARDS (same as Kikky product cards, adapted) ----- */
-    .product-grid-section { padding: 60px 5px; background: transparent; }
-    .section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px; }
-    .section-header h2 { font-size: 2rem; color: #fff; }
-    .link-muted { color: #aaa; display: flex; align-items: center; gap: 5px; }
-    .product-grid {
-      display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 25px;
+    
+    .kh-btn-gold { 
+      display: inline-block; 
+      padding: 14px 30px; 
+      background: #ffffff; 
+      color: #000; 
+      font-weight: 600; 
+      text-transform: uppercase; 
+      border-radius: 50px; 
+      font-size: 0.9rem; 
+      width: 100%;
+      text-align: center;
+      box-shadow: 0 10px 30px rgba(255,255,255,0.1);
     }
-    .feature-card {
-      background: #1e1814; border-radius: 24px; overflow: hidden; border: 1px solid #2a2a2a;
-      transition: var(--transition); padding: 2rem 1.5rem; text-align: center;
-    }
-    .feature-card:hover { transform: translateY(-8px); box-shadow: var(--card-hover-shadow); border-color: #fff; }
-    .feature-icon { font-size: 2.5rem; margin-bottom: 1rem; color: #fff; }
-    .feature-card h3 { font-size: 1.5rem; margin-bottom: 0.8rem; color: #fff; }
-    .feature-card p { color: #ccc; font-size: 0.95rem; line-height: 1.5; }
 
-    /* ----- EXPLANATION CARD (large) ----- */
+    /* Image wrapper - properly positioned */
+    .kh-image-wrapper { 
+      order: 1; 
+      position: relative; 
+      display: flex; 
+      justify-content: center; 
+      margin: 0 auto;
+      width: 100%;
+      max-width: 300px;
+    }
+    
+    .kh-blob-bg { 
+      position: absolute; 
+      top: 50%; 
+      left: 50%; 
+      transform: translate(-50%,-50%); 
+      width: 120%; 
+      height: 120%; 
+      background: radial-gradient(circle, rgba(255,255,255,0.15) 0%, transparent 70%); 
+      filter: blur(30px); 
+    }
+    
+    .kh-img-main {
+      width: 100%;
+      border-radius: 180px 180px 40px 40px;
+      border: 2px solid rgba(255,255,255,0.2);
+      box-shadow: 0 25px 40px -10px #000;
+      aspect-ratio: 1 / 1.2;
+      object-fit: cover;
+    }
+    
+    /* Badge - repositioned for mobile */
+    .kh-float-badge {
+      position: absolute;
+      bottom: 15px;
+      right: 0px;
+      background: rgba(18,14,12,0.95);
+      border: 1px solid var(--white);
+      padding: 8px 16px;
+      backdrop-filter: blur(5px);
+      border-radius: 40px;
+      color: white;
+      font-size: 0.75rem;
+      white-space: nowrap;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    }
+    .badge-head { font-weight: 600; }
+
+    /* ----- CARDS (optimized for mobile) ----- */
     .explain-card {
-      background: #1e1814; border: 1px solid #2a2a2a; border-radius: 40px;
-      padding: 3rem 2.5rem; text-align: center; max-width: 900px; margin: 0 auto;
+      background: #1e1814;
+      border: 1px solid #2a2a2a;
+      border-radius: 30px;
+      padding: 30px 20px;
+      margin: 20px 0;
     }
-    .explain-card p { font-size: 1.3rem; color: #fff; line-height: 1.6; }
+    .explain-card p { 
+      font-size: 1rem; 
+      color: #fff; 
+      line-height: 1.6; 
+    }
 
-    /* ----- FOUNDER CARD ----- */
+    /* Feature cards - full width on mobile */
+    .product-grid-section { padding: 40px 0; }
+    .section-header { 
+      display: flex; 
+      justify-content: space-between; 
+      align-items: center; 
+      margin-bottom: 25px; 
+    }
+    .section-header h2 { font-size: 1.6rem; }
+    
+    .product-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 16px;
+    }
+    
+    .feature-card {
+      background: #1e1814;
+      border-radius: 20px;
+      border: 1px solid #2a2a2a;
+      padding: 20px;
+    }
+    .feature-card h3 { 
+      font-size: 1.3rem; 
+      margin-bottom: 8px; 
+    }
+    .feature-card p { 
+      color: #ccc; 
+      font-size: 0.9rem; 
+    }
+
+    /* Founder card - stacked on mobile */
     .founder-card {
-      background: #1e1814; border: 1px solid #2a2a2a; border-radius: 40px;
-      padding: 3rem 2.5rem; display: flex; gap: 3rem; align-items: center; flex-wrap: wrap;
+      background: #1e1814;
+      border: 1px solid #2a2a2a;
+      border-radius: 30px;
+      padding: 30px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      text-align: center;
     }
-    .founder-left { flex: 2; min-width: 280px; }
-    .founder-quote { font-size: 4rem; line-height: 0.8; color: #fff; opacity: 0.5; margin-right: 0.2rem; }
-    .founder-text { font-size: 1.3rem; color: #ccc; margin-bottom: 1rem; font-style: italic; }
-    .founder-name { font-size: 1.8rem; font-weight: 600; color: #fff; }
-    .founder-title { color: #aaa; }
-    .founder-right { flex: 0 0 auto; }
-    .avatar { width: 120px; height: 120px; border-radius: 50%; background: #2a2a2a; border: 2px solid #fff; }
+    .founder-quote { 
+      font-size: 3rem; 
+      line-height: 0.8; 
+      opacity: 0.5; 
+    }
+    .founder-text { 
+      font-size: 1rem; 
+      color: #ccc; 
+      font-style: italic; 
+      margin: 10px 0; 
+    }
+    .founder-name { 
+      font-size: 1.4rem; 
+      font-weight: 600; 
+    }
+    .avatar { 
+      width: 100px; 
+      height: 100px; 
+      border-radius: 50%; 
+      background: #2a2a2a; 
+      border: 2px solid #fff; 
+      margin: 0 auto; 
+    }
 
-    /* ----- CTA SECTION ----- */
+    /* CTA - full width button */
     .cta-card {
-      background: #1e1814; border: 1px solid #2a2a2a; border-radius: 60px;
-      padding: 4rem 2rem; text-align: center;
+      background: #1e1814;
+      border: 1px solid #2a2a2a;
+      border-radius: 40px;
+      padding: 40px 20px;
+      text-align: center;
     }
-    .cta-title { font-size: 2.5rem; color: #fff; margin-bottom: 2rem; }
-    .cta-btn { background: #fff; color: #000; padding: 1rem 3rem; border-radius: 50px; font-weight: 700; font-size: 1.2rem; display: inline-block; transition: 0.3s; border: none; cursor: pointer; }
-    .cta-btn:hover { transform: translateY(-3px); box-shadow: 0 15px 30px rgba(255,255,255,0.2); }
-    .cta-note { margin-top: 1.5rem; color: #aaa; }
-    .login-link { margin-top: 1.5rem; }
-    .login-link a { color: #ccc; text-decoration: underline; text-underline-offset: 4px; transition: color 0.2s; }
-    .login-link a:hover { color: #fff; }
+    .cta-title { 
+      font-size: 1.8rem; 
+      margin-bottom: 25px; 
+    }
+    .cta-btn { 
+      background: #fff; 
+      color: #000; 
+      padding: 16px 20px; 
+      border-radius: 50px; 
+      font-weight: 600; 
+      display: block; 
+      width: 100%; 
+      margin: 0 auto; 
+    }
+    .login-link { margin-top: 20px; }
+    .login-link a { 
+      color: #ccc; 
+      text-decoration: underline; 
+    }
 
-    /* ----- FOOTER (same as Kikky) ----- */
-    .footer { background: #0c0a08; border-top: 1px solid #2a2a2a; padding: 50px 5% 20px; margin-top: 4rem; }
-    .footer-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px,1fr)); gap: 3rem; }
-    .footer-col h4 { color: #fff; margin-bottom: 1rem; }
-    .footer-col ul { list-style: none; }
-    .footer-col li { margin: 0.7rem 0; }
-    .footer-col a { color: #aaa; }
-    .footer-col a:hover { color: #fff; }
-    .footer-bottom { text-align: center; padding-top: 30px; color: #666; }
+    /* Footer - stacked */
+    .footer-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 25px;
+      text-align: center;
+    }
+    .footer-bottom { 
+      text-align: center; 
+      padding-top: 30px; 
+      color: #666; 
+      font-size: 0.85rem; 
+    }
 
-    /* ----- scroll progress ----- */
+    /* scroll progress */
     #scrollProgress {
-      position: fixed; top: 70px; left: 0; height: 2px; background: #fff; z-index: 1002; width: 0%;
-      transition: width 0.1s ease;
+      position: fixed;
+      top: 60px;
+      left: 0;
+      height: 2px;
+      background: #fff;
+      z-index: 1002;
+      width: 0%;
     }
 
-    /* ----- base responsive (already present) ----- */
-    @media (max-width: 968px) {
-      .kh-container { grid-template-columns: 1fr; text-align: center; }
-      .kh-headline { font-size: 2.5rem; }
-      .kh-features { justify-content: center; }
-      .kh-image-wrapper { order: -1; }
-      .founder-card { flex-direction: column; text-align: center; }
-    }
-    @media (max-width: 600px) {
-      .product-grid { grid-template-columns: 1fr; }
-    }
-
-    /* ========== ENHANCED MOBILE OPTIMIZATIONS ========== */
-    @media (max-width: 600px) {
-      /* General spacing */
-      .container { padding: 0 16px; }
-      .kh-hero-section { padding: 60px 0; min-height: auto; }
-      .kh-headline { font-size: 2.2rem; }
-      .kh-desc { font-size: 1rem; max-width: 100%; }
-      .kh-features { gap: 0.8rem; justify-content: center; }
-      .kh-feature-pill { padding: 8px 14px; font-size: 0.75rem; }
-      .kh-btn-gold { padding: 14px 30px; font-size: 0.9rem; }
-      
-      /* Hero video and badge */
-      .kh-image-wrapper { margin-bottom: 20px; }
-      .kh-img-main { max-width: 320px; }
-      .kh-float-badge {
-        bottom: 20px;
-        right: 10px;
-        padding: 8px 15px;
-        font-size: 0.8rem;
+    /* Desktop styles */
+    @media (min-width: 768px) {
+      .kh-container {
+        flex-direction: row;
+        align-items: center;
+        gap: 40px;
       }
-      
-      /* Explanation card */
-      .explain-card { padding: 2rem 1.5rem; border-radius: 30px; }
-      .explain-card p { font-size: 1.1rem; }
-      
-      /* Feature cards */
-      .feature-card { padding: 1.5rem 1rem; }
-      .feature-icon { font-size: 2rem; }
-      .feature-card h3 { font-size: 1.3rem; }
-      
-      /* Founder card */
-      .founder-card { padding: 2rem 1.5rem; gap: 1.5rem; }
-      .founder-quote { font-size: 3rem; }
-      .founder-text { font-size: 1.1rem; }
-      .founder-name { font-size: 1.5rem; }
-      .avatar { width: 90px; height: 90px; }
-      
-      /* CTA */
-      .cta-card { padding: 2.5rem 1.5rem; border-radius: 40px; }
-      .cta-title { font-size: 1.8rem; }
-      .cta-btn { padding: 0.8rem 2rem; font-size: 1rem; width: 100%; max-width: 300px; }
-      .login-link { font-size: 0.9rem; }
-      
-      /* Footer */
-      .footer { padding: 40px 5% 20px; }
-      .footer-grid { gap: 2rem; }
-    }
-
-    @media (max-width: 380px) {
-      .kh-headline { font-size: 1.9rem; }
-      .kh-img-main { max-width: 260px; }
-      .kh-float-badge { 
-        bottom: 10px;
-        right: 5px;
-        padding: 5px 12px;
-        font-size: 0.7rem;
-      }
-      .badge-head { font-size: 0.8rem; }
-      .feature-card h3 { font-size: 1.2rem; }
-      .cta-title { font-size: 1.6rem; }
-    }
-
-    /* Improve touch targets */
-    .btn, .kh-btn-gold, .cta-btn, #menu-toggle, #theme-toggle, a {
-      min-height: 44px;
-      min-width: 44px;
+      .kh-text-content { order: 1; flex: 1; }
+      .kh-image-wrapper { order: 2; flex: 0 0 45%; max-width: 500px; }
+      .kh-btn-gold { width: auto; display: inline-block; }
+      .product-grid { grid-template-columns: repeat(3, 1fr); }
+      .footer-grid { flex-direction: row; text-align: left; }
+      .founder-card { flex-direction: row; text-align: left; }
+      .avatar { margin: 0; }
     }
   </style>
 </head>
 <body>
-  <!-- OVERLAY -->
   <div id="overlay"></div>
 
-  <!-- LEFT SLIDE‑IN MENU (Nelavista sections) -->
+  <!-- SIDE MENU -->
   <aside id="side-menu">
     <div class="sidebar-header">
       <h2>Nelavista</h2>
@@ -332,16 +442,11 @@
     <nav class="sidebar-nav">
       <ul>
         <li><a href="#home"><i class="ri-home-4-line"></i> Home</a></li>
-        <li><a href="#features"><i class="ri-apps-line"></i> All Features</a></li>
+        <li><a href="#features"><i class="ri-apps-line"></i> Features</a></li>
         <li><a href="/signup"><i class="ri-chat-1-line"></i> Sign up</a></li>
         <li><a href="/login"><i class="ri-file-search-line"></i> Log In</a></li>
       </ul>
     </nav>
-    <div class="sidebar-social">
-      <a href="#" title="Twitter"><i class="ri-twitter-x-line"></i></a>
-      <a href="#" title="LinkedIn"><i class="ri-linkedin-line"></i></a>
-      <a href="#" title="GitHub"><i class="ri-github-line"></i></a>
-    </div>
   </aside>
 
   <!-- TOP BAR -->
@@ -351,113 +456,72 @@
     <div class="header-actions">
       <button id="theme-toggle" aria-label="Toggle theme">🌙</button>
     </div>
-    <nav class="desktop-nav">
-      <a href="#home">Home</a>
-      <a href="#features">Features</a>
-      <a href="#about">About</a>
-      <a href="/signup">Sign Up</a>
-      <a href="/login">Login</a>
-    </nav>
   </header>
 
-  <!-- MAIN CONTENT -->
   <main>
-    <!-- HERO SECTION (with video) -->
+    <!-- HERO SECTION - properly structured for mobile -->
     <section class="kh-hero-section" id="home">
-      <div class="kh-container">
+      <div class="container kh-container">
         <div class="kh-text-content">
           <span class="kh-tagline">Your complete academic ecosystem</span>
-          <h1 class="kh-headline">All your study tools <br><span class="text-white-gradient">in one place</span></h1>
-          <p class="kh-desc">From AI‑powered chat and material analysis to live meetings, practice tests, and campus maps – everything you need to excel at university.</p>
+          <h1 class="kh-headline">
+            All your study tools <br><span class="text-white-gradient">in one place</span>
+          </h1>
+          <p class="kh-desc">
+            From AI‑powered chat and material analysis to live meetings, practice tests, and campus maps – everything you need to excel.
+          </p>
           <div class="kh-features">
             <div class="kh-feature-pill"><i class="ri-chat-1-line"></i> Talk to Nelavista</div>
             <div class="kh-feature-pill"><i class="ri-file-search-line"></i> Analyze</div>
             <div class="kh-feature-pill"><i class="ri-video-chat-line"></i> Live Meeting</div>
+            <div class="kh-feature-pill"><i class="ri-map-pin-line"></i> Lasu Map</div>
           </div>
           <a href="#cta" class="kh-btn-gold">Start learning</a>
         </div>
+        
         <div class="kh-image-wrapper">
           <div class="kh-blob-bg"></div>
-          <!-- 5‑second hero video -->
           <video class="kh-img-main" autoplay muted loop playsinline>
             <source src="{{ url_for('static', filename='nelavista-hero.mp4') }}" type="video/mp4">
-            Your browser does not support the video tag.
           </video>
-          <div class="kh-float-badge"><span class="badge-head">Free</span><span class="badge-sub"> · for LASU students</span></div>
+          <div class="kh-float-badge">
+            <span class="badge-head">Free</span><span> · for LASU students</span>
+          </div>
         </div>
       </div>
     </section>
 
-    <!-- EXPLANATION CARD -->
-    <section class="container" style="margin-top: 60px;">
+    <!-- REST OF CONTENT (unchanged but will flow nicely) -->
+    <div class="container">
       <div class="explain-card">
-        <p>Nelavista isn't just another AI tutor – it's a complete platform built by a LASU student to solve every academic challenge: chat, analyze, collaborate, practice, and navigate campus, all in one sleek interface.</p>
+        <p>Nelavista is a complete platform built by a LASU student to solve every academic challenge: chat, analyze, collaborate, practice, and navigate campus – all in one sleek interface.</p>
       </div>
-    </section>
+    </div>
 
-    <!-- FEATURES GRID -->
     <section id="features" class="product-grid-section container">
       <header class="section-header">
         <h2>Everything you need</h2>
-        <a href="#cta" class="link-muted">Get started <i class="ri-arrow-right-line"></i></a>
+        <a href="#cta" class="link-muted">Get started →</a>
       </header>
       <div class="product-grid">
-        <div class="feature-card">
-          <div class="feature-icon"><i class="ri-user-line"></i></div>
-          <h3>Profile</h3>
-          <p>Personalized dashboard tracking your progress, strengths, and study habits.</p>
-        </div>
-        <div class="feature-card">
-          <div class="feature-icon"><i class="ri-chat-1-line"></i></div>
-          <h3>Talk to Nelavista</h3>
-          <p>AI‑powered academic assistant that answers questions, explains concepts, and helps you work through problems.</p>
-        </div>
-        <div class="feature-card">
-          <div class="feature-icon"><i class="ri-file-search-line"></i></div>
-          <h3>Analyze Materials</h3>
-          <p>Upload lecture notes, past questions, or textbooks – get instant summaries, key terms, and study guides.</p>
-        </div>
-        <div class="feature-card">
-          <div class="feature-icon"><i class="ri-video-chat-line"></i></div>
-          <h3>Live Meeting</h3>
-          <p>Join virtual study rooms with classmates, share screens, and collaborate in real time.</p>
-        </div>
-        <div class="feature-card">
-          <div class="feature-icon"><i class="ri-book-open-line"></i></div>
-          <h3>Study Materials</h3>
-          <p>A curated library of resources, lecture slides, and recommended readings for your courses.</p>
-        </div>
-        <div class="feature-card">
-          <div class="feature-icon"><i class="ri-film-line"></i></div>
-          <h3>Reels</h3>
-          <p>Short, engaging video explanations of tricky topics – learn in seconds.</p>
-        </div>
-        <div class="feature-card">
-          <div class="feature-icon"><i class="ri-questionnaire-line"></i></div>
-          <h3>CBT Test</h3>
-          <p>Adaptive practice exams that target your weak areas and simulate real test conditions.</p>
-        </div>
-        <div class="feature-card">
-          <div class="feature-icon"><i class="ri-information-line"></i></div>
-          <h3>About</h3>
-          <p>Learn more about Nelavista, our mission, and the team behind it.</p>
-        </div>
-        <div class="feature-card">
-          <div class="feature-icon"><i class="ri-map-pin-line"></i></div>
-          <h3>Lasu Map</h3>
-          <p>Interactive campus map with lecture halls, labs, libraries, and faculty buildings – never get lost again.</p>
-        </div>
+        <!-- Feature cards (9 items) -->
+        <div class="feature-card"><i class="ri-user-line feature-icon"></i><h3>Profile</h3><p>Track your progress and study habits.</p></div>
+        <div class="feature-card"><i class="ri-chat-1-line feature-icon"></i><h3>Talk to Nelavista</h3><p>AI assistant that answers questions.</p></div>
+        <div class="feature-card"><i class="ri-file-search-line feature-icon"></i><h3>Analyze Materials</h3><p>Upload notes, get summaries.</p></div>
+        <div class="feature-card"><i class="ri-video-chat-line feature-icon"></i><h3>Live Meeting</h3><p>Virtual study rooms with classmates.</p></div>
+        <div class="feature-card"><i class="ri-book-open-line feature-icon"></i><h3>Study Materials</h3><p>Curated library for your courses.</p></div>
+        <div class="feature-card"><i class="ri-film-line feature-icon"></i><h3>Reels</h3><p>Short video explanations.</p></div>
+        <div class="feature-card"><i class="ri-questionnaire-line feature-icon"></i><h3>CBT Test</h3><p>Adaptive practice exams.</p></div>
+        <div class="feature-card"><i class="ri-information-line feature-icon"></i><h3>About</h3><p>Learn about Nelavista.</p></div>
+        <div class="feature-card"><i class="ri-map-pin-line feature-icon"></i><h3>Lasu Map</h3><p>Interactive campus map.</p></div>
       </div>
     </section>
 
-    <!-- FOUNDER SECTION -->
-    <section id="about" class="container" style="padding: 40px 0;">
+    <section id="about" class="container">
       <div class="founder-card">
         <div class="founder-left">
           <span class="founder-quote">“</span>
-          <div class="founder-text">
-            I built Nelavista because I needed it myself – a single platform that combines AI help, study materials, collaboration tools, and even a campus map. It's designed by a LASU student, for students like us.
-          </div>
+          <div class="founder-text">I built Nelavista because I needed it myself – a single platform designed by a LASU student for students like us.</div>
           <div class="founder-name">Abdul Afeez Tella</div>
           <div class="founder-title">Founder · Mathematics, LASU</div>
         </div>
@@ -467,8 +531,7 @@
       </div>
     </section>
 
-    <!-- CTA SECTION -->
-    <section id="cta" class="container" style="padding: 40px 0 80px;">
+    <section id="cta" class="container" style="padding: 40px 0 60px;">
       <div class="cta-card">
         <h2 class="cta-title">Ready to transform your study life?</h2>
         <a href="/signup" class="cta-btn">Create free account</a>
@@ -479,12 +542,11 @@
       </div>
     </section>
 
-    <!-- FOOTER -->
     <footer class="footer">
-      <div class="footer-grid">
-        <div class="footer-col"><h4>Nelavista</h4><p>Your complete academic ecosystem for LASU and beyond.</p></div>
-        <div class="footer-col"><h4>Quick Links</h4><ul><li><a href="#home">Home</a></li><li><a href="#features">Features</a></li><li><a href="#about">About</a></li><li><a href="#cta">Get started</a></li></ul></div>
-        <div class="footer-col"><h4>Connect</h4><ul><li><i class="ri-twitter-x-line"></i> @nelavista</li><li><i class="ri-linkedin-line"></i> /company/nelavista</li><li><i class="ri-mail-line"></i> hello@nelavista.com</li></ul></div>
+      <div class="container footer-grid">
+        <div><h4>Nelavista</h4><p>Academic ecosystem for LASU.</p></div>
+        <div><h4>Quick Links</h4><ul><li><a href="#home">Home</a></li><li><a href="#features">Features</a></li></ul></div>
+        <div><h4>Connect</h4><ul><li><i class="ri-twitter-x-line"></i> @nelavista</li><li>hello@nelavista.com</li></ul></div>
       </div>
       <div class="footer-bottom">© 2026 Nelavista — clarity for complex coursework</div>
     </footer>
@@ -493,47 +555,41 @@
   <div id="scrollProgress"></div>
 
   <script>
-    (function() {
-      // ----- MENU -----
-      const menuToggle = document.getElementById('menu-toggle');
-      const sideMenu = document.getElementById('side-menu');
-      const overlay = document.getElementById('overlay');
-      const closeSidebar = document.getElementById('closeSidebar');
+    // Menu toggle
+    const menuToggle = document.getElementById('menu-toggle');
+    const sideMenu = document.getElementById('side-menu');
+    const overlay = document.getElementById('overlay');
+    const closeSidebar = document.getElementById('closeSidebar');
 
-      function openMenu() { sideMenu.classList.add('active'); overlay.classList.add('active'); }
-      function closeMenu() { sideMenu.classList.remove('active'); overlay.classList.remove('active'); }
+    menuToggle.addEventListener('click', () => {
+      sideMenu.classList.add('active');
+      overlay.classList.add('active');
+    });
+    
+    const closeMenu = () => {
+      sideMenu.classList.remove('active');
+      overlay.classList.remove('active');
+    };
+    
+    closeSidebar.addEventListener('click', closeMenu);
+    overlay.addEventListener('click', closeMenu);
 
-      menuToggle.addEventListener('click', openMenu);
-      closeSidebar.addEventListener('click', closeMenu);
-      overlay.addEventListener('click', closeMenu);
-      document.querySelectorAll('.sidebar-nav a').forEach(link => link.addEventListener('click', closeMenu));
+    // Scroll progress
+    const progressBar = document.getElementById('scrollProgress');
+    window.addEventListener('scroll', () => {
+      const winScroll = document.documentElement.scrollTop;
+      const height = document.documentElement.scrollHeight - window.innerHeight;
+      progressBar.style.width = (winScroll / height) * 100 + '%';
+    });
 
-      // ----- SCROLL PROGRESS -----
-      const progressBar = document.getElementById('scrollProgress');
-      window.addEventListener('scroll', () => {
-        const winScroll = document.documentElement.scrollTop;
-        const height = document.documentElement.scrollHeight - window.innerHeight;
-        const scrolled = (winScroll / height) * 100;
-        progressBar.style.width = scrolled + '%';
+    // Smooth scroll
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+      anchor.addEventListener('click', function(e) {
+        e.preventDefault();
+        const target = document.querySelector(this.getAttribute('href'));
+        if (target) target.scrollIntoView({ behavior: 'smooth' });
       });
-
-      // ----- SMOOTH SCROLL FOR ANCHOR LINKS -----
-      document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-        anchor.addEventListener('click', function (e) {
-          e.preventDefault();
-          const target = document.querySelector(this.getAttribute('href'));
-          if (target) {
-            target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-          }
-        });
-      });
-
-      // Optional theme toggle placeholder
-      const themeToggle = document.getElementById('theme-toggle');
-      themeToggle.addEventListener('click', () => {
-        alert('Light mode can be implemented later – currently in dark mode.');
-      });
-    })();
+    });
   </script>
 </body>
 </html>
