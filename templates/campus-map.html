@@ -6,6 +6,8 @@
   <title>Nelavista · LASU Campus Map (fixed landmarks)</title>
   
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+  <!-- Leaflet Routing Machine CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.css" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
   
   <style>
@@ -333,6 +335,11 @@
           <i class="fas fa-location-crosshairs"></i> Show My Location
         </button>
         
+        <!-- Navigate to nearest building button -->
+        <button class="btn" onclick="navigateToNearestBuilding()" style="background-color: #0066cc;">
+          <i class="fas fa-building"></i> Go to nearest building
+        </button>
+        
         <div class="coords-box" id="coordsBox">
           Click a landmark to see its coordinates.
         </div>
@@ -354,8 +361,7 @@
       </div>
 
       <div class="info-panel">
-        <p><i class="fas fa-info-circle"></i> <strong>Tip:</strong> Photos are loaded from the <code>images/</code> folder using <code>.jpeg</code> extension. A built‑in fallback appears if an image is missing.</p>
-        <p><i class="fas fa-database"></i> <strong>Storage:</strong> Your last view and selected location are saved.</p>
+                <p><i class="fas fa-database"></i> <strong>Storage:</strong> Your last view and selected location are saved.</p>
         <p><i class="fas fa-mobile-alt"></i> <strong>Mobile:</strong> Tap a location to focus, then use the Navigate button.</p>
       </div>
     </aside>
@@ -374,6 +380,10 @@
   </footer>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <!-- Leaflet Routing Machine JS -->
+  <script src="https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.js"></script>
+  <!-- Leaflet RotatedMarker plugin (for heading) -->
+  <script src="https://unpkg.com/leaflet-rotatedmarker@0.2.0/leaflet.rotatedMarker.js"></script>
 
   <script>
     // ---------- LOCATION PERMISSION PROMPT ----------
@@ -501,12 +511,16 @@
     const markers = {};
     let userLocationMarker = null;
     let userLatLng = null;
-    let navigationLine = null;
     let lastNearestMarker = null;
     const sidebar = document.getElementById('sidebar');
     const mobileToggle = document.getElementById('mobileToggle');
     const toggleIcon = document.getElementById('toggleIcon');
     const locationSelect = document.getElementById('campusLocationSelect');
+
+    // Routing control variable
+    let routingControl = null;
+    // Watch ID for continuous location tracking
+    let watchID = null;
 
     function toggleSidebar() {
       sidebar.classList.toggle('active');
@@ -567,12 +581,6 @@
     }
     function findLocationById(id) { return locations.find(l => l.id === id); }
 
-    function createNavigationLine(from, to) {
-      if (navigationLine) map.removeLayer(navigationLine);
-      navigationLine = L.polyline([from, to], { color:'#0066cc', weight:3, opacity:0.7, dashArray:'10,5', className:'nav-line' }).addTo(map);
-      navigationLine.bindTooltip(`Distance: ${Math.round(getDistanceInMeters(from, to))} m`, { permanent: false, direction:'top' });
-    }
-
     function updateCoordsBox(locationName, latlng) {
       const lat = latlng.lat.toFixed(6);
       const lng = latlng.lng.toFixed(6);
@@ -624,8 +632,6 @@
           closeSidebarOnMobile();
         });
 
-        // No dragend event because markers are not draggable
-
         markers[location.id] = marker;
       });
     }
@@ -654,39 +660,167 @@
       return { location: bestLoc, distance: bestDist };
     }
 
+    // ---------- LOCATE USER (continuous tracking, with heading support) ----------
     window.locateUser = function() {
       hideLocationPrompt();
-      if (!navigator.geolocation) { coordsBox.textContent = 'Geolocation not supported'; return; }
-      coordsBox.textContent = 'Locating...';
-      navigator.geolocation.getCurrentPosition(pos => {
-        const userCoords = [pos.coords.latitude, pos.coords.longitude];
-        userLatLng = L.latLng(userCoords[0], userCoords[1]);
-        const distToCampus = getDistanceInMeters(userLatLng, L.latLng(lasuCenter[0], lasuCenter[1]));
-        if (distToCampus > 2000) {
-          coordsBox.textContent = 'You are outside LASU campus. Showing campus instead.';
-          map.setView(lasuCenter, Math.min(17, getCurrentLayerMaxZoom()));
-          return;
+      if (!navigator.geolocation) {
+        coordsBox.textContent = 'Geolocation not supported';
+        return;
+      }
+
+      // Stop any previous watch before starting a new one
+      if (watchID !== null) {
+        navigator.geolocation.clearWatch(watchID);
+      }
+
+      coordsBox.textContent = 'Getting your location…';
+
+      watchID = navigator.geolocation.watchPosition(
+        function(pos) {
+          const lat = pos.coords.latitude;
+          const lng = pos.coords.longitude;
+          const heading = pos.coords.heading; // may be null
+          const newLatLng = L.latLng(lat, lng);
+
+          // Update global user location
+          userLatLng = newLatLng;
+
+          // Check if user is outside campus (optional – you can adjust threshold)
+          const distToCampus = getDistanceInMeters(userLatLng, L.latLng(lasuCenter[0], lasuCenter[1]));
+          if (distToCampus > 2000) {
+            coordsBox.textContent = 'You are outside LASU campus. Showing campus instead.';
+            map.setView(lasuCenter, Math.min(17, getCurrentLayerMaxZoom()));
+            // Still show the dot but don't recenter automatically
+          }
+
+          // Create or update the blue dot (with rotation if heading available)
+          if (!userLocationMarker) {
+            const blueDot = L.divIcon({
+              className: 'leaflet-pulsing-icon',
+              iconSize: [24, 24],
+              iconAnchor: [12, 12]
+            });
+            // Use rotated marker if heading is supported, else normal marker
+            if (heading !== null) {
+              userLocationMarker = L.marker([lat, lng], {
+                icon: blueDot,
+                rotationAngle: heading,
+                rotationOrigin: 'center'
+              }).addTo(map);
+            } else {
+              userLocationMarker = L.marker([lat, lng], { icon: blueDot }).addTo(map);
+            }
+            userLocationMarker.bindPopup('You are here').openPopup();
+          } else {
+            userLocationMarker.setLatLng([lat, lng]);
+            if (heading !== null && userLocationMarker.setRotationAngle) {
+              userLocationMarker.setRotationAngle(heading);
+            }
+          }
+
+          // Show distance to nearest building
+          const nearest = findNearestBuilding(userLatLng);
+          if (nearest.location) {
+            coordsBox.textContent = `📍 You are ${Math.round(nearest.distance)} m from ${nearest.location.name}`;
+            if (lastNearestMarker && lastNearestMarker !== markers[nearest.location.id]) {
+              lastNearestMarker.closePopup();
+            }
+            lastNearestMarker = markers[nearest.location.id];
+          } else {
+            coordsBox.textContent = `📍 Your location: ${lat.toFixed(6)}, ${lng.toFixed(6)}`;
+          }
+
+          // Live route update: if a route is active, update its start point
+          if (routingControl) {
+            const waypoints = routingControl.getWaypoints();
+            if (waypoints && waypoints.length >= 2 && waypoints[1].latLng) {
+              routingControl.setWaypoints([
+                userLatLng,
+                waypoints[1].latLng
+              ]);
+            }
+          }
+
+          saveState('view', null);
+          closeSidebarOnMobile();
+        },
+        function(err) {
+          coordsBox.textContent = 'Location error: ' + (err.message || 'denied');
+          console.warn('Geolocation error:', err);
+        },
+        {
+          enableHighAccuracy: true,
+          maximumAge: 3000,           // Better battery life, still accurate
+          timeout: 10000
         }
-        if (userLocationMarker) map.removeLayer(userLocationMarker);
-        const blueDot = L.divIcon({ className:'leaflet-pulsing-icon', iconSize:[24,24], iconAnchor:[12,12] });
-        userLocationMarker = L.marker(userCoords, { icon: blueDot }).addTo(map).bindPopup('You are here').openPopup();
-        map.setView(userCoords, Math.min(17, getCurrentLayerMaxZoom()));
-        const nearest = findNearestBuilding(userLatLng);
-        if (nearest.location) {
-          coordsBox.textContent = `Nearest: ${nearest.location.name} – ${Math.round(nearest.distance)} m away`;
-          if (lastNearestMarker) lastNearestMarker.closePopup();
-          markers[nearest.location.id].openPopup();
-          lastNearestMarker = markers[nearest.location.id];
-        }
-        saveState('view', null);
-        closeSidebarOnMobile();
-      }, () => { coordsBox.textContent = 'Location access denied or unavailable'; }, { enableHighAccuracy:true, timeout:10000, maximumAge:0 });
+      );
     };
 
+    // ---------- NAVIGATE (road‑following with OSRM router, auto‑zoom & distance display) ----------
     window.navigateToMarker = function(locationId) {
-      if (!userLatLng) { alert('Please enable location services and click "Show My Location" first.'); return; }
-      const m = markers[locationId];
-      if (m) { createNavigationLine(userLatLng, m.getLatLng()); m.openPopup(); }
+      if (!userLatLng) {
+        alert('Please enable location services and click "Show My Location" first.');
+        return;
+      }
+      const marker = markers[locationId];
+      if (!marker) return;
+
+      // Remove previous route if any
+      if (routingControl) {
+        map.removeControl(routingControl);
+      }
+
+      // Create a new route that follows roads, using OSRM router explicitly
+      routingControl = L.Routing.control({
+        waypoints: [
+          userLatLng,
+          marker.getLatLng()
+        ],
+        router: L.Routing.osrmv1({
+          serviceUrl: "https://router.project-osrm.org/route/v1"
+        }),
+        routeWhileDragging: false,
+        show: false,
+        addWaypoints: false,
+        draggableWaypoints: false,
+        lineOptions: {
+          styles: [
+            { color: "#0066cc", weight: 5, opacity: 0.9 }
+          ]
+        },
+        createMarker: function() { return null; }
+      }).addTo(map);
+
+      // --- NEW: Auto-zoom to route and show distance/time ---
+      routingControl.on('routesfound', function(e) {
+        const route = e.routes[0];
+        // Show distance & time
+        const distanceKm = (route.summary.totalDistance / 1000).toFixed(2);
+        const timeMin = Math.round(route.summary.totalTime / 60);
+        coordsBox.textContent = `🚶 Route: ${distanceKm} km • ${timeMin} min walk`;
+
+        // Zoom to route bounds
+        const bounds = L.latLngBounds(route.coordinates);
+        map.fitBounds(bounds, { padding: [40, 40] });
+      });
+
+      marker.openPopup();
+    };
+
+    // ---------- NAVIGATE TO NEAREST BUILDING ----------
+    window.navigateToNearestBuilding = function() {
+      if (!userLatLng) {
+        alert('Please enable location services first.');
+        return;
+      }
+      const nearest = findNearestBuilding(userLatLng);
+      if (nearest.location) {
+        // Show a message so the user knows what happened
+        coordsBox.textContent = `Navigating to nearest building: ${nearest.location.name}`;
+        navigateToMarker(nearest.location.id);
+      } else {
+        alert('No buildings found.');
+      }
     };
 
     function saveState(type, val) {
@@ -716,6 +850,13 @@
     map.on('moveend', () => saveState('view', null));
     map.on('click', closeSidebarOnMobile);
 
+    // Clean up watch when page unloads (optional)
+    window.addEventListener('beforeunload', function() {
+      if (watchID !== null) {
+        navigator.geolocation.clearWatch(watchID);
+      }
+    });
+
     // ---------- START ----------
     populateSidebar();
     populateDropdown();
@@ -735,6 +876,10 @@
     2. Place landmark photos inside with filenames matching the 'id' and .jpeg extension (e.g., arcade.jpeg, arts.jpeg).
     3. If an image is missing, a built‑in SVG fallback (grey box with "No image") will appear – no blinking.
     4. 🖱️ Landmarks are now fixed (undraggable). Previously saved custom positions are still used if available.
+    5. 🚶‍♂️ Your location now updates live as you walk (with battery‑saving maximumAge 3000) and the dot rotates to show direction.
+    6. 🗺️ Navigation follows LASU roads using OSRM router, and the map auto‑zooms to the full route.
+    7. 🕒 Distance & walking time are displayed in the sidebar.
+    8. 🎯 "Go to nearest building" button shows a confirmation message.
   -->
 </body>
 </html>
