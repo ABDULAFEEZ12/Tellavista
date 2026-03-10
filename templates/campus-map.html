@@ -3,13 +3,12 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
-  <title>Nelavista · LASU Campus Map (fixed landmarks, coordinates on side)</title>
+  <title>Nelavista · LASU Campus Map (fixed landmarks)</title>
   
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
   
   <style>
-    /* === styles identical to previous version, keep unchanged === */
     * {
       margin: 0;
       padding: 0;
@@ -255,12 +254,55 @@
       width: 12px; height: 12px; background-color: #0066cc; border-radius: 100%;
     }
     .nav-line { stroke: #0066cc; stroke-width: 3; stroke-dasharray: 10, 5; fill: none; }
+
+    /* === POPUP STYLES === */
+    .leaflet-popup-content {
+      margin: 10px;
+      font-size: 0.9rem;
+      min-width: 200px;
+    }
+
+    .popup-title {
+      font-weight: 600;
+      font-size: 1rem;
+      margin-bottom: 8px;
+      text-align: center;
+    }
+
+    .popup-image {
+      width: 100%;
+      height: 140px;
+      object-fit: cover;
+      border-radius: 6px;
+      margin-bottom: 8px;
+      background-color: #eee;
+      border: 1px solid #ddd;
+    }
+
+    .popup-nav-btn {
+      display: block;
+      width: 100%;
+      padding: 8px;
+      border: none;
+      border-radius: 6px;
+      background-color: #111;
+      color: white;
+      font-size: 0.85rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .popup-nav-btn:hover {
+      background-color: #333;
+    }
   </style>
 </head>
 <body>
   <header class="header">
+    <div class="header-left">
       <h1>Nelavista LASU Campus Map</h1>
-      <p>Interactive map of Lagos State University. Landmarks are fixed. Click any marker to see its coordinates and get directions from your location.</p>
+      <p>Interactive map of Lagos State University. Landmarks are fixed (undraggable). Click any marker to see its photo and get directions.</p>
     </div>
     <div class="location-dropdown">
       <select id="campusLocationSelect" aria-label="Select a campus location">
@@ -300,7 +342,7 @@
         </div>
         
         <div class="key-hint">
-          <i class="fas fa-info-circle"></i> <strong>Note:</strong> Landmarks are fixed. Click any marker to display its latitude & longitude.
+          <i class="fas fa-info-circle"></i> <strong>Note:</strong> Landmarks are fixed (undraggable). Click any marker to see its photo.
         </div>
       </div>
 
@@ -312,7 +354,7 @@
       </div>
 
       <div class="info-panel">
-        <p><i class="fas fa-info-circle"></i> <strong>Tip:</strong> Click a marker to see its coordinates and get directions from your location.</p>
+        <p><i class="fas fa-info-circle"></i> <strong>Tip:</strong> Photos are loaded from the <code>images/</code> folder using <code>.jpeg</code> extension. A built‑in fallback appears if an image is missing.</p>
         <p><i class="fas fa-database"></i> <strong>Storage:</strong> Your last view and selected location are saved.</p>
         <p><i class="fas fa-mobile-alt"></i> <strong>Mobile:</strong> Tap a location to focus, then use the Navigate button.</p>
       </div>
@@ -328,7 +370,7 @@
        <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a> contributors | 
        Powered by <a href="https://leafletjs.com/" target="_blank">Leaflet</a>
     </p>
-    <p style="margin-top:0.3rem; font-size:0.7rem;">Fixed landmarks – coordinates shown on click.</p>
+    <p style="margin-top:0.3rem; font-size:0.7rem;">Fixed landmarks – photos: images/[id].jpeg (e.g., arcade.jpeg).</p>
   </footer>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -353,42 +395,56 @@
     promptTurnOn.addEventListener('click', function() { hideLocationPrompt(); locateUser(); });
     promptLater.addEventListener('click', function() { localStorage.setItem(DISMISSAL_KEY, 'true'); hideLocationPrompt(); });
 
-    // ---------- MAP DATA (comprehensive list as provided) ----------
+    // ---------- MAP DATA (alphabetical order) ----------
     const locations = [
-      { id: "Abisogun_Leigh_Science_Building", name: "Abisogun Leigh Science Building", coords: [6.467138, 3.199167] },
+      { id: "makanjuola", name: "Aderemi Makanjuola Lecture Theatre", coords: [6.466381, 3.201246] },
       { id: "Agriculture_Society_Building", name: "Agriculture Society Building", coords: [6.469889, 3.200425] },
+      { id: "Abisogun_Leigh_Science_Building", name: "Abisogun Leigh Science Building", coords: [6.467138, 3.199167] },
       { id: "arcade", name: "Arcade (Student Commercial Hub)", coords: [6.465718, 3.203115] },
-      { id: "arts", name: "Faculty of Arts", coords: [6.464550, 3.201790] },
       { id: "bank_arena", name: "Bank Arena", coords: [6.464388, 3.204019] },
+      { id: "bolasciencecomplex", name: "Bola Ahmed Tinubu Science Complex", coords: [6.466131, 3.200286] },
       { id: "cbt_center", name: "CBT Center (Exam Hall)", coords: [6.475192, 3.201302] },
+      { id: "SIWES", name: "Central industrial liason unit (A.K.A) SIWES", coords: [6.464279, 3.200211] },
+      { id: "cessed", name: "Centre for environmental studies and substanable Development (CESSED)", coords: [6.465832, 3.201125] },
+      { id: "Centre-of-General-Nigerian-Studies", name: "Centre of General Nigerian Studies (C.G.N.S)", coords: [6.464905, 3.200186] },
       { id: "Chapel_Of_Light", name: "Chapel Of Light", coords: [6.464979, 3.198642] },
       { id: "cheif_s.l._edu_lecture_hall", name: "Cheif S.L. Edu Lecture Hall", coords: [6.468023, 3.200031] },
       { id: "Department_Of_Fisheries", name: "Department Of Fisheries Lagos State University", coords: [6.470422, 3.200270] },
+      { id: "dsdp", name: "Directorate of Sandwich Degree Program", coords: [6.470616, 3.201238] },
       { id: "economics_hall", name: "Economics Hall", coords: [6.475243, 3.199060] },
+      { id: "arts", name: "Faculty of Arts", coords: [6.465115, 3.201104] },
       { id: "education", name: "Faculty of Education", coords: [6.472996, 3.199889] },
+      { id: "law", name: "Faculty of Law", coords: [6.467394, 3.202010] },
+      { id: "management_sciences", name: "Faculty of Management Sciences", coords: [6.475661, 3.199942] },
+      { id: "sciences", name: "Faculty of Sciences", coords: [6.467837, 3.200798] },
+      { id: "social_sciences", name: "Faculty of Social Sciences", coords: [6.475243, 3.199060] },
       { id: "health", name: "Health Center", coords: [6.465443, 3.202018] },
       { id: "Hussam_okoya_Sports_Complex", name: "Hussam okoya Sports Complex", coords: [6.468703, 3.203875] },
       { id: "ict", name: "ICT Building", coords: [6.468753, 3.201230] },
+      { id: "innovationhub", name: "Innovation Hub", coords: [6.465718, 3.200538] },
+      { id: "Library_Complex", name: "Lasu Centre Library", coords: [6.471904, 3.201474] },
+      { id: "mosque", name: "LASU Central Mosque", coords: [6.465425, 3.200015] },
       { id: "lasu_football_pitch", name: "Lasu Football Pitch", coords: [6.467892, 3.203102] },
-      { id: "law", name: "Faculty of Law", coords: [6.467085, 3.202029] },
-      { id: "law_library", name: "Law Library", coords: [6.464095, 3.200192] },
-      { id: "library", name: "Main Library", coords: [6.464857, 3.200701] },
-      { id: "Library_Complex", name: "Library Complex", coords: [6.471904, 3.201474] },
+      { id: "law_clinic", name: "Law Clinic", coords: [6.466861, 3.202268] },
       { id: "love_garden", name: "Love Garden", coords: [6.469094, 3.200508] },
       { id: "main_auditorium", name: "Main Auditorium", coords: [6.473108, 3.201887] },
-      { id: "management_sciences", name: "Faculty of Management Sciences", coords: [6.475661, 3.199942] },
+      { id: "library", name: "Main Library", coords: [6.464857, 3.200701] },
       { id: "mass_comm_hall", name: "Mass Communication Lecture Hall", coords: [6.472277, 3.200154] },
       { id: "mba_hall", name: "MBA Hall", coords: [6.468553, 3.200275] },
-      { id: "mosque", name: "LASU Central Mosque", coords: [6.465425, 3.200015] },
+      { id: "physicslab", name: "Physics Lab", coords: [6.465115, 3.201104] },
       { id: "post_graduate_school", name: "Post Graduate School", coords: [6.468391, 3.201227] },
-      { id: "sciences", name: "Faculty of Sciences", coords: [6.466275, 3.200283] },
-      { id: "Sciences_Laboratory", name: "Sciences Laboratory", coords: [6.467114, 3.199851] },
+      { id: "primaryhealth", name: "Primary Health Center", coords: [6.466038, 3.202061] },
+      { id: "SchoolofLibrary,ArchivalandinformationScience", name: "School of Library, Archival and information Science", coords: [6.464433, 3.200205] },
+      { id: "school_of_transport", name: "School of Transport and Logistics", coords: [6.474193, 3.198038] },
+      { id: "sciencecomplex", name: "Science Complex", coords: [6.466573, 3.200165] },
       { id: "science_library", name: "Science Library", coords: [6.464526, 3.199186] },
       { id: "science_market", name: "Science Market", coords: [6.468047, 3.199285] },
-      { id: "school_of_transport", name: "School of Transport and Logistics", coords: [6.474193, 3.198038] },
+      { id: "Sciences_Laboratory", name: "Sciences Laboratory", coords: [6.467114, 3.199851] },
       { id: "Senate_Building", name: "Senate Building", coords: [6.471272, 3.199924] },
-      { id: "social_sciences", name: "Faculty of Social Sciences", coords: [6.475243, 3.199060] },
-      { id: "sports", name: "Sports Center", coords: [6.469750, 3.202550] }
+      { id: "bensonhall", name: "Shobowale Benson Hall", coords: [6.467796, 3.200227] },
+      { id: "sports", name: "Sports Center", coords: [6.469750, 3.202550] },
+      { id: "tetfund", name: "Tetfund 2019/2020 annual intervention", coords: [6.465070, 3.202305] },
+      { id: "wppd", name: "Works and Physical Planning Department", coords: [6.464092, 3.200205] }
     ];
 
     const lasuCenter = [6.4700, 3.2000];
@@ -500,9 +556,15 @@
     }
     locationSelect.addEventListener('change', e => { if (e.target.value) focusOnMarker(e.target.value); });
 
-    function getSavedCoords(id, fallback) { const s = localStorage.getItem(`lasu_${id}`); return s ? JSON.parse(s) : fallback; }
-    // saveCoords is no longer used but kept for compatibility (won't be called)
-    function saveCoords(id, latlng) { localStorage.setItem(`lasu_${id}`, JSON.stringify([latlng.lat, latlng.lng])); }
+    // Saved coordinates are still read, but never updated (markers are fixed)
+    function getSavedCoords(id, fallback) { 
+      const s = localStorage.getItem(`lasu_${id}`); 
+      return s ? JSON.parse(s) : fallback; 
+    }
+    // We keep saveCoords for compatibility but it will not be used anymore
+    function saveCoords(id, latlng) { 
+      localStorage.setItem(`lasu_${id}`, JSON.stringify([latlng.lat, latlng.lng])); 
+    }
     function findLocationById(id) { return locations.find(l => l.id === id); }
 
     function createNavigationLine(from, to) {
@@ -511,20 +573,20 @@
       navigationLine.bindTooltip(`Distance: ${Math.round(getDistanceInMeters(from, to))} m`, { permanent: false, direction:'top' });
     }
 
-    // ---- helper to update coordsBox with name + lat/lng ----
     function updateCoordsBox(locationName, latlng) {
       const lat = latlng.lat.toFixed(6);
       const lng = latlng.lng.toFixed(6);
       coordsBox.textContent = `${locationName} : ${lat}, ${lng}`;
     }
 
-    // ---- INIT MARKERS (draggable = false) ----
+    // ---- INIT MARKERS (undraggable) ----
     function initializeMarkers() {
       locations.forEach(location => {
-        const start = getSavedCoords(location.id, location.coords); // still loads any previously saved coords if any (though never saved now)
+        // Load saved coordinates if they exist (from previous draggable sessions) – keeps custom positions
+        const start = getSavedCoords(location.id, location.coords);
         const cat = getCategoryFromLocation(location);
         const marker = L.marker(start, {
-          draggable: false,                // ✨ landmarks are now fixed
+          draggable: false,                 // <--- now fixed (undraggable)
           title: location.name,
           icon: L.divIcon({
             className: 'custom-marker',
@@ -533,7 +595,23 @@
           })
         }).addTo(map);
 
-        const popupContent = `<strong>${location.name}</strong><br><button class="nav-btn" onclick="navigateToMarker('${location.id}'); closeSidebarOnMobile();">Navigate from my location</button>`;
+        // Popup content with image and navigation button
+        const popupContent = `
+          <div class="popup-title">${location.name}</div>
+          
+          <img 
+            src="images/${location.id}.jpeg" 
+            alt="${location.name}" 
+            class="popup-image"
+            onerror="this.onerror=null; this.src='data:image/svg+xml,%3Csvg xmlns=\\'http://www.w3.org/2000/svg\\' width=\\'200\\' height=\\'140\\' viewBox=\\'0 0 200 140\\'%3E%3Crect width=\\'200\\' height=\\'140\\' fill=\\'%23eeeeee\\'/%3E%3Ctext x=\\'50%25\\' y=\\'50%25\\' dominant-baseline=\\'middle\\' text-anchor=\\'middle\\' font-family=\\'Arial,sans-serif\\' font-size=\\'14\\' fill=\\'%23999\\'%3ENo image%3C/text%3E%3C/svg%3E';"
+          >
+
+          <button 
+            class="popup-nav-btn" 
+            onclick="navigateToMarker('${location.id}'); closeSidebarOnMobile();">
+            Navigate from my location
+          </button>
+        `;
         marker.bindPopup(popupContent);
         marker.locationData = location;
 
@@ -545,6 +623,8 @@
           saveState('marker', location.id);
           closeSidebarOnMobile();
         });
+
+        // No dragend event because markers are not draggable
 
         markers[location.id] = marker;
       });
@@ -574,7 +654,6 @@
       return { location: bestLoc, distance: bestDist };
     }
 
-    // ----- locateUser (hides prompt) -----
     window.locateUser = function() {
       hideLocationPrompt();
       if (!navigator.geolocation) { coordsBox.textContent = 'Geolocation not supported'; return; }
@@ -650,5 +729,12 @@
       else { mobileToggle.style.display = 'flex'; }
     });
   </script>
+  <!-- 
+    📸 IMAGE SETUP:
+    1. Create an 'images' folder next to this HTML file.
+    2. Place landmark photos inside with filenames matching the 'id' and .jpeg extension (e.g., arcade.jpeg, arts.jpeg).
+    3. If an image is missing, a built‑in SVG fallback (grey box with "No image") will appear – no blinking.
+    4. 🖱️ Landmarks are now fixed (undraggable). Previously saved custom positions are still used if available.
+  -->
 </body>
 </html>
