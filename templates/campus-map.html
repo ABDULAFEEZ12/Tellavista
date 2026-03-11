@@ -872,9 +872,9 @@
   </script>
   <!-- 
     📸 IMAGE SETUP:
-    1. Create an 'images' folder next to this HTML file.
-    2. Place landmark photos inside with filenames matching the 'id' and .jpeg extension (e.g., arcade.jpeg, arts.jpeg).
-    3. If an image is missing, a built‑in SVG fallback (grey box with "No image") will appear – no blinking.
+    1. Place your landmark photos in the `templates/images` folder (next to this HTML file) with filenames matching the 'id' and .jpeg extension (e.g., arcade.jpeg, arts.jpeg).
+    2. The Flask route `/images/<filename>` (already defined in app.py) serves these files.
+    3. If an image is missing, a built‑in SVG fallback (grey box with "No image") will appear.
     4. 🖱️ Landmarks are now fixed (undraggable). Previously saved custom positions are still used if available.
     5. 🚶‍♂️ Your location now updates live as you walk (with battery‑saving maximumAge 3000) and the dot rotates to show direction.
     6. 🗺️ Navigation follows LASU roads using OSRM router, and the map auto‑zooms to the full route.
