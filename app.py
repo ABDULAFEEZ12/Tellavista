@@ -2532,6 +2532,10 @@ def about():
     """Render about page."""
     return render_template('about.html')
 
+@app.route('/images/<path:filename>')
+def serve_image(filename):
+    return send_from_directory(os.path.join(app.root_path, 'templates', 'images'), filename)
+
 @app.route('/campus-map')
 def campus_map():
     """Render LASU campus map page."""
@@ -3104,3 +3108,4 @@ if __name__ == '__main__':
     
     port = int(os.environ.get('PORT', 5000))
     socketio.run(app, host='0.0.0.0', port=port, debug=DEBUG_MODE)
+
