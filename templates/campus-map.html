@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -349,7 +350,7 @@
         </div>
         
         <div class="key-hint">
-          <i class="fas fa-info-circle"></i> <strong>Note:</strong> Landmarks are fixed (undraggable). Click any marker to see its photo.
+          <i class="fas fa-info-circle"></i> <strong>Note:</strong> Landmarks are fixed (undraggable). Previously saved positions are still shown.
         </div>
       </div>
 
@@ -361,7 +362,7 @@
       </div>
 
       <div class="info-panel">
-                <p><i class="fas fa-database"></i> <strong>Storage:</strong> Your last view and selected location are saved.</p>
+        <p><i class="fas fa-database"></i> <strong>Storage:</strong> Your last view and selected location are saved. Marker positions are no longer editable (fixed).</p>
         <p><i class="fas fa-mobile-alt"></i> <strong>Mobile:</strong> Tap a location to focus, then use the Navigate button.</p>
       </div>
     </aside>
@@ -424,15 +425,19 @@
       { id: "economics_hall", name: "Economics Hall", coords: [6.475243, 3.199060] },
       { id: "arts", name: "Faculty of Arts", coords: [6.465115, 3.201104] },
       { id: "education", name: "Faculty of Education", coords: [6.472996, 3.199889] },
+      { id: "it", name: "Faculty of Computing and information Technology", coords: [6.473991, 3.199653] },
       { id: "law", name: "Faculty of Law", coords: [6.467394, 3.202010] },
       { id: "management_sciences", name: "Faculty of Management Sciences", coords: [6.475661, 3.199942] },
+      { id: "odlri", name: "Open and Distance Learning and Research Institution", coords: [6.474928, 3.200071] },
       { id: "sciences", name: "Faculty of Sciences", coords: [6.467837, 3.200798] },
       { id: "social_sciences", name: "Faculty of Social Sciences", coords: [6.475243, 3.199060] },
+      { id: "gbajabiamila", name: "Femi Gbajabiamila Conference Centre", coords: [6.474624, 3.199331] },
       { id: "health", name: "Health Center", coords: [6.465443, 3.202018] },
       { id: "Hussam_okoya_Sports_Complex", name: "Hussam okoya Sports Complex", coords: [6.468703, 3.203875] },
       { id: "ict", name: "ICT Building", coords: [6.468753, 3.201230] },
       { id: "innovationhub", name: "Innovation Hub", coords: [6.465718, 3.200538] },
       { id: "Library_Complex", name: "Lasu Centre Library", coords: [6.471904, 3.201474] },
+      { id: "lasu-radio", name: "Lasu Radio", coords: [6.472373, 3.199653] },
       { id: "mosque", name: "LASU Central Mosque", coords: [6.465425, 3.200015] },
       { id: "lasu_football_pitch", name: "Lasu Football Pitch", coords: [6.467892, 3.203102] },
       { id: "law_clinic", name: "Law Clinic", coords: [6.466861, 3.202268] },
@@ -572,12 +577,12 @@
     }
     locationSelect.addEventListener('change', e => { if (e.target.value) focusOnMarker(e.target.value); });
 
-    // Saved coordinates are still read, but never updated (markers are fixed)
+    // Get saved coordinates from localStorage (in case user previously dragged them – now they are fixed)
     function getSavedCoords(id, fallback) { 
       const s = localStorage.getItem(`lasu_${id}`); 
       return s ? JSON.parse(s) : fallback; 
     }
-    // We keep saveCoords for compatibility but it will not be used anymore
+    // We keep saveCoords for compatibility but it won't be called anymore (dragend removed)
     function saveCoords(id, latlng) { 
       localStorage.setItem(`lasu_${id}`, JSON.stringify([latlng.lat, latlng.lng])); 
     }
@@ -592,11 +597,11 @@
     // ---- INIT MARKERS (undraggable) ----
     function initializeMarkers() {
       locations.forEach(location => {
-        // Load saved coordinates if they exist (from previous draggable sessions) – keeps custom positions
+        // Load saved coordinates if they exist (from previous draggable sessions) – keeps custom positions but they are now fixed
         const start = getSavedCoords(location.id, location.coords);
         const cat = getCategoryFromLocation(location);
         const marker = L.marker(start, {
-          draggable: false,                 // <--- now fixed (undraggable)
+          draggable: false,                 // <--- fixed, not draggable
           title: location.name,
           icon: L.divIcon({
             className: 'custom-marker',
@@ -633,6 +638,8 @@
           saveState('marker', location.id);
           closeSidebarOnMobile();
         });
+
+        // No dragend event because draggable is false
 
         markers[location.id] = marker;
       });
@@ -875,8 +882,8 @@
     1. Place your landmark photos in the `templates/images` folder (next to this HTML file) with filenames matching the 'id' and .jpeg extension (e.g., arcade.jpeg, arts.jpeg).
     2. The Flask route `/images/<filename>` (already defined in app.py) serves these files.
     3. If an image is missing, a built‑in SVG fallback (grey box with "No image") will appear.
-    4. 🖱️ Landmarks are now fixed (undraggable). Previously saved custom positions are still used if available.
-    5. 🚶‍♂️ Your location now updates live as you walk (with battery‑saving maximumAge 3000) and the dot rotates to show direction.
+    4. 🖱️ Landmarks are now fixed (undraggable). Previously saved custom positions are still used if available, but cannot be changed.
+    5. 🚶‍♂️ Your location updates live as you walk (with battery‑saving maximumAge 3000) and the dot rotates to show direction.
     6. 🗺️ Navigation follows LASU roads using OSRM router, and the map auto‑zooms to the full route only once.
     7. 🕒 Distance & walking time are displayed in the sidebar.
     8. 🎯 "Go to nearest building" button shows a confirmation message.
