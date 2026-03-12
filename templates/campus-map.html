@@ -521,6 +521,8 @@
     let routingControl = null;
     // Watch ID for continuous location tracking
     let watchID = null;
+    // Flag to prevent repeated route zooming
+    let routeZoomed = false;
 
     function toggleSidebar() {
       sidebar.classList.toggle('active');
@@ -685,14 +687,6 @@
           // Update global user location
           userLatLng = newLatLng;
 
-          // Check if user is outside campus (optional – you can adjust threshold)
-          const distToCampus = getDistanceInMeters(userLatLng, L.latLng(lasuCenter[0], lasuCenter[1]));
-          if (distToCampus > 2000) {
-            coordsBox.textContent = 'You are outside LASU campus. Showing campus instead.';
-            map.setView(lasuCenter, Math.min(17, getCurrentLayerMaxZoom()));
-            // Still show the dot but don't recenter automatically
-          }
-
           // Create or update the blue dot (with rotation if heading available)
           if (!userLocationMarker) {
             const blueDot = L.divIcon({
@@ -758,6 +752,9 @@
 
     // ---------- NAVIGATE (road‑following with OSRM router, auto‑zoom & distance display) ----------
     window.navigateToMarker = function(locationId) {
+      // Reset the zoom flag so a new navigation will zoom again
+      routeZoomed = false;
+
       if (!userLatLng) {
         alert('Please enable location services and click "Show My Location" first.');
         return;
@@ -791,7 +788,7 @@
         createMarker: function() { return null; }
       }).addTo(map);
 
-      // --- NEW: Auto-zoom to route and show distance/time ---
+      // --- Auto-zoom to route and show distance/time (only once) ---
       routingControl.on('routesfound', function(e) {
         const route = e.routes[0];
         // Show distance & time
@@ -799,9 +796,12 @@
         const timeMin = Math.round(route.summary.totalTime / 60);
         coordsBox.textContent = `🚶 Route: ${distanceKm} km • ${timeMin} min walk`;
 
-        // Zoom to route bounds
-        const bounds = L.latLngBounds(route.coordinates);
-        map.fitBounds(bounds, { padding: [40, 40] });
+        // Zoom to route bounds only the first time
+        if (!routeZoomed) {
+          const bounds = L.latLngBounds(route.coordinates);
+          map.fitBounds(bounds, { padding: [40, 40] });
+          routeZoomed = true;
+        }
       });
 
       marker.openPopup();
@@ -877,7 +877,7 @@
     3. If an image is missing, a built‑in SVG fallback (grey box with "No image") will appear.
     4. 🖱️ Landmarks are now fixed (undraggable). Previously saved custom positions are still used if available.
     5. 🚶‍♂️ Your location now updates live as you walk (with battery‑saving maximumAge 3000) and the dot rotates to show direction.
-    6. 🗺️ Navigation follows LASU roads using OSRM router, and the map auto‑zooms to the full route.
+    6. 🗺️ Navigation follows LASU roads using OSRM router, and the map auto‑zooms to the full route only once.
     7. 🕒 Distance & walking time are displayed in the sidebar.
     8. 🎯 "Go to nearest building" button shows a confirmation message.
   -->
