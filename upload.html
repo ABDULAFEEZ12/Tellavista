@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload Video – Nelavista</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+        body {
+            background: #f5f5f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .upload-container {
+            background: white;
+            max-width: 600px;
+            width: 100%;
+            padding: 30px;
+            border-radius: 24px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        h1 { font-size: 28px; margin-bottom: 8px; }
+        .subtitle { color: #666; margin-bottom: 24px; }
+        .form-group { margin-bottom: 20px; }
+        label { display: block; font-weight: 500; margin-bottom: 6px; }
+        input, select, textarea {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid #ddd;
+            border-radius: 12px;
+            font-size: 16px;
+            background: #fafafa;
+        }
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: #0070f3;
+            background: white;
+        }
+        textarea { min-height: 80px; resize: vertical; }
+        .file-input { border: 1px dashed #0070f3; background: #f0f7ff; padding: 10px; cursor: pointer; }
+        button {
+            background: #0070f3;
+            color: white;
+            border: none;
+            padding: 14px 20px;
+            font-size: 18px;
+            font-weight: 600;
+            border-radius: 40px;
+            width: 100%;
+            cursor: pointer;
+            transition: background 0.2s;
+            margin-top: 10px;
+        }
+        button:hover { background: #005bb5; }
+        .message {
+            margin-top: 20px;
+            padding: 12px;
+            border-radius: 12px;
+            display: none;
+        }
+        .success { background: #d4edda; color: #155724; display: block; }
+        .error { background: #f8d7da; color: #721c24; display: block; }
+        .info { background: #d1ecf1; color: #0c5460; display: block; }
+        .small-note { font-size: 14px; color: #777; margin-top: 5px; }
+    </style>
+</head>
+<body>
+    <div class="upload-container">
+        <h1>🎥 Share Your Campus Video</h1>
+        <p class="subtitle">Upload videos about LASU life – hostel tours, study spots, department tips, and more.</p>
+
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="message info">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <form action="{{ url_for('upload_video') }}" method="POST" enctype="multipart/form-data">
+            <div class="form-group">
+                <label>Your full name *</label>
+                <input type="text" name="creator_name" placeholder="e.g. John Doe" required>
+            </div>
+            <div class="form-group">
+                <label>Department *</label>
+                <input type="text" name="department" placeholder="e.g. Computer Science" required>
+            </div>
+            <div class="form-group">
+                <label>Course (subject/title) *</label>
+                <input type="text" name="course" placeholder="e.g. MTH101, Hostel tour" required>
+            </div>
+            <div class="form-group">
+                <label>Level *</label>
+                <select name="level" required>
+                    <option value="" disabled selected>Select level</option>
+                    <option value="100">100</option>
+                    <option value="200">200</option>
+                    <option value="300">300</option>
+                    <option value="400">400</option>
+                    <option value="500">500</option>
+                    <option value="Postgraduate">Postgraduate</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Semester *</label>
+                <select name="semester" required>
+                    <option value="" disabled selected>Select semester</option>
+                    <option value="1st">1st Semester</option>
+                    <option value="2nd">2nd Semester</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Caption (optional)</label>
+                <textarea name="caption" placeholder="Describe your video..."></textarea>
+            </div>
+            <div class="form-group">
+                <label>Upload video * (MP4, MOV, etc.)</label>
+                <input type="file" name="video" accept="video/*" required class="file-input">
+                <div class="small-note">Max file size: 100MB</div>
+            </div>
+            <button type="submit">Upload Video</button>
+        </form>
+        <p class="small-note" style="margin-top: 20px;">By uploading, you agree to our terms. Videos appear after review.</p>
+    </div>
+</body>
+</html>
