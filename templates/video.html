@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nelavista Reels – Campus Videos</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+        body {
+            background: #0a0a0a;
+            color: white;
+        }
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: rgba(0,0,0,0.9);
+            padding: 16px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 100;
+            border-bottom: 1px solid #333;
+        }
+        .header h1 {
+            font-size: 24px;
+            font-weight: 700;
+            color: white;
+        }
+        .header h1 span { color: #0070f3; }
+        .upload-link {
+            background: #0070f3;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 40px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 14px;
+            transition: background 0.2s;
+        }
+        .upload-link:hover { background: #005bb5; }
+        .filter-bar {
+            position: fixed;
+            top: 70px;
+            left: 0;
+            right: 0;
+            background: #111;
+            padding: 15px 20px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            align-items: center;
+            z-index: 99;
+            border-bottom: 1px solid #333;
+        }
+        .filter-select {
+            flex: 1;
+            min-width: 150px;
+            padding: 12px;
+            border-radius: 40px;
+            border: 1px solid #333;
+            background: #222;
+            color: white;
+            font-size: 14px;
+        }
+        .find-btn, .reset-btn {
+            padding: 12px 24px;
+            border-radius: 40px;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            white-space: nowrap;
+            border: none;
+        }
+        .find-btn { background: #0070f3; color: white; }
+        .find-btn:hover { background: #005bb5; }
+        .reset-btn { background: transparent; color: #ccc; border: 1px solid #444; }
+        .reset-btn:hover { border-color: #0070f3; color: white; }
+        .reels-container {
+            max-width: 400px;
+            margin: 160px auto 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            padding: 0 10px 80px;
+        }
+        .reel-card {
+            background: #1a1a1a;
+            border-radius: 24px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+        }
+        video {
+            width: 100%;
+            max-height: 600px;
+            object-fit: contain;
+            display: block;
+        }
+        .reel-info { padding: 16px; }
+        .creator-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 8px;
+            flex-wrap: wrap;
+        }
+        .creator-name { font-weight: 700; }
+        .department-level { color: #aaa; font-size: 14px; }
+        .course-tag {
+            background: #2a2a2a;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 13px;
+            color: #0070f3;
+            border: 1px solid #333;
+        }
+        .caption { margin: 8px 0; font-size: 15px; }
+        .stats {
+            display: flex;
+            gap: 20px;
+            margin-top: 12px;
+            border-top: 1px solid #333;
+            padding-top: 12px;
+        }
+        .stat { display: flex; align-items: center; gap: 6px; color: #bbb; font-size: 14px; }
+        .like-button {
+            background: none;
+            border: none;
+            color: #ff3b5c;
+            font-size: 20px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 0;
+        }
+        .like-button:hover { opacity: 0.8; }
+        .loading, .error, .no-videos {
+            text-align: center;
+            padding: 50px 20px;
+            color: #aaa;
+            font-size: 18px;
+        }
+        .footer-note {
+            text-align: center;
+            color: #666;
+            font-size: 14px;
+            margin: 20px 0 40px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Nelavista <span>Reels</span></h1>
+        <a href="{{ url_for('upload_video') }}" class="upload-link">+ Post Video</a>
+    </div>
+
+    <div class="filter-bar">
+        <select id="courseFilter" class="filter-select">
+            <option value="">All Courses</option>
+        </select>
+        <select id="levelFilter" class="filter-select">
+            <option value="">All Levels</option>
+            <option value="100">100</option>
+            <option value="200">200</option>
+            <option value="300">300</option>
+            <option value="400">400</option>
+            <option value="500">500</option>
+            <option value="Postgraduate">Postgraduate</option>
+        </select>
+        <select id="semesterFilter" class="filter-select">
+            <option value="">All Semesters</option>
+            <option value="1st">1st Semester</option>
+            <option value="2nd">2nd Semester</option>
+        </select>
+        <button class="find-btn" id="findBtn">Find Video</button>
+        <button class="reset-btn" id="resetBtn">Reset</button>
+    </div>
+
+    <div id="reelsContainer" class="reels-container">
+        <div class="loading">Loading campus videos...</div>
+    </div>
+
+    <div class="footer-note">
+        📍 Watch, like, and earn – every 1000 views = ₦500
+    </div>
+
+    <script>
+        const container = document.getElementById('reelsContainer');
+        const courseFilter = document.getElementById('courseFilter');
+        const levelFilter = document.getElementById('levelFilter');
+        const semesterFilter = document.getElementById('semesterFilter');
+        const findBtn = document.getElementById('findBtn');
+        const resetBtn = document.getElementById('resetBtn');
+
+        function formatNumber(num) {
+            if (num >= 1000000) return (num/1000000).toFixed(1) + 'M';
+            if (num >= 1000) return (num/1000).toFixed(1) + 'k';
+            return num;
+        }
+
+        async function loadVideos(filters = {}) {
+            const params = new URLSearchParams(filters);
+            const url = `/api/videos?${params}`;
+            const res = await fetch(url);
+            const videos = await res.json();
+            renderVideos(videos);
+        }
+
+        function renderVideos(videos) {
+            if (!videos.length) {
+                container.innerHTML = '<div class="no-videos">🎬 No videos match your filters.</div>';
+                return;
+            }
+            let html = '';
+            videos.forEach(v => {
+                html += `
+                <div class="reel-card" data-id="${v.id}">
+                    <video src="${v.video_url}" controls playsinline preload="metadata"></video>
+                    <div class="reel-info">
+                        <div class="creator-row">
+                            <span class="creator-name">@${v.creator_name}</span>
+                            <span class="department-level">${v.department} · Level ${v.level}</span>
+                            <span class="course-tag">${v.course}</span>
+                        </div>
+                        ${v.caption ? `<div class="caption">${v.caption}</div>` : ''}
+                        <div class="stats">
+                            <div class="stat">👁️ ${formatNumber(v.views)}</div>
+                            <button class="like-button" data-id="${v.id}">❤️ <span class="like-count">${formatNumber(v.likes)}</span></button>
+                        </div>
+                    </div>
+                </div>
+                `;
+            });
+            container.innerHTML = html;
+            attachVideoListeners();
+            attachLikeListeners();
+        }
+
+        function attachVideoListeners() {
+            document.querySelectorAll('video').forEach(video => {
+                let viewSent = false;
+                video.addEventListener('play', () => {
+                    if (viewSent) return;
+                    viewSent = true;
+                    const card = video.closest('.reel-card');
+                    if (!card) return;
+                    const videoId = card.dataset.id;
+                    fetch(`/api/videos/${videoId}/view`, { method: 'POST' })
+                        .then(res => res.json())
+                        .then(data => {
+                            const viewStat = card.querySelector('.stat:first-child');
+                            if (viewStat) viewStat.innerHTML = `👁️ ${formatNumber(data.views)}`;
+                        })
+                        .catch(err => console.error('View increment failed', err));
+                });
+            });
+        }
+
+        function attachLikeListeners() {
+            document.querySelectorAll('.like-button').forEach(btn => {
+                btn.addEventListener('click', async () => {
+                    const videoId = btn.dataset.id;
+                    const likeSpan = btn.querySelector('.like-count');
+                    const currentLikes = parseInt(likeSpan.textContent.replace(/[^0-9]/g,'')) || 0;
+                    likeSpan.textContent = formatNumber(currentLikes + 1);
+                    btn.disabled = true;
+                    try {
+                        const res = await fetch(`/api/videos/${videoId}/like`, { method: 'POST' });
+                        const data = await res.json();
+                        likeSpan.textContent = formatNumber(data.likes);
+                    } catch (e) {
+                        likeSpan.textContent = formatNumber(currentLikes);
+                    } finally {
+                        btn.disabled = false;
+                    }
+                });
+            });
+        }
+
+        async function loadCourses() {
+            const res = await fetch('/api/courses');
+            const courses = await res.json();
+            courseFilter.innerHTML = '<option value="">All Courses</option>';
+            courses.forEach(c => {
+                const opt = document.createElement('option');
+                opt.value = c;
+                opt.textContent = c;
+                courseFilter.appendChild(opt);
+            });
+        }
+
+        findBtn.addEventListener('click', () => {
+            const filters = {
+                course: courseFilter.value || null,
+                level: levelFilter.value || null,
+                semester: semesterFilter.value || null
+            };
+            loadVideos(filters);
+        });
+
+        resetBtn.addEventListener('click', () => {
+            courseFilter.value = '';
+            levelFilter.value = '';
+            semesterFilter.value = '';
+            loadVideos({});
+        });
+
+        // Initial load
+        loadVideos({});
+        loadCourses();
+    </script>
+</body>
+</html>
