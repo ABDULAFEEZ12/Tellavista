@@ -2,47 +2,36 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-    <meta http-equiv="Pragma" content="no-cache">
-    <meta http-equiv="Expires" content="0">
-    <title>Tellavista Reels · study reels</title>
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nelavista Reels – Campus Videos</title>
     <style>
-        /* ===== CSS VARIABLES & RESET ===== */
-        :root {
-            --primary-color: #000000;
-            --primary-dark: #333333;
-            --light-bg: #ffffff;
-            --dark-bg: #000000;
-            --card-light: #ffffff;
-            --card-dark: #0a0a0a;
-            --text-light: #000000;
-            --text-dark: #ffffff;
-            --input-bg: #0a0a0a;
-            --border-light: rgba(0, 0, 0, 0.1);
-            --border-dark: rgba(255, 255, 255, 0.1);
-            --gradient-start: #ffffff;
-            --gradient-end: #888888;
-            --accent-color: #1a1a1a;
-            --correct-color: #4caf50;
-            --incorrect-color: #f44336;
-            --selected-color: rgba(255, 255, 255, 0.15);
-            --review-correct: rgba(76, 175, 80, 0.2);
-            --review-incorrect: rgba(244, 67, 54, 0.2);
-        }
-
+        /* ===== RESET & VARIABLES ===== */
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            -webkit-tap-highlight-color: transparent;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+
+        :root {
+            --bg-primary: #000000;
+            --bg-secondary: #0f0f0f;
+            --bg-tertiary: #1a1a1a;
+            --surface: #1e1e1e;
+            --surface-hover: #2a2a2a;
+            --border-subtle: #2c2c2c;
+            --text-primary: #ffffff;
+            --text-secondary: #a0a0a0;
+            --text-muted: #6b6b6b;
+            --accent: #ffffff;
+            --accent-hover: #e0e0e0;
+            --shadow: 0 8px 30px rgba(0, 0, 0, 0.8);
+            --transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         body {
-            background: var(--dark-bg);
-            color: var(--text-dark);
+            background: var(--bg-primary);
+            color: var(--text-primary);
             min-height: 100vh;
             display: flex;
             flex-direction: column;
@@ -50,101 +39,257 @@
             overflow-x: hidden;
             padding: 0 20px;
             opacity: 0;
-            animation: fadeIn 0.6s ease-out forwards;
-            animation-delay: 0.1s;
+            animation: fadeIn 0.4s ease-out forwards;
         }
 
-        /* ===== TOP BAR ===== */
-        #top-bar {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 60px;
-            background: rgba(0, 0, 0, 0.95);
-            backdrop-filter: blur(10px);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0 16px;
-            z-index: 1002;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-            opacity: 0;
-            animation: fadeInDown 0.5s ease-out 0.2s forwards;
-        }
-
-        #back-btn {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            font-size: 20px;
-            background: rgba(255, 255, 255, 0.1);
-            border: none;
-            color: white;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        #back-btn:hover {
-            background: rgba(255, 255, 255, 0.2);
-            transform: translateX(-2px);
-        }
-
-        #top-bar-title {
-            font-weight: 600;
-            font-size: 1.1rem;
-            background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        /* ===== ANIMATIONS ===== */
         @keyframes fadeIn {
             from { opacity: 0; }
             to { opacity: 1; }
         }
 
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(15px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+        /* ===== TOP BAR ===== */
+        .top-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: rgba(0, 0, 0, 0.95);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            height: 70px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 24px;
+            z-index: 100;
+            border-bottom: 1px solid var(--border-subtle);
         }
 
-        @keyframes fadeInDown {
-            from {
-                opacity: 0;
-                transform: translateY(-10px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+        .back-button {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-subtle);
+            color: var(--text-primary);
+            font-size: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: var(--transition);
+            text-decoration: none;
+            line-height: 1;
         }
 
-        @keyframes slideIn {
-            from {
-                opacity: 0;
-                transform: translateX(-20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateX(0);
-            }
+        .back-button:hover {
+            background: var(--surface-hover);
+            transform: scale(1.05);
+            border-color: var(--text-secondary);
+        }
+
+        .back-button:active {
+            transform: scale(0.95);
+        }
+
+        .logo {
+            font-weight: 600;
+            font-size: 1.2rem;
+            letter-spacing: -0.5px;
+            color: var(--text-primary);
+            background: linear-gradient(135deg, #fff, #aaa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .upload-link {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+            padding: 10px 20px;
+            border-radius: 40px;
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.9rem;
+            border: 1px solid var(--border-subtle);
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .upload-link:hover {
+            background: var(--surface-hover);
+            border-color: var(--text-secondary);
+            transform: translateY(-1px);
+        }
+
+        .upload-link:active {
+            transform: translateY(0);
+        }
+
+        /* ===== TAB BAR ===== */
+        .tab-bar {
+            position: fixed;
+            top: 70px;
+            left: 0;
+            right: 0;
+            background: var(--bg-secondary);
+            display: flex;
+            padding: 12px 24px;
+            gap: 12px;
+            border-bottom: 1px solid var(--border-subtle);
+            z-index: 99;
+            backdrop-filter: blur(8px);
+        }
+
+        .tab {
+            flex: 1;
+            padding: 12px;
+            text-align: center;
+            border-radius: 40px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition);
+            background: transparent;
+            color: var(--text-secondary);
+            border: 1px solid var(--border-subtle);
+            font-size: 0.95rem;
+        }
+
+        .tab.active {
+            background: var(--text-primary);
+            color: var(--bg-primary);
+            border-color: var(--text-primary);
+            font-weight: 600;
+            box-shadow: 0 4px 12px rgba(255,255,255,0.1);
+        }
+
+        .tab:not(.active):hover {
+            background: var(--surface-hover);
+            color: var(--text-primary);
+            border-color: var(--text-secondary);
+        }
+
+        /* ===== FILTER BAR ===== */
+        .filter-bar {
+            position: fixed;
+            top: 138px; /* 70 + 68 */
+            left: 0;
+            right: 0;
+            background: var(--bg-secondary);
+            padding: 16px 24px;
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            align-items: center;
+            z-index: 98;
+            border-bottom: 1px solid var(--border-subtle);
+            backdrop-filter: blur(8px);
+        }
+
+        .filter-select {
+            flex: 1;
+            min-width: 150px;
+            padding: 12px 18px;
+            border-radius: 40px;
+            border: 1px solid var(--border-subtle);
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: var(--transition);
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23ffffff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 18px center;
+            background-size: 14px;
+        }
+
+        .filter-select:hover {
+            background-color: var(--surface-hover);
+            border-color: var(--text-secondary);
+        }
+
+        .filter-select:focus {
+            outline: none;
+            border-color: var(--text-primary);
+        }
+
+        .filter-select option {
+            background: var(--bg-primary);
+            color: var(--text-primary);
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border-radius: 40px;
+            font-weight: 500;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: var(--transition);
+            white-space: nowrap;
+            border: 1px solid var(--border-subtle);
+            background: transparent;
+            color: var(--text-secondary);
+        }
+
+        .btn-primary {
+            background: var(--text-primary);
+            color: var(--bg-primary);
+            border-color: var(--text-primary);
+            font-weight: 600;
+        }
+
+        .btn-primary:hover {
+            background: var(--accent-hover);
+            border-color: var(--accent-hover);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(255,255,255,0.15);
+        }
+
+        .btn-primary:active {
+            transform: translateY(0);
+        }
+
+        .btn-secondary:hover {
+            background: var(--surface-hover);
+            color: var(--text-primary);
+            border-color: var(--text-secondary);
+        }
+
+        /* ===== MAIN CONTENT ===== */
+        .reels-container {
+            width: 100%;
+            max-width: 420px;
+            margin: 220px auto 40px; /* 70+68+82 ≈ 220 */
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+            padding: 0 16px 80px;
+        }
+
+        .reel-card {
+            background: var(--surface);
+            border-radius: 32px;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border-subtle);
+            transition: var(--transition);
+            opacity: 0;
+            animation: slideUp 0.4s ease-out forwards;
+        }
+
+        .reel-card:hover {
+            transform: translateY(-4px);
+            border-color: var(--text-secondary);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.9);
         }
 
         @keyframes slideUp {
             from {
                 opacity: 0;
-                transform: translateY(30px);
+                transform: translateY(20px);
             }
             to {
                 opacity: 1;
@@ -152,255 +297,12 @@
             }
         }
 
-        @keyframes pulse {
-            0%, 100% {
-                transform: scale(1);
-                opacity: 1;
-            }
-            50% {
-                transform: scale(1.02);
-                opacity: 0.9;
-            }
-        }
-
-        @keyframes checkmark {
-            0% {
-                opacity: 0;
-                transform: scale(0) rotate(-45deg);
-            }
-            50% {
-                opacity: 1;
-                transform: scale(1.2) rotate(-45deg);
-            }
-            100% {
-                opacity: 1;
-                transform: scale(1) rotate(-45deg);
-            }
-        }
-
-        /* ===== MAIN CONTAINER ===== */
-        .cbt-container {
-            width: 100%;
-            max-width: 800px;
-            margin-top: 80px;
-            opacity: 0;
-            animation: fadeInUp 0.7s ease-out 0.3s forwards;
-        }
-
-        /* ===== HEADER SECTION ===== */
-        .header-section {
-            text-align: center;
-            margin-bottom: 2rem;
-        }
-
-        .header-title {
-            font-size: 2rem;
-            font-weight: 700;
-            background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            margin-bottom: 0.5rem;
-            opacity: 0;
-            animation: fadeInUp 0.7s ease-out 0.4s forwards;
-        }
-
-        .header-subtitle {
-            color: #a0a0a0;
-            font-size: 1rem;
-            line-height: 1.5;
-            max-width: 500px;
-            margin: 0 auto;
-            opacity: 0;
-            animation: fadeInUp 0.7s ease-out 0.5s forwards;
-        }
-
-        /* ===== SELECTION SECTION ===== */
-        .selection-section {
-            background: var(--card-dark);
-            border: 1px solid var(--border-dark);
-            border-radius: 16px;
-            padding: 2rem;
-            margin-bottom: 2rem;
-            opacity: 0;
-            animation: fadeInUp 0.7s ease-out 0.6s forwards;
-        }
-
-        .input-group {
-            margin-bottom: 1.8rem;
-            opacity: 0;
-            animation: slideIn 0.6s ease-out forwards;
-        }
-
-        .input-group:nth-child(1) {
-            animation-delay: 0.6s;
-        }
-
-        .input-label {
-            display: block;
-            margin-bottom: 0.7rem;
-            font-size: 0.95rem;
-            font-weight: 500;
-            color: #e0e0e0;
-        }
-
-        .input-wrapper {
-            position: relative;
-            background: var(--input-bg);
-            border-radius: 12px;
-            border: 1px solid var(--border-dark);
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        .input-wrapper:focus-within {
-            border-color: rgba(255, 255, 255, 0.3);
-            transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-        }
-
-        .styled-select {
-            width: 100%;
-            padding: 1rem 1.2rem;
-            background: var(--input-bg);
-            border: none;
-            outline: none;
-            font-size: 1rem;
-            color: #ffffff;
-            appearance: none;
-            -webkit-appearance: none;
-            cursor: pointer;
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23ffffff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
-            background-repeat: no-repeat;
-            background-position: right 1rem center;
-            background-size: 16px;
-        }
-
-        .styled-select:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23888888' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
-        }
-
-        .styled-select option {
-            background-color: #1a1a1a;
-            color: #ffffff;
-            padding: 12px;
-            font-size: 1rem;
-        }
-
-        @-moz-document url-prefix() {
-            .styled-select {
-                text-overflow: '';
-                color: #ffffff;
-            }
-            .styled-select option {
-                background-color: #1a1a1a;
-                color: #ffffff;
-            }
-        }
-
-        .search-btn {
-            width: 100%;
-            padding: 1rem;
-            background: var(--primary-color);
-            color: white;
-            border: none;
-            border-radius: 12px;
-            font-size: 1rem;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            margin-top: 0.5rem;
-            opacity: 0;
-            animation: fadeInUp 0.6s ease-out 0.8s forwards;
-        }
-
-        .search-btn:hover:not(:disabled) {
-            opacity: 0.9;
-            transform: translateY(-2px);
-        }
-
-        .search-btn:active:not(:disabled) {
-            transform: translateY(0);
-        }
-
-        .search-btn:disabled {
-            opacity: 0.3;
-            cursor: not-allowed;
-        }
-
-        /* ===== REELS SECTION (materials style) ===== */
-        .reels-section {
-            background: var(--card-dark);
-            border: 1px solid var(--border-dark);
-            border-radius: 16px;
-            padding: 2rem;
-            margin-bottom: 2rem;
-            display: none;
-            opacity: 0;
-        }
-
-        .reels-section.active {
-            display: block;
-            animation: slideUp 0.6s ease-out forwards;
-        }
-
-        .reels-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 2rem;
-            padding-bottom: 1rem;
-            border-bottom: 1px solid var(--border-dark);
-        }
-
-        .reels-title {
-            font-size: 1.5rem;
-            font-weight: 600;
-            background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        .reels-count {
-            font-size: 0.9rem;
-            color: #a0a0a0;
-            background: var(--accent-color);
-            padding: 4px 12px;
-            border-radius: 20px;
-        }
-
-        .reels-grid {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 1.5rem;
-            margin-bottom: 1.5rem;
-        }
-
-        .reel-card {
-            background: var(--accent-color);
-            border: 1px solid var(--border-dark);
-            border-radius: 12px;
-            padding: 1.2rem;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .reel-card:hover {
-            border-color: rgba(255, 255, 255, 0.3);
-            transform: translateY(-2px);
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
-        }
-
         .reel-media {
             width: 100%;
             aspect-ratio: 16 / 9;
-            border-radius: 10px;
+            background: var(--bg-primary);
+            position: relative;
             overflow: hidden;
-            background: #000;
-            margin-bottom: 0.8rem;
         }
 
         .reel-media iframe,
@@ -409,282 +311,259 @@
             height: 100%;
             border: none;
             display: block;
+            object-fit: cover;
         }
 
-        .reel-caption {
-            font-size: 1rem;
-            line-height: 1.4;
-            color: #ddd;
-            padding: 0 4px;
-            word-break: break-word;
+        .reel-info {
+            padding: 18px;
         }
 
-        /* ===== NO REELS MESSAGE ===== */
-        .no-reels {
-            text-align: center;
-            padding: 3rem 2rem;
-            opacity: 0;
-            animation: fadeInUp 0.6s ease-out forwards;
+        .creator-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 10px;
+            flex-wrap: wrap;
         }
 
-        .no-reels-icon {
-            font-size: 3rem;
-            margin-bottom: 1rem;
-            opacity: 0.5;
-        }
-
-        .no-reels-title {
-            font-size: 1.3rem;
+        .creator-name {
             font-weight: 600;
-            color: #ffffff;
-            margin-bottom: 0.5rem;
+            color: var(--text-primary);
+            font-size: 1rem;
         }
 
-        .no-reels-subtitle {
-            color: #a0a0a0;
+        .department-level {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            background: var(--bg-tertiary);
+            padding: 4px 10px;
+            border-radius: 30px;
+            border: 1px solid var(--border-subtle);
+        }
+
+        .course-tag {
+            background: var(--bg-tertiary);
+            padding: 4px 12px;
+            border-radius: 30px;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            border: 1px solid var(--border-subtle);
+        }
+
+        .caption {
+            margin: 12px 0;
             font-size: 0.95rem;
             line-height: 1.5;
-            margin-bottom: 1.5rem;
+            color: var(--text-secondary);
         }
 
-        /* ===== ACTION BUTTONS (back / select) ===== */
-        .action-buttons {
+        .stats {
             display: flex;
-            justify-content: center;
-            margin-top: 1.5rem;
+            align-items: center;
+            gap: 24px;
+            margin-top: 12px;
+            border-top: 1px solid var(--border-subtle);
+            padding-top: 14px;
         }
 
-        .secondary-btn {
-            padding: 0.8rem 1.5rem;
-            background: var(--input-bg);
-            border: 1px solid var(--border-dark);
-            color: white;
-            border-radius: 40px;
-            font-size: 0.95rem;
-            font-weight: 500;
+        .stat {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            transition: var(--transition);
+        }
+
+        .stat:hover {
+            color: var(--text-primary);
+        }
+
+        .like-button {
+            background: none;
+            border: none;
+            color: #ff4d6d;
+            font-size: 1.3rem;
             cursor: pointer;
-            transition: all 0.3s ease;
-            display: inline-flex;
+            display: flex;
             align-items: center;
             gap: 6px;
-            text-decoration: none;
+            padding: 0;
+            transition: var(--transition);
         }
 
-        .secondary-btn:hover {
-            border-color: rgba(255, 255, 255, 0.3);
-            transform: translateY(-2px);
+        .like-button:hover {
+            transform: scale(1.1);
+        }
+
+        .like-button:active {
+            transform: scale(0.9);
+        }
+
+        .loading, .error, .no-videos {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-muted);
+            font-size: 1rem;
+            background: var(--surface);
+            border-radius: 32px;
+            border: 1px solid var(--border-subtle);
+        }
+
+        .footer-note {
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            margin: 20px 0 40px;
+            letter-spacing: 0.3px;
+        }
+
+        /* ===== UTILITIES ===== */
+        .hidden {
+            display: none !important;
         }
 
         /* ===== SCROLLBAR ===== */
         ::-webkit-scrollbar {
             width: 6px;
         }
-
         ::-webkit-scrollbar-track {
             background: transparent;
         }
-
         ::-webkit-scrollbar-thumb {
-            background: rgba(255, 255, 255, 0.1);
+            background: var(--border-subtle);
             border-radius: 3px;
-            transition: background 0.3s ease;
         }
-
         ::-webkit-scrollbar-thumb:hover {
-            background: rgba(255, 255, 255, 0.2);
+            background: var(--text-muted);
         }
 
-        /* ===== RESPONSIVE DESIGN ===== */
-        @media (max-width: 768px) {
-            body {
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 600px) {
+            .top-bar {
                 padding: 0 16px;
-                padding-top: 70px;
             }
-
-            .cbt-container {
-                margin-top: 70px;
+            .tab-bar {
+                padding: 12px 16px;
             }
-
-            .header-title {
-                font-size: 1.6rem;
+            .filter-bar {
+                padding: 16px;
             }
-
-            .header-subtitle {
-                font-size: 0.95rem;
+            .btn {
+                padding: 12px 18px;
             }
-
-            .selection-section,
-            .reels-section {
-                padding: 1.5rem;
-                border-radius: 12px;
+            .reels-container {
+                margin-top: 210px;
             }
-
-            .reel-card {
-                padding: 1rem;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .header-title {
-                font-size: 1.4rem;
-            }
-
-            .selection-section,
-            .reels-section {
-                padding: 1.2rem;
-                border-radius: 10px;
-            }
-        }
-
-        /* ===== UTILITY CLASSES ===== */
-        .hidden {
-            display: none !important;
-        }
-
-        .show {
-            display: block !important;
-        }
-
-        .flex-show {
-            display: flex !important;
         }
     </style>
 </head>
 <body>
-    <div id="top-bar">
-        <button id="back-btn" onclick="goBack()">←</button>
-        <div id="top-bar-title">🎬 Nelavista Reels</div>
-        <div style="width: 40px;"></div>
+    <!-- Top bar with back arrow -->
+    <div class="top-bar">
+        <a href="javascript:history.back()" class="back-button" aria-label="Go back">←</a>
+        <span class="logo">Nelavista Reels</span>
+        <a href="{{ url_for('upload_video') }}" class="upload-link">+ Post Video</a>
     </div>
 
-    <div class="cbt-container">
-        <div class="header-section">
-            <h1 class="header-title">🎬 Nelavista Reels</h1>
-            <p class="header-subtitle">Select a course to watch short educational reels</p>
-        </div>
+    <!-- Tab bar -->
+    <div class="tab-bar">
+        <div class="tab active" id="tabUploaded" onclick="switchTab('uploaded')">📤 Uploaded Videos</div>
+        <div class="tab" id="tabYoutube" onclick="switchTab('youtube')">🎬 YouTube Reels</div>
+    </div>
 
-        <!-- Selection section: only course needed -->
-        <div class="selection-section" id="selectionSection">
-            <div class="input-group">
-                <label class="input-label">Select Course</label>
-                <div class="input-wrapper">
-                    <select id="courseSelect" class="styled-select">
-                        <option value="">-- Select Course --</option>
-                        <!-- Full course list from original -->
-                        <option value="Accountancy">Accountancy</option>
-                        <option value="Agriculture">Agriculture</option>
-                        <option value="Arabic Studies">Arabic Studies</option>
-                        <option value="Banking and Finance">Banking and Finance</option>
-                        <option value="Biochemistry">Biochemistry</option>
-                        <option value="Botany">Botany</option>
-                        <option value="Business Administration">Business Administration</option>
-                        <option value="Chemical and Polymer Engineering">Chemical and Polymer Engineering</option>
-                        <option value="Chemistry">Chemistry</option>
-                        <option value="Christian Religious Studies">Christian Religious Studies</option>
-                        <option value="Computer Science">Computer Science</option>
-                        <option value="Dentistry and Dental Surgery">Dentistry and Dental Surgery</option>
-                        <option value="Drama / Dramatic / Performing Arts">Drama / Dramatic / Performing Arts</option>
-                        <option value="Early Childhood Education">Early Childhood Education</option>
-                        <option value="Economics">Economics</option>
-                        <option value="Education and Accounting">Education and Accounting</option>
-                        <option value="Education and Biology">Education and Biology</option>
-                        <option value="Education and Chemistry">Education and Chemistry</option>
-                        <option value="Education and Christian Religious Studies">Education and Christian Religious Studies</option>
-                        <option value="Education and Computer Science">Education and Computer Science</option>
-                        <option value="Education and Economics">Education and Economics</option>
-                        <option value="Education and English Language">Education and English Language</option>
-                        <option value="Education and French">Education and French</option>
-                        <option value="Education and Geography">Education and Geography</option>
-                        <option value="Education and History">Education and History</option>
-                        <option value="Education and Islamic Studies">Education and Islamic Studies</option>
-                        <option value="Education and Mathematics">Education and Mathematics</option>
-                        <option value="Education and Physics">Education and Physics</option>
-                        <option value="Education and Political Science">Education and Political Science</option>
-                        <option value="Education and Yoruba">Education and Yoruba</option>
-                        <option value="Educational Management">Educational Management</option>
-                        <option value="Electronics and Computer Engineering">Electronics and Computer Engineering</option>
-                        <option value="English Language">English Language</option>
-                        <option value="Fine and Applied Arts">Fine and Applied Arts</option>
-                        <option value="Fisheries">Fisheries</option>
-                        <option value="French">French</option>
-                        <option value="Geography and Planning">Geography and Planning</option>
-                        <option value="Guidance and Counseling">Guidance and Counseling</option>
-                        <option value="Health Education">Health Education</option>
-                        <option value="History and International Studies">History and International Studies</option>
-                        <option value="Industrial Relations and Personnel Management">Industrial Relations and Personnel Management</option>
-                        <option value="Insurance">Insurance</option>
-                        <option value="Islamic Studies">Islamic Studies</option>
-                        <option value="Law">Law</option>
-                        <option value="Library and Information Science">Library and Information Science</option>
-                        <option value="Local Government and Development Studies">Local Government and Development Studies</option>
-                        <option value="Marketing">Marketing</option>
-                        <option value="Mass Communication">Mass Communication</option>
-                        <option value="Mathematics">Mathematics</option>
-                        <option value="Mechanical Engineering">Mechanical Engineering</option>
-                        <option value="Medicine and Surgery">Medicine and Surgery</option>
-                        <option value="Microbiology">Microbiology</option>
-                        <option value="Music">Music</option>
-                        <option value="Nursing / Nursing Science">Nursing / Nursing Science</option>
-                        <option value="Pharmacology">Pharmacology</option>
-                        <option value="Philosophy">Philosophy</option>
-                        <option value="Physical and Health Education">Physical and Health Education</option>
-                        <option value="Physics">Physics</option>
-                        <option value="Physiology">Physiology</option>
-                        <option value="Political Science">Political Science</option>
-                        <option value="Portuguese / English">Portuguese / English</option>
-                        <option value="Psychology">Psychology</option>
-                        <option value="Public Administration">Public Administration</option>
-                        <option value="Sociology">Sociology</option>
-                        <option value="Teacher Education Science">Teacher Education Science</option>
-                        <option value="Technology and Vocational Education">Technology and Vocational Education</option>
-                        <option value="Theatre Arts">Theatre Arts</option>
-                        <option value="Transport Management Technology">Transport Management Technology</option>
-                        <option value="Yoruba">Yoruba</option>
-                        <option value="Zoology">Zoology</option>
-                    </select>
-                </div>
-            </div>
+    <!-- Filter for uploaded videos -->
+    <div class="filter-bar" id="filterUploaded">
+        <select id="courseFilter" class="filter-select">
+            <option value="">All Courses</option>
+        </select>
+        <select id="levelFilter" class="filter-select">
+            <option value="">All Levels</option>
+            <option value="100">100</option>
+            <option value="200">200</option>
+            <option value="300">300</option>
+            <option value="400">400</option>
+            <option value="500">500</option>
+            <option value="Postgraduate">Postgraduate</option>
+        </select>
+        <select id="semesterFilter" class="filter-select">
+            <option value="">All Semesters</option>
+            <option value="1st">1st Semester</option>
+            <option value="2nd">2nd Semester</option>
+        </select>
+        <button class="btn btn-primary" id="findBtn">Find</button>
+        <button class="btn btn-secondary" id="resetBtn">Reset</button>
+    </div>
 
-            <button class="search-btn" id="searchReelsBtn" onclick="loadReels()">🔍 Search Reels</button>
-        </div>
+    <!-- Filter for YouTube reels (hidden initially) -->
+    <div class="filter-bar" id="filterYoutube" style="display: none;">
+        <select id="youtubeCourseSelect" class="filter-select">
+            <option value="">-- Select Course --</option>
+        </select>
+        <button class="btn btn-primary" id="youtubeFindBtn">Search</button>
+        <button class="btn btn-secondary" id="youtubeResetBtn">Reset</button>
+    </div>
 
-        <!-- Reels display section (like materials) -->
-        <div class="reels-section" id="reelsSection">
-            <div class="reels-header">
-                <div class="reels-title" id="reelsTitle">Course Reels</div>
-                <div class="reels-count" id="reelsCount">0 reels</div>
-            </div>
+    <!-- Content container -->
+    <div id="reelsContainer" class="reels-container">
+        <div class="loading">Loading campus videos...</div>
+    </div>
 
-            <div class="reels-grid" id="reelsGrid">
-                <!-- Reels will be dynamically inserted here -->
-            </div>
-
-            <div class="action-buttons">
-                <button class="secondary-btn" onclick="goBackToSelection()">
-                    <span>←</span>
-                    Select another course
-                </button>
-            </div>
-        </div>
-
-        <!-- No reels message -->
-        <div class="no-reels hidden" id="noReels">
-            <div class="no-reels-icon">🎥</div>
-            <div class="no-reels-title">No reels found</div>
-            <div class="no-reels-subtitle">
-                There are no reels available for this course yet.<br>
-                Please try another course.
-            </div>
-            <button class="secondary-btn" onclick="goBackToSelection()">Select another course</button>
-        </div>
+    <div class="footer-note">
+        📍 Watch, like, and earn – every 1000 views = ₦500
     </div>
 
     <script>
         // ===== STATE =====
-        let currentCourse = '';
-        let currentReels = [];
+        let currentTab = 'uploaded';
+        let allCourses = [];
+        const youtubeCourses = [
+            "Accountancy", "Agriculture", "Arabic Studies", "Banking and Finance", "Biochemistry",
+            "Botany", "Business Administration", "Chemical and Polymer Engineering", "Chemistry",
+            "Christian Religious Studies", "Computer Science", "Dentistry and Dental Surgery",
+            "Drama / Dramatic / Performing Arts", "Early Childhood Education", "Economics",
+            "Education and Accounting", "Education and Biology", "Education and Chemistry",
+            "Education and Christian Religious Studies", "Education and Computer Science",
+            "Education and Economics", "Education and English Language", "Education and French",
+            "Education and Geography", "Education and History", "Education and Islamic Studies",
+            "Education and Mathematics", "Education and Physics", "Education and Political Science",
+            "Education and Yoruba", "Educational Management", "Electronics and Computer Engineering",
+            "English Language", "Fine and Applied Arts", "Fisheries", "French", "Geography and Planning",
+            "Guidance and Counseling", "Health Education", "History and International Studies",
+            "Industrial Relations and Personnel Management", "Insurance", "Islamic Studies", "Law",
+            "Library and Information Science", "Local Government and Development Studies", "Marketing",
+            "Mass Communication", "Mathematics", "Mechanical Engineering", "Medicine and Surgery",
+            "Microbiology", "Music", "Nursing / Nursing Science", "Pharmacology", "Philosophy",
+            "Physical and Health Education", "Physics", "Physiology", "Political Science",
+            "Portuguese / English", "Psychology", "Public Administration", "Sociology",
+            "Teacher Education Science", "Technology and Vocational Education", "Theatre Arts",
+            "Transport Management Technology", "Yoruba", "Zoology"
+        ];
 
-        // ===== HELPER FUNCTIONS (original) =====
+        // ===== DOM ELEMENTS =====
+        const container = document.getElementById('reelsContainer');
+        const filterUploaded = document.getElementById('filterUploaded');
+        const filterYoutube = document.getElementById('filterYoutube');
+        const tabUploaded = document.getElementById('tabUploaded');
+        const tabYoutube = document.getElementById('tabYoutube');
+
+        const courseFilter = document.getElementById('courseFilter');
+        const levelFilter = document.getElementById('levelFilter');
+        const semesterFilter = document.getElementById('semesterFilter');
+        const findBtn = document.getElementById('findBtn');
+        const resetBtn = document.getElementById('resetBtn');
+
+        const youtubeCourseSelect = document.getElementById('youtubeCourseSelect');
+        const youtubeFindBtn = document.getElementById('youtubeFindBtn');
+        const youtubeResetBtn = document.getElementById('youtubeResetBtn');
+
+        // ===== HELPER FUNCTIONS =====
+        function formatNumber(num) {
+            if (num >= 1000000) return (num/1000000).toFixed(1) + 'M';
+            if (num >= 1000) return (num/1000).toFixed(1) + 'k';
+            return num;
+        }
+
         function isYouTube(url) {
             return url.includes("youtube.com") || url.includes("youtu.be");
         }
@@ -695,173 +574,211 @@
             return videoId ? `https://www.youtube.com/embed/${videoId}` : null;
         }
 
-        // ===== MAIN FUNCTION TO LOAD REELS (mocked API call, but keeps original fetch) =====
-        async function loadReels() {
-            const courseSelect = document.getElementById("courseSelect");
-            const course = courseSelect.value;
-            currentCourse = course;
+        // ===== TAB SWITCHING =====
+        window.switchTab = function(tab) {
+            currentTab = tab;
+            if (tab === 'uploaded') {
+                tabUploaded.classList.add('active');
+                tabYoutube.classList.remove('active');
+                filterUploaded.style.display = 'flex';
+                filterYoutube.style.display = 'none';
+                loadUploadedVideos(getUploadedFilters());
+            } else {
+                tabYoutube.classList.add('active');
+                tabUploaded.classList.remove('active');
+                filterUploaded.style.display = 'none';
+                filterYoutube.style.display = 'flex';
+                container.innerHTML = '<div class="loading">Select a course and click Search</div>';
+            }
+        };
 
-            if (!course) {
-                alert("Please select a course.");
+        // ===== UPLOADED VIDEOS =====
+        function getUploadedFilters() {
+            return {
+                course: courseFilter.value || null,
+                level: levelFilter.value || null,
+                semester: semesterFilter.value || null
+            };
+        }
+
+        async function loadUploadedVideos(filters = {}) {
+            const params = new URLSearchParams(filters);
+            const url = `/api/videos?${params}`;
+            try {
+                const res = await fetch(url);
+                const videos = await res.json();
+                renderUploadedVideos(videos);
+            } catch (err) {
+                container.innerHTML = `<div class="error">❌ Failed to load videos</div>`;
+            }
+        }
+
+        function renderUploadedVideos(videos) {
+            if (!videos.length) {
+                container.innerHTML = '<div class="no-videos">🎬 No videos match your filters.</div>';
                 return;
             }
+            let html = '';
+            videos.forEach((v, index) => {
+                html += `
+                <div class="reel-card" data-id="${v.id}" style="animation-delay: ${index * 0.05}s">
+                    <div class="reel-media">
+                        <video src="${v.video_url}" controls playsinline preload="metadata"></video>
+                    </div>
+                    <div class="reel-info">
+                        <div class="creator-row">
+                            <span class="creator-name">@${v.creator_name}</span>
+                            <span class="department-level">${v.department} · Level ${v.level}</span>
+                            <span class="course-tag">${v.course}</span>
+                        </div>
+                        ${v.caption ? `<div class="caption">${v.caption}</div>` : ''}
+                        <div class="stats">
+                            <div class="stat">👁️ ${formatNumber(v.views)}</div>
+                            <button class="like-button" data-id="${v.id}">❤️ <span class="like-count">${formatNumber(v.likes)}</span></button>
+                        </div>
+                    </div>
+                </div>
+                `;
+            });
+            container.innerHTML = html;
+            attachVideoListeners();
+            attachLikeListeners();
+        }
 
-            // Show loading state
-            const reelSection = document.getElementById("reelsSection");
-            const noReels = document.getElementById("noReels");
-            const reelsGrid = document.getElementById("reelsGrid");
-            const reelsTitle = document.getElementById("reelsTitle");
-            const reelsCount = document.getElementById("reelsCount");
+        function attachVideoListeners() {
+            document.querySelectorAll('video').forEach(video => {
+                let viewSent = false;
+                video.addEventListener('play', () => {
+                    if (viewSent) return;
+                    viewSent = true;
+                    const card = video.closest('.reel-card');
+                    if (!card) return;
+                    const videoId = card.dataset.id;
+                    fetch(`/api/videos/${videoId}/view`, { method: 'POST' })
+                        .then(res => res.json())
+                        .then(data => {
+                            const viewStat = card.querySelector('.stat:first-child');
+                            if (viewStat) viewStat.innerHTML = `👁️ ${formatNumber(data.views)}`;
+                        })
+                        .catch(err => console.error('View increment failed', err));
+                });
+            });
+        }
 
-            reelSection.classList.remove("active");
-            noReels.classList.add("hidden");
-            reelsGrid.innerHTML = `<div style="text-align:center; padding:2rem; color:#aaa;">⏳ Loading reels...</div>`;
+        function attachLikeListeners() {
+            document.querySelectorAll('.like-button').forEach(btn => {
+                btn.addEventListener('click', async () => {
+                    const videoId = btn.dataset.id;
+                    const likeSpan = btn.querySelector('.like-count');
+                    const currentLikes = parseInt(likeSpan.textContent.replace(/[^0-9]/g,'')) || 0;
+                    likeSpan.textContent = formatNumber(currentLikes + 1);
+                    btn.disabled = true;
+                    try {
+                        const res = await fetch(`/api/videos/${videoId}/like`, { method: 'POST' });
+                        const data = await res.json();
+                        likeSpan.textContent = formatNumber(data.likes);
+                    } catch (e) {
+                        likeSpan.textContent = formatNumber(currentLikes);
+                    } finally {
+                        btn.disabled = false;
+                    }
+                });
+            });
+        }
 
-            // Hide selection, show reels section (will update after fetch)
-            document.getElementById("selectionSection").style.display = "none";
-            reelSection.style.display = "block";
-            reelSection.classList.add("active");
+        async function loadCoursesForUploaded() {
+            const res = await fetch('/api/courses');
+            const courses = await res.json();
+            courseFilter.innerHTML = '<option value="">All Courses</option>';
+            courses.forEach(c => {
+                const opt = document.createElement('option');
+                opt.value = c;
+                opt.textContent = c;
+                courseFilter.appendChild(opt);
+            });
+        }
 
+        // ===== YOUTUBE REELS =====
+        async function loadYoutubeReels() {
+            const course = youtubeCourseSelect.value;
+            if (!course) {
+                alert('Please select a course.');
+                return;
+            }
+            container.innerHTML = '<div class="loading">Loading YouTube reels...</div>';
             try {
-                // Original API call – replace with your actual endpoint
                 const res = await fetch(`/api/reels?course=${encodeURIComponent(course)}`);
                 const data = await res.json();
-
-                // If you want to test without a backend, you can mock some data:
-                // For demo, if fetch fails we'll use mock data to show styling
-                let reels = [];
-                if (data.reels && data.reels.length > 0) {
-                    reels = data.reels;
-                } else {
-                    // MOCK reels for demonstration (remove in production)
-                    // This shows how cards will look – comment out when real API is ready
-                    if (course === "Computer Science") {
-                        reels = [
-                            { video_url: "https://www.youtube.com/embed/dQw4w9WgXcQ", caption: "Introduction to Algorithms (mock)" },
-                            { video_url: "https://www.youtube.com/embed/3JZ_D3ELwOQ", caption: "Data Structures in 5 minutes (mock)" }
-                        ];
-                    } else if (course === "Biochemistry") {
-                        reels = [
-                            { video_url: "https://www.youtube.com/embed/8b0aE4m6QyQ", caption: "Protein synthesis explained (mock)" }
-                        ];
-                    } else {
-                        // No reels
-                    }
+                let reels = data.reels || [];
+                if (reels.length === 0 && course === "Accountancy") {
+                    reels = [{
+                        video_url: "https://youtu.be/Gua2Bo_G-J0?si=aM8ZPO-OqtV-ZbJ9",
+                        caption: "The ACCOUNTING BASICS for BEGINNERS - Full tutorial (3 core parts explained)"
+                    }];
                 }
-
-                currentReels = reels;
-
-                // Update header
-                reelsTitle.textContent = `${course} Reels`;
-                reelsCount.textContent = `${reels.length} reel${reels.length !== 1 ? 's' : ''}`;
-
-                if (reels.length === 0) {
-                    reelSection.classList.remove("active");
-                    reelSection.style.display = "none";
-                    noReels.classList.remove("hidden");
-                } else {
-                    noReels.classList.add("hidden");
-                    displayReels(reels);
-                }
-
+                renderYoutubeReels(reels);
             } catch (err) {
-                console.error(err);
-                // On error, show mock data for demonstration (optional)
-                // For demo, we'll still show mock to illustrate UI
-                const mockReels = [
-                    { video_url: "https://www.youtube.com/embed/dQw4w9WgXcQ", caption: "Sample reel (API error fallback)" },
-                    { video_url: "https://www.youtube.com/embed/3JZ_D3ELwOQ", caption: "Another sample reel" }
-                ];
-                currentReels = mockReels;
-                reelsTitle.textContent = `${course} Reels (demo)`;
-                reelsCount.textContent = `2 reels`;
-                displayReels(mockReels);
+                console.error('API error, using fallback');
+                if (course === "Accountancy") {
+                    renderYoutubeReels([{
+                        video_url: "https://youtu.be/Gua2Bo_G-J0?si=aM8ZPO-OqtV-ZbJ9",
+                        caption: "The ACCOUNTING BASICS for BEGINNERS - Full tutorial (3 core parts explained)"
+                    }]);
+                } else {
+                    container.innerHTML = '<div class="error">❌ Failed to load YouTube reels</div>';
+                }
             }
         }
 
-        function displayReels(reels) {
-            const grid = document.getElementById("reelsGrid");
-            grid.innerHTML = '';
-
-            reels.forEach((reel, index) => {
-                const card = document.createElement('div');
-                card.className = 'reel-card';
-                card.style.animationDelay = `${index * 0.1}s`;
-
-                let mediaHtml = '';
-                if (isYouTube(reel.video_url)) {
-                    const embedUrl = getYouTubeEmbed(reel.video_url);
-                    mediaHtml = `<iframe src="${embedUrl}" frameborder="0" allowfullscreen loading="lazy"></iframe>`;
-                } else {
-                    mediaHtml = `<video src="${reel.video_url}" controls preload="metadata"></video>`;
-                }
-
-                card.innerHTML = `
-                    <div class="reel-media">
-                        ${mediaHtml}
-                    </div>
-                    <div class="reel-caption">${reel.caption || '📌 educational reel'}</div>
-                `;
-                grid.appendChild(card);
-            });
-        }
-
-        // ===== NAVIGATION =====
-        function goBackToSelection() {
-            document.getElementById("reelsSection").classList.remove("active");
-            document.getElementById("reelsSection").style.display = "none";
-            document.getElementById("noReels").classList.add("hidden");
-            document.getElementById("selectionSection").style.display = "block";
-        }
-
-        function goBack() {
-            // If reels or no-reels are visible, go back to selection
-            const reelsActive = document.getElementById("reelsSection").classList.contains("active");
-            const noReelsVisible = !document.getElementById("noReels").classList.contains("hidden");
-
-            if (reelsActive || noReelsVisible) {
-                goBackToSelection();
+        function renderYoutubeReels(reels) {
+            if (!reels.length) {
+                container.innerHTML = '<div class="no-videos">🎬 No YouTube reels found for this course.</div>';
                 return;
             }
-
-            // Otherwise animate out (like original)
-            document.body.style.opacity = '0';
-            document.body.style.transform = 'translateX(20px)';
-            document.body.style.transition = 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)';
-
-            setTimeout(() => {
-                window.history.back();
-            }, 300);
+            let html = '';
+            reels.forEach((reel, index) => {
+                let embedUrl = isYouTube(reel.video_url) ? getYouTubeEmbed(reel.video_url) || reel.video_url : reel.video_url;
+                html += `
+                <div class="reel-card" style="animation-delay: ${index * 0.05}s">
+                    <div class="reel-media">
+                        <iframe src="${embedUrl}" frameborder="0" allowfullscreen loading="lazy"></iframe>
+                    </div>
+                    <div class="reel-info">
+                        <div class="caption">${reel.caption || '📌 educational reel'}</div>
+                    </div>
+                </div>
+                `;
+            });
+            container.innerHTML = html;
         }
 
-        // ===== INIT & EVENT LISTENERS =====
-        document.addEventListener('DOMContentLoaded', () => {
-            // Enable search only when course selected
-            const courseSelect = document.getElementById("courseSelect");
-            const searchBtn = document.getElementById("searchReelsBtn");
-
-            courseSelect.addEventListener('change', function() {
-                searchBtn.disabled = !this.value;
-            });
-
-            // Initial disabled state
-            searchBtn.disabled = true;
+        // ===== EVENT LISTENERS =====
+        findBtn.addEventListener('click', () => {
+            if (currentTab === 'uploaded') loadUploadedVideos(getUploadedFilters());
+        });
+        resetBtn.addEventListener('click', () => {
+            courseFilter.value = '';
+            levelFilter.value = '';
+            semesterFilter.value = '';
+            if (currentTab === 'uploaded') loadUploadedVideos({});
         });
 
-        // Optional: handle visibility change for animation
-        document.addEventListener('visibilitychange', function() {
-            if (!document.hidden) {
-                document.body.style.animation = 'none';
-                setTimeout(() => {
-                    document.body.style.animation = 'fadeIn 0.6s ease-out forwards';
-                }, 10);
-            }
+        youtubeFindBtn.addEventListener('click', loadYoutubeReels);
+        youtubeResetBtn.addEventListener('click', () => {
+            youtubeCourseSelect.value = '';
+            container.innerHTML = '<div class="loading">Select a course and click Search</div>';
         });
 
-        document.addEventListener('keydown', function(e) {
-            if (e.key === 'Escape') {
-                goBack();
-            }
+        // Initial load
+        loadCoursesForUploaded();
+        loadUploadedVideos({});
+
+        // Populate YouTube course dropdown
+        youtubeCourses.forEach(c => {
+            const opt = document.createElement('option');
+            opt.value = c;
+            opt.textContent = c;
+            youtubeCourseSelect.appendChild(opt);
         });
     </script>
 </body>
