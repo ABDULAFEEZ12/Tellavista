@@ -5,163 +5,475 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Nelavista Reels – Campus Videos</title>
     <style>
+        /* ===== RESET & VARIABLES ===== */
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
         }
+
+        :root {
+            --bg-primary: #000000;
+            --bg-secondary: #0f0f0f;
+            --bg-tertiary: #1a1a1a;
+            --surface: #1e1e1e;
+            --surface-hover: #2a2a2a;
+            --border-subtle: #2c2c2c;
+            --text-primary: #ffffff;
+            --text-secondary: #a0a0a0;
+            --text-muted: #6b6b6b;
+            --accent: #ffffff;
+            --accent-hover: #e0e0e0;
+            --shadow: 0 8px 30px rgba(0, 0, 0, 0.8);
+            --transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
         body {
-            background: #0a0a0a;
-            color: white;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            overflow-x: hidden;
+            padding: 0 20px;
+            opacity: 0;
+            animation: fadeIn 0.4s ease-out forwards;
         }
-        .header {
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        /* ===== TOP BAR ===== */
+        .top-bar {
             position: fixed;
             top: 0;
             left: 0;
             right: 0;
-            background: rgba(0,0,0,0.9);
-            padding: 16px 20px;
+            background: rgba(0, 0, 0, 0.95);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            height: 70px;
             display: flex;
-            justify-content: space-between;
             align-items: center;
+            justify-content: space-between;
+            padding: 0 24px;
             z-index: 100;
-            border-bottom: 1px solid #333;
+            border-bottom: 1px solid var(--border-subtle);
         }
-        .header h1 {
+
+        .back-button {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-subtle);
+            color: var(--text-primary);
             font-size: 24px;
-            font-weight: 700;
-            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: var(--transition);
+            text-decoration: none;
+            line-height: 1;
         }
-        .header h1 span { color: #0070f3; }
+
+        .back-button:hover {
+            background: var(--surface-hover);
+            transform: scale(1.05);
+            border-color: var(--text-secondary);
+        }
+
+        .back-button:active {
+            transform: scale(0.95);
+        }
+
+        .logo {
+            font-weight: 600;
+            font-size: 1.2rem;
+            letter-spacing: -0.5px;
+            color: var(--text-primary);
+            background: linear-gradient(135deg, #fff, #aaa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
         .upload-link {
-            background: #0070f3;
-            color: white;
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
             padding: 10px 20px;
             border-radius: 40px;
             text-decoration: none;
-            font-weight: 600;
-            font-size: 14px;
-            transition: background 0.2s;
+            font-weight: 500;
+            font-size: 0.9rem;
+            border: 1px solid var(--border-subtle);
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 6px;
         }
-        .upload-link:hover { background: #005bb5; }
-        .filter-bar {
+
+        .upload-link:hover {
+            background: var(--surface-hover);
+            border-color: var(--text-secondary);
+            transform: translateY(-1px);
+        }
+
+        .upload-link:active {
+            transform: translateY(0);
+        }
+
+        /* ===== TAB BAR ===== */
+        .tab-bar {
             position: fixed;
             top: 70px;
             left: 0;
             right: 0;
-            background: #111;
-            padding: 15px 20px;
+            background: var(--bg-secondary);
             display: flex;
-            gap: 10px;
+            padding: 12px 24px;
+            gap: 12px;
+            border-bottom: 1px solid var(--border-subtle);
+            z-index: 99;
+            backdrop-filter: blur(8px);
+        }
+
+        .tab {
+            flex: 1;
+            padding: 12px;
+            text-align: center;
+            border-radius: 40px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition);
+            background: transparent;
+            color: var(--text-secondary);
+            border: 1px solid var(--border-subtle);
+            font-size: 0.95rem;
+        }
+
+        .tab.active {
+            background: var(--text-primary);
+            color: var(--bg-primary);
+            border-color: var(--text-primary);
+            font-weight: 600;
+            box-shadow: 0 4px 12px rgba(255,255,255,0.1);
+        }
+
+        .tab:not(.active):hover {
+            background: var(--surface-hover);
+            color: var(--text-primary);
+            border-color: var(--text-secondary);
+        }
+
+        /* ===== FILTER BAR ===== */
+        .filter-bar {
+            position: fixed;
+            top: 138px; /* 70 + 68 */
+            left: 0;
+            right: 0;
+            background: var(--bg-secondary);
+            padding: 16px 24px;
+            display: flex;
+            gap: 12px;
             flex-wrap: wrap;
             align-items: center;
-            z-index: 99;
-            border-bottom: 1px solid #333;
+            z-index: 98;
+            border-bottom: 1px solid var(--border-subtle);
+            backdrop-filter: blur(8px);
         }
+
         .filter-select {
             flex: 1;
             min-width: 150px;
-            padding: 12px;
+            padding: 12px 18px;
             border-radius: 40px;
-            border: 1px solid #333;
-            background: #222;
-            color: white;
-            font-size: 14px;
+            border: 1px solid var(--border-subtle);
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: var(--transition);
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23ffffff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 18px center;
+            background-size: 14px;
         }
-        .find-btn, .reset-btn {
+
+        .filter-select:hover {
+            background-color: var(--surface-hover);
+            border-color: var(--text-secondary);
+        }
+
+        .filter-select:focus {
+            outline: none;
+            border-color: var(--text-primary);
+        }
+
+        .filter-select option {
+            background: var(--bg-primary);
+            color: var(--text-primary);
+        }
+
+        .btn {
             padding: 12px 24px;
             border-radius: 40px;
-            font-weight: 600;
-            font-size: 14px;
+            font-weight: 500;
+            font-size: 0.95rem;
             cursor: pointer;
+            transition: var(--transition);
             white-space: nowrap;
-            border: none;
+            border: 1px solid var(--border-subtle);
+            background: transparent;
+            color: var(--text-secondary);
         }
-        .find-btn { background: #0070f3; color: white; }
-        .find-btn:hover { background: #005bb5; }
-        .reset-btn { background: transparent; color: #ccc; border: 1px solid #444; }
-        .reset-btn:hover { border-color: #0070f3; color: white; }
+
+        .btn-primary {
+            background: var(--text-primary);
+            color: var(--bg-primary);
+            border-color: var(--text-primary);
+            font-weight: 600;
+        }
+
+        .btn-primary:hover {
+            background: var(--accent-hover);
+            border-color: var(--accent-hover);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(255,255,255,0.15);
+        }
+
+        .btn-primary:active {
+            transform: translateY(0);
+        }
+
+        .btn-secondary:hover {
+            background: var(--surface-hover);
+            color: var(--text-primary);
+            border-color: var(--text-secondary);
+        }
+
+        /* ===== MAIN CONTENT ===== */
         .reels-container {
-            max-width: 400px;
-            margin: 160px auto 20px;
+            width: 100%;
+            max-width: 420px;
+            margin: 220px auto 40px; /* 70+68+82 ≈ 220 */
             display: flex;
             flex-direction: column;
-            gap: 20px;
-            padding: 0 10px 80px;
+            gap: 24px;
+            padding: 0 16px 80px;
         }
+
         .reel-card {
-            background: #1a1a1a;
-            border-radius: 24px;
+            background: var(--surface);
+            border-radius: 32px;
             overflow: hidden;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border-subtle);
+            transition: var(--transition);
+            opacity: 0;
+            animation: slideUp 0.4s ease-out forwards;
         }
-        video {
+
+        .reel-card:hover {
+            transform: translateY(-4px);
+            border-color: var(--text-secondary);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.9);
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .reel-media {
             width: 100%;
-            max-height: 600px;
-            object-fit: contain;
-            display: block;
+            aspect-ratio: 16 / 9;
+            background: var(--bg-primary);
+            position: relative;
+            overflow: hidden;
         }
-        .reel-info { padding: 16px; }
+
+        .reel-media iframe,
+        .reel-media video {
+            width: 100%;
+            height: 100%;
+            border: none;
+            display: block;
+            object-fit: cover;
+        }
+
+        .reel-info {
+            padding: 18px;
+        }
+
         .creator-row {
             display: flex;
             align-items: center;
-            gap: 10px;
-            margin-bottom: 8px;
+            gap: 8px;
+            margin-bottom: 10px;
             flex-wrap: wrap;
         }
-        .creator-name { font-weight: 700; }
-        .department-level { color: #aaa; font-size: 14px; }
-        .course-tag {
-            background: #2a2a2a;
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 13px;
-            color: #0070f3;
-            border: 1px solid #333;
+
+        .creator-name {
+            font-weight: 600;
+            color: var(--text-primary);
+            font-size: 1rem;
         }
-        .caption { margin: 8px 0; font-size: 15px; }
+
+        .department-level {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            background: var(--bg-tertiary);
+            padding: 4px 10px;
+            border-radius: 30px;
+            border: 1px solid var(--border-subtle);
+        }
+
+        .course-tag {
+            background: var(--bg-tertiary);
+            padding: 4px 12px;
+            border-radius: 30px;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            border: 1px solid var(--border-subtle);
+        }
+
+        .caption {
+            margin: 12px 0;
+            font-size: 0.95rem;
+            line-height: 1.5;
+            color: var(--text-secondary);
+        }
+
         .stats {
             display: flex;
-            gap: 20px;
+            align-items: center;
+            gap: 24px;
             margin-top: 12px;
-            border-top: 1px solid #333;
-            padding-top: 12px;
+            border-top: 1px solid var(--border-subtle);
+            padding-top: 14px;
         }
-        .stat { display: flex; align-items: center; gap: 6px; color: #bbb; font-size: 14px; }
+
+        .stat {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            transition: var(--transition);
+        }
+
+        .stat:hover {
+            color: var(--text-primary);
+        }
+
         .like-button {
             background: none;
             border: none;
-            color: #ff3b5c;
-            font-size: 20px;
+            color: #ff4d6d;
+            font-size: 1.3rem;
             cursor: pointer;
             display: flex;
             align-items: center;
             gap: 6px;
             padding: 0;
+            transition: var(--transition);
         }
-        .like-button:hover { opacity: 0.8; }
+
+        .like-button:hover {
+            transform: scale(1.1);
+        }
+
+        .like-button:active {
+            transform: scale(0.9);
+        }
+
         .loading, .error, .no-videos {
             text-align: center;
-            padding: 50px 20px;
-            color: #aaa;
-            font-size: 18px;
+            padding: 60px 20px;
+            color: var(--text-muted);
+            font-size: 1rem;
+            background: var(--surface);
+            border-radius: 32px;
+            border: 1px solid var(--border-subtle);
         }
+
         .footer-note {
             text-align: center;
-            color: #666;
-            font-size: 14px;
+            color: var(--text-muted);
+            font-size: 0.85rem;
             margin: 20px 0 40px;
+            letter-spacing: 0.3px;
+        }
+
+        /* ===== UTILITIES ===== */
+        .hidden {
+            display: none !important;
+        }
+
+        /* ===== SCROLLBAR ===== */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: var(--border-subtle);
+            border-radius: 3px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--text-muted);
+        }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 600px) {
+            .top-bar {
+                padding: 0 16px;
+            }
+            .tab-bar {
+                padding: 12px 16px;
+            }
+            .filter-bar {
+                padding: 16px;
+            }
+            .btn {
+                padding: 12px 18px;
+            }
+            .reels-container {
+                margin-top: 210px;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="header">
-        <h1>Nelavista <span>Reels</span></h1>
+    <!-- Top bar with back arrow -->
+    <div class="top-bar">
+        <a href="javascript:history.back()" class="back-button" aria-label="Go back">←</a>
+        <span class="logo">Nelavista Reels</span>
         <a href="{{ url_for('upload_video') }}" class="upload-link">+ Post Video</a>
     </div>
 
-    <div class="filter-bar">
+    <!-- Tab bar -->
+    <div class="tab-bar">
+        <div class="tab active" id="tabUploaded" onclick="switchTab('uploaded')">📤 Uploaded Videos</div>
+        <div class="tab" id="tabYoutube" onclick="switchTab('youtube')">🎬 YouTube Reels</div>
+    </div>
+
+    <!-- Filter for uploaded videos -->
+    <div class="filter-bar" id="filterUploaded">
         <select id="courseFilter" class="filter-select">
             <option value="">All Courses</option>
         </select>
@@ -179,10 +491,20 @@
             <option value="1st">1st Semester</option>
             <option value="2nd">2nd Semester</option>
         </select>
-        <button class="find-btn" id="findBtn">Find Video</button>
-        <button class="reset-btn" id="resetBtn">Reset</button>
+        <button class="btn btn-primary" id="findBtn">Find</button>
+        <button class="btn btn-secondary" id="resetBtn">Reset</button>
     </div>
 
+    <!-- Filter for YouTube reels (hidden initially) -->
+    <div class="filter-bar" id="filterYoutube" style="display: none;">
+        <select id="youtubeCourseSelect" class="filter-select">
+            <option value="">-- Select Course --</option>
+        </select>
+        <button class="btn btn-primary" id="youtubeFindBtn">Search</button>
+        <button class="btn btn-secondary" id="youtubeResetBtn">Reset</button>
+    </div>
+
+    <!-- Content container -->
     <div id="reelsContainer" class="reels-container">
         <div class="loading">Loading campus videos...</div>
     </div>
@@ -192,37 +514,117 @@
     </div>
 
     <script>
+        // ===== STATE =====
+        let currentTab = 'uploaded';
+        let allCourses = [];
+        const youtubeCourses = [
+            "Accountancy", "Agriculture", "Arabic Studies", "Banking and Finance", "Biochemistry",
+            "Botany", "Business Administration", "Chemical and Polymer Engineering", "Chemistry",
+            "Christian Religious Studies", "Computer Science", "Dentistry and Dental Surgery",
+            "Drama / Dramatic / Performing Arts", "Early Childhood Education", "Economics",
+            "Education and Accounting", "Education and Biology", "Education and Chemistry",
+            "Education and Christian Religious Studies", "Education and Computer Science",
+            "Education and Economics", "Education and English Language", "Education and French",
+            "Education and Geography", "Education and History", "Education and Islamic Studies",
+            "Education and Mathematics", "Education and Physics", "Education and Political Science",
+            "Education and Yoruba", "Educational Management", "Electronics and Computer Engineering",
+            "English Language", "Fine and Applied Arts", "Fisheries", "French", "Geography and Planning",
+            "Guidance and Counseling", "Health Education", "History and International Studies",
+            "Industrial Relations and Personnel Management", "Insurance", "Islamic Studies", "Law",
+            "Library and Information Science", "Local Government and Development Studies", "Marketing",
+            "Mass Communication", "Mathematics", "Mechanical Engineering", "Medicine and Surgery",
+            "Microbiology", "Music", "Nursing / Nursing Science", "Pharmacology", "Philosophy",
+            "Physical and Health Education", "Physics", "Physiology", "Political Science",
+            "Portuguese / English", "Psychology", "Public Administration", "Sociology",
+            "Teacher Education Science", "Technology and Vocational Education", "Theatre Arts",
+            "Transport Management Technology", "Yoruba", "Zoology"
+        ];
+
+        // ===== DOM ELEMENTS =====
         const container = document.getElementById('reelsContainer');
+        const filterUploaded = document.getElementById('filterUploaded');
+        const filterYoutube = document.getElementById('filterYoutube');
+        const tabUploaded = document.getElementById('tabUploaded');
+        const tabYoutube = document.getElementById('tabYoutube');
+
         const courseFilter = document.getElementById('courseFilter');
         const levelFilter = document.getElementById('levelFilter');
         const semesterFilter = document.getElementById('semesterFilter');
         const findBtn = document.getElementById('findBtn');
         const resetBtn = document.getElementById('resetBtn');
 
+        const youtubeCourseSelect = document.getElementById('youtubeCourseSelect');
+        const youtubeFindBtn = document.getElementById('youtubeFindBtn');
+        const youtubeResetBtn = document.getElementById('youtubeResetBtn');
+
+        // ===== HELPER FUNCTIONS =====
         function formatNumber(num) {
             if (num >= 1000000) return (num/1000000).toFixed(1) + 'M';
             if (num >= 1000) return (num/1000).toFixed(1) + 'k';
             return num;
         }
 
-        async function loadVideos(filters = {}) {
-            const params = new URLSearchParams(filters);
-            const url = `/api/videos?${params}`;
-            const res = await fetch(url);
-            const videos = await res.json();
-            renderVideos(videos);
+        function isYouTube(url) {
+            return url.includes("youtube.com") || url.includes("youtu.be");
         }
 
-        function renderVideos(videos) {
+        function getYouTubeEmbed(url) {
+            const match = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([\w-]+)/);
+            const videoId = match ? match[1] : null;
+            return videoId ? `https://www.youtube.com/embed/${videoId}` : null;
+        }
+
+        // ===== TAB SWITCHING =====
+        window.switchTab = function(tab) {
+            currentTab = tab;
+            if (tab === 'uploaded') {
+                tabUploaded.classList.add('active');
+                tabYoutube.classList.remove('active');
+                filterUploaded.style.display = 'flex';
+                filterYoutube.style.display = 'none';
+                loadUploadedVideos(getUploadedFilters());
+            } else {
+                tabYoutube.classList.add('active');
+                tabUploaded.classList.remove('active');
+                filterUploaded.style.display = 'none';
+                filterYoutube.style.display = 'flex';
+                container.innerHTML = '<div class="loading">Select a course and click Search</div>';
+            }
+        };
+
+        // ===== UPLOADED VIDEOS =====
+        function getUploadedFilters() {
+            return {
+                course: courseFilter.value || null,
+                level: levelFilter.value || null,
+                semester: semesterFilter.value || null
+            };
+        }
+
+        async function loadUploadedVideos(filters = {}) {
+            const params = new URLSearchParams(filters);
+            const url = `/api/videos?${params}`;
+            try {
+                const res = await fetch(url);
+                const videos = await res.json();
+                renderUploadedVideos(videos);
+            } catch (err) {
+                container.innerHTML = `<div class="error">❌ Failed to load videos</div>`;
+            }
+        }
+
+        function renderUploadedVideos(videos) {
             if (!videos.length) {
                 container.innerHTML = '<div class="no-videos">🎬 No videos match your filters.</div>';
                 return;
             }
             let html = '';
-            videos.forEach(v => {
+            videos.forEach((v, index) => {
                 html += `
-                <div class="reel-card" data-id="${v.id}">
-                    <video src="${v.video_url}" controls playsinline preload="metadata"></video>
+                <div class="reel-card" data-id="${v.id}" style="animation-delay: ${index * 0.05}s">
+                    <div class="reel-media">
+                        <video src="${v.video_url}" controls playsinline preload="metadata"></video>
+                    </div>
                     <div class="reel-info">
                         <div class="creator-row">
                             <span class="creator-name">@${v.creator_name}</span>
@@ -284,7 +686,7 @@
             });
         }
 
-        async function loadCourses() {
+        async function loadCoursesForUploaded() {
             const res = await fetch('/api/courses');
             const courses = await res.json();
             courseFilter.innerHTML = '<option value="">All Courses</option>';
@@ -296,25 +698,88 @@
             });
         }
 
-        findBtn.addEventListener('click', () => {
-            const filters = {
-                course: courseFilter.value || null,
-                level: levelFilter.value || null,
-                semester: semesterFilter.value || null
-            };
-            loadVideos(filters);
-        });
+        // ===== YOUTUBE REELS =====
+        async function loadYoutubeReels() {
+            const course = youtubeCourseSelect.value;
+            if (!course) {
+                alert('Please select a course.');
+                return;
+            }
+            container.innerHTML = '<div class="loading">Loading YouTube reels...</div>';
+            try {
+                const res = await fetch(`/api/reels?course=${encodeURIComponent(course)}`);
+                const data = await res.json();
+                let reels = data.reels || [];
+                if (reels.length === 0 && course === "Accountancy") {
+                    reels = [{
+                        video_url: "https://youtu.be/Gua2Bo_G-J0?si=aM8ZPO-OqtV-ZbJ9",
+                        caption: "The ACCOUNTING BASICS for BEGINNERS - Full tutorial (3 core parts explained)"
+                    }];
+                }
+                renderYoutubeReels(reels);
+            } catch (err) {
+                console.error('API error, using fallback');
+                if (course === "Accountancy") {
+                    renderYoutubeReels([{
+                        video_url: "https://youtu.be/Gua2Bo_G-J0?si=aM8ZPO-OqtV-ZbJ9",
+                        caption: "The ACCOUNTING BASICS for BEGINNERS - Full tutorial (3 core parts explained)"
+                    }]);
+                } else {
+                    container.innerHTML = '<div class="error">❌ Failed to load YouTube reels</div>';
+                }
+            }
+        }
 
+        function renderYoutubeReels(reels) {
+            if (!reels.length) {
+                container.innerHTML = '<div class="no-videos">🎬 No YouTube reels found for this course.</div>';
+                return;
+            }
+            let html = '';
+            reels.forEach((reel, index) => {
+                let embedUrl = isYouTube(reel.video_url) ? getYouTubeEmbed(reel.video_url) || reel.video_url : reel.video_url;
+                html += `
+                <div class="reel-card" style="animation-delay: ${index * 0.05}s">
+                    <div class="reel-media">
+                        <iframe src="${embedUrl}" frameborder="0" allowfullscreen loading="lazy"></iframe>
+                    </div>
+                    <div class="reel-info">
+                        <div class="caption">${reel.caption || '📌 educational reel'}</div>
+                    </div>
+                </div>
+                `;
+            });
+            container.innerHTML = html;
+        }
+
+        // ===== EVENT LISTENERS =====
+        findBtn.addEventListener('click', () => {
+            if (currentTab === 'uploaded') loadUploadedVideos(getUploadedFilters());
+        });
         resetBtn.addEventListener('click', () => {
             courseFilter.value = '';
             levelFilter.value = '';
             semesterFilter.value = '';
-            loadVideos({});
+            if (currentTab === 'uploaded') loadUploadedVideos({});
+        });
+
+        youtubeFindBtn.addEventListener('click', loadYoutubeReels);
+        youtubeResetBtn.addEventListener('click', () => {
+            youtubeCourseSelect.value = '';
+            container.innerHTML = '<div class="loading">Select a course and click Search</div>';
         });
 
         // Initial load
-        loadVideos({});
-        loadCourses();
+        loadCoursesForUploaded();
+        loadUploadedVideos({});
+
+        // Populate YouTube course dropdown
+        youtubeCourses.forEach(c => {
+            const opt = document.createElement('option');
+            opt.value = c;
+            opt.textContent = c;
+            youtubeCourseSelect.appendChild(opt);
+        });
     </script>
 </body>
 </html>
