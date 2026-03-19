@@ -6,8 +6,7 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
-    <title>CBT Platform - Study Materials</title>
-    
+    <title>Nelavista Study Materials – Upload & Share</title>
     <style>
         /* ===== CSS VARIABLES & RESET ===== */
         :root {
@@ -337,6 +336,42 @@
             cursor: not-allowed;
         }
 
+        /* Additional action buttons */
+        .action-buttons {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+        .action-btn {
+            flex: 1;
+            padding: 0.8rem;
+            background: var(--accent-color);
+            border: 1px solid var(--border-dark);
+            color: white;
+            border-radius: 12px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+        .action-btn.upload {
+            background: #2196F3;
+            border: none;
+        }
+        .action-btn.admin {
+            background: #ffaa00;
+            border: none;
+            color: black;
+        }
+        .action-btn.admin-active {
+            background: #4caf50;
+            color: black;
+        }
+
         /* ===== MATERIALS SECTION ===== */
         .materials-section {
             background: var(--card-dark);
@@ -477,6 +512,10 @@
             background: var(--primary-color);
             border: none;
         }
+        .material-btn.delete-btn {
+            background: #d32f2f;
+            border: none;
+        }
 
         /* ===== NO MATERIALS ===== */
         .no-materials {
@@ -506,98 +545,278 @@
             margin-bottom: 1.5rem;
         }
 
+        /* ===== UPLOAD MODAL ===== */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        .modal.show {
+            display: flex;
+            opacity: 1;
+        }
+        .modal-content {
+            background: var(--card-dark);
+            border: 1px solid var(--border-dark);
+            border-radius: 24px;
+            width: 90%;
+            max-width: 500px;
+            max-height: 90vh;
+            overflow-y: auto;
+            padding: 24px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.8);
+            animation: slideUp 0.4s ease-out;
+        }
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .modal-header h2 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .close-modal {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--input-bg);
+            border: 1px solid var(--border-dark);
+            color: white;
+            font-size: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .close-modal:hover {
+            background: var(--accent-color);
+            border-color: rgba(255,255,255,0.3);
+        }
+        .upload-form .form-group {
+            margin-bottom: 16px;
+        }
+        .upload-form label {
+            display: block;
+            margin-bottom: 6px;
+            font-size: 0.9rem;
+            color: #ccc;
+        }
+        .upload-form input,
+        .upload-form select,
+        .upload-form textarea {
+            width: 100%;
+            padding: 12px;
+            background: var(--input-bg);
+            border: 1px solid var(--border-dark);
+            border-radius: 12px;
+            color: white;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+        }
+        .upload-form input:focus,
+        .upload-form select:focus,
+        .upload-form textarea:focus {
+            outline: none;
+            border-color: rgba(255,255,255,0.3);
+        }
+        .upload-form textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+        .file-input {
+            padding: 8px;
+            background: var(--input-bg);
+            border: 1px dashed var(--border-dark);
+            border-radius: 12px;
+            color: #aaa;
+        }
+        .file-input:hover {
+            border-color: rgba(255,255,255,0.3);
+        }
+        .submit-btn {
+            width: 100%;
+            padding: 14px;
+            background: white;
+            color: black;
+            border: none;
+            border-radius: 40px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 10px;
+        }
+        .submit-btn:hover {
+            opacity: 0.9;
+            transform: translateY(-2px);
+        }
+        .error-msg {
+            color: #ff6b6b;
+            font-size: 0.85rem;
+            margin-top: 4px;
+            display: none;
+        }
+
         /* ===== SCROLLBAR ===== */
         ::-webkit-scrollbar {
             width: 6px;
         }
-
         ::-webkit-scrollbar-track {
             background: transparent;
         }
-
         ::-webkit-scrollbar-thumb {
             background: rgba(255, 255, 255, 0.1);
             border-radius: 3px;
             transition: background 0.3s ease;
         }
-
         ::-webkit-scrollbar-thumb:hover {
             background: rgba(255, 255, 255, 0.2);
         }
 
-        /* ===== RESPONSIVE DESIGN ===== */
+        /* ===== RESPONSIVE ===== */
         @media (max-width: 768px) {
             body {
                 padding: 0 16px;
                 padding-top: 70px;
             }
-
             .cbt-container {
                 margin-top: 70px;
             }
-
             .header-title {
                 font-size: 1.6rem;
             }
-
             .header-subtitle {
                 font-size: 0.95rem;
             }
-
             .selection-section,
             .materials-section {
                 padding: 1.5rem;
                 border-radius: 12px;
             }
-
             .material-card {
                 padding: 1.2rem;
             }
-
             .material-title {
                 font-size: 1rem;
             }
-
             .material-actions {
                 grid-template-columns: 1fr;
             }
+            .action-buttons {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
         }
-
         @media (max-width: 480px) {
             .header-title {
                 font-size: 1.4rem;
             }
-
             .selection-section,
             .materials-section {
                 padding: 1.2rem;
                 border-radius: 10px;
             }
-
             .material-card {
                 padding: 1rem;
             }
         }
-
-        /* ===== UTILITY CLASSES ===== */
-        .hidden {
-            display: none !important;
-        }
-
-        .show {
-            display: block !important;
-        }
-
-        .flex-show {
-            display: flex !important;
-        }
+        .hidden { display: none !important; }
+        .show { display: block !important; }
     </style>
 </head>
 <body>
     <div id="top-bar">
         <button id="back-btn" onclick="goBack()">←</button>
-        <div id="top-bar-title">CBT Platform - Study Materials</div>
-        <div style="width: 40px;"></div>
+        <div id="top-bar-title">📚 Nelavista Study Materials</div>
+        <div style="width: 40px;"></div> <!-- placeholder for symmetry -->
+    </div>
+
+    <!-- Upload Modal (hidden by default) -->
+    <div id="uploadModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>📤 Share Your PDF</h2>
+                <button class="close-modal" onclick="closeUploadModal()">✕</button>
+            </div>
+            <form id="uploadForm" class="upload-form" onsubmit="handleUpload(event)">
+                <div class="form-group">
+                    <label>Title *</label>
+                    <input type="text" id="materialTitle" required placeholder="e.g. BCH 201 - Enzyme Kinetics">
+                </div>
+                <div class="form-group">
+                    <label>Course *</label>
+                    <select id="materialCourse" required>
+                        <option value="">Select Course</option>
+                        <option value="Biochemistry">Biochemistry</option>
+                        <option value="Mathematics">Mathematics</option>
+                        <option value="Computer Science">Computer Science</option>
+                        <option value="Biology">Biology</option>
+                        <option value="Chemistry">Chemistry</option>
+                        <option value="Physics">Physics</option>
+                        <option value="Accounting">Accounting</option>
+                        <option value="Agriculture">Agriculture</option>
+                        <option value="Business Administration">Business Administration</option>
+                        <option value="Information Technology">Information Technology</option>
+                        <option value="Zoology">Zoology</option>
+                        <option value="Science Laboratory Technology">Science Laboratory Technology</option>
+                        <option value="Entrepreneurship">Entrepreneurship</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Level *</label>
+                    <select id="materialLevel" required>
+                        <option value="">Select Level</option>
+                        <option value="100">100 Level</option>
+                        <option value="200">200 Level</option>
+                        <option value="300">300 Level</option>
+                        <option value="400">400 Level</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Semester *</label>
+                    <select id="materialSemester" required>
+                        <option value="">Select Semester</option>
+                        <option value="First Semester">First Semester</option>
+                        <option value="Second Semester">Second Semester</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Course Code *</label>
+                    <input type="text" id="materialCode" required placeholder="e.g. BCH201">
+                </div>
+                <div class="form-group">
+                    <label>Your Name / Author *</label>
+                    <input type="text" id="materialAuthor" required placeholder="e.g. Dr. Adebayo">
+                </div>
+                <div class="form-group">
+                    <label>Description (optional)</label>
+                    <textarea id="materialDesc" placeholder="Brief description..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label>PDF File * (max 5MB)</label>
+                    <input type="file" id="materialFile" accept=".pdf" class="file-input" required>
+                    <div class="error-msg" id="fileError"></div>
+                </div>
+                <button type="submit" class="submit-btn">📤 Upload & Share</button>
+            </form>
+        </div>
     </div>
 
     <div class="cbt-container">
@@ -621,6 +840,10 @@
                         <option value="Accounting">Accounting</option>
                         <option value="Agriculture">Agriculture</option>
                         <option value="Business Administration">Business Administration</option>
+                        <option value="Information Technology">Information Technology</option>
+                        <option value="Zoology">Zoology</option>
+                        <option value="Science Laboratory Technology">Science Laboratory Technology</option>
+                        <option value="Entrepreneurship">Entrepreneurship</option>
                     </select>
                 </div>
             </div>
@@ -648,6 +871,12 @@
             </div>
 
             <button class="start-btn" id="openMaterialsBtn" onclick="openMaterials()" disabled>Open Materials</button>
+
+            <!-- Upload & Admin buttons placed here to keep top bar clean -->
+            <div class="action-buttons">
+                <button class="action-btn upload" onclick="openUploadModal()"><span>➕</span> Upload Material</button>
+                <button class="action-btn admin" id="adminBtn" onclick="toggleAdmin()"><span>🔑</span> Admin</button>
+            </div>
         </div>
 
         <div class="materials-section" id="materialsSection">
@@ -662,12 +891,10 @@
 
             <div class="material-actions">
                 <button class="material-btn" onclick="goBackToSelection()">
-                    <span>←</span>
-                    Back to Selection
+                    <span>←</span> Back to Selection
                 </button>
                 <button class="material-btn primary" onclick="downloadAllMaterials()">
-                    <span>⬇️</span>
-                    Download All
+                    <span>⬇️</span> Download All
                 </button>
             </div>
         </div>
@@ -684,1891 +911,405 @@
     </div>
 
     <script>
-        // ===== STATE MANAGEMENT =====
+        // ===== STATE =====
         const materialsState = {
             course: '',
             level: '',
             semester: '',
             materials: []
         };
+        let isAdmin = false;
 
-        // ===== SEMESTER STRUCTURE =====
-        const semesterStructure = {
-            "Biochemistry": {
-                "100": ["First Semester", "Second Semester"],
-                "200": ["First Semester", "Second Semester"],
-                "300": ["First Semester", "Second Semester"],
-                "400": ["First Semester", "Second Semester"]
-            },
-            "Mathematics": {
-                "100": ["First Semester", "Second Semester"],
-                "200": ["First Semester", "Second Semester"],
-                "300": ["First Semester", "Second Semester"],
-                "400": ["First Semester", "Second Semester"]
-            },
-            "Computer Science": {
-                "100": ["First Semester", "Second Semester"],
-                "200": ["First Semester", "Second Semester"],
-                "300": ["First Semester", "Second Semester"],
-                "400": ["First Semester", "Second Semester"]
-            },
-            "Biology": {
-                "100": ["First Semester", "Second Semester"],
-                "200": ["First Semester", "Second Semester"],
-                "300": ["First Semester", "Second Semester"],
-                "400": ["First Semester", "Second Semester"]
-            },
-            "Chemistry": {
-                "100": ["First Semester", "Second Semester"],
-                "200": ["First Semester", "Second Semester"],
-                "300": ["First Semester", "Second Semester"],
-                "400": ["First Semester", "Second Semester"]
-            },
-            "Physics": {
-                "100": ["First Semester", "Second Semester"],
-                "200": ["First Semester", "Second Semester"],
-                "300": ["First Semester", "Second Semester"],
-                "400": ["First Semester", "Second Semester"]
-            },
-            "Accounting": {
-                "100": ["First Semester", "Second Semester"],
-                "200": ["First Semester", "Second Semester"],
-                "300": ["First Semester", "Second Semester"],
-                "400": ["First Semester", "Second Semester"]
-            },
-            "Agriculture": {
-                "100": ["First Semester", "Second Semester"],
-                "200": ["First Semester", "Second Semester"],
-                "300": ["First Semester", "Second Semester"],
-                "400": ["First Semester", "Second Semester"]
-            },
-            "Business Administration": {
-                "100": ["First Semester", "Second Semester"],
-                "200": ["First Semester", "Second Semester"],
-                "300": ["First Semester", "Second Semester"],
-                "400": ["First Semester", "Second Semester"]
-            }
-        };
-
-        // ===== MATERIALS DATABASE =====
-        const materialsDatabase = [
-            {
-                title: "BCH 101 - Lipids of Biological Importance",
-                author: "Unknown",
-                license: "Educational Use",
-                link: "static/materials/Lipids-of-Biological-Importance.pdf",
-                type: "pdf",
-                course: "Biochemistry",
-                level: "100",
-                semester: "First Semester",
-                courseCode: "BCH101"
-            },
-            {
-                title: "BCH 101 – Carbohydrates",
-                author: "ADEYEMO, ADESEGUN GIDEON",
-                license: "Educational Use",
-                link: "static/materials/BCH-101-Carbohydrate.pdf",
-                type: "pdf",
-                course: "Biochemistry",
-                level: "100",
-                semester: "First Semester",
-                courseCode: "BCH101"
-            },
-            {
-                title: "BCH 101 – Amino Acids and Proteins",
-                author: "Adeyemo, Adesegun Gideon",
-                license: "Educational Use",
-                link: "static/materials/BCH-101-Amino-Acids-and-Proteins.pdf",
-                type: "pdf",
-                course: "Biochemistry",
-                level: "100",
-                semester: "First Semester",
-                courseCode: "BCH101"
-            },
-            {
-                title: "BCH 101 – Macromolecules",
-                author: "Unknown",
-                license: "Educational Use",
-                link: "static/materials/BCH-101-Macromolecules.pdf",
-                type: "pdf",
-                course: "Biochemistry",
-                level: "100",
-                semester: "First Semester",
-                courseCode: "BCH101"
-            },
-            {
-                title: "BCH 101 OER – Past Questions",
-                author: "Open Educational Resource",
-                license: "OER",
-                link: "static/materials/BCH-101-OER-Past-Questions.pdf",
-                type: "pdf",
-                course: "Biochemistry",
-                level: "100",
-                semester: "First Semester",
-                courseCode: "BCH101"
-            },
-            {
-                title: "BCH 101 – Brief History of Biochemistry",
-                author: "Hikmet Geckil",
-                license: "Educational Use",
-                link: "static/materials/BCH-101-Brief-History-of-Biochemistry.pdf",
-                type: "pdf",
-                course: "Biochemistry",
-                level: "100",
-                semester: "First Semester",
-                courseCode: "BCH101"
-            },
-            {
-                title: "BCH 101 – Multiple Choice Questions",
-                author: "RSM",
-                license: "Educational Use",
-                link: "static/materials/BCH-101-Multiple-Choice-Questions.pdf",
-                type: "pdf",
-                course: "Biochemistry",
-                level: "100",
-                semester: "First Semester",
-                courseCode: "BCH101"
-            },
-            {
-                title: "History of Biochemistry",
-                author: "Unknown",
-                license: "Educational Use",
-                link: "static/materials/History-of-Biochemistry.pdf",
-                type: "pdf",
-                course: "Biochemistry",
-                level: "100",
-                semester: "First Semester",
-                courseCode: "BCH101"
-            },
-            {
-                title: "MAT 101 OER – Likely Exam Questions",
-                author: "Sir Temi",
-                license: "OER",
-                link: "static/materials/MAT-101-OER.pdf",
-                type: "pdf",
-                course: "Mathematics",
-                level: "100",
-                semester: "First Semester",
-                courseCode: "MAT101"
-            },
-            {
-                title: "MAT 101 – Questions (DML & Adebanjo)",
-                author: "DML & Adebanjo",
-                license: "Educational Use",
-                link: "static/materials/MAT-101-Questions-DML-and-Adebanjo-2.pdf",
-                type: "pdf",
-                course: "Mathematics",
-                level: "100",
-                semester: "First Semester",
-                courseCode: "MAT101"
-            },
-            {
-                title: "MAT 101 – Elementary Mathematics I (Lecture 1: Elementary Set Theory)",
-                author: "Dr. Akinwale Lewis Olutimo",
-                license: "LASU Academic Material",
-                link: "static/materials/lasu/mathematics/1768303502_online_aspect_mat101_lesson_1.pdf",
-                type: "pdf",
-                course: "Mathematics",
-                level: "100",
-                semester: "First Semester",
-                courseCode: "MAT101"
-            },
-            {
-                title: "MAT 101 – Elementary Mathematics I (Lecture 2: Theory of Quadratic Equations)",
-                author: "Dr. Akinwale Lewis Olutimo",
-                license: "LASU Academic Material",
-                link: "static/materials/lasu/mathematics/MAT-101-Lecture-2-Theory-of-Quadratic-Equations.pdf",
-                type: "pdf",
-                course: "Mathematics",
-                level: "100",
-                semester: "First Semester",
-                courseCode: "MAT101"
-            },
-            {
-                title: "MAT 101 – Elementary Mathematics I (Lecture 3: Indices and Logarithms)",
-                author: "Dr. Akinwale Lewis Olutimo",
-                license: "LASU Academic Material",
-                link: "static/materials/lasu/mathematics/MAT-101-Lecture-3-Indices-and-Logarithms.pdf",
-                type: "pdf",
-                course: "Mathematics",
-                level: "100",
-                semester: "First Semester",
-                courseCode: "MAT101"
-            },
-            {
-                title: "PHY 101 OER",
-                author: "Sola Royal",
-                license: "lasuoer.online",
-                link: "static/materials/PHY-101-OER-Sola-Royal.pdf",
-                type: "pdf",
-                course: "Physics",
-                level: "100",
-                semester: "First Semester",
-                courseCode: "PHY101"
-            },
-            {
-                title: "CSC 102 – Introduction to Computing Concepts",
-                author: "Prof. Aribisala & Dr. Zubair Adam",
-                license: "Educational Use",
-                link: "static/materials/CSC-102-Introduction-to-Computing-Concepts.pdf",
-                type: "pdf",
-                course: "Computer Science",
-                level: "100",
-                semester: "Second Semester",
-                courseCode: "CSC102"
-            },
-            {
-                title: "Types of Documents and Their Structures in LaTeX",
-                author: "Dr. Idowu G. A.",
-                license: "Educational Use",
-                link: "static/materials/Types-of-Documents-and-Their-Structures-in-LaTeX.pdf",
-                type: "pdf",
-                course: "Computer Science",
-                level: "100",
-                semester: "Second Semester",
-                courseCode: "CSC102"
-            },
-            {
-                title: "BIO 101 – Levels of Biological Organization and Classification of Living Things",
-                author: "Alafia, A. O.",
-                license: "Educational Use",
-                link: "static/materials/BIO-101-Levels-of-Biological-Organization-and-Classification.pdf",
-                type: "pdf",
-                course: "Biology",
-                level: "100",
-                semester: "First Semester",
-                courseCode: "BIO101"
-            },
-            {
-                title: "BIO 101 – Meiosis, Gametogenesis, Inheritance and Variation",
-                author: "Unknown",
-                license: "Educational Use",
-                link: "static/materials/BIO-101-Meiosis-Gametogenesis-Inheritance-and-Variation.pdf",
-                type: "pdf",
-                course: "Biology",
-                level: "100",
-                semester: "First Semester",
-                courseCode: "BIO101"
-            },
-            {
-                title: "BIO 101 – Biomolecules: Carbohydrates and Lipids",
-                author: "Adu, Oluwatosin B.",
-                license: "Educational Use",
-                link: "static/materials/BIO-101-Biomolecules-Carbohydrates-and-Lipids.pdf",
-                type: "pdf",
-                course: "Biology",
-                level: "100",
-                semester: "First Semester",
-                courseCode: "BIO101"
-            },
-            {
-                title: "BIO 101 – Biomolecules: Proteins and Nucleic Acids",
-                author: "Adu, Oluwatosin B.",
-                license: "Educational Use",
-                link: "static/materials/BIO-101-Biomolecules-Proteins-and-Nucleic-Acids.pdf",
-                type: "pdf",
-                course: "Biology",
-                level: "100",
-                semester: "First Semester",
-                courseCode: "BIO101"
-            },
-            {
-                title: "BIO 101 – Gametogenesis",
-                author: "Osinaike, T. S.",
-                license: "Educational Use",
-                link: "static/materials/BIO-101-Gametogenesis.pdf",
-                type: "pdf",
-                course: "Biology",
-                level: "100",
-                semester: "First Semester",
-                courseCode: "BIO101"
-            },
-            {
-                title: "BIO 101 – Basic Principles of Reproduction and Growth",
-                author: "Unknown",
-                license: "Educational Use",
-                link: "static/materials/BIO-101-Basic-Principles-of-Reproduction-and-Growth.pdf",
-                type: "pdf",
-                course: "Biology",
-                level: "100",
-                semester: "First Semester",
-                courseCode: "BIO101"
-            },
-            {
-                title: "BIO 101 – Proteins and Nucleic Acids",
-                author: "Adu, Oluwatosin B.",
-                license: "Educational Use",
-                link: "static/materials/BIO-101-Proteins-and-Nucleic-Acids.pdf",
-                type: "pdf",
-                course: "Biology",
-                level: "100",
-                semester: "First Semester",
-                courseCode: "BIO101"
-            },
-            {
-                title: "BIO 101 – Evolutionary Trends",
-                author: "Alafia, A. O. (Ph.D)",
-                license: "Educational Use",
-                link: "static/materials/BIO-101-Evolutionary-Trends.pdf",
-                type: "pdf",
-                course: "Biology",
-                level: "100",
-                semester: "First Semester",
-                courseCode: "BIO101"
-            },
-            {
-                title: "BIO 101 – Diversity of Animals",
-                author: "Alafia, A. O.",
-                license: "Educational Use",
-                link: "static/materials/BIO-101-Diversity-of-Animals.pdf",
-                type: "pdf",
-                course: "Biology",
-                level: "100",
-                semester: "First Semester",
-                courseCode: "BIO101"
-            },
-            {
-                title: "BIO 101 – Diversity, Classification and Characteristics of Animals",
-                author: "Unknown",
-                license: "Educational Use",
-                link: "static/materials/BIO-101-Diversity-Classification-and-Characteristics-of-Animals.pdf",
-                type: "pdf",
-                course: "Biology",
-                level: "100",
-                semester: "First Semester",
-                courseCode: "BIO101"
-            },
-            {
-                title: "BIO 101 – Microscopy",
-                author: "Dr. Bola Oyefolu",
-                license: "Educational Use",
-                link: "static/materials/BIO-101-Microscopy.pdf",
-                type: "pdf",
-                course: "Biology",
-                level: "100",
-                semester: "First Semester",
-                courseCode: "BIO101"
-            },
-            {
-                title: "BIO 101 – Cell Structure and Function of Organelles",
-                author: "Unknown",
-                license: "Educational Use",
-                link: "static/materials/BIO-101-Cell-Structure-and-Function-of-Organelles.pdf",
-                type: "pdf",
-                course: "Biology",
-                level: "100",
-                semester: "First Semester",
-                courseCode: "BIO101"
-            },
-            {
-                title: "CHM 102 – Homework Practice Questions",
-                author: "Unknown",
-                license: "Educational Use",
-                link: "static/materials/CHM-102-Homework-Practice-Questions.pdf",
-                type: "pdf",
-                course: "Chemistry",
-                level: "100",
-                semester: "Second Semester",
-                courseCode: "CHM102"
-            },
-            {
-                title: "CHM 101 – Oxidation and Reduction",
-                author: "Unknown",
-                license: "Educational Use",
-                link: "static/materials/CHM-101-Oxidation-and-Reduction.pdf",
-                type: "pdf",
-                course: "Chemistry",
-                level: "100",
-                semester: "First Semester",
-                courseCode: "CHM101"
-            },
-            {
-                title: "CHM 101 – Acids and Bases",
-                author: "Unknown",
-                license: "Educational Use",
-                link: "static/materials/CHM-101-Acids-and-Bases-Chapter-15.pdf",
-                type: "pdf",
-                course: "Chemistry",
-                level: "100",
-                semester: "First Semester",
-                courseCode: "CHM101"
-            },
-            {
-                title: "CHM 101 – Acids and Bases",
-                author: "Onwordi, C. T. (Ph.D)",
-                license: "Educational Use",
-                link: "static/materials/CHM-101-Acids-and-Bases.pdf",
-                type: "pdf",
-                course: "Chemistry",
-                level: "100",
-                semester: "First Semester",
-                courseCode: "CHM101"
-            },
-            {
-                title: "CHM 101 – Atomic Theory Timeline",
-                author: "Unknown",
-                license: "Educational Use",
-                link: "static/materials/CHM-101-Atomic-Theory-Timeline.pdf",
-                type: "pdf",
-                course: "Chemistry",
-                level: "100",
-                semester: "First Semester",
-                courseCode: "CHM101"
-            },
-            {
-                title: "CHM 101 – Redox Reactions and Introduction to Electrochemistry",
-                author: "Prof. Olowu R. A.",
-                license: "Educational Use",
-                link: "static/materials/CHM-101-Redox-Reactions-and-Introduction-to-Electrochemistry.pdf",
-                type: "pdf",
-                course: "Chemistry",
-                level: "100",
-                semester: "First Semester",
-                courseCode: "CHM101"
-            },
-            {
-                title: "CHM 101 – Periodicity",
-                author: "Unknown",
-                license: "Educational Use",
-                link: "static/materials/CHM-101-Periodicity.pdf",
-                type: "pdf",
-                course: "Chemistry",
-                level: "100",
-                semester: "First Semester",
-                courseCode: "CHM101"
-            },
-            {
-                title: "CHM 101 – Periodic Table and Periodicity",
-                author: "Prof. Adeniyi",
-                license: "Educational Use",
-                link: "static/materials/CHM-101-Periodic-Table-and-Periodicity.pdf",
-                type: "pdf",
-                course: "Chemistry",
-                level: "100",
-                semester: "First Semester",
-                courseCode: "CHM101"
-            },
-            {
-                title: "CHM 101 – Rates of Reactions and Equilibrium",
-                author: "Unknown",
-                license: "Educational Use",
-                link: "static/materials/CHM-101-Rates-of-Reactions-and-Equilibrium.pdf",
-                type: "pdf",
-                course: "Chemistry",
-                level: "100",
-                semester: "First Semester",
-                courseCode: "CHM101"
-            },
-            {
-                title: "CHM 101 – Modern Electronic Theory of Atoms",
-                author: "Prof. A. A. Adeniyi",
-                license: "Educational Use",
-                link: "static/materials/CHM-101-Modern-Electronic-Theory-of-Atoms.pdf",
-                type: "pdf",
-                course: "Chemistry",
-                level: "100",
-                semester: "First Semester",
-                courseCode: "CHM101"
-            },
-            {
-                title: "CHM 101 – Atomic and Molecular Structure",
-                author: "Unknown",
-                license: "Educational Use",
-                link: "static/materials/CHM-101-Atomic-and-Molecular-Structure.pdf",
-                type: "pdf",
-                course: "Chemistry",
-                level: "100",
-                semester: "First Semester",
-                courseCode: "CHM101"
-            },
-            {
-                title: "CHM 101 – Hybridization and Shapes of Molecules",
-                author: "Dr. Olubunmi A. Adewusi",
-                license: "Educational Use",
-                link: "static/materials/CHM-101-Hybridization-and-Shapes-of-Molecules.pdf",
-                type: "pdf",
-                course: "Chemistry",
-                level: "100",
-                semester: "First Semester",
-                courseCode: "CHM101"
-            },
-            {
-                title: "BIO 101 OER",
-                author: "Sola Royal",
-                license: "OER",
-                link: "static/materials/BIO-101-OER-Sola-Royal.pdf",
-                type: "pdf",
-                course: "Biology",
-                level: "100",
-                semester: "First Semester",
-                courseCode: "BIO101"
-            },
-            {
-                title: "BIO 101 OER",
-                author: "Honorer",
-                license: "OER",
-                link: "static/materials/BIO-101-OER.pdf",
-                type: "pdf",
-                course: "Biology",
-                level: "100",
-                semester: "First Semester",
-                courseCode: "BIO101"
-            },
-            {
-                title: "Sure A in CHM 101 – Past Questions & Answers",
-                author: "Unknown",
-                license: "Educational Use",
-                link: "static/materials/Sure-A-in-CHM-101-Past-Questions-and-Answers.pdf",
-                type: "pdf",
-                course: "Chemistry",
-                level: "100",
-                semester: "First Semester",
-                courseCode: "CHM101"
-            },
-            {
-                title: "PHY 104 – Electricity and Magnetism",
-                author: "University of Abuja",
-                license: "Educational Use",
-                link: "static/materials/PHY-104-Electricity-and-Magnetism.pdf",
-                type: "pdf",
-                course: "Physics",
-                level: "100",
-                semester: "Second Semester",
-                courseCode: "PHY104"
-            },
-            {
-                title: "PHY 104 – Oscillation",
-                author: "Unknown",
-                license: "Educational Use",
-                link: "static/materials/PHY-104-Oscillation.pdf",
-                type: "pdf",
-                course: "Physics",
-                level: "100",
-                semester: "Second Semester",
-                courseCode: "PHY104"
-            },
-            {
-                title: "Trigonometry",
-                author: "Dr. Olaniyan",
-                license: "LASU Academic Material",
-                link: "static/materials/lasu/mathematics/Trigonometry.pdf",
-                type: "pdf",
-                course: "Mathematics",
-                level: "100",
-                semester: "First Semester",
-                courseCode: "MAT101"
-            },
-            {
-                title: "Indices, Surds and Logarithms",
-                author: "Department of Mathematics",
-                license: "LASU Academic Material",
-                link: "static/materials/lasu/mathematics/Indices-Surds-and-Logarithms.pdf",
-                type: "pdf",
-                course: "Mathematics",
-                level: "100",
-                semester: "First Semester",
-                courseCode: "MAT101"
-            },
-            {
-                title: "Inequalities",
-                author: "Dr. Olaniyan Adegoke",
-                license: "LASU Academic Material",
-                link: "static/materials/lasu/mathematics/Inequalities.pdf",
-                type: "pdf",
-                course: "Mathematics",
-                level: "100",
-                semester: "First Semester",
-                courseCode: "MAT101"
-            },
-            {
-                title: "Theory of Quadratic Equation",
-                author: "Dr. Olaniyan Adegoke",
-                license: "LASU Academic Material",
-                link: "static/materials/lasu/mathematics/Theory-of-Quadratic-Equation.pdf",
-                type: "pdf",
-                course: "Mathematics",
-                level: "100",
-                semester: "First Semester",
-                courseCode: "MAT101"
-            },
-            {
-                title: "Sequence and Series",
-                author: "Department of Mathematics, Lagos State University",
-                license: "LASU Academic Material",
-                link: "static/materials/lasu/mathematics/Sequence-and-Series.pdf",
-                type: "pdf",
-                course: "Mathematics",
-                level: "100",
-                semester: "First Semester",
-                courseCode: "MAT101"
-            },
-            {
-                title: "Binomial Expansion",
-                author: "Dr. Olaniyan Adegoke",
-                license: "LASU Academic Material",
-                link: "static/materials/lasu/mathematics/Binomial-Expansion.pdf",
-                type: "pdf",
-                course: "Mathematics",
-                level: "100",
-                semester: "First Semester",
-                courseCode: "MAT101"
-            },
-            {
-                title: "MAT 161 – Descriptive Statistics (Lecture 1: The Meaning of Statistics)",
-                author: "Dr. Akinwale Lewis Olutimo",
-                license: "LASU Academic Material",
-                link: "static/materials/lasu/mat161/MAT-161-Descriptive-Statistics-Lecture-1.pdf",
-                type: "pdf",
-                course: "Mathematics",
-                level: "100",
-                semester: "First Semester",
-                courseCode: "MAT101"
-            },
-            {
-                title: "Financial Accounting",
-                author: "OpenStax",
-                license: "CC BY 4.0",
-                link: "static/materials/accounting/Financial-Accounting.pdf",
-                type: "pdf",
-                course: "Accounting",
-                level: "100",
-                semester: "First Semester",
-                courseCode: "ACC101"
-            },
-            {
-                title: "A Business Perspective (Managerial Accounting)",
-                author: "Open Educational Resource",
-                license: "CC BY 4.0",
-                link: "static/materials/account/A-Business-Perspective-(Managerial-Accounting).pdf",
-                type: "pdf",
-                course: "Accounting",
-                level: "100",
-                semester: "First Semester",
-                courseCode: "ACC101"
-            },
-            {
-                title: "Principles Of Accounting Vol 1",
-                author: "Open Educational Resource",
-                license: "CC BY 4.0",
-                link: "static/materials/account/Principles-Of-Accounting-Vol-1.pdf",
-                type: "pdf",
-                course: "Accounting",
-                level: "100",
-                semester: "First Semester",
-                courseCode: "ACC101"
-            },
-            {
-                title: "Principles of Accounting Vol 2",
-                author: "Open Educational Resource",
-                license: "CC BY 4.0",
-                link: "static/materials/account/Principles-Of-Accounting-Vol-2.pdf",
-                type: "pdf",
-                course: "Accounting",
-                level: "100",
-                semester: "Second Semester",
-                courseCode: "ACC102"
-            },
-            {
-  title: "CHM 101 – Gases",
-  author: "Unknown",
-  license: "Educational Use",
-  link: "static/materials/CHM-101-Gases.pdf",
-  type: "pdf",
-  course: "Chemistry",
-  level: "100",
-  courseCode: "CHM101"
-},
-{
-  title: "Zoology Test",
-  author: "Unknown",
-  license: "Educational Use",
-  link: "static/materials/Zoology-Test.pdf",
-  type: "pdf",
-  course: "Zoology",
-  level: "100",
-  courseCode: "ZOO101"
-},
-{
-  title: "ZOO 102 – Digestive System of Mammals",
-  author: "Dr. O. O. Okwa",
-  license: "Educational Use",
-  link: "static/materials/ZOO-102-Digestive-System-of-Mammals.pdf",
-  type: "pdf",
-  course: "Zoology",
-  level: "100",
-  courseCode: "ZOO102"
-},
-
-{
-  title: "PHY 101 OER",
-  author: "The Sporty Boys",
-  license: "OER",
-  link: "static/materials/PHY-101-OER-The-Sporty-Boys.pdf",
-  type: "pdf",
-  course: "Physics",
-  level: "100",
-  courseCode: "PHY101"
-},
-
-{
-  title: "PHY 101 OER",
-  author: "Sola Royal",
-  license: "OER",
-  link: "static/materials/PHY-101-OER-Sola-Royal.pdf",
-  type: "pdf",
-  course: "Physics",
-  level: "100",
-  courseCode: "PHY101"
-},
-{
-  title: "PHY 101 – General Physics I",
-  author: "Dr. Adewusi",
-  license: "Educational Use",
-  link: "static/materials/PHY-101-General-Physics-I-Dr-Adewusi.pdf",
-  type: "pdf",
-  course: "Physics",
-  level: "100",
-  courseCode: "PHY101"
-},
-{
-  title: "PHY 101 – General Physics I (Mechanics)",
-  author: "CCMAS",
-  license: "Educational Use",
-  link: "static/materials/PHY-101-General-Physics-I-Mechanics-CCMAS.pdf",
-  type: "pdf",
-  course: "Physics",
-  level: "100",
-  courseCode: "PHY101"
-},
-{
-  title: "PHY 101 – Circular Motion",
-  author: "Unknown",
-  license: "Educational Use",
-  link: "static/materials/PHY-101-Circular-Motion.pdf",
-  type: "pdf",
-  course: "Physics",
-  level: "100",
-  courseCode: "PHY101"
-},
-
-{
-  title: "General Physics – Physics and Measurement",
-  author: "Prof. Rashad Badran",
-  license: "Educational Use",
-  link: "static/materials/General-Physics-Physics-and-Measurement.pdf",
-  type: "pdf",
-  course: "Physics",
-  level: "100",
-  courseCode: "PHY101"
-},
-{
-  title: "PHY 101 – Mechanics and Properties of Matter",
-  author: "Dr. S. O. Oseni",
-  license: "Educational Use",
-  link: "static/materials/PHY-101-Dr-Oseni.pdf",
-  type: "pdf",
-  course: "Physics",
-  level: "100",
-  courseCode: "PHY101"
-},
-{
-  title: "PHY 101 – Mechanics and Properties of Matter",
-  author: "Dr. S. O. Oseni",
-  license: "Educational Use",
-  link: "static/materials/PHY-101-Mechanics-and-Properties-of-Matter.pdf",
-  type: "pdf",
-  course: "Physics",
-  level: "100",
-  courseCode: "PHY101"
-},
-{
-  title: "PHY 101 – Circular and Oscillatory Motion",
-  author: "Dr. A. O. Adewale",
-  license: "Educational Use",
-  link: "static/materials/PHY-101-Circular-and-Oscillatory-Motion.pdf",
-  type: "pdf",
-  course: "Physics",
-  level: "100",
-  courseCode: "PHY101"
-},
-{
-  title: "PHY 101 – Centre of Mass and Law of Conservation of Momentum",
-  author: "Unknown",
-  license: "Educational Use",
-  link: "static/materials/PHY-101-Centre-of-Mass-and-Law-of-Conservation-of-Momentum.pdf",
-  type: "pdf",
-  course: "Physics",
-  level: "100",
-  courseCode: "PHY101"
-},
-
-{
-  title: "MAT 141 – Mathematics",
-  author: "Unknown",
-  license: "Educational Use",
-  link: "static/materials/MAT-141.pdf",
-  type: "pdf",
-  course: "Mathematics",
-  level: "100",
-  courseCode: "MAT141"
-},
-{
-  title: "MAT 101 – Practice Questions",
-  author: "NoahLyMatics (LASUCBTest)",
-  license: "Educational Use",
-  link: "static/materials/MAT-101-Practice-Questions-NoahLyMatics.pdf",
-  type: "pdf",
-  course: "Mathematics",
-  level: "100",
-  courseCode: "MAT101"
-},
-{
-  title: "MAT 161 – VLAP Exercise (2023/2024)",
-  author: "Temple",
-  license: "Educational Use",
-  link: "static/materials/MAT-161-VLAP-Exercise-2023-2024.pdf",
-  type: "pdf",
-  course: "Mathematics",
-  level: "100",
-  courseCode: "MAT161"
-},
-
-{
-  title: "MAT 101 – Questions",
-  author: "Unknown",
-  license: "Educational Use",
-  link: "static/materials/MAT-101-Questions.pdf",
-  type: "pdf",
-  course: "Mathematics",
-  level: "100",
-  courseCode: "MAT101"
-},
-{
-  title: "MAT 101 – Algebra (Harmattan Exam 2012/2013)",
-  author: "Bunday Tutorial",
-  license: "Educational Use",
-  link: "static/materials/MAT-101-Algebra-Harmattan-Exam-2012-2013-By-Bunday.pdf",
-  type: "pdf",
-  course: "Mathematics",
-  level: "100",
-  courseCode: "MAT101"
-},
-
-{
-  title: "Addition Formulas in Trigonometry",
-  author: "Scott Fallstrom",
-  license: "Educational Use",
-  link: "static/materials/Addition-Formulas-in-Trigonometry.pdf",
-  type: "pdf",
-  course: "Mathematics",
-  level: "100",
-  courseCode: "MAT101"
-},
-{
-  title: "Computer Questions and Answers – Basic to Advanced",
-  author: "Unknown",
-  license: "Educational Use",
-  link: "static/materials/Computer-Questions-and-Answers-Basic-to-Advanced.pdf",
-  type: "pdf",
-  course: "Computer Science",
-  level: "100",
-  courseCode: "CSC101"
-},
-
-{
-  title: "CSC 120 OER",
-  author: "Alexa",
-  license: "OER",
-  link: "static/materials/CSC-120-OER-Alexa.pdf",
-  type: "pdf",
-  course: "Computer Science",
-  level: "100",
-  courseCode: "CSC101"
-},
-{
-  title: "CSC 111 – Possible Questions",
-  author: "DML, Doyen, Adebanjo, Sola Royal",
-  license: "Educational Use",
-  link: "static/materials/CSC-111-Possible-Questions-DML-Doyen-Adebanjo-Sola-Royal.pdf",
-  type: "pdf",
-  course: "Computer Science",
-  level: "100",
-  courseCode: "CSC101"
-},
-{
-  title: "CSC 111 – Past Questions",
-  author: "DML",
-  license: "Educational Use",
-  link: "static/materials/CSC-111-Past-Questions-DML.pdf",
-  type: "pdf",
-  course: "Computer Science",
-  level: "100",
-  courseCode: "CSC101"
-},
-
-{
-  title: "Computer Programming MCQs and Answers with Explanations",
-  author: "Unknown",
-  license: "Educational Use",
-  link: "static/materials/Computer-Programming-MCQs-and-Answers-with-Explanations.pdf",
-  type: "pdf",
-  course: "Computer Science",
-  level: "100",
-  courseCode: "CSC111"
-},
-
-{
-  title: "CSC 101 – Introduction to Computing",
-  author: "Dr. Zubair Adam",
-  license: "Educational Use",
-  link: "static/materials/CSC-101-Introduction-to-Computing-Lecture-3.pdf",
-  type: "pdf",
-  course: "Computer Science",
-  level: "100",
-  courseCode: "CSC101"
-},
-{
-  title: "CSC 111 – Introduction to Internet",
-  author: "Prof. B. S. Aribisala & Dr. U. C. Ogude",
-  license: "Educational Use",
-  link: "static/materials/CSC-111-Introduction-to-Internet.pdf",
-  type: "pdf",
-  course: "Computer Science",
-  level: "100",
-  courseCode: "CSC111"
-},
-{
-  title: "CSC 111 – Course Information",
-  author: "Prof. B. S. Aribisala & Dr. U. C. Ogude",
-  license: "Educational Use",
-  link: "static/materials/CSC-111-Course-Instructors-and-Information.pdf",
-  type: "pdf",
-  course: "Computer Science",
-  level: "100",
-  courseCode: "CSC111"
-},
-{
-  title: "CSC 111 – Introduction to Computer Science",
-  author: "Unknown",
-  license: "Educational Use",
-  link: "static/materials/CSC-111-Introduction-to-Computer-Science.pdf",
-  type: "pdf",
-  course: "Computer Science",
-  level: "100",
-  courseCode: "CSC111"
-},
-{
-  title: "CSC 111 – Software",
-  author: "Dr. Zubair Adam",
-  license: "Educational Use",
-  link: "static/materials/CSC-111-Software-Lecture-4.pdf",
-  type: "pdf",
-  course: "Computer Science",
-  level: "100",
-  courseCode: "CSC111"
-},
-
-{
-  title: "CSC 111 – Computer Hardware and Software",
-  author: "Acethychlorine Community",
-  license: "Educational Use",
-  link: "static/materials/CSC-111-Computer-Hardware-and-Software.pdf",
-  type: "pdf",
-  course: "Computer Science",
-  level: "100",
-  courseCode: "CSC111"
-},
-{
-  title: "CHM 102 – Thermochemistry: Nature and Types of Energy",
-  author: "Unknown",
-  license: "Educational Use",
-  link: "static/materials/CHM-102-Thermochemistry-Nature-and-Types-of-Energy.pdf",
-  type: "pdf",
-  course: "Chemistry",
-  level: "100",
-  courseCode: "CHM102"
-},
-
-{
-  title: "CHM 101 – Rates of Reactions",
-  author: "Unknown",
-  license: "Educational Use",
-  link: "static/materials/CHM-101-Rates-of-Reactions.pdf",
-  type: "pdf",
-  course: "Chemistry",
-  level: "100",
-  courseCode: "CHM101"
-},
-
-{
-  title: "CHM 101 – Quantum Numbers, Atomic Orbitals and Electron Configurations",
-  author: "Unknown",
-  license: "Educational Use",
-  link: "static/materials/CHM-101-Quantum-Numbers-Atomic-Orbitals-and-Electron-Configurations.pdf",
-  type: "pdf",
-  course: "Chemistry",
-  level: "100",
-  courseCode: "CHM101"
-},
-
-{
-  title: "CHM 101 – Radioactivity",
-  author: "Unknown",
-  license: "Educational Use",
-  link: "static/materials/CHM-101-Radioactivity.pdf",
-  type: "pdf",
-  course: "Chemistry",
-  level: "100",
-  courseCode: "CHM101"
-},
-
-            {
-                title: "Principles of Financial Accounting",
-                author: "Open Educational Resource",
-                license: "CC BY 4.0",
-                link: "static/materials/account/Principles-of-Financial-Accounting.pdf",
-                type: "pdf",
-                course: "Accounting",
-                level: "100",
-                semester: "First Semester",
-                courseCode: "ACC101"
-            },
-            {
-                title: "Training Manual for ORGANIC AGRICULTURE",
-                author: "FAO",
-                license: "FAO PDF for small‑holder farmers",
-                link: "static/materials/agriculture/Compilation_techniques_organic_agriculture_rev.pdf",
-                type: "pdf",
-                course: "Agriculture",
-                level: "100",
-                semester: "First Semester",
-                courseCode: "AGR101"
-            },
-            {
-    title: "Material II",
-    author: "Computer Science Department",
-    license: "All Rights Reserved",
-    link: "static/materials/1769479673_material_ii.pdf",
-    type: "pdf",
-    course: "Computer Science",
-    level: "200",
-    semester: "First Semester",
-    courseCode: "CSC221"
-},
-{
-    title: "CISC and RISC",
-    author: "Information Technology Department",
-    license: "All Rights Reserved",
-    link: "static/materials/IFT219-CISC-and-RISC.pdf",
-    type: "pdf",
-    course: "Information Technology",
-    level: "200",
-    semester: "First Semester",
-    courseCode: "IFT219"
-},
-{
-    title: "CSC 207 Test 2",
-    author: "Computer Science Department",
-    license: "All Rights Reserved",
-    link: "static/materials/1769478686_csc_207_test_2.pdf",
-    type: "pdf",
-    course: "Computer Science",
-    level: "200",
-    semester: "First Semester",
-    courseCode: "CSC207"
-},
-{
-    title: "ENT 211 Compilation",
-    author: "Entrepreneurship Department",
-    license: "All Rights Reserved",
-    link: "static/materials/1769479082_ent_211_compilation.pdf",
-    type: "pdf",
-    course: "Entrepreneurship",
-    level: "200",
-    semester: "First Semester",
-    courseCode: "ENT211"
-},
-{
-    title: "CSC 221 Course Content",
-    author: "Computer Science Department",
-    license: "All Rights Reserved",
-    link: "static/materials/1769479515_csc_221_course_content.pdf",
-    type: "pdf",
-    course: "Computer Science",
-    level: "200",
-    semester: "First Semester",
-    courseCode: "CSC221"
-},
-{
-    title: "Data Structure I",
-    author: "Computer Science Department",
-    license: "All Rights Reserved",
-    link: "static/materials/1769479567_data_structure_i.pdf",
-    type: "pdf",
-    course: "Computer Science",
-    level: "200",
-    semester: "First Semester",
-    courseCode: "CSC221"
-},
-{
-    title: "Data Structure II",
-    author: "Computer Science Department",
-    license: "All Rights Reserved",
-    link: "static/materials/1769479600_data_structure_ii.pdf",
-    type: "pdf",
-    course: "Computer Science",
-    level: "200",
-    semester: "First Semester",
-    courseCode: "CSC221"
-},
-{
-    title: "CSC217 Lecture 1",
-    author: "Computer Science Department",
-    license: "All Rights Reserved",
-    link: "static/materials/1769475988_217_lecture_1.pdf",
-    type: "pdf",
-    course: "Computer Science",
-    level: "200",
-    semester: "First Semester",
-    courseCode: "CSC217"
-},
-{
-    title: "CSC217 Lecture 2",
-    author: "Computer Science Department",
-    license: "All Rights Reserved",
-    link: "static/materials/1769476027_217_lecture_2.pdf",
-    type: "pdf",
-    course: "Computer Science",
-    level: "200",
-    semester: "First Semester",
-    courseCode: "CSC217"
-},
-{
-    title: "CSC217 Lecture 3",
-    author: "Computer Science Department",
-    license: "All Rights Reserved",
-    link: "static/materials/1769476056_217_lecture_3.pdf",
-    type: "pdf",
-    course: "Computer Science",
-    level: "200",
-    semester: "First Semester",
-    courseCode: "CSC217"
-},
-{
-    title: "Compiler Construction Note II",
-    author: "Computer Science Department",
-    license: "All Rights Reserved",
-    link: "static/materials/1769476061_compiler_construction_note_ii.pdf",
-    type: "pdf",
-    course: "Computer Science",
-    level: "300",
-    semester: "First Semester",
-    courseCode: "CSC319"
-},
-{
-    title: "CSC217 Lecture 4",
-    author: "Computer Science Department",
-    license: "All Rights Reserved",
-    link: "static/materials/1769476087_217_lecture_4.pdf",
-    type: "pdf",
-    course: "Computer Science",
-    level: "200",
-    semester: "First Semester",
-    courseCode: "CSC217"
-},
-{
-    title: "CIT Compiler Construction",
-    author: "Computer Science Department",
-    license: "All Rights Reserved",
-    link: "static/materials/1769476187_cit_compiler_construction.pdf",
-    type: "pdf",
-    course: "Computer Science",
-    level: "300",
-    semester: "First Semester",
-    courseCode: "CSC319"
-},
-{
-    title: "CSC217 Key Points & Practice Questions",
-    author: "Computer Science Department",
-    license: "All Rights Reserved",
-    link: "static/materials/1769476220_csc217_key_points_practice_questions.pdf",
-    type: "pdf",
-    course: "Computer Science",
-    level: "200",
-    semester: "First Semester",
-    courseCode: "CSC217"
-},
-{
-    title: "Compiler Note II",
-    author: "Computer Science Department",
-    license: "All Rights Reserved",
-    link: "static/materials/1769476250_compiler_note_ii.pdf",
-    type: "pdf",
-    course: "Computer Science",
-    level: "300",
-    semester: "First Semester",
-    courseCode: "CSC319"
-},
-{
-    title: "Lecture 1: Real-Valued Functions of a Real Variable",
-    author: "Dr. Ashiribo Senapon WUSU",
-    license: "All Rights Reserved",
-    link: "static/materials/LASUmat_201_lesson_1.pdf",
-    type: "pdf",
-    course: "Mathematics",
-    level: "200",
-    semester: "First Semester",
-    courseCode: "MAT201"
-},
-{
-    title: "Lecture: Multiple Integrals",
-    author: "Dr. Ashiribo Senapon WUSU",
-    license: "All Rights Reserved",
-    link: "static/materials/LASU_mat_201_lecture_10.pdf",
-    type: "pdf",
-    course: "Mathematics",
-    level: "200",
-    semester: "First Semester",
-    courseCode: "MAT201"
-},
-{
-    title: "Lecture: Evaluation of Line Integrals",
-    author: "Dr. Ashiribo Senapon WUSU",
-    license: "All Rights Reserved",
-    link: "static/materials/LASU_mat_201_lecture_9.pdf",
-    type: "pdf",
-    course: "Mathematics",
-    level: "200",
-    semester: "First Semester",
-    courseCode: "MAT201"
-},
-{
-    title: "Lecture 8: Increments, Differentials and Linear Approximations",
-    author: "Dr. Ashiribo Senapon WUSU",
-    license: "All Rights Reserved",
-    link: "static/materials/LASU_mat_201_lecture_8.pdf",
-    type: "pdf",
-    course: "Mathematics",
-    level: "200",
-    semester: "First Semester",
-    courseCode: "MAT201"
-},
-
-{
-    title: "Lecture 7: Partial Derivatives and Applications",
-    author: "Dr. Ashiribo Senapon WUSU",
-    license: "All Rights Reserved",
-    link: "static/materials/LASU_mat_201_lecture_7.pdf",
-    type: "pdf",
-    course: "Mathematics",
-    level: "200",
-    semester: "First Semester",
-    courseCode: "MAT201"
-},
-{
-    title: "Lecture 6: Real-Valued Functions of Two or Three Variables",
-    author: "Dr. Ashiribo Senapon WUSU",
-    license: "All Rights Reserved",
-    link: "static/materials/LASU_mat_201_lecture_6.pdf",
-    type: "pdf",
-    course: "Mathematics",
-    level: "200",
-    semester: "First Semester",
-    courseCode: "MAT201"
-},
-{
-    title: "Lecture 5: Taylor Series",
-    author: "Dr. Ashiribo Senapon WUSU",
-    license: "All Rights Reserved",
-    link: "static/materials/LASU_mat_201_lecture_5.pdf",
-    type: "pdf",
-    course: "Mathematics",
-    level: "200",
-    semester: "First Semester",
-    courseCode: "MAT201"
-},
-{
-    title: "Lecture 4: Mean Value Theorem",
-    author: "Dr. Ashiribo Senapon WUSU",
-    license: "All Rights Reserved",
-    link: "static/materials/LASUmat_201_lecture_4.pdf",
-    type: "pdf",
-    course: "Mathematics",
-    level: "200",
-    semester: "First Semester",
-    courseCode: "MAT201"
-},
-{
-    title: "Lecture 3: Applications of Differentiation and Integration",
-    author: "Dr. Ashiribo Senapon WUSU",
-    license: "All Rights Reserved",
-    link: "static/materials/LASUmat_201_lecture_3.pdf",
-    type: "pdf",
-    course: "Mathematics",
-    level: "200",
-    semester: "First Semester",
-    courseCode: "MAT201"
-},
-{
-    title: "Lecture 2: Review of Differentiation and Integration",
-    author: "Dr. Ashiribo Senapon WUSU",
-    license: "All Rights Reserved",
-    link: "static/materials/LASUmat_201_lecture_2.pdf",
-    type: "pdf",
-    course: "Mathematics",
-    level: "200",
-    semester: "First Semester",
-    courseCode: "MAT201"
-},
-{
-    title: "Operating System Note I",
-    author: "Computer Science Department",
-    license: "All Rights Reserved",
-    link: "static/materials/1769477900_operating_system_note_i.pdf",
-    type: "pdf",
-    course: "Computer Science",
-    level: "200",
-    semester: "First Semester",
-    courseCode: "CSC205"
-},
-{
-    title: "Operating System",
-    author: "Computer Science Department",
-    license: "All Rights Reserved",
-    link: "static/materials/1769477950_operating_system.pdf",
-    type: "pdf",
-    course: "Computer Science",
-    level: "200",
-    semester: "First Semester",
-    courseCode: "CSC205"
-},
-{
-    title: "CSC 207 Note 1",
-    author: "Computer Science Department",
-    license: "All Rights Reserved",
-    link: "static/materials/1769478505_csc_207_note_1.pdf",
-    type: "pdf",
-    course: "Computer Science",
-    level: "200",
-    semester: "First Semester",
-    courseCode: "CSC207"
-},
-{
-    title: "IFT 219 Note I",
-    author: "Information Technology Department",
-    license: "All Rights Reserved",
-    link: "static/materials/1769478514_ift_219_note_i.pdf",
-    type: "pdf",
-    course: "Information Technology",
-    level: "200",
-    semester: "First Semester",
-    courseCode: "IFT219"
-},
-{
-    title: "CSC 215 Note 2",
-    author: "Computer Science Department",
-    license: "All Rights Reserved",
-    link: "static/materials/1769478533_csc_215_note_2.pdf",
-    type: "pdf",
-    course: "Computer Science",
-    level: "200",
-    semester: "First Semester",
-    courseCode: "CSC207"
-},
-{
-    title: "Lecture Notes",
-    author: "Information Technology Department",
-    license: "All Rights Reserved",
-    link: "static/materials/1769478551_lecture_notes.pdf",
-    type: "pdf",
-    course: "Information Technology",
-    level: "200",
-    semester: "First Semester",
-    courseCode: "IFT219"
-},
-{
-    title: "CSC 217 Notes",
-    author: "Computer Science Department",
-    license: "All Rights Reserved",
-    link: "static/materials/1769478557_csc_217_notes.pdf",
-    type: "pdf",
-    course: "Computer Science",
-    level: "200",
-    semester: "First Semester",
-    courseCode: "CSC207"
-},
-{
-    title: "Digital Logic Circuit Analysis and Design",
-    author: "Information Technology Department",
-    license: "All Rights Reserved",
-    link: "static/materials/1769478611_digital_logic_circuit_analysis_and_design.pdf",
-    type: "pdf",
-    course: "Information Technology",
-    level: "200",
-    semester: "First Semester",
-    courseCode: "IFT219"
-},
-{
-    title: "Visual Basic",
-    author: "Computer Science Department",
-    license: "All Rights Reserved",
-    link: "static/materials/1769478621_visual_basic.pdf",
-    type: "pdf",
-    course: "Computer Science",
-    level: "200",
-    semester: "First Semester",
-    courseCode: "CSC207"
-},
-{
-    title: "Hashing",
-    author: "Computer Science Department",
-    license: "All Rights Reserved",
-    link: "static/materials/1769479631_hashing.pdf",
-    type: "pdf",
-    course: "Computer Science",
-    level: "200",
-    semester: "First Semester",
-    courseCode: "CSC221"
-},
-            {
-    title: "Queues",
-    author: "Computer Science Department",
-    license: "All Rights Reserved",
-    link: "static/materials/1769479735_queues.pdf",
-    type: "pdf",
-    course: "Computer Science",
-    level: "200",
-    semester: "First Semester",
-    courseCode: "CSC221"
-},
-            {
-    title: "Stacks",
-    author: "Computer Science Department",
-    license: "All Rights Reserved",
-    link: "static/materials/1769479771_stacks.pdf",
-    type: "pdf",
-    course: "Computer Science",
-    level: "200",
-    semester: "First Semester",
-    courseCode: "CSC221"
-},
-            {
-    title: "Complexity Analysis of Algorithms",
-    author: "Jordi Cortadella",
-    license: "All Rights Reserved",
-    link: "static/materials/complexity_analysis_of_algorithm.pdf",
-    type: "pdf",
-    course: "Computer Science",
-    level: "200",
-    semester: "First Semester",
-    courseCode: "CSC213"
-},
-{
-    title: "GLT 201 – Instrument Maintenance (Practice Problems)",
-    author: "Science Laboratory Technology Department",
-    license: "All Rights Reserved",
-    link: "static/materials/glt_practice_problems.pdf",
-    type: "pdf",
-    course: "Science Laboratory Technology",
-    level: "200",
-    semester: "First Semester",
-    courseCode: "GLT201"
-},
-{
-    title: "Trees I",
-    author: "Computer Science Department",
-    license: "All Rights Reserved",
-    link: "static/materials/1769480131_trees_i.pdf",
-    type: "pdf",
-    course: "Computer Science",
-    level: "200",
-    semester: "First Semester",
-    courseCode: "CSC221"
-},
-{
-    title: "Trees III",
-    author: "Computer Science Department",
-    license: "All Rights Reserved",
-    link: "static/materials/1769480347_trees_iii.pdf",
-    type: "pdf",
-    course: "Computer Science",
-    level: "200",
-    semester: "First Semester",
-    courseCode: "CSC221"
-},
-{
-    title: "Tree II",
-    author: "Computer Science Department",
-    license: "All Rights Reserved",
-    link: "static/materials/1769480504_tree_ii.pdf",
-    type: "pdf",
-    course: "Computer Science",
-    level: "200",
-    semester: "First Semester",
-    courseCode: "CSC221"
-},
-{
-    title: "CSC 213 Note 1",
-    author: "Computer Science Department",
-    license: "All Rights Reserved",
-    link: "static/materials/1769480768_csc_213_note_i.pdf",
-    type: "pdf",
-    course: "Computer Science",
-    level: "200",
-    semester: "First Semester",
-    courseCode: "CSC213"
-},
-{
-    title: "CSC 113 Note II",
-    author: "Computer Science Department",
-    license: "All Rights Reserved",
-    link: "static/materials/computer_of_arts_socialscience_and_managementscience_csc_213_note_ii.pdf",
-    type: "pdf",
-    course: "Computer Science",
-    level: "100",
-    semester: "First Semester",
-    courseCode: "CSC213"
-},
-{
-    title: "Complexity IV",
-    author: "Computer Science Department",
-    license: "All Rights Reserved",
-    link: "static/materials/complexity_iv.pdf",
-    type: "pdf",
-    course: "Computer Science",
-    level: "200",
-    semester: "First Semester",
-    courseCode: "CSC213"
-},
-{
-    title: "Complexity III",
-    author: "Computer Science Department",
-    license: "All Rights Reserved",
-    link: "static/materials/complexity_iii.pdf",
-    type: "pdf",
-    course: "Computer Science",
-    level: "200",
-    semester: "First Semester",
-    courseCode: "CSC213"
-},
-
-{
-    title: "Algorithm Design Techniques and Analysis",
-    author: "M. H. Alsuwaiyel",
-    license: "All Rights Reserved",
-    link: "static/materials/algorithm_design_techniques_and_analysis.pdf",
-    type: "pdf",
-    course: "Computer Science",
-    level: "200",
-    semester: "First Semester",
-    courseCode: "CSC213"
-},
-            {
-                title: "Complexity Analysis of Algorithms",
-                author: "Jordi Cortadella",
-                license: "CC BY 4.0",
-                link: "static/materials/complexity_analysis_of_algorithm.pdf",
-                type: "pdf",
-                course: "Computer Science",
-                level: "200",
-                semester: "First Semester",
-                courseCode: "AGR101"
-            },
-            {
-                title: "Genetics, Agriculture, and Biotechnology",
-                author: "Walter Suza and Donald Lee",
-                license: "CC BY-NC-SA 4.0",
-                link: "static/materials/agriculture/Genetics-Agriculture-and-Biotechnology-1646343300.pdf",
-                type: "pdf",
-                course: "Agriculture",
-                level: "100",
-                semester: "First Semester",
-                courseCode: "AGR101"
-            },
-            {
-                title: "Plant Breeding Methods",
-                author: "Walter R. Fehr and Walter P. Suza",
-                license: "CC BY-NC 4.0",
-                link: "static/materials/agriculture/Plant-Breeding-Methods-1724939423.pdf",
-                type: "pdf",
-                course: "Agriculture",
-                level: "100",
-                semester: "First Semester",
-                courseCode: "AGR101"
-            },
-            {
-                title: "Crop Genetics",
-                author: "William Beavis, Arden Campbell, Jode Edwards, Shui-Zhang Fei, Thomas Lübberstedt, Laura Merrick, Deborah Muenchrath, Walter Suza",
-                license: "CC BY-NC-SA 4.0",
-                link: "static/materials/agriculture/Crop-Genetics-1696858550.pdf",
-                type: "pdf",
-                course: "Agriculture",
-                level: "100",
-                semester: "First Semester",
-                courseCode: "AGR101"
-            },
-            {
-                title: "Quantitative Methods for Plant Breeding",
-                author: "Ken Moore, M. L. Harbur, Ron Mowers, Laura Merrick, Dennis Todey, Kendra Meade, William Beavis, Reka Howard, Ursula Frei, Anthony Assibi Mahama, Walter Suza",
-                license: "CC BY-NC-SA 4.0",
-                link: "static/materials/agriculture/Quantitative-Methods-for-Plant-Breeding-1696860463.pdf",
-                type: "pdf",
-                course: "Agriculture",
-                level: "100",
-                semester: "First Semester",
-                courseCode: "AGR101"
-            },
-            {
-                title: "Molecular Plant Breeding",
-                author: "Walter Suza, Kendall Lamkey, Thomas Lübberstedt, William Beavis, Madan Bhattacharyya, Laura Merrick, Ursula Frei",
-                license: "CC BY-NC-SA 4.0",
-                link: "static/materials/agriculture/Molecular-Plant-Breeding-1696858563.pdf",
-                type: "pdf",
-                course: "Agriculture",
-                level: "100",
-                semester: "First Semester",
-                courseCode: "AGR101"
-            },
-            {
-                title: "Quantitative Genetics for Plant Breeding",
-                author: "William Beavis, Katherine Espinosa, Mark Newell, Anthony Assibi Mahama, Walter Suza",
-                license: "CC BY-NC-SA 4.0",
-                link: "static/materials/agriculture/Quantitative-Genetics-for-Plant-Breeding-1697468159.pdf",
-                type: "pdf",
-                course: "Agriculture",
-                level: "100",
-                semester: "First Semester",
-                courseCode: "AGR101"
-            },
-            {
-                title: "Introduction to Business Administration",
-                author: "Amit Shah; Bethann Talsma; Carl McDaniel; Lawrence J. Gitman; Linda Koffel; Monique Reece",
-                license: "CC BY 4.0",
-                link: "static/materials/businessadministation/Introduction-to-Business-Administration-1735836334.pdf",
-                type: "pdf",
-                course: "Business Administration",
-                level: "100",
-                semester: "First Semester",
-                courseCode: "BUS101"
-            },
-            {
-                title: "Business Fundamentals – 1st Edition",
-                author: "Kerri Shields",
-                license: "CC BY-NC-SA 4.0",
-                link: "static/materials/businessadministation/Business-Fundamentals-1st-Edition-1760797243.pdf",
-                type: "pdf",
-                course: "Business Administration",
-                level: "100",
-                semester: "First Semester",
-                courseCode: "BUS101"
-            },
-            {
-                title: "100 Level Second Semester Course Outline",
-                author: "Bunday",
-                license: "Educational Use",
-                link: "static/materials/100-Level-Second-Semester-Course-Outline.pdf",
-                type: "pdf",
-                course: "General",
-                level: "100",
-                semester: "Second Semester",
-                courseCode: "GEN102"
-            },
-            {
-                title: "Probability & Statistics for Engineers & Scientists (9th Edition)",
-                author: "Ronald E. Walpole, Raymond H. Myers, Sharon L. Myers, Keying Ye",
-                license: "Copyrighted",
-                link: "static/materials/Probability-and-Statistics-for-Engineers-and-Scientists-9th-Edition.pdf",
-                type: "pdf",
-                course: "Mathematics",
-                level: "100",
-                semester: "First Semester",
-                courseCode: "MAT101"
-            },
-            {
-                title: "Macmillan Mathematical Guides – Introduction to Algebra",
-                author: "Carol Whitehead",
-                license: "Copyrighted",
-                link: "static/materials/Macmillan-Mathematical-Guides-Introduction-to-Algebra.pdf",
-                type: "pdf",
-                course: "Mathematics",
-                level: "100",
-                semester: "First Semester",
-                courseCode: "MAT101"
-            },
-            {
-                title: "Magnetic Field – Unconfirmed Source",
-                author: "Unknown",
-                license: "Unverified",
-                link: "static/materials/Magnetic-Field.pdf",
-                type: "pdf",
-                course: "Physics",
-                level: "100",
-                semester: "First Semester",
-                courseCode: "PHY101"
-            },
-            {
-                title: "DBMS II – Transaction Processing (Unit 6: Transaction Management)",
-                author: "Prof. Firoz Sherasiya",
-                license: "LASU Academic Material",
-                link: "static/materials/lasu/dbms2/DBMS-II-Unit-6-Transaction-Management.pdf",
-                type: "pdf",
-                course: "Computer Science",
-                level: "200",
-                semester: "First Semester",
-                courseCode: "CSC201"
-            }
+        // ===== STATIC MATERIALS DATABASE (from CBT version) =====
+        const staticMaterials = [
+            { title: "BCH 101 - Lipids of Biological Importance", author: "Unknown", license: "Educational Use", link: "static/materials/Lipids-of-Biological-Importance.pdf", type: "pdf", course: "Biochemistry", level: "100", semester: "First Semester", courseCode: "BCH101", isStatic: true },
+            { title: "BCH 101 – Carbohydrates", author: "ADEYEMO, ADESEGUN GIDEON", license: "Educational Use", link: "static/materials/BCH-101-Carbohydrate.pdf", type: "pdf", course: "Biochemistry", level: "100", semester: "First Semester", courseCode: "BCH101", isStatic: true },
+            { title: "BCH 101 – Amino Acids and Proteins", author: "Adeyemo, Adesegun Gideon", license: "Educational Use", link: "static/materials/BCH-101-Amino-Acids-and-Proteins.pdf", type: "pdf", course: "Biochemistry", level: "100", semester: "First Semester", courseCode: "BCH101", isStatic: true },
+            { title: "BCH 101 – Macromolecules", author: "Unknown", license: "Educational Use", link: "static/materials/BCH-101-Macromolecules.pdf", type: "pdf", course: "Biochemistry", level: "100", semester: "First Semester", courseCode: "BCH101", isStatic: true },
+            { title: "BCH 101 OER – Past Questions", author: "Open Educational Resource", license: "OER", link: "static/materials/BCH-101-OER-Past-Questions.pdf", type: "pdf", course: "Biochemistry", level: "100", semester: "First Semester", courseCode: "BCH101", isStatic: true },
+            { title: "BCH 101 – Brief History of Biochemistry", author: "Hikmet Geckil", license: "Educational Use", link: "static/materials/BCH-101-Brief-History-of-Biochemistry.pdf", type: "pdf", course: "Biochemistry", level: "100", semester: "First Semester", courseCode: "BCH101", isStatic: true },
+            { title: "BCH 101 – Multiple Choice Questions", author: "RSM", license: "Educational Use", link: "static/materials/BCH-101-Multiple-Choice-Questions.pdf", type: "pdf", course: "Biochemistry", level: "100", semester: "First Semester", courseCode: "BCH101", isStatic: true },
+            { title: "History of Biochemistry", author: "Unknown", license: "Educational Use", link: "static/materials/History-of-Biochemistry.pdf", type: "pdf", course: "Biochemistry", level: "100", semester: "First Semester", courseCode: "BCH101", isStatic: true },
+            { title: "MAT 101 OER – Likely Exam Questions", author: "Sir Temi", license: "OER", link: "static/materials/MAT-101-OER.pdf", type: "pdf", course: "Mathematics", level: "100", semester: "First Semester", courseCode: "MAT101", isStatic: true },
+            { title: "MAT 101 – Questions (DML & Adebanjo)", author: "DML & Adebanjo", license: "Educational Use", link: "static/materials/MAT-101-Questions-DML-and-Adebanjo-2.pdf", type: "pdf", course: "Mathematics", level: "100", semester: "First Semester", courseCode: "MAT101", isStatic: true },
+            { title: "MAT 101 – Elementary Mathematics I (Lecture 1)", author: "Dr. Akinwale Lewis Olutimo", license: "LASU Academic Material", link: "static/materials/lasu/mathematics/1768303502_online_aspect_mat101_lesson_1.pdf", type: "pdf", course: "Mathematics", level: "100", semester: "First Semester", courseCode: "MAT101", isStatic: true },
+            { title: "MAT 101 – Lecture 2: Theory of Quadratic Equations", author: "Dr. Akinwale Lewis Olutimo", license: "LASU Academic Material", link: "static/materials/lasu/mathematics/MAT-101-Lecture-2-Theory-of-Quadratic-Equations.pdf", type: "pdf", course: "Mathematics", level: "100", semester: "First Semester", courseCode: "MAT101", isStatic: true },
+            { title: "MAT 101 – Lecture 3: Indices and Logarithms", author: "Dr. Akinwale Lewis Olutimo", license: "LASU Academic Material", link: "static/materials/lasu/mathematics/MAT-101-Lecture-3-Indices-and-Logarithms.pdf", type: "pdf", course: "Mathematics", level: "100", semester: "First Semester", courseCode: "MAT101", isStatic: true },
+            { title: "PHY 101 OER", author: "Sola Royal", license: "lasuoer.online", link: "static/materials/PHY-101-OER-Sola-Royal.pdf", type: "pdf", course: "Physics", level: "100", semester: "First Semester", courseCode: "PHY101", isStatic: true },
+            { title: "CSC 102 – Introduction to Computing Concepts", author: "Prof. Aribisala & Dr. Zubair Adam", license: "Educational Use", link: "static/materials/CSC-102-Introduction-to-Computing-Concepts.pdf", type: "pdf", course: "Computer Science", level: "100", semester: "Second Semester", courseCode: "CSC102", isStatic: true },
+            { title: "Types of Documents and Their Structures in LaTeX", author: "Dr. Idowu G. A.", license: "Educational Use", link: "static/materials/Types-of-Documents-and-Their-Structures-in-LaTeX.pdf", type: "pdf", course: "Computer Science", level: "100", semester: "Second Semester", courseCode: "CSC102", isStatic: true },
+            { title: "BIO 101 – Levels of Biological Organization", author: "Alafia, A. O.", license: "Educational Use", link: "static/materials/BIO-101-Levels-of-Biological-Organization-and-Classification.pdf", type: "pdf", course: "Biology", level: "100", semester: "First Semester", courseCode: "BIO101", isStatic: true },
+            { title: "BIO 101 – Meiosis, Gametogenesis, Inheritance and Variation", author: "Unknown", license: "Educational Use", link: "static/materials/BIO-101-Meiosis-Gametogenesis-Inheritance-and-Variation.pdf", type: "pdf", course: "Biology", level: "100", semester: "First Semester", courseCode: "BIO101", isStatic: true },
+            { title: "BIO 101 – Biomolecules: Carbohydrates and Lipids", author: "Adu, Oluwatosin B.", license: "Educational Use", link: "static/materials/BIO-101-Biomolecules-Carbohydrates-and-Lipids.pdf", type: "pdf", course: "Biology", level: "100", semester: "First Semester", courseCode: "BIO101", isStatic: true },
+            { title: "BIO 101 – Biomolecules: Proteins and Nucleic Acids", author: "Adu, Oluwatosin B.", license: "Educational Use", link: "static/materials/BIO-101-Biomolecules-Proteins-and-Nucleic-Acids.pdf", type: "pdf", course: "Biology", level: "100", semester: "First Semester", courseCode: "BIO101", isStatic: true },
+            { title: "BIO 101 – Gametogenesis", author: "Osinaike, T. S.", license: "Educational Use", link: "static/materials/BIO-101-Gametogenesis.pdf", type: "pdf", course: "Biology", level: "100", semester: "First Semester", courseCode: "BIO101", isStatic: true },
+            { title: "BIO 101 – Basic Principles of Reproduction and Growth", author: "Unknown", license: "Educational Use", link: "static/materials/BIO-101-Basic-Principles-of-Reproduction-and-Growth.pdf", type: "pdf", course: "Biology", level: "100", semester: "First Semester", courseCode: "BIO101", isStatic: true },
+            { title: "BIO 101 – Proteins and Nucleic Acids", author: "Adu, Oluwatosin B.", license: "Educational Use", link: "static/materials/BIO-101-Proteins-and-Nucleic-Acids.pdf", type: "pdf", course: "Biology", level: "100", semester: "First Semester", courseCode: "BIO101", isStatic: true },
+            { title: "BIO 101 – Evolutionary Trends", author: "Alafia, A. O. (Ph.D)", license: "Educational Use", link: "static/materials/BIO-101-Evolutionary-Trends.pdf", type: "pdf", course: "Biology", level: "100", semester: "First Semester", courseCode: "BIO101", isStatic: true },
+            { title: "BIO 101 – Diversity of Animals", author: "Alafia, A. O.", license: "Educational Use", link: "static/materials/BIO-101-Diversity-of-Animals.pdf", type: "pdf", course: "Biology", level: "100", semester: "First Semester", courseCode: "BIO101", isStatic: true },
+            { title: "BIO 101 – Diversity, Classification and Characteristics of Animals", author: "Unknown", license: "Educational Use", link: "static/materials/BIO-101-Diversity-Classification-and-Characteristics-of-Animals.pdf", type: "pdf", course: "Biology", level: "100", semester: "First Semester", courseCode: "BIO101", isStatic: true },
+            { title: "BIO 101 – Microscopy", author: "Dr. Bola Oyefolu", license: "Educational Use", link: "static/materials/BIO-101-Microscopy.pdf", type: "pdf", course: "Biology", level: "100", semester: "First Semester", courseCode: "BIO101", isStatic: true },
+            { title: "BIO 101 – Cell Structure and Function of Organelles", author: "Unknown", license: "Educational Use", link: "static/materials/BIO-101-Cell-Structure-and-Function-of-Organelles.pdf", type: "pdf", course: "Biology", level: "100", semester: "First Semester", courseCode: "BIO101", isStatic: true },
+            { title: "CHM 102 – Homework Practice Questions", author: "Unknown", license: "Educational Use", link: "static/materials/CHM-102-Homework-Practice-Questions.pdf", type: "pdf", course: "Chemistry", level: "100", semester: "Second Semester", courseCode: "CHM102", isStatic: true },
+            { title: "CHM 101 – Oxidation and Reduction", author: "Unknown", license: "Educational Use", link: "static/materials/CHM-101-Oxidation-and-Reduction.pdf", type: "pdf", course: "Chemistry", level: "100", semester: "First Semester", courseCode: "CHM101", isStatic: true },
+            { title: "CHM 101 – Acids and Bases", author: "Unknown", license: "Educational Use", link: "static/materials/CHM-101-Acids-and-Bases-Chapter-15.pdf", type: "pdf", course: "Chemistry", level: "100", semester: "First Semester", courseCode: "CHM101", isStatic: true },
+            { title: "CHM 101 – Acids and Bases", author: "Onwordi, C. T. (Ph.D)", license: "Educational Use", link: "static/materials/CHM-101-Acids-and-Bases.pdf", type: "pdf", course: "Chemistry", level: "100", semester: "First Semester", courseCode: "CHM101", isStatic: true },
+            { title: "CHM 101 – Atomic Theory Timeline", author: "Unknown", license: "Educational Use", link: "static/materials/CHM-101-Atomic-Theory-Timeline.pdf", type: "pdf", course: "Chemistry", level: "100", semester: "First Semester", courseCode: "CHM101", isStatic: true },
+            { title: "CHM 101 – Redox Reactions and Introduction to Electrochemistry", author: "Prof. Olowu R. A.", license: "Educational Use", link: "static/materials/CHM-101-Redox-Reactions-and-Introduction-to-Electrochemistry.pdf", type: "pdf", course: "Chemistry", level: "100", semester: "First Semester", courseCode: "CHM101", isStatic: true },
+            { title: "CHM 101 – Periodicity", author: "Unknown", license: "Educational Use", link: "static/materials/CHM-101-Periodicity.pdf", type: "pdf", course: "Chemistry", level: "100", semester: "First Semester", courseCode: "CHM101", isStatic: true },
+            { title: "CHM 101 – Periodic Table and Periodicity", author: "Prof. Adeniyi", license: "Educational Use", link: "static/materials/CHM-101-Periodic-Table-and-Periodicity.pdf", type: "pdf", course: "Chemistry", level: "100", semester: "First Semester", courseCode: "CHM101", isStatic: true },
+            { title: "CHM 101 – Rates of Reactions and Equilibrium", author: "Unknown", license: "Educational Use", link: "static/materials/CHM-101-Rates-of-Reactions-and-Equilibrium.pdf", type: "pdf", course: "Chemistry", level: "100", semester: "First Semester", courseCode: "CHM101", isStatic: true },
+            { title: "CHM 101 – Modern Electronic Theory of Atoms", author: "Prof. A. A. Adeniyi", license: "Educational Use", link: "static/materials/CHM-101-Modern-Electronic-Theory-of-Atoms.pdf", type: "pdf", course: "Chemistry", level: "100", semester: "First Semester", courseCode: "CHM101", isStatic: true },
+            { title: "CHM 101 – Atomic and Molecular Structure", author: "Unknown", license: "Educational Use", link: "static/materials/CHM-101-Atomic-and-Molecular-Structure.pdf", type: "pdf", course: "Chemistry", level: "100", semester: "First Semester", courseCode: "CHM101", isStatic: true },
+            { title: "CHM 101 – Hybridization and Shapes of Molecules", author: "Dr. Olubunmi A. Adewusi", license: "Educational Use", link: "static/materials/CHM-101-Hybridization-and-Shapes-of-Molecules.pdf", type: "pdf", course: "Chemistry", level: "100", semester: "First Semester", courseCode: "CHM101", isStatic: true },
+            { title: "BIO 101 OER", author: "Sola Royal", license: "OER", link: "static/materials/BIO-101-OER-Sola-Royal.pdf", type: "pdf", course: "Biology", level: "100", semester: "First Semester", courseCode: "BIO101", isStatic: true },
+            { title: "BIO 101 OER", author: "Honorer", license: "OER", link: "static/materials/BIO-101-OER.pdf", type: "pdf", course: "Biology", level: "100", semester: "First Semester", courseCode: "BIO101", isStatic: true },
+            { title: "Sure A in CHM 101 – Past Questions & Answers", author: "Unknown", license: "Educational Use", link: "static/materials/Sure-A-in-CHM-101-Past-Questions-and-Answers.pdf", type: "pdf", course: "Chemistry", level: "100", semester: "First Semester", courseCode: "CHM101", isStatic: true },
+            { title: "PHY 104 – Electricity and Magnetism", author: "University of Abuja", license: "Educational Use", link: "static/materials/PHY-104-Electricity-and-Magnetism.pdf", type: "pdf", course: "Physics", level: "100", semester: "Second Semester", courseCode: "PHY104", isStatic: true },
+            { title: "PHY 104 – Oscillation", author: "Unknown", license: "Educational Use", link: "static/materials/PHY-104-Oscillation.pdf", type: "pdf", course: "Physics", level: "100", semester: "Second Semester", courseCode: "PHY104", isStatic: true },
+            { title: "Trigonometry", author: "Dr. Olaniyan", license: "LASU Academic Material", link: "static/materials/lasu/mathematics/Trigonometry.pdf", type: "pdf", course: "Mathematics", level: "100", semester: "First Semester", courseCode: "MAT101", isStatic: true },
+            { title: "Indices, Surds and Logarithms", author: "Department of Mathematics", license: "LASU Academic Material", link: "static/materials/lasu/mathematics/Indices-Surds-and-Logarithms.pdf", type: "pdf", course: "Mathematics", level: "100", semester: "First Semester", courseCode: "MAT101", isStatic: true },
+            { title: "Inequalities", author: "Dr. Olaniyan Adegoke", license: "LASU Academic Material", link: "static/materials/lasu/mathematics/Inequalities.pdf", type: "pdf", course: "Mathematics", level: "100", semester: "First Semester", courseCode: "MAT101", isStatic: true },
+            { title: "Theory of Quadratic Equation", author: "Dr. Olaniyan Adegoke", license: "LASU Academic Material", link: "static/materials/lasu/mathematics/Theory-of-Quadratic-Equation.pdf", type: "pdf", course: "Mathematics", level: "100", semester: "First Semester", courseCode: "MAT101", isStatic: true },
+            { title: "Sequence and Series", author: "Department of Mathematics, Lagos State University", license: "LASU Academic Material", link: "static/materials/lasu/mathematics/Sequence-and-Series.pdf", type: "pdf", course: "Mathematics", level: "100", semester: "First Semester", courseCode: "MAT101", isStatic: true },
+            { title: "Binomial Expansion", author: "Dr. Olaniyan Adegoke", license: "LASU Academic Material", link: "static/materials/lasu/mathematics/Binomial-Expansion.pdf", type: "pdf", course: "Mathematics", level: "100", semester: "First Semester", courseCode: "MAT101", isStatic: true },
+            { title: "MAT 161 – Descriptive Statistics (Lecture 1)", author: "Dr. Akinwale Lewis Olutimo", license: "LASU Academic Material", link: "static/materials/lasu/mat161/MAT-161-Descriptive-Statistics-Lecture-1.pdf", type: "pdf", course: "Mathematics", level: "100", semester: "First Semester", courseCode: "MAT101", isStatic: true },
+            { title: "Financial Accounting", author: "OpenStax", license: "CC BY 4.0", link: "static/materials/accounting/Financial-Accounting.pdf", type: "pdf", course: "Accounting", level: "100", semester: "First Semester", courseCode: "ACC101", isStatic: true },
+            { title: "A Business Perspective (Managerial Accounting)", author: "Open Educational Resource", license: "CC BY 4.0", link: "static/materials/account/A-Business-Perspective-(Managerial-Accounting).pdf", type: "pdf", course: "Accounting", level: "100", semester: "First Semester", courseCode: "ACC101", isStatic: true },
+            { title: "Principles Of Accounting Vol 1", author: "Open Educational Resource", license: "CC BY 4.0", link: "static/materials/account/Principles-Of-Accounting-Vol-1.pdf", type: "pdf", course: "Accounting", level: "100", semester: "First Semester", courseCode: "ACC101", isStatic: true },
+            { title: "Principles of Accounting Vol 2", author: "Open Educational Resource", license: "CC BY 4.0", link: "static/materials/account/Principles-Of-Accounting-Vol-2.pdf", type: "pdf", course: "Accounting", level: "100", semester: "Second Semester", courseCode: "ACC102", isStatic: true },
+            { title: "CHM 101 – Gases", author: "Unknown", license: "Educational Use", link: "static/materials/CHM-101-Gases.pdf", type: "pdf", course: "Chemistry", level: "100", semester: "First Semester", courseCode: "CHM101", isStatic: true },
+            { title: "Zoology Test", author: "Unknown", license: "Educational Use", link: "static/materials/Zoology-Test.pdf", type: "pdf", course: "Zoology", level: "100", semester: "First Semester", courseCode: "ZOO101", isStatic: true },
+            { title: "ZOO 102 – Digestive System of Mammals", author: "Dr. O. O. Okwa", license: "Educational Use", link: "static/materials/ZOO-102-Digestive-System-of-Mammals.pdf", type: "pdf", course: "Zoology", level: "100", semester: "Second Semester", courseCode: "ZOO102", isStatic: true },
+            { title: "PHY 101 OER", author: "The Sporty Boys", license: "OER", link: "static/materials/PHY-101-OER-The-Sporty-Boys.pdf", type: "pdf", course: "Physics", level: "100", semester: "First Semester", courseCode: "PHY101", isStatic: true },
+            { title: "PHY 101 – General Physics I", author: "Dr. Adewusi", license: "Educational Use", link: "static/materials/PHY-101-General-Physics-I-Dr-Adewusi.pdf", type: "pdf", course: "Physics", level: "100", semester: "First Semester", courseCode: "PHY101", isStatic: true },
+            { title: "PHY 101 – General Physics I (Mechanics)", author: "CCMAS", license: "Educational Use", link: "static/materials/PHY-101-General-Physics-I-Mechanics-CCMAS.pdf", type: "pdf", course: "Physics", level: "100", semester: "First Semester", courseCode: "PHY101", isStatic: true },
+            { title: "PHY 101 – Circular Motion", author: "Unknown", license: "Educational Use", link: "static/materials/PHY-101-Circular-Motion.pdf", type: "pdf", course: "Physics", level: "100", semester: "First Semester", courseCode: "PHY101", isStatic: true },
+            { title: "General Physics – Physics and Measurement", author: "Prof. Rashad Badran", license: "Educational Use", link: "static/materials/General-Physics-Physics-and-Measurement.pdf", type: "pdf", course: "Physics", level: "100", semester: "First Semester", courseCode: "PHY101", isStatic: true },
+            { title: "PHY 101 – Mechanics and Properties of Matter", author: "Dr. S. O. Oseni", license: "Educational Use", link: "static/materials/PHY-101-Dr-Oseni.pdf", type: "pdf", course: "Physics", level: "100", semester: "First Semester", courseCode: "PHY101", isStatic: true },
+            { title: "PHY 101 – Mechanics and Properties of Matter", author: "Dr. S. O. Oseni", license: "Educational Use", link: "static/materials/PHY-101-Mechanics-and-Properties-of-Matter.pdf", type: "pdf", course: "Physics", level: "100", semester: "First Semester", courseCode: "PHY101", isStatic: true },
+            { title: "PHY 101 – Circular and Oscillatory Motion", author: "Dr. A. O. Adewale", license: "Educational Use", link: "static/materials/PHY-101-Circular-and-Oscillatory-Motion.pdf", type: "pdf", course: "Physics", level: "100", semester: "First Semester", courseCode: "PHY101", isStatic: true },
+            { title: "PHY 101 – Centre of Mass and Law of Conservation of Momentum", author: "Unknown", license: "Educational Use", link: "static/materials/PHY-101-Centre-of-Mass-and-Law-of-Conservation-of-Momentum.pdf", type: "pdf", course: "Physics", level: "100", semester: "First Semester", courseCode: "PHY101", isStatic: true },
+            { title: "MAT 141 – Mathematics", author: "Unknown", license: "Educational Use", link: "static/materials/MAT-141.pdf", type: "pdf", course: "Mathematics", level: "100", semester: "First Semester", courseCode: "MAT141", isStatic: true },
+            { title: "MAT 101 – Practice Questions", author: "NoahLyMatics (LASUCBTest)", license: "Educational Use", link: "static/materials/MAT-101-Practice-Questions-NoahLyMatics.pdf", type: "pdf", course: "Mathematics", level: "100", semester: "First Semester", courseCode: "MAT101", isStatic: true },
+            { title: "MAT 161 – VLAP Exercise (2023/2024)", author: "Temple", license: "Educational Use", link: "static/materials/MAT-161-VLAP-Exercise-2023-2024.pdf", type: "pdf", course: "Mathematics", level: "100", semester: "First Semester", courseCode: "MAT161", isStatic: true },
+            { title: "MAT 101 – Questions", author: "Unknown", license: "Educational Use", link: "static/materials/MAT-101-Questions.pdf", type: "pdf", course: "Mathematics", level: "100", semester: "First Semester", courseCode: "MAT101", isStatic: true },
+            { title: "MAT 101 – Algebra (Harmattan Exam 2012/2013)", author: "Bunday Tutorial", license: "Educational Use", link: "static/materials/MAT-101-Algebra-Harmattan-Exam-2012-2013-By-Bunday.pdf", type: "pdf", course: "Mathematics", level: "100", semester: "First Semester", courseCode: "MAT101", isStatic: true },
+            { title: "Addition Formulas in Trigonometry", author: "Scott Fallstrom", license: "Educational Use", link: "static/materials/Addition-Formulas-in-Trigonometry.pdf", type: "pdf", course: "Mathematics", level: "100", semester: "First Semester", courseCode: "MAT101", isStatic: true },
+            { title: "Computer Questions and Answers – Basic to Advanced", author: "Unknown", license: "Educational Use", link: "static/materials/Computer-Questions-and-Answers-Basic-to-Advanced.pdf", type: "pdf", course: "Computer Science", level: "100", semester: "First Semester", courseCode: "CSC101", isStatic: true },
+            { title: "CSC 120 OER", author: "Alexa", license: "OER", link: "static/materials/CSC-120-OER-Alexa.pdf", type: "pdf", course: "Computer Science", level: "100", semester: "First Semester", courseCode: "CSC101", isStatic: true },
+            { title: "CSC 111 – Possible Questions", author: "DML, Doyen, Adebanjo, Sola Royal", license: "Educational Use", link: "static/materials/CSC-111-Possible-Questions-DML-Doyen-Adebanjo-Sola-Royal.pdf", type: "pdf", course: "Computer Science", level: "100", semester: "First Semester", courseCode: "CSC101", isStatic: true },
+            { title: "CSC 111 – Past Questions", author: "DML", license: "Educational Use", link: "static/materials/CSC-111-Past-Questions-DML.pdf", type: "pdf", course: "Computer Science", level: "100", semester: "First Semester", courseCode: "CSC101", isStatic: true },
+            { title: "Computer Programming MCQs and Answers with Explanations", author: "Unknown", license: "Educational Use", link: "static/materials/Computer-Programming-MCQs-and-Answers-with-Explanations.pdf", type: "pdf", course: "Computer Science", level: "100", semester: "First Semester", courseCode: "CSC111", isStatic: true },
+            { title: "CSC 101 – Introduction to Computing", author: "Dr. Zubair Adam", license: "Educational Use", link: "static/materials/CSC-101-Introduction-to-Computing-Lecture-3.pdf", type: "pdf", course: "Computer Science", level: "100", semester: "First Semester", courseCode: "CSC101", isStatic: true },
+            { title: "CSC 111 – Introduction to Internet", author: "Prof. B. S. Aribisala & Dr. U. C. Ogude", license: "Educational Use", link: "static/materials/CSC-111-Introduction-to-Internet.pdf", type: "pdf", course: "Computer Science", level: "100", semester: "First Semester", courseCode: "CSC111", isStatic: true },
+            { title: "CSC 111 – Course Information", author: "Prof. B. S. Aribisala & Dr. U. C. Ogude", license: "Educational Use", link: "static/materials/CSC-111-Course-Instructors-and-Information.pdf", type: "pdf", course: "Computer Science", level: "100", semester: "First Semester", courseCode: "CSC111", isStatic: true },
+            { title: "CSC 111 – Introduction to Computer Science", author: "Unknown", license: "Educational Use", link: "static/materials/CSC-111-Introduction-to-Computer-Science.pdf", type: "pdf", course: "Computer Science", level: "100", semester: "First Semester", courseCode: "CSC111", isStatic: true },
+            { title: "CSC 111 – Software", author: "Dr. Zubair Adam", license: "Educational Use", link: "static/materials/CSC-111-Software-Lecture-4.pdf", type: "pdf", course: "Computer Science", level: "100", semester: "First Semester", courseCode: "CSC111", isStatic: true },
+            { title: "CSC 111 – Computer Hardware and Software", author: "Acethychlorine Community", license: "Educational Use", link: "static/materials/CSC-111-Computer-Hardware-and-Software.pdf", type: "pdf", course: "Computer Science", level: "100", semester: "First Semester", courseCode: "CSC111", isStatic: true },
+            { title: "CHM 102 – Thermochemistry: Nature and Types of Energy", author: "Unknown", license: "Educational Use", link: "static/materials/CHM-102-Thermochemistry-Nature-and-Types-of-Energy.pdf", type: "pdf", course: "Chemistry", level: "100", semester: "Second Semester", courseCode: "CHM102", isStatic: true },
+            { title: "CHM 101 – Rates of Reactions", author: "Unknown", license: "Educational Use", link: "static/materials/CHM-101-Rates-of-Reactions.pdf", type: "pdf", course: "Chemistry", level: "100", semester: "First Semester", courseCode: "CHM101", isStatic: true },
+            { title: "CHM 101 – Quantum Numbers, Atomic Orbitals and Electron Configurations", author: "Unknown", license: "Educational Use", link: "static/materials/CHM-101-Quantum-Numbers-Atomic-Orbitals-and-Electron-Configurations.pdf", type: "pdf", course: "Chemistry", level: "100", semester: "First Semester", courseCode: "CHM101", isStatic: true },
+            { title: "CHM 101 – Radioactivity", author: "Unknown", license: "Educational Use", link: "static/materials/CHM-101-Radioactivity.pdf", type: "pdf", course: "Chemistry", level: "100", semester: "First Semester", courseCode: "CHM101", isStatic: true },
+            { title: "Principles of Financial Accounting", author: "Open Educational Resource", license: "CC BY 4.0", link: "static/materials/account/Principles-of-Financial-Accounting.pdf", type: "pdf", course: "Accounting", level: "100", semester: "First Semester", courseCode: "ACC101", isStatic: true },
+            { title: "Training Manual for ORGANIC AGRICULTURE", author: "FAO", license: "FAO PDF for small‑holder farmers", link: "static/materials/agriculture/Compilation_techniques_organic_agriculture_rev.pdf", type: "pdf", course: "Agriculture", level: "100", semester: "First Semester", courseCode: "AGR101", isStatic: true },
+            { title: "Material II", author: "Computer Science Department", license: "All Rights Reserved", link: "static/materials/1769479673_material_ii.pdf", type: "pdf", course: "Computer Science", level: "200", semester: "First Semester", courseCode: "CSC221", isStatic: true },
+            { title: "CISC and RISC", author: "Information Technology Department", license: "All Rights Reserved", link: "static/materials/IFT219-CISC-and-RISC.pdf", type: "pdf", course: "Information Technology", level: "200", semester: "First Semester", courseCode: "IFT219", isStatic: true },
+            { title: "CSC 207 Test 2", author: "Computer Science Department", license: "All Rights Reserved", link: "static/materials/1769478686_csc_207_test_2.pdf", type: "pdf", course: "Computer Science", level: "200", semester: "First Semester", courseCode: "CSC207", isStatic: true },
+            { title: "ENT 211 Compilation", author: "Entrepreneurship Department", license: "All Rights Reserved", link: "static/materials/1769479082_ent_211_compilation.pdf", type: "pdf", course: "Entrepreneurship", level: "200", semester: "First Semester", courseCode: "ENT211", isStatic: true },
+            { title: "CSC 221 Course Content", author: "Computer Science Department", license: "All Rights Reserved", link: "static/materials/1769479515_csc_221_course_content.pdf", type: "pdf", course: "Computer Science", level: "200", semester: "First Semester", courseCode: "CSC221", isStatic: true },
+            { title: "Data Structure I", author: "Computer Science Department", license: "All Rights Reserved", link: "static/materials/1769479567_data_structure_i.pdf", type: "pdf", course: "Computer Science", level: "200", semester: "First Semester", courseCode: "CSC221", isStatic: true },
+            { title: "Data Structure II", author: "Computer Science Department", license: "All Rights Reserved", link: "static/materials/1769479600_data_structure_ii.pdf", type: "pdf", course: "Computer Science", level: "200", semester: "First Semester", courseCode: "CSC221", isStatic: true },
+            { title: "CSC217 Lecture 1", author: "Computer Science Department", license: "All Rights Reserved", link: "static/materials/1769475988_217_lecture_1.pdf", type: "pdf", course: "Computer Science", level: "200", semester: "First Semester", courseCode: "CSC217", isStatic: true },
+            { title: "CSC217 Lecture 2", author: "Computer Science Department", license: "All Rights Reserved", link: "static/materials/1769476027_217_lecture_2.pdf", type: "pdf", course: "Computer Science", level: "200", semester: "First Semester", courseCode: "CSC217", isStatic: true },
+            { title: "CSC217 Lecture 3", author: "Computer Science Department", license: "All Rights Reserved", link: "static/materials/1769476056_217_lecture_3.pdf", type: "pdf", course: "Computer Science", level: "200", semester: "First Semester", courseCode: "CSC217", isStatic: true },
+            { title: "Compiler Construction Note II", author: "Computer Science Department", license: "All Rights Reserved", link: "static/materials/1769476061_compiler_construction_note_ii.pdf", type: "pdf", course: "Computer Science", level: "300", semester: "First Semester", courseCode: "CSC319", isStatic: true },
+            { title: "CSC217 Lecture 4", author: "Computer Science Department", license: "All Rights Reserved", link: "static/materials/1769476087_217_lecture_4.pdf", type: "pdf", course: "Computer Science", level: "200", semester: "First Semester", courseCode: "CSC217", isStatic: true },
+            { title: "CIT Compiler Construction", author: "Computer Science Department", license: "All Rights Reserved", link: "static/materials/1769476187_cit_compiler_construction.pdf", type: "pdf", course: "Computer Science", level: "300", semester: "First Semester", courseCode: "CSC319", isStatic: true },
+            { title: "CSC217 Key Points & Practice Questions", author: "Computer Science Department", license: "All Rights Reserved", link: "static/materials/1769476220_csc217_key_points_practice_questions.pdf", type: "pdf", course: "Computer Science", level: "200", semester: "First Semester", courseCode: "CSC217", isStatic: true },
+            { title: "Compiler Note II", author: "Computer Science Department", license: "All Rights Reserved", link: "static/materials/1769476250_compiler_note_ii.pdf", type: "pdf", course: "Computer Science", level: "300", semester: "First Semester", courseCode: "CSC319", isStatic: true },
+            { title: "Lecture 1: Real-Valued Functions of a Real Variable", author: "Dr. Ashiribo Senapon WUSU", license: "All Rights Reserved", link: "static/materials/LASUmat_201_lesson_1.pdf", type: "pdf", course: "Mathematics", level: "200", semester: "First Semester", courseCode: "MAT201", isStatic: true },
+            { title: "Lecture: Multiple Integrals", author: "Dr. Ashiribo Senapon WUSU", license: "All Rights Reserved", link: "static/materials/LASU_mat_201_lecture_10.pdf", type: "pdf", course: "Mathematics", level: "200", semester: "First Semester", courseCode: "MAT201", isStatic: true },
+            { title: "Lecture: Evaluation of Line Integrals", author: "Dr. Ashiribo Senapon WUSU", license: "All Rights Reserved", link: "static/materials/LASU_mat_201_lecture_9.pdf", type: "pdf", course: "Mathematics", level: "200", semester: "First Semester", courseCode: "MAT201", isStatic: true },
+            { title: "Lecture 8: Increments, Differentials and Linear Approximations", author: "Dr. Ashiribo Senapon WUSU", license: "All Rights Reserved", link: "static/materials/LASU_mat_201_lecture_8.pdf", type: "pdf", course: "Mathematics", level: "200", semester: "First Semester", courseCode: "MAT201", isStatic: true },
+            { title: "Lecture 7: Partial Derivatives and Applications", author: "Dr. Ashiribo Senapon WUSU", license: "All Rights Reserved", link: "static/materials/LASU_mat_201_lecture_7.pdf", type: "pdf", course: "Mathematics", level: "200", semester: "First Semester", courseCode: "MAT201", isStatic: true },
+            { title: "Lecture 6: Real-Valued Functions of Two or Three Variables", author: "Dr. Ashiribo Senapon WUSU", license: "All Rights Reserved", link: "static/materials/LASU_mat_201_lecture_6.pdf", type: "pdf", course: "Mathematics", level: "200", semester: "First Semester", courseCode: "MAT201", isStatic: true },
+            { title: "Lecture 5: Taylor Series", author: "Dr. Ashiribo Senapon WUSU", license: "All Rights Reserved", link: "static/materials/LASU_mat_201_lecture_5.pdf", type: "pdf", course: "Mathematics", level: "200", semester: "First Semester", courseCode: "MAT201", isStatic: true },
+            { title: "Lecture 4: Mean Value Theorem", author: "Dr. Ashiribo Senapon WUSU", license: "All Rights Reserved", link: "static/materials/LASUmat_201_lecture_4.pdf", type: "pdf", course: "Mathematics", level: "200", semester: "First Semester", courseCode: "MAT201", isStatic: true },
+            { title: "Lecture 3: Applications of Differentiation and Integration", author: "Dr. Ashiribo Senapon WUSU", license: "All Rights Reserved", link: "static/materials/LASUmat_201_lecture_3.pdf", type: "pdf", course: "Mathematics", level: "200", semester: "First Semester", courseCode: "MAT201", isStatic: true },
+            { title: "Lecture 2: Review of Differentiation and Integration", author: "Dr. Ashiribo Senapon WUSU", license: "All Rights Reserved", link: "static/materials/LASUmat_201_lecture_2.pdf", type: "pdf", course: "Mathematics", level: "200", semester: "First Semester", courseCode: "MAT201", isStatic: true },
+            { title: "Operating System Note I", author: "Computer Science Department", license: "All Rights Reserved", link: "static/materials/1769477900_operating_system_note_i.pdf", type: "pdf", course: "Computer Science", level: "200", semester: "First Semester", courseCode: "CSC205", isStatic: true },
+            { title: "Operating System", author: "Computer Science Department", license: "All Rights Reserved", link: "static/materials/1769477950_operating_system.pdf", type: "pdf", course: "Computer Science", level: "200", semester: "First Semester", courseCode: "CSC205", isStatic: true },
+            { title: "CSC 207 Note 1", author: "Computer Science Department", license: "All Rights Reserved", link: "static/materials/1769478505_csc_207_note_1.pdf", type: "pdf", course: "Computer Science", level: "200", semester: "First Semester", courseCode: "CSC207", isStatic: true },
+            { title: "IFT 219 Note I", author: "Information Technology Department", license: "All Rights Reserved", link: "static/materials/1769478514_ift_219_note_i.pdf", type: "pdf", course: "Information Technology", level: "200", semester: "First Semester", courseCode: "IFT219", isStatic: true },
+            { title: "CSC 215 Note 2", author: "Computer Science Department", license: "All Rights Reserved", link: "static/materials/1769478533_csc_215_note_2.pdf", type: "pdf", course: "Computer Science", level: "200", semester: "First Semester", courseCode: "CSC207", isStatic: true },
+            { title: "Lecture Notes", author: "Information Technology Department", license: "All Rights Reserved", link: "static/materials/1769478551_lecture_notes.pdf", type: "pdf", course: "Information Technology", level: "200", semester: "First Semester", courseCode: "IFT219", isStatic: true },
+            { title: "CSC 217 Notes", author: "Computer Science Department", license: "All Rights Reserved", link: "static/materials/1769478557_csc_217_notes.pdf", type: "pdf", course: "Computer Science", level: "200", semester: "First Semester", courseCode: "CSC207", isStatic: true },
+            { title: "Digital Logic Circuit Analysis and Design", author: "Information Technology Department", license: "All Rights Reserved", link: "static/materials/1769478611_digital_logic_circuit_analysis_and_design.pdf", type: "pdf", course: "Information Technology", level: "200", semester: "First Semester", courseCode: "IFT219", isStatic: true },
+            { title: "Visual Basic", author: "Computer Science Department", license: "All Rights Reserved", link: "static/materials/1769478621_visual_basic.pdf", type: "pdf", course: "Computer Science", level: "200", semester: "First Semester", courseCode: "CSC207", isStatic: true },
+            { title: "Hashing", author: "Computer Science Department", license: "All Rights Reserved", link: "static/materials/1769479631_hashing.pdf", type: "pdf", course: "Computer Science", level: "200", semester: "First Semester", courseCode: "CSC221", isStatic: true },
+            { title: "Queues", author: "Computer Science Department", license: "All Rights Reserved", link: "static/materials/1769479735_queues.pdf", type: "pdf", course: "Computer Science", level: "200", semester: "First Semester", courseCode: "CSC221", isStatic: true },
+            { title: "Stacks", author: "Computer Science Department", license: "All Rights Reserved", link: "static/materials/1769479771_stacks.pdf", type: "pdf", course: "Computer Science", level: "200", semester: "First Semester", courseCode: "CSC221", isStatic: true },
+            { title: "Complexity Analysis of Algorithms", author: "Jordi Cortadella", license: "All Rights Reserved", link: "static/materials/complexity_analysis_of_algorithm.pdf", type: "pdf", course: "Computer Science", level: "200", semester: "First Semester", courseCode: "CSC213", isStatic: true },
+            { title: "GLT 201 – Instrument Maintenance (Practice Problems)", author: "Science Laboratory Technology Department", license: "All Rights Reserved", link: "static/materials/glt_practice_problems.pdf", type: "pdf", course: "Science Laboratory Technology", level: "200", semester: "First Semester", courseCode: "GLT201", isStatic: true },
+            { title: "Trees I", author: "Computer Science Department", license: "All Rights Reserved", link: "static/materials/1769480131_trees_i.pdf", type: "pdf", course: "Computer Science", level: "200", semester: "First Semester", courseCode: "CSC221", isStatic: true },
+            { title: "Trees III", author: "Computer Science Department", license: "All Rights Reserved", link: "static/materials/1769480347_trees_iii.pdf", type: "pdf", course: "Computer Science", level: "200", semester: "First Semester", courseCode: "CSC221", isStatic: true },
+            { title: "Tree II", author: "Computer Science Department", license: "All Rights Reserved", link: "static/materials/1769480504_tree_ii.pdf", type: "pdf", course: "Computer Science", level: "200", semester: "First Semester", courseCode: "CSC221", isStatic: true },
+            { title: "CSC 213 Note 1", author: "Computer Science Department", license: "All Rights Reserved", link: "static/materials/1769480768_csc_213_note_i.pdf", type: "pdf", course: "Computer Science", level: "200", semester: "First Semester", courseCode: "CSC213", isStatic: true },
+            { title: "CSC 113 Note II", author: "Computer Science Department", license: "All Rights Reserved", link: "static/materials/computer_of_arts_socialscience_and_managementscience_csc_213_note_ii.pdf", type: "pdf", course: "Computer Science", level: "100", semester: "First Semester", courseCode: "CSC213", isStatic: true },
+            { title: "Complexity IV", author: "Computer Science Department", license: "All Rights Reserved", link: "static/materials/complexity_iv.pdf", type: "pdf", course: "Computer Science", level: "200", semester: "First Semester", courseCode: "CSC213", isStatic: true },
+            { title: "Complexity III", author: "Computer Science Department", license: "All Rights Reserved", link: "static/materials/complexity_iii.pdf", type: "pdf", course: "Computer Science", level: "200", semester: "First Semester", courseCode: "CSC213", isStatic: true },
+            { title: "Algorithm Design Techniques and Analysis", author: "M. H. Alsuwaiyel", license: "All Rights Reserved", link: "static/materials/algorithm_design_techniques_and_analysis.pdf", type: "pdf", course: "Computer Science", level: "200", semester: "First Semester", courseCode: "CSC213", isStatic: true },
+            { title: "Genetics, Agriculture, and Biotechnology", author: "Walter Suza and Donald Lee", license: "CC BY-NC-SA 4.0", link: "static/materials/agriculture/Genetics-Agriculture-and-Biotechnology-1646343300.pdf", type: "pdf", course: "Agriculture", level: "100", semester: "First Semester", courseCode: "AGR101", isStatic: true },
+            { title: "Plant Breeding Methods", author: "Walter R. Fehr and Walter P. Suza", license: "CC BY-NC 4.0", link: "static/materials/agriculture/Plant-Breeding-Methods-1724939423.pdf", type: "pdf", course: "Agriculture", level: "100", semester: "First Semester", courseCode: "AGR101", isStatic: true },
+            { title: "Crop Genetics", author: "William Beavis, Arden Campbell, Jode Edwards, Shui-Zhang Fei, Thomas Lübberstedt, Laura Merrick, Deborah Muenchrath, Walter Suza", license: "CC BY-NC-SA 4.0", link: "static/materials/agriculture/Crop-Genetics-1696858550.pdf", type: "pdf", course: "Agriculture", level: "100", semester: "First Semester", courseCode: "AGR101", isStatic: true },
+            { title: "Quantitative Methods for Plant Breeding", author: "Ken Moore, M. L. Harbur, Ron Mowers, Laura Merrick, Dennis Todey, Kendra Meade, William Beavis, Reka Howard, Ursula Frei, Anthony Assibi Mahama, Walter Suza", license: "CC BY-NC-SA 4.0", link: "static/materials/agriculture/Quantitative-Methods-for-Plant-Breeding-1696860463.pdf", type: "pdf", course: "Agriculture", level: "100", semester: "First Semester", courseCode: "AGR101", isStatic: true },
+            { title: "Molecular Plant Breeding", author: "Walter Suza, Kendall Lamkey, Thomas Lübberstedt, William Beavis, Madan Bhattacharyya, Laura Merrick, Ursula Frei", license: "CC BY-NC-SA 4.0", link: "static/materials/agriculture/Molecular-Plant-Breeding-1696858563.pdf", type: "pdf", course: "Agriculture", level: "100", semester: "First Semester", courseCode: "AGR101", isStatic: true },
+            { title: "Quantitative Genetics for Plant Breeding", author: "William Beavis, Katherine Espinosa, Mark Newell, Anthony Assibi Mahama, Walter Suza", license: "CC BY-NC-SA 4.0", link: "static/materials/agriculture/Quantitative-Genetics-for-Plant-Breeding-1697468159.pdf", type: "pdf", course: "Agriculture", level: "100", semester: "First Semester", courseCode: "AGR101", isStatic: true },
+            { title: "Introduction to Business Administration", author: "Amit Shah; Bethann Talsma; Carl McDaniel; Lawrence J. Gitman; Linda Koffel; Monique Reece", license: "CC BY 4.0", link: "static/materials/businessadministation/Introduction-to-Business-Administration-1735836334.pdf", type: "pdf", course: "Business Administration", level: "100", semester: "First Semester", courseCode: "BUS101", isStatic: true },
+            { title: "Business Fundamentals – 1st Edition", author: "Kerri Shields", license: "CC BY-NC-SA 4.0", link: "static/materials/businessadministation/Business-Fundamentals-1st-Edition-1760797243.pdf", type: "pdf", course: "Business Administration", level: "100", semester: "First Semester", courseCode: "BUS101", isStatic: true },
+            { title: "100 Level Second Semester Course Outline", author: "Bunday", license: "Educational Use", link: "static/materials/100-Level-Second-Semester-Course-Outline.pdf", type: "pdf", course: "General", level: "100", semester: "Second Semester", courseCode: "GEN102", isStatic: true },
+            { title: "Probability & Statistics for Engineers & Scientists (9th Edition)", author: "Ronald E. Walpole, Raymond H. Myers, Sharon L. Myers, Keying Ye", license: "Copyrighted", link: "static/materials/Probability-and-Statistics-for-Engineers-and-Scientists-9th-Edition.pdf", type: "pdf", course: "Mathematics", level: "100", semester: "First Semester", courseCode: "MAT101", isStatic: true },
+            { title: "Macmillan Mathematical Guides – Introduction to Algebra", author: "Carol Whitehead", license: "Copyrighted", link: "static/materials/Macmillan-Mathematical-Guides-Introduction-to-Algebra.pdf", type: "pdf", course: "Mathematics", level: "100", semester: "First Semester", courseCode: "MAT101", isStatic: true },
+            { title: "Magnetic Field – Unconfirmed Source", author: "Unknown", license: "Unverified", link: "static/materials/Magnetic-Field.pdf", type: "pdf", course: "Physics", level: "100", semester: "First Semester", courseCode: "PHY101", isStatic: true },
+            { title: "DBMS II – Transaction Processing (Unit 6: Transaction Management)", author: "Prof. Firoz Sherasiya", license: "LASU Academic Material", link: "static/materials/lasu/dbms2/DBMS-II-Unit-6-Transaction-Management.pdf", type: "pdf", course: "Computer Science", level: "200", semester: "First Semester", courseCode: "CSC201", isStatic: true }
         ];
 
-        // ===== INITIALIZATION =====
+        // ===== LOCALSTORAGE KEYS =====
+        const STORAGE_UPLOADS = 'nelavista_uploads';
+        const STORAGE_STATS = 'nelavista_stats';
+
+        function loadUploadedMaterials() {
+            const stored = localStorage.getItem(STORAGE_UPLOADS);
+            return stored ? JSON.parse(stored) : [];
+        }
+        function saveUploadedMaterials(uploads) {
+            localStorage.setItem(STORAGE_UPLOADS, JSON.stringify(uploads));
+        }
+
+        // ===== STATS =====
+        function loadStats() {
+            const stored = localStorage.getItem(STORAGE_STATS);
+            return stored ? JSON.parse(stored) : {};
+        }
+        function saveStats(stats) {
+            localStorage.setItem(STORAGE_STATS, JSON.stringify(stats));
+        }
+        function getMaterialId(m) {
+            return `${m.course}_${m.level}_${m.semester}_${m.courseCode}_${m.title}`.replace(/\s+/g, '_');
+        }
+        function incrementView(m) {
+            if (m.isStatic) {
+                const stats = loadStats();
+                const id = getMaterialId(m);
+                if (!stats[id]) stats[id] = { views: 0, downloads: 0 };
+                stats[id].views++;
+                saveStats(stats);
+            } else {
+                m.views = (m.views || 0) + 1;
+                const uploads = loadUploadedMaterials();
+                const idx = uploads.findIndex(u => u.id === m.id);
+                if (idx !== -1) {
+                    uploads[idx].views = m.views;
+                    saveUploadedMaterials(uploads);
+                }
+            }
+        }
+        function incrementDownload(m) {
+            if (m.isStatic) {
+                const stats = loadStats();
+                const id = getMaterialId(m);
+                if (!stats[id]) stats[id] = { views: 0, downloads: 0 };
+                stats[id].downloads++;
+                saveStats(stats);
+            } else {
+                m.downloads = (m.downloads || 0) + 1;
+                const uploads = loadUploadedMaterials();
+                const idx = uploads.findIndex(u => u.id === m.id);
+                if (idx !== -1) {
+                    uploads[idx].downloads = m.downloads;
+                    saveUploadedMaterials(uploads);
+                }
+            }
+        }
+
+        // ===== SEMESTER STRUCTURE (copied from CBT version, extended) =====
+        const semesterStructure = {
+            "Biochemistry": { "100": ["First Semester", "Second Semester"], "200": ["First Semester", "Second Semester"], "300": ["First Semester", "Second Semester"], "400": ["First Semester", "Second Semester"] },
+            "Mathematics": { "100": ["First Semester", "Second Semester"], "200": ["First Semester", "Second Semester"], "300": ["First Semester", "Second Semester"], "400": ["First Semester", "Second Semester"] },
+            "Computer Science": { "100": ["First Semester", "Second Semester"], "200": ["First Semester", "Second Semester"], "300": ["First Semester", "Second Semester"], "400": ["First Semester", "Second Semester"] },
+            "Biology": { "100": ["First Semester", "Second Semester"], "200": ["First Semester", "Second Semester"], "300": ["First Semester", "Second Semester"], "400": ["First Semester", "Second Semester"] },
+            "Chemistry": { "100": ["First Semester", "Second Semester"], "200": ["First Semester", "Second Semester"], "300": ["First Semester", "Second Semester"], "400": ["First Semester", "Second Semester"] },
+            "Physics": { "100": ["First Semester", "Second Semester"], "200": ["First Semester", "Second Semester"], "300": ["First Semester", "Second Semester"], "400": ["First Semester", "Second Semester"] },
+            "Accounting": { "100": ["First Semester", "Second Semester"], "200": ["First Semester", "Second Semester"], "300": ["First Semester", "Second Semester"], "400": ["First Semester", "Second Semester"] },
+            "Agriculture": { "100": ["First Semester", "Second Semester"], "200": ["First Semester", "Second Semester"], "300": ["First Semester", "Second Semester"], "400": ["First Semester", "Second Semester"] },
+            "Business Administration": { "100": ["First Semester", "Second Semester"], "200": ["First Semester", "Second Semester"], "300": ["First Semester", "Second Semester"], "400": ["First Semester", "Second Semester"] },
+            "Information Technology": { "100": ["First Semester", "Second Semester"], "200": ["First Semester", "Second Semester"], "300": ["First Semester", "Second Semester"], "400": ["First Semester", "Second Semester"] },
+            "Zoology": { "100": ["First Semester", "Second Semester"], "200": ["First Semester", "Second Semester"], "300": ["First Semester", "Second Semester"], "400": ["First Semester", "Second Semester"] },
+            "Science Laboratory Technology": { "100": ["First Semester", "Second Semester"], "200": ["First Semester", "Second Semester"], "300": ["First Semester", "Second Semester"], "400": ["First Semester", "Second Semester"] },
+            "Entrepreneurship": { "100": ["First Semester", "Second Semester"], "200": ["First Semester", "Second Semester"], "300": ["First Semester", "Second Semester"], "400": ["First Semester", "Second Semester"] }
+        };
+
+        // ===== INIT =====
         document.addEventListener('DOMContentLoaded', () => {
             setupEventListeners();
             updateOpenMaterialsButton();
         });
 
-        // ===== EVENT HANDLERS =====
         function setupEventListeners() {
-            const courseSelect = document.getElementById('courseSelect');
-            const levelSelect = document.getElementById('levelSelect');
-            const semesterSelect = document.getElementById('semesterSelect');
-
-            courseSelect.addEventListener('change', function() {
+            document.getElementById('courseSelect').addEventListener('change', function() {
                 materialsState.course = this.value;
                 updateSemesterDropdown();
                 updateOpenMaterialsButton();
             });
-
-            levelSelect.addEventListener('change', function() {
+            document.getElementById('levelSelect').addEventListener('change', function() {
                 materialsState.level = this.value;
                 updateSemesterDropdown();
                 updateOpenMaterialsButton();
             });
-
-            semesterSelect.addEventListener('change', function() {
+            document.getElementById('semesterSelect').addEventListener('change', function() {
                 materialsState.semester = this.value;
                 updateOpenMaterialsButton();
             });
         }
 
-        // ===== DROPDOWN MANAGEMENT =====
         function updateSemesterDropdown() {
-            const semesterSelect = document.getElementById('semesterSelect');
+            const sem = document.getElementById('semesterSelect');
             const course = materialsState.course;
             const level = materialsState.level;
-
-            semesterSelect.innerHTML = '<option value="">-- Select Semester --</option>';
-
+            sem.innerHTML = '<option value="">-- Select Semester --</option>';
             if (course && level) {
-                semesterSelect.disabled = false;
-                const semesters = semesterStructure[course]?.[level];
-
-                if (semesters) {
-                    semesters.forEach(semester => {
-                        const option = document.createElement('option');
-                        option.value = semester;
-                        option.textContent = semester;
-                        semesterSelect.appendChild(option);
-                    });
-                }
+                sem.disabled = false;
+                const sems = semesterStructure[course]?.[level];
+                if (sems) sems.forEach(s => {
+                    const opt = document.createElement('option');
+                    opt.value = s; opt.textContent = s;
+                    sem.appendChild(opt);
+                });
             } else {
-                semesterSelect.disabled = true;
-                semesterSelect.innerHTML = '<option value="">-- First select Course and Level --</option>';
+                sem.disabled = true;
+                sem.innerHTML = '<option value="">-- First select Course and Level --</option>';
             }
-
             materialsState.semester = '';
         }
 
         function updateOpenMaterialsButton() {
-            const openBtn = document.getElementById('openMaterialsBtn');
-            openBtn.disabled = !(materialsState.course && materialsState.level && materialsState.semester);
+            const btn = document.getElementById('openMaterialsBtn');
+            btn.disabled = !(materialsState.course && materialsState.level && materialsState.semester);
         }
 
-        // ===== MATERIALS DISPLAY =====
+        // ===== OPEN MATERIALS =====
         function openMaterials() {
-            const course = materialsState.course;
-            const level = materialsState.level;
-            const semester = materialsState.semester;
+            const { course, level, semester } = materialsState;
+            if (!course || !level || !semester) return alert('Please select course, level, and semester.');
 
-            if (!course || !level || !semester) {
-                alert('Please select course, level, and semester.');
-                return;
-            }
-
-            const filteredMaterials = materialsDatabase.filter(material =>
-                material.course === course &&
-                material.level === level &&
-                material.semester === semester
-            );
-
-            materialsState.materials = filteredMaterials;
+            const uploaded = loadUploadedMaterials();
+            const staticFiltered = staticMaterials.filter(m => m.course === course && m.level === level && m.semester === semester).map(m => ({ ...m, isStatic: true }));
+            const uploadedFiltered = uploaded.filter(m => m.course === course && m.level === level && m.semester === semester).map(m => ({ ...m, isStatic: false }));
+            const all = [...staticFiltered, ...uploadedFiltered];
+            materialsState.materials = all;
 
             document.getElementById('selectionSection').style.display = 'none';
             document.getElementById('materialsSection').classList.add('active');
             document.getElementById('noMaterials').classList.add('hidden');
-
             document.getElementById('materialsTitle').textContent = `${course} – ${level} Level – ${semester}`;
-            document.getElementById('materialsCount').textContent = `${filteredMaterials.length} materials`;
-
-            displayMaterials(filteredMaterials);
-
-            if (filteredMaterials.length === 0) {
+            document.getElementById('materialsCount').textContent = `${all.length} material${all.length !== 1 ? 's' : ''}`;
+            displayMaterials(all);
+            if (all.length === 0) {
                 document.getElementById('materialsSection').classList.remove('active');
                 document.getElementById('noMaterials').classList.remove('hidden');
             }
         }
 
+        // ===== DISPLAY CARDS =====
         function displayMaterials(materials) {
             const grid = document.getElementById('materialsGrid');
             grid.innerHTML = '';
-
-            materials.forEach((material, index) => {
+            materials.forEach((m, idx) => {
                 const card = document.createElement('div');
                 card.className = 'material-card';
-                card.style.animationDelay = `${index * 0.1}s`;
+                card.style.animationDelay = `${idx * 0.1}s`;
 
-                const typeIcon = material.type === 'pdf' ? '📘' : '📄';
-                const isLasuMaterial = material.license.includes("LASU");
-                const materialTypeLabel = isLasuMaterial ? "LASU Lecture Notes" : "Course Material";
+                const typeIcon = '📘';
+                const authorLine = m.author ? `<div class="material-author">👤 ${m.author}</div>` : '';
+                const licenseText = m.license || 'Educational';
 
+                // Prepare actions (view, download, and delete if admin & uploaded)
+                const actions = [];
+                const materialStr = encodeURIComponent(JSON.stringify(m));
+                actions.push(`<button class="material-btn primary" onclick="openMaterial('${m.link}', '${m.title.replace(/'/g, "\\'")}', '${materialStr}')"><span>📖</span> View</button>`);
+                actions.push(`<button class="material-btn" onclick="downloadMaterial('${m.link}', '${m.title.replace(/'/g, "\\'")}', '${materialStr}')"><span>⬇️</span> Download</button>`);
+                if (!m.isStatic && isAdmin) {
+                    actions.push(`<button class="material-btn delete-btn" onclick="deleteMaterial('${m.id}', event)"><span>🗑️</span> Delete</button>`);
+                }
+
+                const gridCols = actions.length === 3 ? 'repeat(3,1fr)' : 'repeat(2,1fr)';
                 card.innerHTML = `
                     <div class="material-type">${typeIcon}</div>
-                    <div class="material-title">${material.title}</div>
-                    ${material.author ? `<div class="material-author">👤 ${material.author}</div>` : ''}
-                    <div class="material-license">${material.license} • ${materialTypeLabel}</div>
-                    <div class="material-actions">
-                        <button class="material-btn primary" onclick="openMaterial('${material.link}', '${material.title}')">
-                            <span>📖</span>
-                            ${isLasuMaterial ? 'View Lecture' : 'Read PDF'}
-                        </button>
-                        <button class="material-btn" onclick="downloadMaterial('${material.link}', '${material.title}')">
-                            <span>⬇️</span>
-                            Download
-                        </button>
-                    </div>
+                    <div class="material-title">${m.title}</div>
+                    ${authorLine}
+                    <div class="material-license">${licenseText}</div>
+                    <div class="material-actions" style="grid-template-columns: ${gridCols};">${actions.join('')}</div>
                 `;
-
                 grid.appendChild(card);
             });
         }
 
-        // ===== MATERIAL ACTIONS =====
-        function openMaterial(link, title) {
-            window.open(link, '_blank');
-            trackMaterialView(title);
+        // ===== BASE64 TO BLOB =====
+        function base64ToBlob(dataUrl) {
+            const base64 = dataUrl.includes(',') ? dataUrl.split(',')[1] : dataUrl;
+            const byteChars = atob(base64);
+            const bytes = new Uint8Array(byteChars.length);
+            for (let i = 0; i < byteChars.length; i++) bytes[i] = byteChars.charCodeAt(i);
+            return new Blob([bytes], { type: 'application/pdf' });
         }
 
-        function downloadMaterial(link, title) {
-            const a = document.createElement('a');
-            a.href = link;
-            a.download = title.replace(/\s+/g, '_') + '.pdf';
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            trackMaterialDownload(title);
+        // ===== OPEN MATERIAL (reliable) =====
+        function openMaterial(link, title, materialEncoded) {
+            let material;
+            try { material = JSON.parse(decodeURIComponent(materialEncoded)); } catch { material = { isStatic: false }; }
+            if (link.startsWith('data:')) {
+                try {
+                    const blob = base64ToBlob(link);
+                    const url = URL.createObjectURL(blob);
+                    window.open(url, '_blank');
+                } catch (e) {
+                    alert('Failed to open PDF. The file may be corrupted.');
+                }
+            } else {
+                window.open(link, '_blank');
+            }
+            incrementView(material);
+        }
+
+        // ===== DOWNLOAD MATERIAL =====
+        function downloadMaterial(link, title, materialEncoded) {
+            let material;
+            try { material = JSON.parse(decodeURIComponent(materialEncoded)); } catch { material = { isStatic: false }; }
+            const filename = (title || 'document').replace(/[^a-z0-9]/gi, '_') + '.pdf';
+            if (link.startsWith('data:')) {
+                try {
+                    const blob = base64ToBlob(link);
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url; a.download = filename;
+                    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+                    setTimeout(() => URL.revokeObjectURL(url), 100);
+                } catch (e) {
+                    alert('Failed to download PDF.');
+                }
+            } else {
+                const a = document.createElement('a');
+                a.href = link; a.download = filename;
+                document.body.appendChild(a); a.click(); document.body.removeChild(a);
+            }
+            incrementDownload(material);
         }
 
         function downloadAllMaterials() {
-            materialsState.materials.forEach(material => {
-                downloadMaterial(material.link, material.title);
+            materialsState.materials.forEach(m => {
+                const enc = encodeURIComponent(JSON.stringify(m));
+                downloadMaterial(m.link, m.title, enc);
             });
         }
 
@@ -2578,75 +1319,96 @@
             document.getElementById('selectionSection').style.display = 'block';
         }
 
-        // ===== TRACKING =====
-        function trackMaterialView(title) {
-            const history = JSON.parse(localStorage.getItem('materialHistory')) || [];
-            history.push({
-                title: title,
-                type: 'view',
-                timestamp: new Date().toISOString(),
-                course: materialsState.course,
-                level: materialsState.level,
-                semester: materialsState.semester
-            });
-
-            if (history.length > 50) {
-                history.shift();
-            }
-
-            localStorage.setItem('materialHistory', JSON.stringify(history));
+        // ===== UPLOAD MODAL =====
+        function openUploadModal() {
+            document.getElementById('uploadModal').classList.add('show');
+            document.getElementById('uploadForm').reset();
+            document.getElementById('fileError').style.display = 'none';
+        }
+        function closeUploadModal() {
+            document.getElementById('uploadModal').classList.remove('show');
         }
 
-        function trackMaterialDownload(title) {
-            const history = JSON.parse(localStorage.getItem('materialHistory')) || [];
-            history.push({
-                title: title,
-                type: 'download',
-                timestamp: new Date().toISOString(),
-                course: materialsState.course,
-                level: materialsState.level,
-                semester: materialsState.semester
-            });
+        async function handleUpload(e) {
+            e.preventDefault();
+            const title = document.getElementById('materialTitle').value.trim();
+            const course = document.getElementById('materialCourse').value;
+            const level = document.getElementById('materialLevel').value;
+            const semester = document.getElementById('materialSemester').value;
+            const courseCode = document.getElementById('materialCode').value.trim().toUpperCase();
+            const author = document.getElementById('materialAuthor').value.trim();
+            const file = document.getElementById('materialFile').files[0];
+            if (!file) return showFileError('Select a PDF.');
+            if (file.type !== 'application/pdf') return showFileError('Only PDFs allowed.');
+            if (file.size > 5 * 1024 * 1024) return showFileError('Max 5MB.');
 
-            if (history.length > 50) {
-                history.shift();
-            }
-
-            localStorage.setItem('materialHistory', JSON.stringify(history));
+            document.getElementById('fileError').style.display = 'none';
+            const reader = new FileReader();
+            reader.onload = (ev) => {
+                const newMaterial = {
+                    id: 'upload_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9),
+                    title, author, license: 'Student Upload',
+                    link: ev.target.result, type: 'pdf',
+                    course, level, semester, courseCode,
+                    views: 0, downloads: 0, timestamp: new Date().toISOString(), isStatic: false
+                };
+                const uploads = loadUploadedMaterials();
+                uploads.push(newMaterial);
+                saveUploadedMaterials(uploads);
+                closeUploadModal();
+                alert('✅ Uploaded!');
+                if (materialsState.course === course && materialsState.level === level && materialsState.semester === semester) openMaterials();
+            };
+            reader.readAsDataURL(file);
+        }
+        function showFileError(msg) {
+            const err = document.getElementById('fileError');
+            err.textContent = msg; err.style.display = 'block';
         }
 
-        // ===== NAVIGATION =====
+        // ===== ADMIN =====
+        function toggleAdmin() {
+            if (!isAdmin) {
+                const pwd = prompt('Enter admin password:');
+                if (pwd === 'admin123') {
+                    isAdmin = true;
+                    document.getElementById('adminBtn').classList.add('admin-active');
+                    alert('Admin mode enabled. Delete buttons appear on uploaded materials.');
+                    if (document.getElementById('materialsSection').classList.contains('active')) openMaterials();
+                } else alert('Incorrect password.');
+            } else {
+                isAdmin = false;
+                document.getElementById('adminBtn').classList.remove('admin-active');
+                if (document.getElementById('materialsSection').classList.contains('active')) openMaterials();
+            }
+        }
+
+        function deleteMaterial(id, event) {
+            event.stopPropagation();
+            if (!isAdmin || !confirm('Delete this material? This cannot be undone.')) return;
+            const uploads = loadUploadedMaterials();
+            saveUploadedMaterials(uploads.filter(m => m.id !== id));
+            if (document.getElementById('materialsSection').classList.contains('active')) openMaterials();
+        }
+
+        // ===== BACK =====
         function goBack() {
-            if (document.getElementById('materialsSection').classList.contains('active') ||
-                document.getElementById('noMaterials').classList.contains('show')) {
-                goBackToSelection();
-                return;
+            if (document.getElementById('materialsSection').classList.contains('active') || document.getElementById('noMaterials').classList.contains('show')) {
+                goBackToSelection(); return;
             }
-
             document.body.style.opacity = '0';
             document.body.style.transform = 'translateX(20px)';
             document.body.style.transition = 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)';
-
-            setTimeout(() => {
-                window.history.back();
-            }, 300);
+            setTimeout(() => window.history.back(), 300);
         }
 
-        // ===== EVENT LISTENERS =====
-        document.addEventListener('visibilitychange', function() {
+        document.addEventListener('visibilitychange', () => {
             if (!document.hidden) {
                 document.body.style.animation = 'none';
-                setTimeout(() => {
-                    document.body.style.animation = 'fadeIn 0.6s ease-out forwards';
-                }, 10);
+                setTimeout(() => document.body.style.animation = 'fadeIn 0.6s ease-out forwards', 10);
             }
         });
-
-        document.addEventListener('keydown', function(e) {
-            if (e.key === 'Escape') {
-                goBack();
-            }
-        });
+        document.addEventListener('keydown', (e) => { if (e.key === 'Escape') goBack(); });
     </script>
 </body>
 </html>
