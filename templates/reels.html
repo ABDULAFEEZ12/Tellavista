@@ -270,7 +270,7 @@
             display: flex;
             flex-direction: column;
             gap: 20px;
-            padding: 0 0 80px;
+            padding: 0 0 20px;
             transition: padding-top 0.2s;
         }
 
@@ -426,13 +426,6 @@
             margin-top: 1rem;
         }
 
-        .footer-note {
-            text-align: center;
-            color: #a0a0a0;
-            font-size: 0.8rem;
-            margin: 16px 0 20px;
-        }
-
         /* ===== UPLOAD MODAL ===== */
         .modal {
             display: none;
@@ -455,6 +448,8 @@
             width: 90%;
             max-width: 400px;
             padding: 24px;
+            max-height: 90vh;
+            overflow-y: auto;
         }
 
         .modal-header {
@@ -491,6 +486,10 @@
             border: 1px solid var(--border-dark);
             border-radius: 12px;
             color: white;
+        }
+
+        .upload-form input[type="file"] {
+            padding: 8px;
         }
 
         .submit-btn {
@@ -574,15 +573,11 @@
         <!-- Videos will be injected here -->
     </div>
 
-    <div class="footer-note">
-        📍 1000 views = ₦500 · watch & earn
-    </div>
-
-    <!-- Upload Modal -->
+    <!-- Upload Modal (file upload only) -->
     <div id="uploadModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h2>📤 Upload Reel</h2>
+                <h2>📤 Upload Video</h2>
                 <button class="close-modal" onclick="closeUploadModal()">✕</button>
             </div>
             <form id="uploadForm" class="upload-form" onsubmit="handleUpload(event)">
@@ -601,8 +596,9 @@
                     <option value="Second Semester">Second Semester</option>
                 </select>
                 <input type="text" id="videoCreator" placeholder="Your name *" required>
-                <input type="url" id="videoUrl" placeholder="Video URL (YouTube or direct) *" required>
-                <button type="submit" class="submit-btn">📤 Post</button>
+                <input type="file" id="videoFile" accept="video/*" required>
+                <small style="color:#aaa; display:block; margin-bottom:12px;">Max size: 100MB (simulated)</small>
+                <button type="submit" class="submit-btn">📤 Upload</button>
             </form>
         </div>
     </div>
@@ -707,9 +703,8 @@
                 }
                 let html = '<div class="videos-grid">';
                 videos.forEach((v, index) => {
-                    const mediaHtml = (v.video_url.includes('youtube.com') || v.video_url.includes('youtu.be'))
-                        ? `<iframe src="${getYouTubeEmbed(v.video_url)}" frameborder="0" allowfullscreen loading="lazy"></iframe>`
-                        : `<video src="${v.video_url}" controls playsinline preload="metadata"></video>`;
+                    // For uploaded videos we always use video tag (they are file URLs or object URLs)
+                    const mediaHtml = `<video src="${v.video_url}" controls playsinline preload="metadata"></video>`;
 
                     const deleteButton = (isAdmin) ? `
                         <div class="delete-overlay">
@@ -856,7 +851,7 @@
                 if (currentTab === 'uploaded') renderUploadedVideos(getFilteredUploaded());
             };
 
-            // ========== Upload Modal ==========
+            // ========== Upload Modal (File Upload) ==========
             window.openUploadModal = function() {
                 document.getElementById('uploadModal').classList.add('show');
             };
@@ -870,16 +865,20 @@
                 const level = document.getElementById('videoLevel').value.trim();
                 const semester = document.getElementById('videoSemester').value;
                 const creator = document.getElementById('videoCreator').value.trim();
-                const url = document.getElementById('videoUrl').value.trim();
+                const fileInput = document.getElementById('videoFile');
+                const file = fileInput.files[0];
 
-                if (!title || !course || !level || !semester || !creator || !url) {
-                    alert('Please fill all fields');
+                if (!title || !course || !level || !semester || !creator || !file) {
+                    alert('Please fill all fields and select a video file.');
                     return;
                 }
 
+                // Create an object URL for the uploaded file
+                const videoUrl = URL.createObjectURL(file);
+
                 const newVideo = {
-                    id: 'upload_' + Date.now(),
-                    video_url: url,
+                    id: 'upload_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6),
+                    video_url: videoUrl,
                     creator_name: creator,
                     department: 'General',
                     level: level,
@@ -895,6 +894,8 @@
                 if (currentTab === 'uploaded') {
                     renderUploadedVideos(getFilteredUploaded());
                 }
+                // Reset form
+                document.getElementById('uploadForm').reset();
             };
 
             // ========== Navigation ==========
