@@ -3,35 +3,37 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
-    <title>Nelavista Reels – campus videos</title>
+    <title>Nelavista Reels – Study Videos</title>
     <style>
-        /* ===== RESET & VARIABLES ===== */
+        /* ===== MATERIALS.HTML CSS (adapted) ===== */
+        :root {
+            --primary-color: #000000;
+            --primary-dark: #333333;
+            --light-bg: #ffffff;
+            --dark-bg: #000000;
+            --card-light: #ffffff;
+            --card-dark: #0a0a0a;
+            --text-light: #000000;
+            --text-dark: #ffffff;
+            --input-bg: #0a0a0a;
+            --border-light: rgba(0, 0, 0, 0.1);
+            --border-dark: rgba(255, 255, 255, 0.1);
+            --gradient-start: #ffffff;
+            --gradient-end: #888888;
+            --accent-color: #1a1a1a;
+        }
+
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, sans-serif;
-        }
-
-        :root {
-            --bg-primary: #000000;
-            --bg-secondary: #0f0f0f;
-            --bg-tertiary: #1a1a1a;
-            --surface: #1e1e1e;
-            --surface-hover: #2a2a2a;
-            --border-subtle: #2c2c2c;
-            --text-primary: #ffffff;
-            --text-secondary: #a0a0a0;
-            --text-muted: #6b6b6b;
-            --accent: #ffffff;
-            --accent-hover: #e0e0e0;
-            --safe-top: env(safe-area-inset-top, 0px);
-            --header-height: 0px; /* will be set by JS */
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            -webkit-tap-highlight-color: transparent;
         }
 
         body {
-            background: var(--bg-primary);
-            color: var(--text-primary);
+            background: var(--dark-bg);
+            color: var(--text-dark);
             min-height: 100vh;
             display: flex;
             flex-direction: column;
@@ -39,7 +41,7 @@
             overflow-x: hidden;
             padding: 0 12px;
             opacity: 0;
-            animation: fadeIn 0.3s ease-out forwards;
+            animation: fadeIn 0.6s ease-out forwards;
         }
 
         @keyframes fadeIn {
@@ -47,94 +49,128 @@
             to { opacity: 1; }
         }
 
-        /* ===== FIXED HEADERS ===== */
-        .top-bar {
+        /* ===== TOP BAR ===== */
+        #top-bar {
             position: fixed;
             top: 0;
             left: 0;
             right: 0;
-            background: rgba(0, 0, 0, 0.96);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            height: 60px; /* slightly reduced */
+            height: 60px;
+            background: rgba(0, 0, 0, 0.95);
+            backdrop-filter: blur(10px);
             display: flex;
             align-items: center;
             justify-content: space-between;
             padding: 0 16px;
-            z-index: 100;
-            border-bottom: 1px solid var(--border-subtle);
+            z-index: 1002;
+            border-bottom: 1px solid var(--border-dark);
         }
 
-        .back-button {
-            width: 44px;
-            height: 44px;
+        #back-btn {
+            width: 40px;
+            height: 40px;
             border-radius: 50%;
-            background: var(--bg-tertiary);
-            border: 1px solid var(--border-subtle);
-            color: var(--text-primary);
-            font-size: 26px;
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            transition: 0.2s;
-            text-decoration: none;
-            line-height: 1;
-            flex-shrink: 0;
+            font-size: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            color: white;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        .back-button:active {
-            background: var(--surface-hover);
-            transform: scale(0.96);
+        #back-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateX(-2px);
         }
 
-        .logo {
+        #top-bar-title {
             font-weight: 600;
-            font-size: 1.2rem;
-            letter-spacing: -0.5px;
-            background: linear-gradient(135deg, #fff, #aaa);
+            font-size: 1.1rem;
+            background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
+            flex: 1 1 auto;
+            min-width: 0;
+            overflow: hidden;
+            text-overflow: ellipsis;
             white-space: nowrap;
-            margin: 0 8px;
+            margin: 0 12px;
+            text-align: center;
         }
 
-        .upload-link {
-            background: var(--bg-tertiary);
-            color: var(--text-primary);
+        .right-buttons {
+            display: flex;
+            gap: 8px;
+            flex-shrink: 0;
+        }
+
+        #upload-btn, #admin-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid var(--border-dark);
+            color: white;
             padding: 8px 16px;
             border-radius: 40px;
-            text-decoration: none;
-            font-weight: 500;
             font-size: 0.9rem;
-            border: 1px solid var(--border-subtle);
-            transition: 0.2s;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
             display: flex;
             align-items: center;
-            gap: 4px;
+            gap: 6px;
             white-space: nowrap;
             flex-shrink: 0;
         }
 
-        .upload-link:active {
-            background: var(--surface-hover);
-            transform: scale(0.97);
+        #upload-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: rgba(255, 255, 255, 0.3);
+            transform: translateY(-1px);
+        }
+
+        #admin-btn {
+            border-color: #ffaa00;
+            color: #ffaa00;
+        }
+        #admin-btn:hover {
+            background: rgba(255, 170, 0, 0.2);
+            border-color: #ffaa00;
+            color: #ffaa00;
+            transform: translateY(-1px);
+        }
+
+        #admin-btn.admin-active {
+            background: #4caf50;
+            border-color: #4caf50;
+            color: black;
+        }
+
+        @media (max-width: 600px) {
+            #upload-btn .btn-text, #admin-btn .btn-text {
+                display: none;
+            }
+            #upload-btn, #admin-btn {
+                padding: 8px 12px;
+                font-size: 1.2rem;
+            }
         }
 
         /* ===== TAB BAR ===== */
         .tab-bar {
             position: fixed;
-            top: 60px; /* matches top-bar height */
+            top: 60px;
             left: 0;
             right: 0;
-            background: var(--bg-secondary);
+            background: var(--card-dark);
             display: flex;
             padding: 8px 16px;
             gap: 10px;
-            border-bottom: 1px solid var(--border-subtle);
-            z-index: 99;
-            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border-dark);
+            z-index: 1001;
+            backdrop-filter: blur(10px);
         }
 
         .tab {
@@ -146,50 +182,43 @@
             cursor: pointer;
             transition: 0.2s;
             background: transparent;
-            color: var(--text-secondary);
-            border: 1px solid var(--border-subtle);
+            color: #a0a0a0;
+            border: 1px solid var(--border-dark);
             font-size: 0.9rem;
-            white-space: nowrap;
         }
 
         .tab.active {
-            background: var(--text-primary);
-            color: var(--bg-primary);
-            border-color: var(--text-primary);
+            background: white;
+            color: black;
+            border-color: white;
             font-weight: 600;
-        }
-
-        .tab:active {
-            background: var(--surface-hover);
-            color: var(--text-primary);
         }
 
         /* ===== FILTER BARS ===== */
         .filter-bar {
             position: fixed;
-            top: 108px; /* 60 + 48 (approx tab height) */
+            top: 108px; /* 60 + 48 */
             left: 0;
             right: 0;
-            background: var(--bg-secondary);
+            background: var(--card-dark);
             padding: 12px 16px;
             display: flex;
             gap: 10px;
             flex-wrap: wrap;
             align-items: center;
-            z-index: 98;
-            border-bottom: 1px solid var(--border-subtle);
-            backdrop-filter: blur(12px);
-            transition: top 0.2s;
+            z-index: 1000;
+            border-bottom: 1px solid var(--border-dark);
+            backdrop-filter: blur(10px);
         }
 
         .filter-select {
-            flex: 1 1 140px; /* grow, shrink, base width */
+            flex: 1 1 140px;
             min-width: 130px;
             padding: 12px 32px 12px 16px;
             border-radius: 40px;
-            border: 1px solid var(--border-subtle);
-            background: var(--bg-tertiary);
-            color: var(--text-primary);
+            border: 1px solid var(--border-dark);
+            background: var(--input-bg);
+            color: white;
             font-size: 0.9rem;
             cursor: pointer;
             appearance: none;
@@ -199,7 +228,7 @@
             background-size: 14px;
         }
 
-        .filter-select option { background: var(--bg-primary); }
+        .filter-select option { background: #1a1a1a; }
 
         .btn {
             padding: 12px 18px;
@@ -209,68 +238,80 @@
             cursor: pointer;
             transition: 0.15s;
             white-space: nowrap;
-            border: 1px solid var(--border-subtle);
+            border: 1px solid var(--border-dark);
             background: transparent;
-            color: var(--text-secondary);
+            color: #a0a0a0;
             flex: 0 1 auto;
-            min-width: 70px;
             text-align: center;
         }
 
         .btn-primary {
-            background: var(--text-primary);
-            color: var(--bg-primary);
-            border-color: var(--text-primary);
+            background: white;
+            color: black;
+            border-color: white;
             font-weight: 600;
         }
 
         .btn-primary:active {
-            background: var(--accent-hover);
-            transform: scale(0.96);
+            opacity: 0.9;
+            transform: translateY(-2px);
         }
 
         .btn-secondary:active {
-            background: var(--surface-hover);
-            color: var(--text-primary);
+            border-color: rgba(255,255,255,0.3);
+            transform: translateY(-2px);
         }
 
         /* ===== MAIN CONTENT (dynamic padding) ===== */
-        .reels-container {
+        .videos-container {
             width: 100%;
-            max-width: 440px;
+            max-width: 700px;
             margin: 0 auto;
             display: flex;
             flex-direction: column;
             gap: 20px;
-            padding: 16px 0 80px;
+            padding: 0 0 80px;
             transition: padding-top 0.2s;
         }
 
-        .reel-card {
-            background: var(--surface);
-            border-radius: 28px;
+        .videos-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1.5rem;
+            margin-top: 1rem;
+        }
+
+        .video-card {
+            background: var(--card-dark);
+            border: 1px solid var(--border-dark);
+            border-radius: 20px;
             overflow: hidden;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
-            border: 1px solid var(--border-subtle);
-            transition: 0.2s;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
             opacity: 0;
-            animation: slideUp 0.3s ease-out forwards;
+            animation: slideUp 0.4s ease-out forwards;
+        }
+
+        .video-card:hover {
+            border-color: rgba(255, 255, 255, 0.3);
+            transform: translateY(-4px);
+            box-shadow: 0 12px 28px rgba(0,0,0,0.6);
         }
 
         @keyframes slideUp {
-            from { opacity: 0; transform: translateY(15px); }
+            from { opacity: 0; transform: translateY(20px); }
             to { opacity: 1; transform: translateY(0); }
         }
 
-        .reel-media {
+        .video-media {
             width: 100%;
-            aspect-ratio: 16 / 9;
+            aspect-ratio: 9 / 16; /* TikTok vertical */
             background: #0a0a0a;
             position: relative;
         }
 
-        .reel-media iframe,
-        .reel-media video {
+        .video-media iframe,
+        .video-media video {
             width: 100%;
             height: 100%;
             border: none;
@@ -279,56 +320,74 @@
             background: #000;
         }
 
-        .reel-info {
+        .delete-overlay {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            z-index: 10;
+        }
+
+        .delete-btn {
+            background: #d32f2f;
+            color: white;
+            border: none;
+            border-radius: 30px;
+            padding: 8px 16px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            transition: all 0.2s;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+        }
+
+        .delete-btn:hover {
+            background: #b71c1c;
+            transform: scale(1.05);
+        }
+
+        .video-info {
             padding: 14px 16px 16px;
         }
 
         .creator-row {
             display: flex;
             align-items: center;
-            gap: 6px;
+            gap: 8px;
             flex-wrap: wrap;
             margin-bottom: 8px;
         }
 
         .creator-name {
             font-weight: 600;
-            color: var(--text-primary);
+            color: white;
             font-size: 1rem;
         }
 
-        .department-level {
-            color: var(--text-muted);
+        .badge {
+            color: #a0a0a0;
             font-size: 0.8rem;
-            background: var(--bg-tertiary);
-            padding: 4px 10px;
-            border-radius: 30px;
-            border: 1px solid var(--border-subtle);
-        }
-
-        .course-tag {
-            background: var(--bg-tertiary);
+            background: var(--input-bg);
             padding: 4px 12px;
             border-radius: 30px;
-            font-size: 0.75rem;
-            color: var(--text-secondary);
-            border: 1px solid var(--border-subtle);
+            border: 1px solid var(--border-dark);
         }
 
         .caption {
             margin: 10px 0 8px;
-            font-size: 0.9rem;
+            font-size: 0.95rem;
             line-height: 1.45;
-            color: var(--text-secondary);
-            word-break: break-word;
+            color: #ddd;
         }
 
         .stats {
             display: flex;
             align-items: center;
             gap: 28px;
-            margin-top: 10px;
-            border-top: 1px solid var(--border-subtle);
+            margin-top: 12px;
+            border-top: 1px solid var(--border-dark);
             padding-top: 12px;
         }
 
@@ -336,8 +395,8 @@
             display: flex;
             align-items: center;
             gap: 6px;
-            color: var(--text-muted);
-            font-size: 0.9rem;
+            color: #a0a0a0;
+            font-size: 0.95rem;
         }
 
         .like-button {
@@ -357,65 +416,129 @@
             transform: scale(1.2);
         }
 
-        .like-button:disabled {
-            opacity: 0.7;
-            transform: none;
-        }
-
-        .loading, .error, .no-videos {
+        .no-videos {
             text-align: center;
-            padding: 40px 20px;
-            color: var(--text-muted);
-            font-size: 1rem;
-            background: var(--surface);
-            border-radius: 32px;
-            border: 1px solid var(--border-subtle);
+            padding: 3rem 2rem;
+            color: #a0a0a0;
+            background: var(--card-dark);
+            border-radius: 16px;
+            border: 1px solid var(--border-dark);
+            margin-top: 1rem;
         }
 
         .footer-note {
             text-align: center;
-            color: var(--text-muted);
+            color: #a0a0a0;
             font-size: 0.8rem;
-            margin: 10px 0 20px;
-            letter-spacing: 0.2px;
+            margin: 16px 0 20px;
         }
 
-        /* ===== SCROLLBAR ===== */
-        ::-webkit-scrollbar { width: 4px; }
-        ::-webkit-scrollbar-thumb { background: var(--border-subtle); border-radius: 2px; }
-
-        /* ===== MOBILE SAFE AREA ===== */
-        .top-bar, .tab-bar, .filter-bar {
-            padding-left: max(16px, env(safe-area-inset-left));
-            padding-right: max(16px, env(safe-area-inset-right));
+        /* ===== UPLOAD MODAL ===== */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.9);
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
         }
 
-        /* small screen fine-tuning */
-        @media (max-width: 420px) {
-            .filter-select { min-width: 100%; } /* stack on very narrow */
-            .btn { flex: 1 0 auto; }
-            .reel-info { padding: 12px; }
-            .creator-name { font-size: 0.95rem; }
+        .modal.show {
+            display: flex;
         }
+
+        .modal-content {
+            background: var(--card-dark);
+            border: 1px solid var(--border-dark);
+            border-radius: 24px;
+            width: 90%;
+            max-width: 400px;
+            padding: 24px;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .modal-header h2 {
+            font-size: 1.5rem;
+            background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .close-modal {
+            width: 40px; height: 40px;
+            border-radius: 50%;
+            background: var(--input-bg);
+            border: 1px solid var(--border-dark);
+            color: white;
+            font-size: 20px;
+            cursor: pointer;
+        }
+
+        .upload-form input,
+        .upload-form select,
+        .upload-form textarea {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 12px;
+            background: var(--input-bg);
+            border: 1px solid var(--border-dark);
+            border-radius: 12px;
+            color: white;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 14px;
+            background: white;
+            color: black;
+            border: none;
+            border-radius: 40px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        /* ===== UTILITY ===== */
+        .hidden { display: none !important; }
     </style>
 </head>
 <body>
-    <!-- Fixed headers -->
-    <div class="top-bar">
-        <a href="javascript:history.back()" class="back-button" aria-label="Go back">←</a>
-        <span class="logo">Nelavista Reels</span>
-        <a href="{{ url_for('upload_video') }}" class="upload-link">➕ Post</a>
+    <!-- Top bar -->
+    <div id="top-bar">
+        <button id="back-btn" onclick="goBack()">←</button>
+        <div id="top-bar-title">📽️ Study Videos</div>
+        <div class="right-buttons">
+            <button id="upload-btn" onclick="openUploadModal()">
+                <span>➕</span>
+                <span class="btn-text">Upload</span>
+            </button>
+            <button id="admin-btn" onclick="toggleAdmin()">
+                <span>🔑</span>
+                <span class="btn-text">Admin</span>
+            </button>
+        </div>
     </div>
 
+    <!-- Tabs -->
     <div class="tab-bar">
         <div class="tab active" id="tabUploaded" onclick="switchTab('uploaded')">📤 Uploaded</div>
         <div class="tab" id="tabYoutube" onclick="switchTab('youtube')">🎬 YouTube</div>
     </div>
 
-    <!-- Uploaded filters -->
+    <!-- Filter bar for Uploaded videos -->
     <div class="filter-bar" id="filterUploaded">
         <select id="courseFilter" class="filter-select">
             <option value="">All Courses</option>
+            <option value="Biochemistry">Biochemistry</option>
+            <option value="Computer Science">Computer Science</option>
+            <option value="Physics">Physics</option>
+            <option value="Mathematics">Mathematics</option>
         </select>
         <select id="levelFilter" class="filter-select">
             <option value="">All Levels</option>
@@ -423,88 +546,109 @@
             <option value="200">200</option>
             <option value="300">300</option>
             <option value="400">400</option>
-            <option value="500">500</option>
-            <option value="Postgraduate">Postgrad</option>
         </select>
         <select id="semesterFilter" class="filter-select">
             <option value="">All Semesters</option>
-            <option value="1st">1st</option>
-            <option value="2nd">2nd</option>
+            <option value="First Semester">First Semester</option>
+            <option value="Second Semester">Second Semester</option>
         </select>
-        <button class="btn btn-primary" id="findBtn">Find</button>
-        <button class="btn btn-secondary" id="resetBtn">Reset</button>
+        <button class="btn btn-primary" id="filterApplyBtn">Apply</button>
+        <button class="btn btn-secondary" id="filterResetBtn">Reset</button>
     </div>
 
-    <!-- YouTube filters (hidden initially) -->
+    <!-- Filter bar for YouTube videos (only course) -->
     <div class="filter-bar" id="filterYoutube" style="display: none;">
-        <select id="youtubeCourseSelect" class="filter-select">
-            <option value="">-- Select Course --</option>
+        <select id="youtubeCourseFilter" class="filter-select">
+            <option value="">All Courses</option>
+            <option value="Biochemistry">Biochemistry</option>
+            <option value="Computer Science">Computer Science</option>
+            <option value="Physics">Physics</option>
+            <option value="Mathematics">Mathematics</option>
         </select>
-        <button class="btn btn-primary" id="youtubeFindBtn">Search</button>
+        <button class="btn btn-primary" id="youtubeApplyBtn">Search</button>
         <button class="btn btn-secondary" id="youtubeResetBtn">Reset</button>
     </div>
 
-    <!-- Dynamic content -->
-    <div id="reelsContainer" class="reels-container">
-        <div class="loading">Loading campus videos...</div>
+    <!-- Main content -->
+    <div class="videos-container" id="videosContainer">
+        <!-- Videos will be injected here -->
     </div>
 
     <div class="footer-note">
         📍 1000 views = ₦500 · watch & earn
     </div>
 
+    <!-- Upload Modal -->
+    <div id="uploadModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>📤 Upload Reel</h2>
+                <button class="close-modal" onclick="closeUploadModal()">✕</button>
+            </div>
+            <form id="uploadForm" class="upload-form" onsubmit="handleUpload(event)">
+                <input type="text" id="videoTitle" placeholder="Title *" required>
+                <select id="videoCourse" required>
+                    <option value="">Select Course</option>
+                    <option value="Biochemistry">Biochemistry</option>
+                    <option value="Computer Science">Computer Science</option>
+                    <option value="Physics">Physics</option>
+                    <option value="Mathematics">Mathematics</option>
+                </select>
+                <input type="text" id="videoLevel" placeholder="Level (e.g. 100) *" required>
+                <select id="videoSemester" required>
+                    <option value="">Select Semester</option>
+                    <option value="First Semester">First Semester</option>
+                    <option value="Second Semester">Second Semester</option>
+                </select>
+                <input type="text" id="videoCreator" placeholder="Your name *" required>
+                <input type="url" id="videoUrl" placeholder="Video URL (YouTube or direct) *" required>
+                <button type="submit" class="submit-btn">📤 Post</button>
+            </form>
+        </div>
+    </div>
+
     <script>
         (function() {
-            // ========== STATE & CONFIG ==========
+            // ========== STATE ==========
             let currentTab = 'uploaded';
-            let allCourses = [];
-            const youtubeCourses = [
-                "Accountancy", "Agriculture", "Arabic Studies", "Banking and Finance", "Biochemistry",
-                "Botany", "Business Administration", "Chemical and Polymer Engineering", "Chemistry",
-                "Christian Religious Studies", "Computer Science", "Dentistry and Dental Surgery",
-                "Drama / Dramatic / Performing Arts", "Early Childhood Education", "Economics",
-                "Education and Accounting", "Education and Biology", "Education and Chemistry",
-                "Education and Christian Religious Studies", "Education and Computer Science",
-                "Education and Economics", "Education and English Language", "Education and French",
-                "Education and Geography", "Education and History", "Education and Islamic Studies",
-                "Education and Mathematics", "Education and Physics", "Education and Political Science",
-                "Education and Yoruba", "Educational Management", "Electronics and Computer Engineering",
-                "English Language", "Fine and Applied Arts", "Fisheries", "French", "Geography and Planning",
-                "Guidance and Counseling", "Health Education", "History and International Studies",
-                "Industrial Relations and Personnel Management", "Insurance", "Islamic Studies", "Law",
-                "Library and Information Science", "Local Government and Development Studies", "Marketing",
-                "Mass Communication", "Mathematics", "Mechanical Engineering", "Medicine and Surgery",
-                "Microbiology", "Music", "Nursing / Nursing Science", "Pharmacology", "Philosophy",
-                "Physical and Health Education", "Physics", "Physiology", "Political Science",
-                "Portuguese / English", "Psychology", "Public Administration", "Sociology",
-                "Teacher Education Science", "Technology and Vocational Education", "Theatre Arts",
-                "Transport Management Technology", "Yoruba", "Zoology"
+            let isAdmin = false;
+
+            // Mock data: uploaded videos (with metadata)
+            let uploadedVideos = [
+                { id: 'v1', video_url: 'https://storage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4', creator_name: 'john_doe', department: 'CS', level: '200', course: 'Computer Science', semester: 'First Semester', caption: 'Learn Python basics', views: 15400, likes: 423 },
+                { id: 'v2', video_url: 'https://storage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4', creator_name: 'jane_smith', department: 'Physics', level: '300', course: 'Physics', semester: 'Second Semester', caption: 'Quantum mechanics explained', views: 8200, likes: 215 },
+                { id: 'v3', video_url: 'https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4', creator_name: 'alice_k', department: 'Math', level: '100', course: 'Mathematics', semester: 'First Semester', caption: 'Calculus fundamentals', views: 4300, likes: 98 },
             ];
 
-            // ========== DOM elements ==========
-            const container = document.getElementById('reelsContainer');
-            const filterUploaded = document.getElementById('filterUploaded');
-            const filterYoutube = document.getElementById('filterYoutube');
+            // Mock YouTube reels (no level/semester, only course)
+            const youtubeReels = [
+                { id: 'yt1', video_url: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ', course: 'Computer Science', caption: 'Intro to Algorithms', creator_name: 'CS Dojo' },
+                { id: 'yt2', video_url: 'https://www.youtube.com/watch?v=3JZ_D3ELwOQ', course: 'Computer Science', caption: 'Python in 10 mins', creator_name: 'FreeCodeCamp' },
+                { id: 'yt3', video_url: 'https://www.youtube.com/watch?v=8jLOx1hD3_o', course: 'Physics', caption: 'Quantum Physics explained', creator_name: 'PBS Space Time' },
+                { id: 'yt4', video_url: 'https://www.youtube.com/watch?v=LwCRRUa8yTU', course: 'Biochemistry', caption: 'DNA Replication', creator_name: 'Amoeba Sisters' },
+            ];
+
+            // ========== DOM Elements ==========
             const tabUploaded = document.getElementById('tabUploaded');
             const tabYoutube = document.getElementById('tabYoutube');
+            const filterUploaded = document.getElementById('filterUploaded');
+            const filterYoutube = document.getElementById('filterYoutube');
+            const videosContainer = document.getElementById('videosContainer');
             const courseFilter = document.getElementById('courseFilter');
             const levelFilter = document.getElementById('levelFilter');
             const semesterFilter = document.getElementById('semesterFilter');
-            const findBtn = document.getElementById('findBtn');
-            const resetBtn = document.getElementById('resetBtn');
-            const youtubeCourseSelect = document.getElementById('youtubeCourseSelect');
-            const youtubeFindBtn = document.getElementById('youtubeFindBtn');
+            const filterApplyBtn = document.getElementById('filterApplyBtn');
+            const filterResetBtn = document.getElementById('filterResetBtn');
+            const youtubeCourseFilter = document.getElementById('youtubeCourseFilter');
+            const youtubeApplyBtn = document.getElementById('youtubeApplyBtn');
             const youtubeResetBtn = document.getElementById('youtubeResetBtn');
+            const adminBtn = document.getElementById('admin-btn');
 
-            // ========== HELPER FUNCTIONS ==========
+            // ========== Helper Functions ==========
             function formatNumber(num) {
                 if (num >= 1e6) return (num/1e6).toFixed(1) + 'M';
                 if (num >= 1e3) return (num/1e3).toFixed(1) + 'k';
                 return num;
-            }
-
-            function isYouTube(url) {
-                return url && (url.includes('youtube.com') || url.includes('youtu.be'));
             }
 
             function getYouTubeEmbed(url) {
@@ -512,27 +656,19 @@
                 return match ? `https://www.youtube.com/embed/${match[1]}` : url;
             }
 
-            // ========== DYNAMIC HEADER OFFSET ==========
             function adjustContainerPadding() {
-                const topBar = document.querySelector('.top-bar');
+                const topBar = document.getElementById('top-bar');
                 const tabBar = document.querySelector('.tab-bar');
                 const activeFilter = currentTab === 'uploaded' ? filterUploaded : filterYoutube;
                 if (!topBar || !tabBar || !activeFilter) return;
-
-                // get heights including margins (but fixed elements are in flow? we just measure offset)
-                const topHeight = topBar.offsetHeight;
-                const tabHeight = tabBar.offsetHeight;
-                const filterHeight = activeFilter.offsetHeight;
-                const totalFixed = topHeight + tabHeight + filterHeight;
-                container.style.paddingTop = (totalFixed + 16) + 'px'; // extra gap
+                const total = topBar.offsetHeight + tabBar.offsetHeight + activeFilter.offsetHeight;
+                videosContainer.style.paddingTop = (total + 16) + 'px';
             }
 
-            // call after render and on resize / tab switch
             window.addEventListener('load', adjustContainerPadding);
             window.addEventListener('resize', adjustContainerPadding);
-            window.addEventListener('orientationchange', adjustContainerPadding);
 
-            // ========== TAB SWITCHING ==========
+            // ========== Tab Switching ==========
             window.switchTab = function(tab) {
                 currentTab = tab;
                 if (tab === 'uploaded') {
@@ -540,69 +676,69 @@
                     tabYoutube.classList.remove('active');
                     filterUploaded.style.display = 'flex';
                     filterYoutube.style.display = 'none';
-                    loadUploadedVideos(getUploadedFilters());
+                    renderUploadedVideos(getFilteredUploaded());
                 } else {
                     tabYoutube.classList.add('active');
                     tabUploaded.classList.remove('active');
                     filterUploaded.style.display = 'none';
                     filterYoutube.style.display = 'flex';
-                    container.innerHTML = '<div class="loading">Select a course and tap Search</div>';
+                    renderYoutubeVideos(getFilteredYoutube());
                 }
-                // slight delay to let filter bar render
                 setTimeout(adjustContainerPadding, 30);
             };
 
-            // ========== UPLOADED VIDEOS ==========
-            function getUploadedFilters() {
-                return {
-                    course: courseFilter.value || null,
-                    level: levelFilter.value || null,
-                    semester: semesterFilter.value || null
-                };
-            }
-
-            async function loadUploadedVideos(filters = {}) {
-                const params = new URLSearchParams(filters);
-                const url = `/api/videos?${params}`;
-                try {
-                    const res = await fetch(url);
-                    const videos = await res.json();
-                    renderUploadedVideos(videos);
-                } catch (err) {
-                    container.innerHTML = `<div class="error">⚠️ Could not load videos. Check connection.</div>`;
-                } finally {
-                    adjustContainerPadding();
-                }
+            // ========== Uploaded Videos Filtering ==========
+            function getFilteredUploaded() {
+                const course = courseFilter.value;
+                const level = levelFilter.value;
+                const semester = semesterFilter.value;
+                return uploadedVideos.filter(v => {
+                    if (course && v.course !== course) return false;
+                    if (level && v.level !== level) return false;
+                    if (semester && v.semester !== semester) return false;
+                    return true;
+                });
             }
 
             function renderUploadedVideos(videos) {
                 if (!videos.length) {
-                    container.innerHTML = '<div class="no-videos">🎬 No videos match filters.</div>';
+                    videosContainer.innerHTML = '<div class="no-videos">📤 No uploaded videos match your filters.</div>';
                     return;
                 }
-                let html = '';
+                let html = '<div class="videos-grid">';
                 videos.forEach((v, index) => {
+                    const mediaHtml = (v.video_url.includes('youtube.com') || v.video_url.includes('youtu.be'))
+                        ? `<iframe src="${getYouTubeEmbed(v.video_url)}" frameborder="0" allowfullscreen loading="lazy"></iframe>`
+                        : `<video src="${v.video_url}" controls playsinline preload="metadata"></video>`;
+
+                    const deleteButton = (isAdmin) ? `
+                        <div class="delete-overlay">
+                            <button class="delete-btn" onclick="deleteVideo('${v.id}', event)"><span>🗑️</span> Delete</button>
+                        </div>` : '';
+
                     html += `
-                    <div class="reel-card" data-id="${v.id}" style="animation-delay: ${index * 0.04}s">
-                        <div class="reel-media">
-                            <video src="${v.video_url}" controls playsinline preload="metadata" poster="${v.thumbnail || ''}"></video>
-                        </div>
-                        <div class="reel-info">
-                            <div class="creator-row">
-                                <span class="creator-name">@${v.creator_name}</span>
-                                <span class="department-level">${v.department} · L${v.level}</span>
-                                <span class="course-tag">${v.course}</span>
+                        <div class="video-card" data-id="${v.id}" style="animation-delay: ${index * 0.05}s">
+                            <div class="video-media">
+                                ${mediaHtml}
+                                ${deleteButton}
                             </div>
-                            ${v.caption ? `<div class="caption">${v.caption}</div>` : ''}
-                            <div class="stats">
-                                <div class="stat">👁️ ${formatNumber(v.views)}</div>
-                                <button class="like-button" data-id="${v.id}">❤️ <span class="like-count">${formatNumber(v.likes)}</span></button>
+                            <div class="video-info">
+                                <div class="creator-row">
+                                    <span class="creator-name">@${v.creator_name}</span>
+                                    <span class="badge">${v.department || 'General'} · L${v.level}</span>
+                                    <span class="badge">${v.course}</span>
+                                </div>
+                                <div class="caption">${v.caption || ''}</div>
+                                <div class="stats">
+                                    <div class="stat">👁️ ${formatNumber(v.views)}</div>
+                                    <button class="like-button" data-id="${v.id}">❤️ <span class="like-count">${formatNumber(v.likes)}</span></button>
+                                </div>
                             </div>
                         </div>
-                    </div>
                     `;
                 });
-                container.innerHTML = html;
+                html += '</div>';
+                videosContainer.innerHTML = html;
                 attachVideoListeners();
                 attachLikeListeners();
             }
@@ -613,145 +749,161 @@
                     video.addEventListener('play', () => {
                         if (viewSent) return;
                         viewSent = true;
-                        const card = video.closest('.reel-card');
+                        const card = video.closest('.video-card');
                         if (!card) return;
                         const videoId = card.dataset.id;
-                        fetch(`/api/videos/${videoId}/view`, { method: 'POST' })
-                            .then(res => res.json())
-                            .then(data => {
-                                const viewStat = card.querySelector('.stat:first-child');
-                                if (viewStat) viewStat.innerHTML = `👁️ ${formatNumber(data.views)}`;
-                            }).catch(() => {});
+                        const videoObj = uploadedVideos.find(v => v.id === videoId);
+                        if (videoObj) {
+                            videoObj.views = (videoObj.views || 0) + 1;
+                            const viewStat = card.querySelector('.stat:first-child');
+                            if (viewStat) viewStat.innerHTML = `👁️ ${formatNumber(videoObj.views)}`;
+                        }
                     });
                 });
             }
 
             function attachLikeListeners() {
                 document.querySelectorAll('.like-button').forEach(btn => {
-                    btn.addEventListener('click', async (e) => {
+                    btn.addEventListener('click', (e) => {
                         e.stopPropagation();
-                        const videoId = btn.dataset.id;
-                        const likeSpan = btn.querySelector('.like-count');
-                        const currentLikes = parseInt(likeSpan.textContent.replace(/[^0-9]/g,'')) || 0;
-                        likeSpan.textContent = formatNumber(currentLikes + 1);
-                        btn.disabled = true;
-                        try {
-                            const res = await fetch(`/api/videos/${videoId}/like`, { method: 'POST' });
-                            const data = await res.json();
-                            likeSpan.textContent = formatNumber(data.likes);
-                        } catch (e) {
-                            likeSpan.textContent = formatNumber(currentLikes); // revert
-                        } finally {
-                            btn.disabled = false;
+                        const card = btn.closest('.video-card');
+                        if (!card) return;
+                        const videoId = card.dataset.id;
+                        const videoObj = uploadedVideos.find(v => v.id === videoId);
+                        if (videoObj) {
+                            videoObj.likes = (videoObj.likes || 0) + 1;
+                            const likeSpan = btn.querySelector('.like-count');
+                            likeSpan.textContent = formatNumber(videoObj.likes);
                         }
                     });
                 });
             }
 
-            async function loadCoursesForUploaded() {
-                try {
-                    const res = await fetch('/api/courses');
-                    const courses = await res.json();
-                    courseFilter.innerHTML = '<option value="">All Courses</option>';
-                    courses.forEach(c => {
-                        const opt = document.createElement('option');
-                        opt.value = c;
-                        opt.textContent = c;
-                        courseFilter.appendChild(opt);
-                    });
-                } catch (e) { /* ignore */ }
+            // ========== YouTube Videos Filtering ==========
+            function getFilteredYoutube() {
+                const course = youtubeCourseFilter.value;
+                if (!course) return youtubeReels;
+                return youtubeReels.filter(r => r.course === course);
             }
 
-            // ========== YOUTUBE REELS ==========
-            async function loadYoutubeReels() {
-                const course = youtubeCourseSelect.value;
-                if (!course) {
-                    alert('Please select a course.');
-                    return;
-                }
-                container.innerHTML = '<div class="loading">Loading YouTube reels...</div>';
-                adjustContainerPadding();
-                try {
-                    const res = await fetch(`/api/reels?course=${encodeURIComponent(course)}`);
-                    const data = await res.json();
-                    let reels = data.reels || [];
-                    if (reels.length === 0 && course === "Accountancy") {
-                        reels = [{
-                            video_url: "https://youtu.be/Gua2Bo_G-J0?si=aM8ZPO-OqtV-ZbJ9",
-                            caption: "ACCOUNTING basics for BEGINNERS"
-                        }];
-                    }
-                    renderYoutubeReels(reels);
-                } catch (err) {
-                    if (course === "Accountancy") {
-                        renderYoutubeReels([{
-                            video_url: "https://youtu.be/Gua2Bo_G-J0?si=aM8ZPO-OqtV-ZbJ9",
-                            caption: "ACCOUNTING basics for BEGINNERS"
-                        }]);
-                    } else {
-                        container.innerHTML = '<div class="error">❌ Failed to load YouTube reels</div>';
-                    }
-                } finally {
-                    adjustContainerPadding();
-                }
-            }
-
-            function renderYoutubeReels(reels) {
+            function renderYoutubeVideos(reels) {
                 if (!reels.length) {
-                    container.innerHTML = '<div class="no-videos">🎬 No reels found for this course.</div>';
+                    videosContainer.innerHTML = '<div class="no-videos">🎬 No YouTube reels match your filters.</div>';
                     return;
                 }
-                let html = '';
-                reels.forEach((reel, index) => {
-                    let embedUrl = isYouTube(reel.video_url) ? getYouTubeEmbed(reel.video_url) : reel.video_url;
+                let html = '<div class="videos-grid">';
+                reels.forEach((r, index) => {
                     html += `
-                    <div class="reel-card" style="animation-delay: ${index * 0.04}s">
-                        <div class="reel-media">
-                            <iframe src="${embedUrl}" frameborder="0" allowfullscreen loading="lazy"></iframe>
+                        <div class="video-card" style="animation-delay: ${index * 0.05}s">
+                            <div class="video-media">
+                                <iframe src="${getYouTubeEmbed(r.video_url)}" frameborder="0" allowfullscreen loading="lazy"></iframe>
+                            </div>
+                            <div class="video-info">
+                                <div class="creator-row">
+                                    <span class="creator-name">@${r.creator_name || 'YouTube'}</span>
+                                    <span class="badge">${r.course}</span>
+                                </div>
+                                <div class="caption">${r.caption || ''}</div>
+                            </div>
                         </div>
-                        <div class="reel-info">
-                            <div class="caption">${reel.caption || '📌 educational reel'}</div>
-                        </div>
-                    </div>
                     `;
                 });
-                container.innerHTML = html;
+                html += '</div>';
+                videosContainer.innerHTML = html;
             }
 
-            // ========== EVENT LISTENERS ==========
-            findBtn.addEventListener('click', () => {
-                if (currentTab === 'uploaded') loadUploadedVideos(getUploadedFilters());
+            // ========== Event Listeners for Filters ==========
+            filterApplyBtn.addEventListener('click', () => {
+                if (currentTab === 'uploaded') renderUploadedVideos(getFilteredUploaded());
             });
-            resetBtn.addEventListener('click', () => {
+            filterResetBtn.addEventListener('click', () => {
                 courseFilter.value = '';
                 levelFilter.value = '';
                 semesterFilter.value = '';
-                if (currentTab === 'uploaded') loadUploadedVideos({});
+                if (currentTab === 'uploaded') renderUploadedVideos(uploadedVideos);
             });
 
-            youtubeFindBtn.addEventListener('click', loadYoutubeReels);
+            youtubeApplyBtn.addEventListener('click', () => {
+                if (currentTab === 'youtube') renderYoutubeVideos(getFilteredYoutube());
+            });
             youtubeResetBtn.addEventListener('click', () => {
-                youtubeCourseSelect.value = '';
-                container.innerHTML = '<div class="loading">Select a course and tap Search</div>';
-                adjustContainerPadding();
+                youtubeCourseFilter.value = '';
+                if (currentTab === 'youtube') renderYoutubeVideos(youtubeReels);
             });
 
-            // initial load
-            loadCoursesForUploaded();
-            loadUploadedVideos({});
+            // ========== Admin Toggle ==========
+            window.toggleAdmin = function() {
+                if (!isAdmin) {
+                    const pwd = prompt('Enter admin password:');
+                    if (pwd === 'admin123') {
+                        isAdmin = true;
+                        adminBtn.classList.add('admin-active');
+                        alert('Admin mode enabled. Delete buttons appear on uploaded videos.');
+                        if (currentTab === 'uploaded') renderUploadedVideos(getFilteredUploaded());
+                    } else alert('Incorrect password.');
+                } else {
+                    isAdmin = false;
+                    adminBtn.classList.remove('admin-active');
+                    if (currentTab === 'uploaded') renderUploadedVideos(getFilteredUploaded());
+                }
+            };
 
-            // populate YouTube dropdown
-            youtubeCourses.forEach(c => {
-                const opt = document.createElement('option');
-                opt.value = c;
-                opt.textContent = c;
-                youtubeCourseSelect.appendChild(opt);
-            });
+            window.deleteVideo = function(id, event) {
+                event.stopPropagation();
+                if (!isAdmin) return;
+                if (!confirm('Delete this video? This cannot be undone.')) return;
+                uploadedVideos = uploadedVideos.filter(v => v.id !== id);
+                if (currentTab === 'uploaded') renderUploadedVideos(getFilteredUploaded());
+            };
 
-            // adjust on every filter toggle (just in case)
-            const observer = new ResizeObserver(() => adjustContainerPadding());
-            observer.observe(filterUploaded);
-            observer.observe(filterYoutube);
+            // ========== Upload Modal ==========
+            window.openUploadModal = function() {
+                document.getElementById('uploadModal').classList.add('show');
+            };
+            window.closeUploadModal = function() {
+                document.getElementById('uploadModal').classList.remove('show');
+            };
+            window.handleUpload = function(e) {
+                e.preventDefault();
+                const title = document.getElementById('videoTitle').value.trim();
+                const course = document.getElementById('videoCourse').value;
+                const level = document.getElementById('videoLevel').value.trim();
+                const semester = document.getElementById('videoSemester').value;
+                const creator = document.getElementById('videoCreator').value.trim();
+                const url = document.getElementById('videoUrl').value.trim();
+
+                if (!title || !course || !level || !semester || !creator || !url) {
+                    alert('Please fill all fields');
+                    return;
+                }
+
+                const newVideo = {
+                    id: 'upload_' + Date.now(),
+                    video_url: url,
+                    creator_name: creator,
+                    department: 'General',
+                    level: level,
+                    course: course,
+                    semester: semester,
+                    caption: title,
+                    views: 0,
+                    likes: 0
+                };
+                uploadedVideos.unshift(newVideo);
+                closeUploadModal();
+                alert('✅ Video uploaded!');
+                if (currentTab === 'uploaded') {
+                    renderUploadedVideos(getFilteredUploaded());
+                }
+            };
+
+            // ========== Navigation ==========
+            window.goBack = function() {
+                window.history.back();
+            };
+
+            // ========== Initial Render ==========
+            renderUploadedVideos(uploadedVideos);
         })();
     </script>
 </body>
