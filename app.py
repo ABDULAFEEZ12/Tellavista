@@ -21,8 +21,6 @@ from functools import wraps
 # Third-party imports
 import requests
 from bs4 import BeautifulSoup
-import cloudinary
-import cloudinary.uploader
 import psycopg2
 from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
 
@@ -34,6 +32,7 @@ from flask import (
 from flask_sqlalchemy import SQLAlchemy
 from flask_socketio import SocketIO, emit, join_room, leave_room
 from werkzeug.security import generate_password_hash, check_password_hash
+from werkzeug.utils import secure_filename
 from dotenv import load_dotenv
 
 # Load environment variables
@@ -62,10 +61,20 @@ app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL', 'sqlite:///tel
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['UPLOAD_FOLDER'] = os.path.join(os.getcwd(), 'uploads')
 app.config['IMAGE_FOLDER'] = os.path.join(os.getcwd(), 'extracted_images')
+app.config['MAX_CONTENT_LENGTH'] = 100 * 1024 * 1024  # 100 MB limit for video uploads
 
 # Create upload folders if they don't exist
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 os.makedirs(app.config['IMAGE_FOLDER'], exist_ok=True)
+
+# Video upload folder inside static
+VIDEO_UPLOAD_FOLDER = os.path.join(app.root_path, 'static', 'uploads')
+os.makedirs(VIDEO_UPLOAD_FOLDER, exist_ok=True)
+
+ALLOWED_VIDEO_EXTENSIONS = {'mp4', 'mov', 'avi', 'mkv', 'webm', 'flv'}
+
+def allowed_video_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_VIDEO_EXTENSIONS
 
 # ============================================
 # Extensions
@@ -182,8 +191,8 @@ class Video(db.Model):
     creator_name = db.Column(db.String(150), nullable=False)
     department = db.Column(db.String(100), nullable=False)
     course = db.Column(db.String(200), nullable=False)
-    level = db.Column(db.String(50), nullable=False)
-    semester = db.Column(db.String(10), nullable=False)
+    level = db.Column(db.String(50), nullable=False)      # increased to 50
+    semester = db.Column(db.String(20), nullable=False)   # increased to 20
     caption = db.Column(db.Text)
     video_url = db.Column(db.String(500), nullable=False)
     bank_name = db.Column(db.String(100))
@@ -284,7 +293,7 @@ def create_database_if_not_exists():
         return False
 
 def init_database():
-    """Initialize database with error handling."""
+    """Initialize database with error handling and upgrade video columns."""
     try:
         # Try to create database first
         create_database_if_not_exists()
@@ -292,6 +301,20 @@ def init_database():
         with app.app_context():
             db.create_all()
             print("✅ Database tables created/verified")
+
+            # ---- Upgrade video table columns if needed (PostgreSQL) ----
+            try:
+                from sqlalchemy import text
+                with db.engine.connect() as conn:
+                    # Increase semester and level column sizes
+                    conn.execute(text("ALTER TABLE videos ALTER COLUMN semester TYPE VARCHAR(20)"))
+                    conn.execute(text("ALTER TABLE videos ALTER COLUMN level TYPE VARCHAR(50)"))
+                    conn.commit()
+                    print("✅ Video table columns upgraded (semester -> 20, level -> 50)")
+            except Exception as e:
+                # Columns may already be upgraded or not exist; ignore
+                debug_print(f"Note: Could not upgrade video columns (might already be fine): {e}")
+
             # Test the connection
             from sqlalchemy import text
             db.session.execute(text('SELECT 1'))
@@ -1562,7 +1585,7 @@ def safe_markdown_to_html(text):
     text = '\n'.join(new_lines)
 
     # Convert Markdown tables to HTML tables (simplified)
-    # This is basic; for complex tables AI should output proper <table>
+    # This is basic; for complex tables AI should output proper 美>
     # We'll look for lines with | and --- separators
     lines = text.split('\n')
     i = 0
@@ -1582,7 +1605,7 @@ def safe_markdown_to_html(text):
                     data_rows.append(row)
                     j += 1
                 # build HTML table
-                table_html = '<table>\n<thead>\n<tr>\n'
+                table_html = ' 表\n<thead>\n<tr>\n'
                 for h in headers:
                     table_html += f'<th>{h}</th>\n'
                 table_html += '</tr>\n</thead>\n<tbody>\n'
@@ -2103,6 +2126,12 @@ def upload_video():
         bank_name = request.form.get('bank_name', '').strip()
         account_number = request.form.get('account_number', '').strip()
 
+        # ---- Truncate level and semester to fit database columns ----
+        if len(level) > 50:
+            level = level[:50]
+        if len(semester) > 20:
+            semester = semester[:20]
+
         if not all([creator_name, department, course, level, semester, bank_name, account_number]):
             flash('All fields except caption are required.')
             return redirect(url_for('upload_video'))
@@ -2120,19 +2149,24 @@ def upload_video():
             flash('No video file selected.')
             return redirect(url_for('upload_video'))
 
-        debug_print(f"Uploading file: {file.filename}, size: {len(file.read())} bytes")
-        file.seek(0)  # rewind after reading
+        # Validate video file type
+        if not allowed_video_file(file.filename):
+            flash('Only video files (mp4, mov, avi, mkv, webm, flv) are allowed.')
+            return redirect(url_for('upload_video'))
 
-        # Upload to Cloudinary
-        result = cloudinary.uploader.upload(
-            file,
-            resource_type="video",
-            folder="nelavista_videos",
-            public_id=None,
-            overwrite=False
-        )
-        video_url = result['secure_url']
-        debug_print(f"✅ Cloudinary upload successful: {video_url}")
+        # Secure the filename and generate unique name
+        original_filename = secure_filename(file.filename)
+        name_parts = original_filename.rsplit('.', 1)
+        base = name_parts[0]
+        ext = name_parts[1] if len(name_parts) > 1 else ''
+        unique_name = f"{base}_{int(time.time())}_{uuid.uuid4().hex[:8]}.{ext}"
+        video_path = os.path.join(VIDEO_UPLOAD_FOLDER, unique_name)
+
+        # Save file
+        file.save(video_path)
+
+        # Build public URL
+        video_url = url_for('static', filename=f'uploads/{unique_name}')
 
         video = Video(
             creator_name=creator_name,
@@ -2145,12 +2179,12 @@ def upload_video():
             bank_name=bank_name,
             account_number=account_number,
             username=session['user']['username'],
-            is_approved=True   # Auto‑approve for testing – change to False in production
+            is_approved=True
         )
         db.session.add(video)
         db.session.commit()
 
-        debug_print(f"✅ Video saved to database: id={video.id}")
+        debug_print(f"✅ Video saved: {video_path} | URL: {video_url}")
         flash('Video uploaded successfully!')
         return redirect(url_for('videos_page'))
 
@@ -2164,6 +2198,57 @@ def upload_video():
 @login_required
 def videos_page():
     return render_template('video.html', user=session.get('user'))
+
+import os
+import requests
+from flask import jsonify, request
+
+YOUTUBE_API_KEY = os.environ.get('YOUTUBE_API_KEY')  # Set this in your environment
+
+@app.route('/api/youtube/search', methods=['GET'])
+def youtube_search():
+    """
+    Search YouTube for educational videos.
+    Query param: q (search string)
+    Returns up to 3 video results.
+    """
+    if not YOUTUBE_API_KEY:
+        return jsonify({'error': 'YouTube API key not configured'}), 500
+
+    query = request.args.get('q', '').strip()
+    if not query:
+        return jsonify({'error': 'Missing search query'}), 400
+
+    try:
+        url = 'https://www.googleapis.com/youtube/v3/search'
+        params = {
+            'part': 'snippet',
+            'maxResults': 3,
+            'q': query,
+            'type': 'video',
+            'key': YOUTUBE_API_KEY,
+            'videoCategoryId': '27'  # Education category (optional but relevant)
+        }
+        response = requests.get(url, params=params, timeout=10)
+        response.raise_for_status()
+        data = response.json()
+
+        items = []
+        for item in data.get('items', []):
+            items.append({
+                'videoId': item['id']['videoId'],
+                'title': item['snippet']['title'],
+                'channelTitle': item['snippet']['channelTitle']
+            })
+
+        return jsonify({'items': items})
+
+    except requests.exceptions.RequestException as e:
+        app.logger.error(f"YouTube search failed: {e}")
+        return jsonify({'error': 'External API error'}), 500
+    except Exception as e:
+        app.logger.error(f"Unexpected error: {e}")
+        return jsonify({'error': 'Internal server error'}), 500
 
 @app.route('/api/videos')
 @login_required
@@ -2183,6 +2268,16 @@ def api_get_videos():
 
     videos = query.all()
     return jsonify([v.to_dict() for v in videos])
+
+@app.route('/api/videos/<int:video_id>', methods=['DELETE'])
+@login_required
+def delete_video(video_id):
+    if session['user']['username'] != 'admin':
+        return jsonify({'error': 'Unauthorized'}), 403
+    video = Video.query.get_or_404(video_id)
+    db.session.delete(video)
+    db.session.commit()
+    return jsonify({'success': True})
 
 @app.route('/api/courses')
 @login_required
@@ -2847,7 +2942,7 @@ if __name__ == '__main__':
     print("   5. 📚 Study Materials Library")
     print("   6. 🎬 Educational Reels")
     print("   7. 📝 CBT Test System")
-    print("   8. 🎥 Video Upload & Sharing (Cloudinary)")
+    print("   8. 🎥 Video Upload & Sharing (Local Storage)")
     print(f"{'='*70}")
     print("\n📡 Access at: http://localhost:5000")
     print("👨‍🏫 Teacher test: http://localhost:5000/live_meeting/teacher")
