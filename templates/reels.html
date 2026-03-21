@@ -254,6 +254,11 @@
             color: #ff4d6d;
         }
 
+        /* mute button specific - consistent with overlay-btn */
+        .mute-btn {
+            font-size: 1.8rem;
+        }
+
         .delete-overlay {
             position: absolute;
             top: 20px;
@@ -596,7 +601,10 @@
             // ---------- AUDIO CONTROL STATE ----------
             let userInteracted = false;          // user tapped -> allow unmuted sound for active reel only
             let activeReelElement = null;         // DOM element of the currently active reel
-            let viewCountedSet = new Set();        // track which reels already counted view (avoid duplicate)
+            let viewCountedSet = new Set();        // track which reels already counted view
+            
+            // NEW: global manual mute/unmute flag (default muted = false)
+            let isManuallyUnmuted = false;         // true = user wants sound ON (unmuted), false = muted
 
             // ---------- DOM elements ----------
             const reelContainer = document.getElementById('reel-container');
@@ -673,35 +681,51 @@
                 iframe.contentWindow.postMessage(message, '*');
             }
 
-            // ---------- CORE AUDIO LOGIC: apply state to a single reel ----------
+            // ---------- Update mute button icon for a specific reel (or all if reel not given) ----------
+            function updateMuteButtonIcon(reelElement) {
+                if (!reelElement) return;
+                const muteBtn = reelElement.querySelector('.mute-btn');
+                if (muteBtn) {
+                    muteBtn.textContent = isManuallyUnmuted ? '🔊' : '🔇';
+                }
+            }
+
+            function updateAllMuteButtons() {
+                document.querySelectorAll('.reel-item').forEach(reel => {
+                    updateMuteButtonIcon(reel);
+                });
+            }
+
+            // ---------- CORE AUDIO LOGIC: apply state to a single reel (respects userInteracted + manual flag) ----------
             function applyAudioToReel(reelElement, isActive) {
                 if (!reelElement) return;
                 const media = reelElement.querySelector('video') || reelElement.querySelector('iframe');
                 if (!media) return;
 
-                if (media.tagName === 'VIDEO') {
-                    const video = media;
-                    if (isActive) {
-                        // unmute ONLY if user has interacted (otherwise stay muted)
-                        video.muted = !userInteracted;
-                        video.play().catch(e => console.log('video play', e));
-                    } else {
-                        video.pause();
-                        video.muted = true;
+                // For inactive: always mute + pause
+                if (!isActive) {
+                    if (media.tagName === 'VIDEO') {
+                        media.pause();
+                        media.muted = true;
+                    } else if (media.tagName === 'IFRAME' && media.src.includes('youtube.com/embed/')) {
+                        sendYouTubeCommand(media, 'pauseVideo');
+                        sendYouTubeCommand(media, 'mute');
                     }
+                    return;
+                }
+
+                // ACTIVE REEL: decide mute/unmute based on userInteracted and manual flag
+                const shouldBeUnmuted = userInteracted && isManuallyUnmuted;
+                
+                if (media.tagName === 'VIDEO') {
+                    media.muted = !shouldBeUnmuted;
+                    media.play().catch(e => console.log('video play', e));
                 } 
                 else if (media.tagName === 'IFRAME' && media.src.includes('youtube.com/embed/')) {
-                    if (isActive) {
-                        // active iframe: play video, and unmute only if user interacted
-                        sendYouTubeCommand(media, 'playVideo');
-                        if (userInteracted) {
-                            sendYouTubeCommand(media, 'unMute');
-                        } else {
-                            sendYouTubeCommand(media, 'mute');
-                        }
+                    sendYouTubeCommand(media, 'playVideo');
+                    if (shouldBeUnmuted) {
+                        sendYouTubeCommand(media, 'unMute');
                     } else {
-                        // inactive: pause and mute
-                        sendYouTubeCommand(media, 'pauseVideo');
                         sendYouTubeCommand(media, 'mute');
                     }
                 }
@@ -718,6 +742,24 @@
                 
                 // Activate new
                 activeReelElement = newReelElement;
+                if (activeReelElement) {
+                    applyAudioToReel(activeReelElement, true);
+                    // ensure mute button icon on active reel reflects global flag (all buttons already consistent)
+                    updateMuteButtonIcon(activeReelElement);
+                }
+            }
+
+            // ---------- MANUAL MUTE TOGGLE (called from button click) ----------
+            function toggleManualMute() {
+                // First interaction unlocks browser autoplay restrictions
+                if (!userInteracted) {
+                    userInteracted = true;
+                }
+                // Toggle global manual flag
+                isManuallyUnmuted = !isManuallyUnmuted;
+                // Update all mute button icons
+                updateAllMuteButtons();
+                // Apply new audio state to the currently active reel
                 if (activeReelElement) {
                     applyAudioToReel(activeReelElement, true);
                 }
@@ -756,15 +798,9 @@
                     
                     if (highestRatioEntry && highestRatioEntry.intersectionRatio >= 0.7) {
                         const targetReel = highestRatioEntry.target;
-                        // count view only when becomes active for first time
                         countViewForReel(targetReel);
-                        // set as active reel (this will pause/mute all others)
                         setActiveReel(targetReel);
                     } else {
-                        // if no reel meets threshold and the current active reel is still in list,
-                        // we might need to deactivate it if it's not intersecting.
-                        // But usually the scroll-snap ensures at least one is visible.
-                        // For safety, if activeReel is not intersecting (check manually)
                         if (activeReelElement) {
                             const rect = activeReelElement.getBoundingClientRect();
                             const isVisible = rect.top < window.innerHeight && rect.bottom > 0;
@@ -779,16 +815,15 @@
                 document.querySelectorAll('.reel-item').forEach(item => observer.observe(item));
             }
 
-            // ---------- First user interaction: allow unmuted sound for current active reel only ----------
+            // ---------- First user interaction (tap/click) enables sound based on manual flag ----------
             function onFirstUserInteraction() {
                 if (userInteracted) return;
                 userInteracted = true;
-                
-                // If we already have an active reel, apply audio (unmute it)
+                // re-apply audio to active reel with updated userInteracted flag
                 if (activeReelElement) {
                     applyAudioToReel(activeReelElement, true);
                 } else {
-                    // Fallback: find the most visible reel manually and set it active
+                    // fallback: find most visible reel
                     const reels = Array.from(document.querySelectorAll('.reel-item'));
                     let bestReel = null;
                     let bestRatio = 0;
@@ -810,11 +845,10 @@
                 }
             }
 
-            // Attach once for first tap/click (do NOT unmute all)
             document.addEventListener('touchstart', onFirstUserInteraction, { once: true, passive: true });
             document.addEventListener('click', onFirstUserInteraction, { once: true });
             
-            // ---------- Re-render logic ----------
+            // ---------- Re-render logic with mute button added ----------
             function renderReel() {
                 let items = [];
                 if (currentTab === 'uploaded') {
@@ -860,6 +894,7 @@
                             <button class="delete-btn" onclick="deleteVideo('${item.id}', event)">🗑️ Delete</button>
                         </div>` : '';
                     
+                    // NEW: mute/unmute button added inside .video-overlay-right
                     html += `
                         <div class="reel-item" data-id="${item.id}" data-type="${currentTab}" data-index="${idx}">
                             <div class="reel-media">
@@ -872,6 +907,7 @@
                                 <div><span class="badge">${item.course}</span> ${item.level ? '<span class="badge">L'+item.level+'</span>' : ''} ${item.semester ? '<span class="badge">'+item.semester+'</span>' : ''}</div>
                             </div>
                             <div class="video-overlay-right">
+                                <button class="overlay-btn mute-btn">${isManuallyUnmuted ? '🔊' : '🔇'}</button>
                                 <button class="overlay-btn like-btn" data-id="${item.id}">
                                     ❤️ <span class="like-count">${formatNumber(item.likes || 0)}</span>
                                 </button>
@@ -886,12 +922,15 @@
                 reelContainer.innerHTML = html;
                 attachReelListeners();
                 viewCountedSet.clear();
-                activeReelElement = null;   // will be re-evaluated by observer
+                activeReelElement = null;
                 initIntersectionObserver();
+                // ensure all mute buttons have the correct icon after render
+                updateAllMuteButtons();
             }
             
-            // ---------- Like listener ----------
+            // ---------- Attach like + mute button listeners ----------
             function attachReelListeners() {
+                // Like buttons
                 document.querySelectorAll('.like-btn').forEach(btn => {
                     btn.addEventListener('click', async (e) => {
                         e.stopPropagation();
@@ -904,6 +943,14 @@
                         } catch (err) {
                             console.error('Like failed', err);
                         }
+                    });
+                });
+                
+                // NEW: Mute button listeners (toggle ONLY active reel, but we use global state)
+                document.querySelectorAll('.mute-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        toggleManualMute();
                     });
                 });
             }
@@ -927,7 +974,7 @@
                 }
             };
             
-            // ---------- Search modal ----------
+            // ---------- Search modal (unchanged) ----------
             window.openSearchModal = function() {
                 let html = `
                     <div class="filter-group">
@@ -983,7 +1030,7 @@
             };
             window.closeSearchModal = () => searchModal.classList.remove('show');
             
-            // ---------- Upload modal ----------
+            // ---------- Upload modal (unchanged) ----------
             window.openUploadModal = () => uploadModal.classList.add('show');
             window.closeUploadModal = () => {
                 uploadModal.classList.remove('show');
@@ -991,7 +1038,7 @@
                 setRequiredAttributes();
             };
             
-            // ---------- Handle upload (unchanged but keep) ----------
+            // ---------- Handle upload (unchanged) ----------
             window.handleUpload = async function(e) {
                 e.preventDefault();
                 if (currentUploadType === 'file') {
